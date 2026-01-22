@@ -10,7 +10,9 @@ describe("Button component", () => {
   it("should apply variant classes", () => {
     const { container } = render(<Button variant="destructive">Delete</Button>);
     const button = container.querySelector("button");
-    expect(button?.className).toContain("destructive");
+    // Check for data attribute or specific destructive styles
+    expect(button?.getAttribute("data-button-variant")).toBe("destructive");
+    expect(button?.className).toContain("bg-red-600");
   });
 
   it("should be disabled when disabled prop is true", () => {

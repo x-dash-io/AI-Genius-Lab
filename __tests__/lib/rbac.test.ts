@@ -7,9 +7,14 @@ describe("RBAC utilities", () => {
       expect(hasRole("customer", "customer")).toBe(true);
     });
 
-    it("should return false for non-matching roles", () => {
+    it("should return false when user role is lower than required", () => {
+      // Customer cannot access admin resources
       expect(hasRole("customer", "admin")).toBe(false);
-      expect(hasRole("admin", "customer")).toBe(false);
+    });
+
+    it("should return true when user role is higher than required", () => {
+      // Admin can access customer resources (hierarchical system)
+      expect(hasRole("admin", "customer")).toBe(true);
     });
 
     it("should handle admin access correctly", () => {
