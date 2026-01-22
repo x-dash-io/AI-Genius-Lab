@@ -1,0 +1,114 @@
+"use server";
+
+import { prisma } from "@/lib/prisma";
+import { hasCourseAccess, requireUser } from "@/lib/access";
+import { getSignedCloudinaryUrl } from "@/lib/cloudinary";
+
+function resolveResourceType(contentType: string) {
+  if (contentType === "video" || contentType === "audio") {
+    return "video";
+  }
+
+  if (contentType === "pdf" || contentType === "file") {
+    return "raw";
+  }
+
+  return "image";
+}
+
+function buildLessonUrl(lesson: {
+  contentType: string;
+  contentUrl: string | null;
+  allowDownload: boolean;
+}) {
+  if (!lesson.contentUrl) {
+    return null;
+  }
+
+  if (lesson.contentType === "link") {
+    return lesson.contentUrl;
+  }
+
+  const resourceType = resolveResourceType(lesson.contentType);
+  return getSignedCloudinaryUrl(lesson.contentUrl, resourceType, {
+    download: lesson.allowDownload,
+  });
+}
+
+export async function requireLessonAccess(lessonId: string) {
+  const user = await requireUser();
+
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: lessonId },
+    select: {
+      id: true,
+      section: {
+        select: {
+          courseId: true,
+          course: { select: { slug: true } },
+        },
+      },
+    },
+  });
+
+  if (!lesson) {
+    throw new Error("NOT_FOUND");
+  }
+
+  const hasAccess = await hasCourseAccess(
+    user.id,
+    user.role,
+    lesson.section.courseId
+  );
+
+  if (!hasAccess) {
+    throw new Error("FORBIDDEN");
+  }
+
+  return {
+    lessonId: lesson.id,
+    courseSlug: lesson.section.course.slug,
+    userId: user.id,
+  };
+}
+
+export async function getAuthorizedLessonContent(lessonId: string) {
+  const user = await requireUser();
+
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: lessonId },
+    include: {
+      section: {
+        include: {
+          course: true,
+        },
+      },
+    },
+  });
+
+  if (!lesson) {
+    throw new Error("NOT_FOUND");
+  }
+
+  const hasAccess = await hasCourseAccess(
+    user.id,
+    user.role,
+    lesson.section.courseId
+  );
+
+  if (!hasAccess) {
+    throw new Error("FORBIDDEN");
+  }
+
+  return {
+    lesson: {
+      id: lesson.id,
+      title: lesson.title,
+      contentType: lesson.contentType,
+      durationSeconds: lesson.durationSeconds,
+      allowDownload: lesson.allowDownload,
+    },
+    courseSlug: lesson.section.course.slug,
+    signedUrl: buildLessonUrl(lesson),
+  };
+}

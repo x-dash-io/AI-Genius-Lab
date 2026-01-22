@@ -1,5 +1,27 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Environment Variables
+
+Create a `.env.local` file with the following values (do not commit real secrets):
+
+```bash
+DATABASE_URL="postgres://USER:PASSWORD@HOST:5432/DB_NAME"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="replace_with_random_secret"
+
+PAYPAL_ENV="sandbox"
+PAYPAL_CLIENT_ID="replace_with_paypal_client_id"
+PAYPAL_CLIENT_SECRET="replace_with_paypal_client_secret"
+PAYPAL_WEBHOOK_ID="replace_with_paypal_webhook_id"
+
+STRIPE_SECRET_KEY="replace_with_stripe_secret_key"
+STRIPE_WEBHOOK_SECRET="replace_with_stripe_webhook_secret"
+
+CLOUDINARY_CLOUD_NAME="replace_with_cloudinary_cloud_name"
+CLOUDINARY_API_KEY="replace_with_cloudinary_api_key"
+CLOUDINARY_API_SECRET="replace_with_cloudinary_api_secret"
+```
+
 ## Getting Started
 
 First, run the development server:
