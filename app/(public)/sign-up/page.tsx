@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
-export default function SignInPage() {
+export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -27,46 +27,54 @@ export default function SignInPage() {
     const formData = new FormData(event.currentTarget);
     const email = String(formData.get("email") ?? "");
     const password = String(formData.get("password") ?? "");
+    const confirmPassword = String(formData.get("confirmPassword") ?? "");
+    const name = String(formData.get("name") ?? "");
 
-    if (!email || !password) {
-      setError("Please enter both email and password");
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      setIsLoading(false);
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long");
       setIsLoading(false);
       return;
     }
 
     try {
-      const signInPromise = signIn("credentials", {
+      const signupResponse = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password, name: name || null }),
+      });
+
+      const signupData = await signupResponse.json();
+
+      if (!signupResponse.ok) {
+        setError(signupData.error || "Failed to create account");
+        setIsLoading(false);
+        return;
+      }
+
+      const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
 
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Sign in timeout")), 10000)
-      );
-
-      const result = await Promise.race([signInPromise, timeoutPromise]) as any;
-
       if (result?.error) {
-        setError("Invalid email or password. Please try again.");
+        setError("Account created but sign-in failed. Please try signing in.");
         setIsLoading(false);
         return;
       }
 
-      if (result?.ok) {
-        router.push(callbackUrl);
-        router.refresh();
-      } else {
-        setError("Sign in failed. Please try again.");
-        setIsLoading(false);
-      }
-    } catch (err: any) {
-      console.error("Sign in error:", err);
-      if (err?.message === "Sign in timeout") {
-        setError("Sign in is taking too long. Please check your connection and try again.");
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
+      router.push("/dashboard");
+      router.refresh();
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
       setIsLoading(false);
     }
   }
@@ -92,13 +100,23 @@ export default function SignInPage() {
       >
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle className="font-display text-2xl font-bold">Sign in</CardTitle>
+            <CardTitle className="font-display text-2xl font-bold">Sign up</CardTitle>
             <CardDescription>
-              Access your purchased courses and continue learning.
+              Create an account to purchase courses and start learning.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <form className="space-y-4" onSubmit={handleSubmit}>
+              <div>
+                <FloatingInput
+                  id="name"
+                  name="name"
+                  type="text"
+                  label="Name (optional)"
+                  placeholder="John Doe"
+                  disabled={isLoading}
+                />
+              </div>
               <FloatingInput
                 id="email"
                 name="email"
@@ -108,12 +126,28 @@ export default function SignInPage() {
                 placeholder="you@example.com"
                 disabled={isLoading}
               />
+              <div>
+                <FloatingInput
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  minLength={8}
+                  label="Password"
+                  placeholder="••••••••"
+                  disabled={isLoading}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Must be at least 8 characters
+                </p>
+              </div>
               <FloatingInput
-                id="password"
-                name="password"
+                id="confirmPassword"
+                name="confirmPassword"
                 type="password"
                 required
-                label="Password"
+                minLength={8}
+                label="Confirm Password"
                 placeholder="••••••••"
                 disabled={isLoading}
               />
@@ -129,7 +163,7 @@ export default function SignInPage() {
                 </motion.div>
               )}
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Signing in..." : "Sign in"}
+                {isLoading ? "Creating account..." : "Sign up"}
               </Button>
             </form>
             <div className="relative">
@@ -167,15 +201,15 @@ export default function SignInPage() {
                   fill="#EA4335"
                 />
               </svg>
-              Sign in with Google
+              Sign up with Google
             </Button>
             <p className="text-center text-sm text-muted-foreground">
-              Don't have an account?{" "}
+              Already have an account?{" "}
               <Link
-                href="/sign-up"
+                href="/sign-in"
                 className="font-medium text-primary hover:underline"
               >
-                Sign up
+                Sign in
               </Link>
             </p>
           </CardContent>

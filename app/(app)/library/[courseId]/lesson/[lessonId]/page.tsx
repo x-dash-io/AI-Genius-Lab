@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { requireLessonAccess, getAuthorizedLessonContent } from "@/lib/lessons";
 import { prisma } from "@/lib/prisma";
 
@@ -39,7 +40,7 @@ async function updateLessonProgress(formData: FormData) {
 }
 
 export default async function LessonPage({ params }: LessonPageProps) {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user) {
     redirect("/sign-in");
   }

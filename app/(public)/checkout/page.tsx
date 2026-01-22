@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { getCoursePreviewBySlug } from "@/lib/courses";
 import { prisma } from "@/lib/prisma";
 import { createPayPalOrder } from "@/lib/paypal";
@@ -12,7 +13,7 @@ type CheckoutPageProps = {
 async function createCheckoutSession(formData: FormData) {
   "use server";
 
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user) {
     redirect("/sign-in");
   }
@@ -70,7 +71,7 @@ async function createCheckoutSession(formData: FormData) {
 }
 
 export default async function CheckoutPage({ searchParams }: CheckoutPageProps) {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   const slug = searchParams?.course;
   if (!slug) {
     redirect("/courses");
@@ -82,6 +83,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
   }
 
   if (!session?.user) {
+    const returnUrl = slug ? `/checkout?course=${slug}` : "/checkout";
     return (
       <section className="grid gap-6">
         <div>
@@ -91,7 +93,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
           </p>
         </div>
         <Link
-          href="/sign-in"
+          href={`/sign-in?callbackUrl=${encodeURIComponent(returnUrl)}`}
           className="w-fit rounded-full bg-zinc-900 px-5 py-2 text-sm font-semibold text-white"
         >
           Sign in

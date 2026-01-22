@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCoursePreviewBySlug } from "@/lib/courses";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 type CourseDetailPageProps = {
   params: { courseId: string };
@@ -16,48 +19,63 @@ export default async function CourseDetailPage({
     notFound();
   }
 
+  const lessons = course.sections.flatMap((section) => section.lessons);
+
   return (
-    <section className="grid gap-6">
+    <section className="grid gap-8">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-500">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Course Preview
         </p>
-        <h1 className="mt-2 text-3xl font-semibold text-zinc-900">
+        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
           {course.title}
         </h1>
-        <p className="mt-3 max-w-2xl text-zinc-600">
+        <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
           {course.description ??
             "Detailed course pages will include lesson previews, outcomes, and learning resources."}
         </p>
       </div>
-      <div className="grid gap-4 rounded-2xl border border-dashed border-zinc-300 p-5 text-sm text-zinc-600">
-        <p>Preview lessons and resources below.</p>
-        <ul className="grid gap-2">
-          {course.sections.flatMap((section) => section.lessons).length === 0 ? (
-            <li>No lessons yet. Add lessons in the admin panel.</li>
+      <Card>
+        <CardHeader>
+          <CardTitle>Preview Lessons</CardTitle>
+          <CardDescription>
+            Get a preview of what you'll learn in this course
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {lessons.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No lessons yet. Add lessons in the admin panel.
+            </p>
           ) : (
-            course.sections.flatMap((section) =>
-              section.lessons.slice(0, 2).map((lesson) => (
-                <li key={lesson.id}>
-                  {lesson.title} · {lesson.contentType.toUpperCase()}
+            <ul className="grid gap-3">
+              {lessons.slice(0, 5).map((lesson) => (
+                <li
+                  key={lesson.id}
+                  className="flex items-center justify-between rounded-lg border p-3"
+                >
+                  <div>
+                    <p className="font-medium">{lesson.title}</p>
+                    <Badge variant="secondary" className="mt-1">
+                      {lesson.contentType.toUpperCase()}
+                    </Badge>
+                  </div>
                 </li>
-              ))
-            )
+              ))}
+            </ul>
           )}
-        </ul>
-      </div>
-      <div className="flex flex-wrap gap-3">
-        <Link
-          href={`/checkout?course=${course.slug}`}
-          className="rounded-full bg-zinc-900 px-5 py-2 text-sm font-semibold text-white"
-        >
-          Buy for ${(course.priceCents / 100).toFixed(2)}
+        </CardContent>
+      </Card>
+      <div className="flex flex-wrap gap-4">
+        <Link href={`/checkout?course=${course.slug}`}>
+          <Button size="lg">
+            Buy for ${(course.priceCents / 100).toFixed(2)}
+          </Button>
         </Link>
-        <Link
-          href="/courses"
-          className="rounded-full border border-zinc-300 px-5 py-2 text-sm font-semibold text-zinc-900"
-        >
-          Back to catalog
+        <Link href="/courses">
+          <Button variant="outline" size="lg">
+            Back to catalog
+          </Button>
         </Link>
       </div>
     </section>

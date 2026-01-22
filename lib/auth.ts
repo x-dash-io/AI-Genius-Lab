@@ -1,13 +1,19 @@
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 import { type Role } from "@/lib/rbac";
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "database" },
+  session: { 
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === "development",
   providers: [
     Credentials({
       name: "Email and Password",
@@ -16,40 +22,82 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const email = credentials?.email?.toString().toLowerCase().trim();
-        const password = credentials?.password?.toString();
+        try {
+          const email = credentials?.email?.toString().toLowerCase().trim();
+          const password = credentials?.password?.toString();
 
-        if (!email || !password) {
+          if (!email || !password) {
+            return null;
+          }
+
+          const user = await prisma.user.findUnique({
+            where: { email },
+          });
+
+          if (!user || !user.passwordHash) {
+            return null;
+          }
+
+          const isValid = await verifyPassword(password, user.passwordHash);
+          if (!isValid) {
+            return null;
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error("Authorize error:", error);
           return null;
         }
-
-        const user = await prisma.user.findUnique({
-          where: { email },
-        });
-
-        if (!user || !user.passwordHash) {
-          return null;
-        }
-
-        const isValid = await verifyPassword(password, user.passwordHash);
-        if (!isValid) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        };
       },
+    }),
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
-        session.user.role = user.role as Role;
+    async signIn({ user, account }) {
+      // For OAuth providers, ensure new users get customer role
+      if (account?.provider !== "credentials" && user.email) {
+        try {
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email },
+          });
+
+          // If user exists but has no role, set it to customer
+          if (existingUser && !existingUser.role) {
+            await prisma.user.update({
+              where: { id: existingUser.id },
+              data: { role: "customer" },
+            });
+          }
+        } catch (error) {
+          console.error("SignIn callback error:", error);
+          // Don't block sign-in if role update fails
+        }
+      }
+      // For credentials provider, user is already authenticated by authorize function
+      return true;
+    },
+    async jwt({ token, user }) {
+      // Initial sign in - user object is available
+      if (user) {
+        token.id = user.id;
+        // For credentials provider, role comes from authorize function
+        // For OAuth, PrismaAdapter will create user with default role from schema
+        token.role = (user as any).role || "customer";
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user && token) {
+        session.user.id = token.id as string;
+        session.user.role = (token.role as Role) || "customer";
       }
       return session;
     },

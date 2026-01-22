@@ -9,6 +9,10 @@ DATABASE_URL="postgres://USER:PASSWORD@HOST:5432/DB_NAME"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="replace_with_random_secret"
 
+# Google OAuth (optional but recommended)
+GOOGLE_CLIENT_ID="replace_with_google_client_id"
+GOOGLE_CLIENT_SECRET="replace_with_google_client_secret"
+
 PAYPAL_ENV="sandbox"
 PAYPAL_CLIENT_ID="replace_with_paypal_client_id"
 PAYPAL_CLIENT_SECRET="replace_with_paypal_client_secret"
@@ -21,6 +25,20 @@ CLOUDINARY_CLOUD_NAME="replace_with_cloudinary_cloud_name"
 CLOUDINARY_API_KEY="replace_with_cloudinary_api_key"
 CLOUDINARY_API_SECRET="replace_with_cloudinary_api_secret"
 ```
+
+### Google OAuth Setup (Optional)
+
+To enable Google sign-in:
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the Google+ API
+4. Go to "Credentials" → "Create Credentials" → "OAuth client ID"
+5. Choose "Web application"
+6. Add authorized redirect URIs:
+   - `http://localhost:3000/api/auth/callback/google` (for development)
+   - `https://yourdomain.com/api/auth/callback/google` (for production)
+7. Copy the Client ID and Client Secret to your `.env.local` file
 
 ## Getting Started
 

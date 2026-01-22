@@ -1,9 +1,13 @@
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Activity } from "lucide-react";
 
 export default async function ActivityPage() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user) {
     redirect("/sign-in");
   }
@@ -15,33 +19,44 @@ export default async function ActivityPage() {
   });
 
   return (
-    <section className="grid gap-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-semibold text-white">Activity</h1>
-        <p className="mt-2 text-zinc-400">
+        <h1 className="font-display text-4xl font-bold tracking-tight">
+          Activity
+        </h1>
+        <p className="mt-2 text-lg text-muted-foreground">
           Recent learning activity and purchase history will appear here.
         </p>
       </div>
-      <div className="grid gap-3">
+      <div className="grid gap-4">
         {activity.map((entry) => (
-          <div
-            key={entry.id}
-            className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 text-sm text-zinc-200"
-          >
-            <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-              {entry.type}
-            </p>
-            <p className="mt-2 text-zinc-300">
-              {entry.createdAt.toLocaleString()}
-            </p>
-          </div>
+          <Card key={entry.id}>
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <CardTitle className="text-lg">{entry.type}</CardTitle>
+                  <CardDescription>
+                    {entry.createdAt.toLocaleString()}
+                  </CardDescription>
+                </div>
+                <Badge variant="secondary">
+                  <Activity className="mr-1 h-3 w-3" />
+                  {entry.type}
+                </Badge>
+              </div>
+            </CardHeader>
+          </Card>
         ))}
-        {activity.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-zinc-700 p-5 text-sm text-zinc-400">
-            Activity timeline and completion events coming soon.
-          </div>
-        ) : null}
+        {activity.length === 0 && (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground">
+                Activity timeline and completion events coming soon.
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
-    </section>
+    </div>
   );
 }

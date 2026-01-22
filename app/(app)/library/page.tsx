@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { BookOpen } from "lucide-react";
 
 export default async function LibraryPage() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user) {
     redirect("/sign-in");
   }
@@ -21,41 +25,49 @@ export default async function LibraryPage() {
   });
 
   return (
-    <section className="grid gap-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-semibold text-white">My Courses</h1>
-        <p className="mt-2 text-zinc-400">
+        <h1 className="font-display text-4xl font-bold tracking-tight">
+          My Courses
+        </h1>
+        <p className="mt-2 text-lg text-muted-foreground">
           Purchased courses appear here with progress and resume actions.
         </p>
       </div>
-      <div className="grid gap-4">
+      <div className="grid gap-6">
         {purchases.map((purchase) => (
-          <div
-            key={purchase.id}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5"
-          >
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-                Purchased
-              </p>
-              <h2 className="mt-2 text-lg font-semibold text-white">
-                {purchase.course.title}
-              </h2>
-            </div>
-            <Link
-              href={`/library/${purchase.course.slug}`}
-              className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-zinc-900"
-            >
-              Resume
-            </Link>
-          </div>
+          <Card key={purchase.id}>
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    Purchased
+                  </p>
+                  <CardTitle className="text-xl">{purchase.course.title}</CardTitle>
+                  <CardDescription>
+                    {purchase.course.description || "Continue your learning journey"}
+                  </CardDescription>
+                </div>
+                <BookOpen className="h-5 w-5 text-muted-foreground" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Link href={`/library/${purchase.course.slug}`}>
+                <Button>Resume Learning</Button>
+              </Link>
+            </CardContent>
+          </Card>
         ))}
-        {purchases.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-zinc-700 p-5 text-sm text-zinc-400">
-            No purchases yet. Complete checkout to unlock your course library.
-          </div>
-        ) : null}
+        {purchases.length === 0 && (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground">
+                No purchases yet. Complete checkout to unlock your course library.
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
-    </section>
+    </div>
   );
 }

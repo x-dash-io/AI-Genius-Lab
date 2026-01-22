@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { BookOpen, Activity } from "lucide-react";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -22,40 +25,57 @@ export default async function DashboardPage() {
   ]);
 
   return (
-    <section className="grid gap-6">
+    <div className="space-y-8">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Customer Dashboard
         </p>
-        <h1 className="mt-2 text-3xl font-semibold text-white">
+        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
           Welcome back to Synapze.
         </h1>
-        <p className="mt-2 text-zinc-400">
+        <p className="mt-2 text-lg text-muted-foreground">
           Resume learning and track your progress across purchased courses.
         </p>
       </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5">
-          <p className="text-sm text-zinc-400">Courses purchased</p>
-          <h2 className="mt-2 text-3xl font-semibold text-white">
-            {purchaseCount}
-          </h2>
-          <Link href="/library" className="mt-4 inline-flex text-sm text-white">
-            View library →
-          </Link>
-        </div>
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5">
-          <p className="text-sm text-zinc-400">Last activity</p>
-          <h2 className="mt-2 text-lg font-semibold text-white">
-            {lastProgress?.lesson.title ?? "No activity yet"}
-          </h2>
-          <p className="mt-2 text-sm text-zinc-400">
-            {lastProgress?.updatedAt
-              ? `Updated ${lastProgress.updatedAt.toLocaleDateString()}`
-              : "Complete a lesson to see progress here."}
-          </p>
-        </div>
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Courses Purchased
+            </CardTitle>
+            <BookOpen className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{purchaseCount}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Total courses in your library
+            </p>
+            <Link href="/library" className="mt-4 inline-block">
+              <Button variant="outline" size="sm">
+                View library
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Last Activity
+            </CardTitle>
+            <Activity className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-lg font-semibold">
+              {lastProgress?.lesson.title ?? "No activity yet"}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {lastProgress?.updatedAt
+                ? `Updated ${lastProgress.updatedAt.toLocaleDateString()}`
+                : "Complete a lesson to see progress here."}
+            </p>
+          </CardContent>
+        </Card>
       </div>
-    </section>
+    </div>
   );
 }

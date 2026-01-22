@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { getCourseForLibraryBySlug } from "@/lib/courses";
 import { hasCourseAccess } from "@/lib/access";
 import { prisma } from "@/lib/prisma";
@@ -10,7 +11,7 @@ type CourseAppPageProps = {
 };
 
 export default async function CourseAppPage({ params }: CourseAppPageProps) {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session?.user) {
     redirect("/sign-in");
   }
