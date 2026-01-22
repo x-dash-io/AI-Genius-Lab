@@ -43,6 +43,7 @@ model Course {
   purchases   Purchase[]
   reviews     Review[]
   sections    Section[]
+  certificates Certificate[]
 }
 
 model Section {
@@ -237,4 +238,30 @@ enum PurchaseStatus {
 enum PaymentProvider {
   stripe
   paypal
+}
+
+enum CertificateType {
+  course
+  learning_path
+}
+
+model Certificate {
+  id            String          @id @default(cuid())
+  userId        String
+  type          CertificateType
+  courseId      String?
+  pathId        String?
+  certificateId String         @unique // Public certificate ID for verification
+  issuedAt      DateTime        @default(now())
+  expiresAt     DateTime?
+  metadata      Json?
+  pdfUrl        String?
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course        Course?         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  path          LearningPath?   @relation(fields: [pathId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([certificateId])
+  @@index([courseId])
+  @@index([pathId])
 }

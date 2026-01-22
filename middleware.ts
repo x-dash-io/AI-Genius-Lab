@@ -41,8 +41,17 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Protect authenticated routes
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/library")) {
+  // Protect authenticated routes - all routes under (app) folder
+  const protectedRoutes = [
+    "/dashboard",
+    "/library",
+    "/profile",
+    "/activity",
+  ];
+
+  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
+
+  if (isProtectedRoute) {
     const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET,

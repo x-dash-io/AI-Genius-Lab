@@ -12,6 +12,7 @@ import {
   X,
   GraduationCap,
   User,
+  Route,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -26,6 +27,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "My Courses", href: "/library", icon: BookOpen },
   { name: "Browse Courses", href: "/courses", icon: GraduationCap },
+  { name: "Learning Paths", href: "/learning-paths", icon: Route },
   { name: "Activity", href: "/activity", icon: Activity },
   { name: "Profile", href: "/profile", icon: User },
 ];

@@ -1,0 +1,354 @@
+"use server";
+
+import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/access";
+import { getCourseProgress } from "./progress";
+import { hasEnrolledInLearningPath } from "./learning-paths";
+
+/**
+ * Generate a unique certificate ID
+ */
+function generateCertificateId(): string {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 10);
+  return `CERT-${timestamp}-${random}`.toUpperCase();
+}
+
+/**
+ * Check if user has completed a course (all lessons completed)
+ */
+export async function hasCompletedCourse(userId: string, courseId: string): Promise<boolean> {
+  // Get all lessons in the course
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    include: {
+      sections: {
+        include: {
+          lessons: {
+            select: { id: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!course) return false;
+
+  const lessonIds = course.sections.flatMap((s) => s.lessons.map((l) => l.id));
+  if (lessonIds.length === 0) return false;
+
+  // Get progress for all lessons
+  const progressRecords = await prisma.progress.findMany({
+    where: {
+      userId,
+      lessonId: { in: lessonIds },
+    },
+  });
+
+  // Check if all lessons are completed
+  const completedLessons = progressRecords.filter((p) => p.completedAt !== null).length;
+  return completedLessons === lessonIds.length;
+}
+
+/**
+ * Check if user has completed a learning path (all courses completed)
+ */
+export async function hasCompletedLearningPath(userId: string, pathId: string): Promise<boolean> {
+  const path = await prisma.learningPath.findUnique({
+    where: { id: pathId },
+    include: {
+      courses: {
+        include: {
+          course: {
+            select: { id: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!path || path.courses.length === 0) {
+    return false;
+  }
+
+  // Check if all courses are completed
+  for (const pathCourse of path.courses) {
+    const completed = await hasCompletedCourse(userId, pathCourse.courseId);
+    if (!completed) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Generate certificate for course completion
+ */
+export async function generateCourseCertificate(courseId: string) {
+  const user = await requireUser();
+
+  // Verify user has purchased the course
+  const purchase = await prisma.purchase.findFirst({
+    where: {
+      userId: user.id,
+      courseId,
+      status: "paid",
+    },
+  });
+
+  if (!purchase) {
+    throw new Error("Course not purchased");
+  }
+
+  // Verify course completion
+  const completed = await hasCompletedCourse(user.id, courseId);
+  if (!completed) {
+    throw new Error("Course not completed");
+  }
+
+  // Check if certificate already exists
+  const existing = await prisma.certificate.findFirst({
+    where: {
+      userId: user.id,
+      courseId,
+      type: "course",
+    },
+  });
+
+  if (existing) {
+    return existing;
+  }
+
+  // Generate certificate
+  const certificateId = generateCertificateId();
+  const certificate = await prisma.certificate.create({
+    data: {
+      userId: user.id,
+      courseId,
+      type: "course",
+      certificateId,
+    },
+    include: {
+      course: {
+        select: {
+          title: true,
+          description: true,
+        },
+      },
+      user: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+
+  // Log certificate issuance
+  await prisma.activityLog.create({
+    data: {
+      userId: user.id,
+      type: "certificate_earned",
+      metadata: {
+        certificateId: certificate.certificateId,
+        type: "course",
+        courseId,
+        courseTitle: certificate.course?.title,
+      },
+    },
+  });
+
+  // TODO: Generate PDF and upload to Cloudinary
+  // TODO: Send certificate email
+
+  return certificate;
+}
+
+/**
+ * Generate certificate for learning path completion
+ */
+export async function generatePathCertificate(pathId: string) {
+  const user = await requireUser();
+
+  // Verify user has enrolled in the path (all courses purchased)
+  const enrolled = await hasEnrolledInLearningPath(user.id, pathId);
+  if (!enrolled) {
+    throw new Error("Learning path not enrolled");
+  }
+
+  // Verify path completion
+  const completed = await hasCompletedLearningPath(user.id, pathId);
+  if (!completed) {
+    throw new Error("Learning path not completed");
+  }
+
+  // Check if certificate already exists
+  const existing = await prisma.certificate.findFirst({
+    where: {
+      userId: user.id,
+      pathId,
+      type: "learning_path",
+    },
+  });
+
+  if (existing) {
+    return existing;
+  }
+
+  // Get path details for metadata
+  const path = await prisma.learningPath.findUnique({
+    where: { id: pathId },
+    include: {
+      courses: {
+        include: {
+          course: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
+        },
+        orderBy: { sortOrder: "asc" },
+      },
+    },
+  });
+
+  // Generate certificate
+  const certificateId = generateCertificateId();
+  const certificate = await prisma.certificate.create({
+    data: {
+      userId: user.id,
+      pathId,
+      type: "learning_path",
+      certificateId,
+      metadata: path ? {
+        courseCount: path.courses.length,
+        courses: path.courses.map((pc) => ({
+          courseId: pc.course.id,
+          title: pc.course.title,
+        })),
+      } : undefined,
+    },
+    include: {
+      path: {
+        select: {
+          title: true,
+          description: true,
+        },
+      },
+      user: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+    },
+  });
+
+  // Log certificate issuance
+  await prisma.activityLog.create({
+    data: {
+      userId: user.id,
+      type: "certificate_earned",
+      metadata: {
+        certificateId: certificate.certificateId,
+        type: "learning_path",
+        pathId,
+        pathTitle: certificate.path?.title,
+      },
+    },
+  });
+
+  // TODO: Generate PDF and upload to Cloudinary
+  // TODO: Send certificate email
+
+  return certificate;
+}
+
+/**
+ * Get user's certificates
+ */
+export async function getUserCertificates(userId: string) {
+  const user = await requireUser();
+  
+  if (user.id !== userId) {
+    throw new Error("FORBIDDEN: You can only view your own certificates");
+  }
+
+  return prisma.certificate.findMany({
+    where: { userId },
+    include: {
+      course: {
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+        },
+      },
+      path: {
+        select: {
+          id: true,
+          title: true,
+        },
+      },
+    },
+    orderBy: { issuedAt: "desc" },
+  });
+}
+
+/**
+ * Verify a certificate (public endpoint)
+ */
+export async function verifyCertificate(certificateId: string) {
+  const certificate = await prisma.certificate.findUnique({
+    where: { certificateId },
+    include: {
+      user: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+      course: {
+        select: {
+          title: true,
+          description: true,
+        },
+      },
+      path: {
+        select: {
+          title: true,
+          description: true,
+        },
+      },
+    },
+  });
+
+  if (!certificate) {
+    return {
+      valid: false,
+      error: "Certificate not found",
+    };
+  }
+
+  if (certificate.expiresAt && certificate.expiresAt < new Date()) {
+    return {
+      valid: false,
+      error: "Certificate has expired",
+    };
+  }
+
+  return {
+    valid: true,
+    certificate: {
+      type: certificate.type,
+      studentName: certificate.user.name,
+      courseName: certificate.course?.title,
+      pathName: certificate.path?.title,
+      issuedAt: certificate.issuedAt,
+      expiresAt: certificate.expiresAt,
+      certificateId: certificate.certificateId,
+    },
+  };
+}

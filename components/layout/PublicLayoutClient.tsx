@@ -38,12 +38,20 @@ export function PublicLayoutClient({
           </div>
           <nav className="flex items-center gap-6 flex-wrap">
             {!isAuthPage && (
-              <Link
-                href="/courses"
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Courses
-              </Link>
+              <>
+                <Link
+                  href="/courses"
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Courses
+                </Link>
+                <Link
+                  href="/learning-paths"
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Learning Paths
+                </Link>
+              </>
             )}
             <ThemeToggle />
             {!isAuthPage && session?.user ? (

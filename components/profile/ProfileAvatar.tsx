@@ -123,7 +123,7 @@ export function ProfileAvatar({
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <Avatar className="h-24 w-24 ring-4 ring-primary ring-offset-2 ring-offset-card">
+      <Avatar className="h-24 w-24 border-2 border-border/50">
         <AvatarImage src={imageUrl || undefined} alt={userName || userEmail} />
         <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
           {initials}
