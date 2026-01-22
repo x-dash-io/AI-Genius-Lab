@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ContentUpload } from "@/components/admin/ContentUpload";
 import { Plus, Trash2, ChevronDown, ChevronRight } from "lucide-react";
 import type { Course, Section, Lesson } from "@prisma/client";
 
@@ -43,6 +44,8 @@ export function CourseEditForm({
   const [showAddSection, setShowAddSection] = useState(false);
   const [showAddLesson, setShowAddLesson] = useState<string | null>(null);
   const [contentTypes, setContentTypes] = useState<Record<string, string>>({});
+  const [contentUrls, setContentUrls] = useState<Record<string, string>>({});
+  const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
 
   const toggleSection = (sectionId: string) => {
     const newExpanded = new Set(expandedSections);
@@ -231,11 +234,21 @@ export function CourseEditForm({
                             action={addLessonAction.bind(null, section.id)}
                             onSubmit={() => {
                               setShowAddLesson(null);
-                              // Clear contentType for this section after submission
+                              // Clear form state after submission
                               setContentTypes((prev) => {
                                 const newTypes = { ...prev };
                                 delete newTypes[section.id];
                                 return newTypes;
+                              });
+                              setContentUrls((prev) => {
+                                const newUrls = { ...prev };
+                                delete newUrls[section.id];
+                                return newUrls;
+                              });
+                              setUploadErrors((prev) => {
+                                const newErrors = { ...prev };
+                                delete newErrors[section.id];
+                                return newErrors;
                               });
                             }}
                             className="space-y-4"

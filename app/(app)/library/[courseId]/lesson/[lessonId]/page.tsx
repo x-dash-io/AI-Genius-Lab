@@ -79,7 +79,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
       <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 text-sm text-zinc-300">
         {signedUrl ? (
           <a
-            href={signedUrl}
+            href={`/api/content/${lesson.id}`}
             target="_blank"
             rel="noreferrer"
             className="font-semibold text-white underline"

@@ -20,7 +20,7 @@ function buildLessonUrl(lesson: {
   contentType: string;
   contentUrl: string | null;
   allowDownload: boolean;
-}) {
+}, userId?: string) {
   if (!lesson.contentUrl) {
     return null;
   }
@@ -32,6 +32,7 @@ function buildLessonUrl(lesson: {
   const resourceType = resolveResourceType(lesson.contentType);
   return getSignedCloudinaryUrl(lesson.contentUrl, resourceType, {
     download: lesson.allowDownload,
+    userId, // Add user ID for enhanced security
   });
 }
 
@@ -109,6 +110,6 @@ export async function getAuthorizedLessonContent(lessonId: string) {
       allowDownload: lesson.allowDownload,
     },
     courseSlug: lesson.section.course.slug,
-    signedUrl: buildLessonUrl(lesson),
+    signedUrl: buildLessonUrl(lesson, user.id), // Pass user ID for user-specific URLs
   };
 }
