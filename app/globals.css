@@ -123,3 +123,39 @@ body {
 #__next-build-watcher {
   display: none;
 }
+
+/* Print styles for invoice */
+@media print {
+  body {
+    background: white;
+  }
+  
+  /* Hide navigation and non-essential elements */
+  header,
+  nav,
+  aside,
+  footer,
+  button:not(.print-button),
+  a:not(.print-link) {
+    display: none !important;
+  }
+  
+  /* Ensure invoice card is visible */
+  section {
+    max-width: 100%;
+    padding: 0;
+  }
+  
+  /* Remove background colors for printing */
+  .bg-background,
+  .bg-card,
+  .bg-muted {
+    background: white !important;
+  }
+  
+  /* Ensure text is black for printing */
+  .text-foreground,
+  .text-muted-foreground {
+    color: #000 !important;
+  }
+}

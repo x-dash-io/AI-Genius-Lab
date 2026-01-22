@@ -6,13 +6,29 @@ function getCaptureId(payload: any) {
   return payload?.purchase_units?.[0]?.payments?.captures?.[0]?.id ?? null;
 }
 
+function getBaseUrl(requestUrl: URL): string {
+  // Use NEXTAUTH_URL if available (preferred)
+  if (process.env.NEXTAUTH_URL) {
+    return process.env.NEXTAUTH_URL;
+  }
+  
+  // Otherwise, construct from request URL but ensure HTTP for localhost
+  const origin = requestUrl.origin;
+  if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+    return origin.replace('https://', 'http://');
+  }
+  
+  return origin;
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
+  const baseUrl = getBaseUrl(url);
   const orderId = url.searchParams.get("token");
   const purchaseIdsParam = url.searchParams.get("purchases");
 
   if (!orderId) {
-    return NextResponse.redirect(new URL("/courses", url));
+    return NextResponse.redirect(new URL("/courses", baseUrl));
   }
 
   // Handle multiple purchases (learning path enrollment)
@@ -52,7 +68,7 @@ export async function GET(request: Request) {
       }
 
       return NextResponse.redirect(
-        new URL(`/learning-paths/${purchases[0].course.slug}?checkout=failed`, url)
+        new URL(`/learning-paths/${purchases[0].course.slug}?checkout=failed`, baseUrl)
       );
     }
 
@@ -135,9 +151,10 @@ export async function GET(request: Request) {
       }
     }
 
-    // Redirect to library or first course
+    // Redirect to success page with invoice
+    const purchasesQuery = purchaseIds.join(",");
     return NextResponse.redirect(
-      new URL(`/library?checkout=success`, url)
+      new URL(`/purchase/success?purchases=${encodeURIComponent(purchasesQuery)}`, baseUrl)
     );
   }
 
@@ -148,7 +165,7 @@ export async function GET(request: Request) {
   });
 
   if (!purchase) {
-    return NextResponse.redirect(new URL("/courses", url));
+    return NextResponse.redirect(new URL("/courses", baseUrl));
   }
 
   if (purchase.status !== "paid") {
@@ -252,7 +269,8 @@ export async function GET(request: Request) {
     }
   }
 
+  // Redirect to success page with invoice
   return NextResponse.redirect(
-    new URL(`/library/${purchase.course.slug}?checkout=success`, url)
+    new URL(`/purchase/success?purchase=${encodeURIComponent(purchase.id)}`, baseUrl)
   );
 }

@@ -84,6 +84,139 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 4. Set `EMAIL_FROM` to your verified domain email (e.g., `noreply@yourdomain.com`)
 5. Verify your domain in Resend dashboard (required for production)
 
+## PayPal Sandbox Setup (Testing with Fake Money)
+
+PayPal Sandbox allows you to test payments without using real money. Here's how to set it up:
+
+### 1. Create PayPal Developer Account
+
+1. Go to [PayPal Developer Dashboard](https://developer.paypal.com/)
+2. Sign in with your PayPal account (or create one)
+3. Navigate to **Dashboard** → **My Apps & Credentials**
+
+### 2. Create Sandbox App
+
+1. Click **Create App**
+2. Fill in:
+   - **App Name**: `Synapze Sandbox` (or any name)
+   - **Merchant**: Select your sandbox business account
+   - **Features**: Select **Accept Payments**
+3. Click **Create App**
+4. Copy the **Client ID** and **Secret** to your `.env.local`:
+   ```bash
+   PAYPAL_CLIENT_ID="your_sandbox_client_id"
+   PAYPAL_CLIENT_SECRET="your_sandbox_secret"
+   ```
+
+### 3. Create Sandbox Test Accounts
+
+1. Go to **Dashboard** → **Accounts** (under Sandbox section)
+2. Click **Create Account** to create test accounts:
+   - **Business Account** (seller): Already created with your app
+   - **Personal Account** (buyer): Create one for testing
+
+### 4. PayPal Sandbox Test Credentials
+
+PayPal provides pre-configured test accounts. You can use these or create your own:
+
+**Pre-configured Personal Account (Buyer):**
+- Email: `sb-xxxxx@personal.example.com` (check PayPal dashboard)
+- Password: Use the password shown in PayPal dashboard
+- Or create your own test account
+
+**Pre-configured Business Account (Seller):**
+- Email: `sb-xxxxx@business.example.com` (check PayPal dashboard)
+- Password: Use the password shown in PayPal dashboard
+
+### 5. Testing Payments
+
+When testing:
+
+1. **Start your app** with `PAYPAL_ENV="sandbox"` (default)
+2. **Click "Enroll" or "Purchase"** - you'll be redirected to PayPal Sandbox
+3. **Sign in** with your sandbox personal account credentials
+4. **Complete the payment** - no real money is charged!
+5. **Test different scenarios**:
+   - Successful payment
+   - Cancel payment
+   - Payment failure
+
+### 6. Test Credit Cards (Alternative)
+
+PayPal Sandbox also accepts test credit cards:
+
+**Visa:**
+- Card Number: `4032031085371234`
+- Expiry: Any future date (e.g., `12/25`)
+- CVV: `123`
+- Name: Any name
+
+**Mastercard:**
+- Card Number: `5421698999991059`
+- Expiry: Any future date
+- CVV: `123`
+
+**Note**: These cards only work in PayPal Sandbox, not in production!
+
+### 7. Webhook Setup (Optional for Testing)
+
+For webhook testing with ngrok:
+
+1. **Start your Next.js app first**: `npm run dev` (runs on port 3000)
+2. **Start ngrok pointing to port 3000**: `ngrok http 3000` ⚠️ **Important: Use port 3000, not 80!**
+3. Copy your ngrok HTTPS URL (e.g., `https://abc123.ngrok-free.dev`)
+4. **Update `.env.local`** with your ngrok URL:
+   ```bash
+   NEXTAUTH_URL="https://abc123.ngrok-free.dev"
+   ```
+5. **Restart your Next.js server** so it picks up the new URL
+6. In PayPal Developer Dashboard:
+   - Go to **My Apps & Credentials** → Your App
+   - Scroll to **Webhooks**
+   - Click **Add Webhook**
+   - URL: `https://your-ngrok-url.ngrok-free.dev/api/webhooks/paypal`
+   - Event types: Select `PAYMENT.CAPTURE.COMPLETED` and `CHECKOUT.ORDER.APPROVED`
+7. Copy the **Webhook ID** to your `.env.local`:
+   ```bash
+   PAYPAL_WEBHOOK_ID="your_webhook_id"
+   ```
+
+**⚠️ Common Mistake**: If you see `ERR_NGROK_8012` (connection refused), ngrok is pointing to the wrong port. Make sure you run `ngrok http 3000` not `ngrok http 80`.
+
+### 8. Environment Variables Summary
+
+```bash
+# PayPal Sandbox (for testing)
+PAYPAL_ENV="sandbox"
+PAYPAL_CLIENT_ID="your_sandbox_client_id"
+PAYPAL_CLIENT_SECRET="your_sandbox_secret"
+PAYPAL_WEBHOOK_ID="your_webhook_id"  # Optional for testing
+
+# Make sure NEXTAUTH_URL points to your ngrok URL when testing webhooks
+NEXTAUTH_URL="https://your-ngrok-url.ngrok.io"
+```
+
+### 9. Switching to Production
+
+When ready for production:
+
+1. Create a **Live App** in PayPal Developer Dashboard
+2. Get **Live Client ID** and **Secret**
+3. Update `.env.local`:
+   ```bash
+   PAYPAL_ENV="live"
+   PAYPAL_CLIENT_ID="your_live_client_id"
+   PAYPAL_CLIENT_SECRET="your_live_secret"
+   ```
+4. Set up production webhook with your actual domain
+
+### Troubleshooting
+
+- **"Failed to create PayPal order"**: Check your Client ID and Secret
+- **Redirect not working**: Ensure `NEXTAUTH_URL` matches your ngrok URL
+- **Webhook not receiving events**: Verify webhook URL in PayPal dashboard
+- **Payment not completing**: Check browser console and server logs
+
 ## Analytics Setup
 
 ### Vercel Analytics (Automatic)
