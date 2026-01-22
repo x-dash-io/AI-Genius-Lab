@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { requireRole } from "@/lib/access";
 import { getAllUsers } from "@/lib/admin/users";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,9 +10,12 @@ import Link from "next/link";
 import { Users, User, Shield } from "lucide-react";
 
 export default async function AdminUsersPage() {
+  const session = await getServerSession(authOptions);
   await requireRole("admin");
 
-  const users = await getAllUsers();
+  const allUsers = await getAllUsers();
+  // Filter out current admin's account
+  const users = allUsers.filter((user) => user.id !== session?.user?.id);
 
   return (
     <div className="space-y-8">

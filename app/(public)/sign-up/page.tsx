@@ -82,11 +82,14 @@ export default function SignUpPage() {
       setIsLoading(false);
       setIsRedirecting(true);
       
-      // Show loading state for 1.5 seconds before redirecting
-      setTimeout(() => {
-        router.push("/dashboard");
+      // Wait a moment for session to update, then check role and redirect
+      setTimeout(async () => {
+        const sessionResponse = await fetch("/api/auth/session");
+        const session = await sessionResponse.json();
+        const redirectUrl = session?.user?.role === "admin" ? "/admin" : "/dashboard";
+        router.push(redirectUrl);
         router.refresh();
-      }, 1500);
+      }, 500);
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
       setIsLoading(false);

@@ -1,4 +1,6 @@
 import { redirect, notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { requireRole } from "@/lib/access";
 import { getUserById, updateUserRole } from "@/lib/admin/users";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ArrowLeft, Shield, User, ShoppingCart, GraduationCap, Activity } from "lucide-react";
+import { RoleSelectForm } from "@/components/admin/RoleSelectForm";
 import type { Role } from "@/lib/rbac";
 
 function formatCurrency(cents: number) {
@@ -17,7 +20,12 @@ function formatCurrency(cents: number) {
 
 async function changeRoleAction(userId: string, formData: FormData) {
   "use server";
-  await requireRole("admin");
+  const admin = await requireRole("admin");
+
+  // Prevent admins from changing their own role
+  if (userId === admin.id) {
+    throw new Error("You cannot change your own role");
+  }
 
   const role = formData.get("role") as Role;
   if (role !== "admin" && role !== "customer") {
@@ -33,10 +41,13 @@ export default async function UserDetailPage({
 }: {
   params: Promise<{ userId: string }>;
 }) {
+  const session = await getServerSession(authOptions);
   await requireRole("admin");
 
   const { userId } = await params;
   const user = await getUserById(userId);
+  
+  const isCurrentUser = session?.user?.id === userId;
 
   if (!user) {
     notFound();
@@ -111,27 +122,19 @@ export default async function UserDetailPage({
         <Card>
           <CardHeader>
             <CardTitle>Role Management</CardTitle>
-            <CardDescription>Change user role</CardDescription>
+            <CardDescription>
+              {isCurrentUser 
+                ? "You cannot change your own role" 
+                : "Change user role"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={changeRoleAction.bind(null, user.id)} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Current Role</label>
-                <p className="text-lg capitalize">{user.role}</p>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Change to</label>
-                <select
-                  name="role"
-                  defaultValue={user.role}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <option value="customer">Customer</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </div>
-              <Button type="submit">Update Role</Button>
-            </form>
+            <RoleSelectForm
+              currentRole={user.role}
+              userId={user.id}
+              isCurrentUser={isCurrentUser}
+              changeRoleAction={changeRoleAction}
+            />
           </CardContent>
         </Card>
       </div>

@@ -59,11 +59,14 @@ export default function SignInPage() {
         setIsLoading(false);
         setIsRedirecting(true);
         
-        // Show loading state for 1.5 seconds before redirecting
-        setTimeout(() => {
-          router.push(callbackUrl);
+        // Wait a moment for session to update, then check role and redirect
+        setTimeout(async () => {
+          const sessionResponse = await fetch("/api/auth/session");
+          const session = await sessionResponse.json();
+          const redirectUrl = session?.user?.role === "admin" ? "/admin" : callbackUrl;
+          router.push(redirectUrl);
           router.refresh();
-        }, 1500);
+        }, 500);
       } else {
         setError("Sign in failed. Please try again.");
         setIsLoading(false);

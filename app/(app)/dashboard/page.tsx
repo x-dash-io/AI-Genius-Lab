@@ -13,6 +13,11 @@ export default async function DashboardPage() {
     redirect("/sign-in");
   }
 
+  // Redirect admins to admin dashboard
+  if (session.user.role === "admin") {
+    redirect("/admin");
+  }
+
   const [purchaseCount, lastProgress] = await Promise.all([
     prisma.purchase.count({
       where: { userId: session.user.id, status: "paid" },

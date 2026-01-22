@@ -21,10 +21,7 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          Admin Dashboard
-        </p>
-        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
+        <h1 className="font-display text-4xl font-bold tracking-tight">
           Overview
         </h1>
         <p className="mt-2 text-lg text-muted-foreground">

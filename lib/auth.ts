@@ -108,6 +108,14 @@ export const authOptions = {
       }
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      // Redirect admins to admin dashboard after sign-in
+      if (url.startsWith("/dashboard") || url === baseUrl || url === `${baseUrl}/`) {
+        // We'll handle admin redirect in the dashboard page itself
+        return url;
+      }
+      return url.startsWith(baseUrl) ? url : baseUrl;
+    },
   },
   pages: {
     signIn: "/sign-in",
