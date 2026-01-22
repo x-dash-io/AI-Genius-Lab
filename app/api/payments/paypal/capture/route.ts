@@ -27,6 +27,25 @@ export async function GET(request: Request) {
     const capture = await capturePayPalOrder(orderId);
 
     if (capture?.status !== "COMPLETED") {
+      // Send failure email if user exists
+      const user = await prisma.user.findUnique({
+        where: { id: purchase.userId },
+        select: { email: true },
+      });
+
+      if (user && purchase.course) {
+        try {
+          const { sendPurchaseFailedEmail } = await import("@/lib/email");
+          await sendPurchaseFailedEmail(
+            user.email,
+            purchase.course.title,
+            "Payment capture failed"
+          );
+        } catch (error) {
+          console.error("Failed to send failure email:", error);
+        }
+      }
+
       return NextResponse.redirect(
         new URL(`/courses/${purchase.course.slug}?checkout=failed`, url)
       );
@@ -37,7 +56,7 @@ export async function GET(request: Request) {
       data: { status: "paid" },
     });
 
-    await prisma.enrollment.upsert({
+    const enrollment = await prisma.enrollment.upsert({
       where: {
         userId_courseId: {
           userId: purchase.userId,
@@ -51,6 +70,25 @@ export async function GET(request: Request) {
         purchaseId: purchase.id,
       },
     });
+
+    // Send email notifications
+    const user = await prisma.user.findUnique({
+      where: { id: purchase.userId },
+      select: { email: true },
+    });
+
+    if (user && purchase.course) {
+      try {
+        const { sendPurchaseConfirmationEmail, sendEnrollmentEmail } = await import("@/lib/email");
+        await Promise.all([
+          sendPurchaseConfirmationEmail(user.email, purchase.course.title, purchase.amountCents),
+          sendEnrollmentEmail(user.email, purchase.course.title),
+        ]);
+      } catch (error) {
+        console.error("Failed to send email notifications:", error);
+        // Don't fail the capture if email fails
+      }
+    }
 
     await prisma.payment.create({
       data: {

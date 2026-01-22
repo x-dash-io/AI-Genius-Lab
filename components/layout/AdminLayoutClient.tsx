@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   Shield,
+  Route,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -25,6 +26,7 @@ import { useState } from "react";
 const adminNavigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Courses", href: "/admin/courses", icon: BookOpen },
+  { name: "Learning Paths", href: "/admin/learning-paths", icon: Route },
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Purchases", href: "/admin/purchases", icon: ShoppingCart },
 ];

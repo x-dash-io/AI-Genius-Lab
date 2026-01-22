@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireRole } from "@/lib/access";
 import { uploadToCloudinary, getResourceTypeFromFile } from "@/lib/cloudinary";
+import { rateLimits } from "@/lib/rate-limit";
 
 // File size limits (in bytes)
 const MAX_FILE_SIZES = {
@@ -34,6 +35,19 @@ export async function POST(request: NextRequest) {
   try {
     // Require admin role
     await requireRole("admin");
+
+    // Rate limiting
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0] ||
+      request.headers.get("x-real-ip") ||
+      "unknown";
+    const rateLimitResult = rateLimits.upload(ip);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: "Too many upload requests. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

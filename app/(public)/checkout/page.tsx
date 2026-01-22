@@ -7,6 +7,8 @@ import { prisma } from "@/lib/prisma";
 import { createPayPalOrder } from "@/lib/paypal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckoutForm } from "@/components/checkout/CheckoutForm";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type CheckoutPageProps = {
   searchParams: Promise<{ course?: string }>;
@@ -76,6 +78,8 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
   const session = await getServerSession(authOptions);
   const resolvedSearchParams = await searchParams;
   const slug = resolvedSearchParams?.course;
+  const checkoutStatus = resolvedSearchParams?.checkout;
+  
   if (!slug) {
     redirect("/courses");
   }
@@ -134,6 +138,23 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
           Complete your purchase to unlock this course.
         </p>
       </div>
+
+      {checkoutStatus === "cancelled" && (
+        <Alert variant="warning">
+          <AlertDescription>
+            Checkout was cancelled. You can try again when you're ready.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {checkoutStatus === "failed" && (
+        <Alert variant="destructive">
+          <AlertDescription>
+            Payment failed. Please try again or contact support if the problem persists.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>{course.title}</CardTitle>
@@ -142,23 +163,17 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={createCheckoutSession} className="grid gap-4">
-            <input type="hidden" name="courseId" value={course.id} />
-            <div className="flex items-baseline justify-between border-t pt-4">
-              <span className="text-lg font-semibold">Total</span>
-              <span className="text-2xl font-bold">
-                ${(course.priceCents / 100).toFixed(2)}
-              </span>
-            </div>
-            <Button type="submit" size="lg" className="w-full">
-              Pay with PayPal · ${(course.priceCents / 100).toFixed(2)}
+          <CheckoutForm
+            courseId={course.id}
+            courseTitle={course.title}
+            priceCents={course.priceCents}
+            createCheckoutSession={createCheckoutSession}
+          />
+          <Link href={`/courses/${course.slug}`} className="block mt-4">
+            <Button type="button" variant="outline" className="w-full">
+              Cancel
             </Button>
-            <Link href={`/courses/${course.slug}`}>
-              <Button type="button" variant="outline" className="w-full">
-                Cancel
-              </Button>
-            </Link>
-          </form>
+          </Link>
         </CardContent>
       </Card>
     </section>

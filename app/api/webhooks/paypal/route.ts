@@ -80,7 +80,7 @@ export async function POST(request: Request) {
     data: { status: "paid" },
   });
 
-  await prisma.enrollment.upsert({
+  const enrollment = await prisma.enrollment.upsert({
     where: {
       userId_courseId: {
         userId: purchase.userId,
@@ -94,6 +94,30 @@ export async function POST(request: Request) {
       purchaseId: purchase.id,
     },
   });
+
+  // Send email notifications
+  const user = await prisma.user.findUnique({
+    where: { id: purchase.userId },
+    select: { email: true },
+  });
+
+  const course = await prisma.course.findUnique({
+    where: { id: purchase.courseId },
+    select: { title: true },
+  });
+
+  if (user && course) {
+    try {
+      const { sendPurchaseConfirmationEmail, sendEnrollmentEmail } = await import("@/lib/email");
+      await Promise.all([
+        sendPurchaseConfirmationEmail(user.email, course.title, purchase.amountCents),
+        sendEnrollmentEmail(user.email, course.title),
+      ]);
+    } catch (error) {
+      console.error("Failed to send email notifications:", error);
+      // Don't fail the webhook if email fails
+    }
+  }
 
   await prisma.payment.create({
     data: {

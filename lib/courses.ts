@@ -15,6 +15,12 @@ export async function getPublishedCourses() {
 }
 
 export async function getCoursePreviewBySlug(slug: string) {
+  // Check cache first
+  const cacheKey = cacheKeys.coursePreview(slug);
+  const cached = cache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
   return prisma.course.findUnique({
     where: { slug },
     select: {

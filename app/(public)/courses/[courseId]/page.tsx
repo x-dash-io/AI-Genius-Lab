@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCoursePreviewBySlug } from "@/lib/courses";
+import { getCourseReviewStats } from "@/lib/reviews";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ReviewSection } from "@/components/reviews/ReviewSection";
 
 type CourseDetailPageProps = {
   params: { courseId: string };
@@ -78,6 +80,9 @@ export default async function CourseDetailPage({
           </Button>
         </Link>
       </div>
+
+      {/* Reviews Section */}
+      <ReviewSection courseId={course.id} initialStats={reviewStats} />
     </section>
   );
 }
