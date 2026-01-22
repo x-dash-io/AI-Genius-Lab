@@ -112,6 +112,14 @@ export async function GET(request: Request) {
         },
       },
     });
+
+    // Track analytics
+    try {
+      const { trackPurchase } = await import("@/lib/analytics");
+      trackPurchase(purchase.courseId, purchase.amountCents, purchase.userId);
+    } catch (error) {
+      console.error("Failed to track purchase analytics:", error);
+    }
   }
 
   return NextResponse.redirect(

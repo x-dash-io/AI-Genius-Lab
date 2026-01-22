@@ -13,11 +13,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const user = await requireUser();
     const progress = await updateLessonProgress(lessonId, {
       lastPosition: lastPosition ?? undefined,
       completionPercent: completionPercent ?? undefined,
       completedAt: completed ? new Date() : undefined,
     });
+
+    // Track lesson completion analytics
+    if (completed) {
+      try {
+        const lesson = await import("@/lib/courses").then((m) =>
+          m.getLessonById(lessonId)
+        );
+        if (lesson) {
+          trackLessonComplete(lessonId, lesson.section.courseId, user.id);
+        }
+      } catch (error) {
+        console.error("Failed to track lesson completion:", error);
+      }
+    }
 
     return NextResponse.json({ progress });
   } catch (error) {

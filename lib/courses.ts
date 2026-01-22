@@ -21,7 +21,7 @@ export async function getCoursePreviewBySlug(slug: string) {
   if (cached) {
     return cached;
   }
-  return prisma.course.findUnique({
+  const course = await prisma.course.findUnique({
     where: { slug },
     select: {
       id: true,
@@ -47,6 +47,12 @@ export async function getCoursePreviewBySlug(slug: string) {
       },
     },
   });
+
+  if (course) {
+    cache.set(cacheKey, course, 300); // Cache for 5 minutes
+  }
+  
+  return course;
 }
 
 export async function getCourseForLibraryBySlug(slug: string) {
