@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ContentUpload } from "@/components/admin/ContentUpload";
-import { Plus, Trash2, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
+import { toast } from "@/lib/toast";
 import type { Course, Section, Lesson } from "@prisma/client";
 
 type CourseWithSections = Course & {
@@ -40,12 +42,18 @@ export function CourseEditForm({
   addLessonAction,
   deleteLessonAction,
 }: CourseEditFormProps) {
+  const router = useRouter();
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [showAddSection, setShowAddSection] = useState(false);
   const [showAddLesson, setShowAddLesson] = useState<string | null>(null);
   const [contentTypes, setContentTypes] = useState<Record<string, string>>({});
   const [contentUrls, setContentUrls] = useState<Record<string, string>>({});
   const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
+  const [isSavingCourse, setIsSavingCourse] = useState(false);
+  const [isAddingSection, setIsAddingSection] = useState(false);
+  const [isDeletingSection, setIsDeletingSection] = useState<Record<string, boolean>>({});
+  const [isAddingLesson, setIsAddingLesson] = useState<Record<string, boolean>>({});
+  const [isDeletingLesson, setIsDeletingLesson] = useState<Record<string, boolean>>({});
 
   const toggleSection = (sectionId: string) => {
     const newExpanded = new Set(expandedSections);
@@ -57,6 +65,147 @@ export function CourseEditForm({
     setExpandedSections(newExpanded);
   };
 
+  const handleUpdateCourse = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSavingCourse(true);
+    try {
+      const formData = new FormData(e.currentTarget);
+      await updateCourseAction(formData);
+      toast({
+        title: "Course updated",
+        description: "Course details have been saved successfully.",
+        variant: "success",
+      });
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Update failed",
+        description: error instanceof Error ? error.message : "Failed to update course",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingCourse(false);
+    }
+  };
+
+  const handleAddSection = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsAddingSection(true);
+    try {
+      const formData = new FormData(e.currentTarget);
+      await addSectionAction(formData);
+      toast({
+        title: "Section added",
+        description: "New section has been added successfully.",
+        variant: "success",
+      });
+      setShowAddSection(false);
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Failed to add section",
+        description: error instanceof Error ? error.message : "Failed to add section",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAddingSection(false);
+    }
+  };
+
+  const handleDeleteSection = async (sectionId: string) => {
+    if (!confirm("Are you sure you want to delete this section? All lessons in this section will also be deleted.")) {
+      return;
+    }
+    setIsDeletingSection((prev) => ({ ...prev, [sectionId]: true }));
+    try {
+      await deleteSectionAction(sectionId, course.id);
+      toast({
+        title: "Section deleted",
+        description: "Section has been deleted successfully.",
+        variant: "success",
+      });
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Failed to delete section",
+        description: error instanceof Error ? error.message : "Failed to delete section",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeletingSection((prev) => {
+        const next = { ...prev };
+        delete next[sectionId];
+        return next;
+      });
+    }
+  };
+
+  const handleAddLesson = async (sectionId: string, e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsAddingLesson((prev) => ({ ...prev, [sectionId]: true }));
+    try {
+      const formData = new FormData(e.currentTarget);
+      await addLessonAction(sectionId, formData);
+      toast({
+        title: "Lesson added",
+        description: "New lesson has been added successfully.",
+        variant: "success",
+      });
+      setShowAddLesson(null);
+      setContentTypes((prev) => {
+        const next = { ...prev };
+        delete next[sectionId];
+        return next;
+      });
+      setContentUrls((prev) => {
+        const next = { ...prev };
+        delete next[sectionId];
+        return next;
+      });
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Failed to add lesson",
+        description: error instanceof Error ? error.message : "Failed to add lesson",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAddingLesson((prev) => {
+        const next = { ...prev };
+        delete next[sectionId];
+        return next;
+      });
+    }
+  };
+
+  const handleDeleteLesson = async (lessonId: string) => {
+    if (!confirm("Are you sure you want to delete this lesson?")) {
+      return;
+    }
+    setIsDeletingLesson((prev) => ({ ...prev, [lessonId]: true }));
+    try {
+      await deleteLessonAction(lessonId, course.id);
+      toast({
+        title: "Lesson deleted",
+        description: "Lesson has been deleted successfully.",
+        variant: "success",
+      });
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Failed to delete lesson",
+        description: error instanceof Error ? error.message : "Failed to delete lesson",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeletingLesson((prev) => {
+        const next = { ...prev };
+        delete next[lessonId];
+        return next;
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Course Details */}
@@ -66,7 +215,7 @@ export function CourseEditForm({
           <CardDescription>Basic information about your course</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={updateCourseAction} className="space-y-6">
+          <form onSubmit={handleUpdateCourse} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="title">Title *</Label>
               <Input
@@ -141,7 +290,16 @@ export function CourseEditForm({
               </Label>
             </div>
 
-            <Button type="submit">Save Course</Button>
+            <Button type="submit" disabled={isSavingCourse}>
+              {isSavingCourse ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Course"
+              )}
+            </Button>
           </form>
         </CardContent>
       </Card>
@@ -171,8 +329,7 @@ export function CourseEditForm({
             <Card className="mb-4">
               <CardContent className="pt-6">
                 <form
-                  action={addSectionAction}
-                  onSubmit={() => setShowAddSection(false)}
+                  onSubmit={handleAddSection}
                   className="space-y-4"
                 >
                   <div className="space-y-2">
@@ -185,14 +342,22 @@ export function CourseEditForm({
                     />
                   </div>
                   <div className="flex gap-2">
-                    <Button type="submit" size="sm">
-                      Create Section
+                    <Button type="submit" size="sm" disabled={isAddingSection}>
+                      {isAddingSection ? (
+                        <>
+                          <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        "Create Section"
+                      )}
                     </Button>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => setShowAddSection(false)}
+                      disabled={isAddingSection}
                     >
                       Cancel
                     </Button>
@@ -237,14 +402,19 @@ export function CourseEditForm({
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
-                      <form
-                        action={deleteSectionAction.bind(null, section.id, course.id)}
-                        className="inline"
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteSection(section.id)}
+                        disabled={isDeletingSection[section.id]}
                       >
-                        <Button type="submit" variant="ghost" size="sm">
+                        {isDeletingSection[section.id] ? (
+                          <Loader2 className="h-4 w-4 animate-spin text-destructive" />
+                        ) : (
                           <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </form>
+                        )}
+                      </Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -254,26 +424,7 @@ export function CourseEditForm({
                       <Card className="mb-4">
                         <CardContent className="pt-6">
                           <form
-                            action={addLessonAction.bind(null, section.id)}
-                            onSubmit={() => {
-                              setShowAddLesson(null);
-                              // Clear form state after submission
-                              setContentTypes((prev) => {
-                                const newTypes = { ...prev };
-                                delete newTypes[section.id];
-                                return newTypes;
-                              });
-                              setContentUrls((prev) => {
-                                const newUrls = { ...prev };
-                                delete newUrls[section.id];
-                                return newUrls;
-                              });
-                              setUploadErrors((prev) => {
-                                const newErrors = { ...prev };
-                                delete newErrors[section.id];
-                                return newErrors;
-                              });
-                            }}
+                            onSubmit={(e) => handleAddLesson(section.id, e)}
                             className="space-y-4"
                           >
                             <input type="hidden" name="courseId" value={course.id} />
@@ -371,8 +522,15 @@ export function CourseEditForm({
                               </div>
                             </div>
                             <div className="flex gap-2">
-                              <Button type="submit" size="sm">
-                                Create Lesson
+                              <Button type="submit" size="sm" disabled={isAddingLesson[section.id]}>
+                                {isAddingLesson[section.id] ? (
+                                  <>
+                                    <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+                                    Creating...
+                                  </>
+                                ) : (
+                                  "Create Lesson"
+                                )}
                               </Button>
                               <Button
                                 type="button"
@@ -408,14 +566,19 @@ export function CourseEditForm({
                               )}
                             </div>
                           </div>
-                          <form
-                            action={deleteLessonAction.bind(null, lesson.id, course.id)}
-                            className="inline"
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteLesson(lesson.id)}
+                            disabled={isDeletingLesson[lesson.id]}
                           >
-                            <Button type="submit" variant="ghost" size="sm">
+                            {isDeletingLesson[lesson.id] ? (
+                              <Loader2 className="h-4 w-4 animate-spin text-destructive" />
+                            ) : (
                               <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </form>
+                            )}
+                          </Button>
                         </div>
                       ))}
                       {section.lessons.length === 0 && (

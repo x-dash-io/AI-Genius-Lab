@@ -52,3 +52,45 @@ export function subscribe(listener: (toasts: Toast[]) => void) {
 export function getToasts() {
   return [...toasts];
 }
+
+// Helper functions for common toast types
+export const toastHelpers = {
+  success: (title: string, description?: string, duration?: number) => {
+    return toast({
+      title,
+      description,
+      variant: "success",
+      duration,
+    });
+  },
+  error: (title: string, description?: string, duration?: number) => {
+    return toast({
+      title,
+      description,
+      variant: "destructive",
+      duration: duration ?? 7000, // Errors stay longer
+    });
+  },
+  warning: (title: string, description?: string, duration?: number) => {
+    return toast({
+      title,
+      description,
+      variant: "warning",
+      duration,
+    });
+  },
+  info: (title: string, description?: string, duration?: number) => {
+    return toast({
+      title,
+      description,
+      variant: "default",
+      duration,
+    });
+  },
+};
+
+// Export helpers directly for convenience
+export const toastSuccess = toastHelpers.success;
+export const toastError = toastHelpers.error;
+export const toastWarning = toastHelpers.warning;
+export const toastInfo = toastHelpers.info;

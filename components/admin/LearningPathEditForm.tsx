@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, GripVertical } from "lucide-react";
+import { X, GripVertical, Loader2, Plus } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 interface Course {
   id: string;
@@ -60,22 +62,109 @@ export function LearningPathEditForm({
   addCourseAction,
   removeCourseAction,
 }: LearningPathEditFormProps) {
+  const router = useRouter();
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isAddingCourse, setIsAddingCourse] = useState(false);
+  const [isRemovingCourse, setIsRemovingCourse] = useState<Record<string, boolean>>({});
+
+  const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsUpdating(true);
+    try {
+      const formData = new FormData(e.currentTarget);
+      await updateAction(formData);
+      toast({
+        title: "Path updated",
+        description: "Learning path has been updated successfully.",
+        variant: "success",
+      });
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Update failed",
+        description: error instanceof Error ? error.message : "Failed to update path",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const handleAddCourse = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCourseId) return;
 
-    const formData = new FormData();
-    formData.set("courseId", selectedCourseId);
-    await addCourseAction(formData);
-    setSelectedCourseId("");
+    setIsAddingCourse(true);
+    try {
+      const formData = new FormData();
+      formData.set("courseId", selectedCourseId);
+      await addCourseAction(formData);
+      toast({
+        title: "Course added",
+        description: "Course has been added to the learning path.",
+        variant: "success",
+      });
+      setSelectedCourseId("");
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Failed to add course",
+        description: error instanceof Error ? error.message : "Failed to add course",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAddingCourse(false);
+    }
+  };
+
+  const handleRemoveCourse = async (courseId: string) => {
+    setIsRemovingCourse((prev) => ({ ...prev, [courseId]: true }));
+    try {
+      await removeCourseAction(courseId);
+      toast({
+        title: "Course removed",
+        description: "Course has been removed from the learning path.",
+        variant: "success",
+      });
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Failed to remove course",
+        description: error instanceof Error ? error.message : "Failed to remove course",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRemovingCourse((prev) => {
+        const next = { ...prev };
+        delete next[courseId];
+        return next;
+      });
+    }
   };
 
   const handleDelete = async () => {
     if (showDeleteConfirm) {
-      await deleteAction();
+      setIsDeleting(true);
+      try {
+        await deleteAction();
+        toast({
+          title: "Path deleted",
+          description: "Learning path has been deleted successfully.",
+          variant: "success",
+        });
+        router.push("/admin/learning-paths");
+      } catch (error) {
+        toast({
+          title: "Failed to delete path",
+          description: error instanceof Error ? error.message : "Failed to delete path",
+          variant: "destructive",
+        });
+        setIsDeleting(false);
+        setShowDeleteConfirm(false);
+      }
     } else {
       setShowDeleteConfirm(true);
     }
@@ -110,19 +199,39 @@ export function LearningPathEditForm({
               />
             </div>
             <div className="flex gap-2">
-              <Button type="submit">Update Path</Button>
+              <Button type="submit" disabled={isUpdating}>
+                {isUpdating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update Path"
+                )}
+              </Button>
               <Button
                 type="button"
                 variant="destructive"
                 onClick={handleDelete}
+                disabled={isDeleting}
               >
-                {showDeleteConfirm ? "Confirm Delete" : "Delete Path"}
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : showDeleteConfirm ? (
+                  "Confirm Delete"
+                ) : (
+                  "Delete Path"
+                )}
               </Button>
               {showDeleteConfirm && (
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setShowDeleteConfirm(false)}
+                  disabled={isDeleting}
                 >
                   Cancel
                 </Button>
@@ -205,11 +314,19 @@ export function LearningPathEditForm({
                         View Course
                       </Button>
                     </Link>
-                    <form action={removeCourseAction.bind(null, pathCourse.courseId)}>
-                      <Button type="submit" variant="ghost" size="sm">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveCourse(pathCourse.courseId)}
+                      disabled={isRemovingCourse[pathCourse.courseId]}
+                    >
+                      {isRemovingCourse[pathCourse.courseId] ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
                         <X className="h-4 w-4" />
-                      </Button>
-                    </form>
+                      )}
+                    </Button>
                   </div>
                 </div>
               ))}

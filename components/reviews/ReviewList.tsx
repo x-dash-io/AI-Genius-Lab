@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star, Edit2, Trash2 } from "lucide-react";
+import { Star, Edit2, Trash2, Loader2 } from "lucide-react";
 import { ReviewForm } from "./ReviewForm";
 import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "@/lib/toast";
 
 interface Review {
   id: string;
@@ -30,6 +31,7 @@ export function ReviewList({ courseId, currentUserId }: ReviewListProps) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+  const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchReviews();
@@ -156,8 +158,13 @@ export function ReviewList({ courseId, currentUserId }: ReviewListProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDelete(review.id)}
+                      disabled={deletingReviewId === review.id}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      {deletingReviewId === review.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 )}

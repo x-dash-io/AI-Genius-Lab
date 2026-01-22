@@ -12,6 +12,7 @@ model User {
   email         String        @unique
   name          String?
   image         String?
+  bio           String?
   emailVerified DateTime?
   passwordHash  String?
   role          Role          @default(customer)

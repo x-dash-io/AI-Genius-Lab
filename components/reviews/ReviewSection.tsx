@@ -23,6 +23,8 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
   const [stats, setStats] = useState(initialStats);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
   const [userReview, setUserReview] = useState<any>(null);
+  const [loadingStats, setLoadingStats] = useState(false);
+  const [loadingUserReview, setLoadingUserReview] = useState(false);
 
   useEffect(() => {
     // Fetch current user session
@@ -39,16 +41,20 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
   }, [courseId]);
 
   const fetchStats = async () => {
+    setLoadingStats(true);
     try {
       const response = await fetch(`/api/reviews/stats?courseId=${courseId}`);
       const data = await response.json();
       setStats(data);
     } catch (error) {
       console.error("Error fetching review stats:", error);
+    } finally {
+      setLoadingStats(false);
     }
   };
 
   const fetchUserReview = async (userId: string) => {
+    setLoadingUserReview(true);
     try {
       const response = await fetch(
         `/api/reviews/user?courseId=${courseId}&userId=${userId}`
@@ -59,6 +65,8 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
       }
     } catch (error) {
       console.error("Error fetching user review:", error);
+    } finally {
+      setLoadingUserReview(false);
     }
   };
 
@@ -70,7 +78,7 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
     }
   };
 
-  if (!stats) {
+  if (!stats || loadingStats) {
     return <div className="text-sm text-muted-foreground">Loading reviews...</div>;
   }
 

@@ -4,8 +4,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Star } from "lucide-react";
+import { Star, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "@/lib/toast";
 
 interface ReviewFormProps {
   courseId: string;
@@ -44,30 +45,46 @@ export function ReviewForm({
           body: JSON.stringify({ rating, text: text || null }),
         });
 
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || "Failed to update review");
-        }
-      } else {
-        // Create new review
-        const response = await fetch("/api/reviews", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ courseId, rating, text: text || null }),
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || "Failed to create review");
-        }
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to update review");
       }
+      toast({
+        title: "Review updated",
+        description: "Your review has been updated successfully.",
+        variant: "success",
+      });
+    } else {
+      // Create new review
+      const response = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courseId, rating, text: text || null }),
+      });
 
-      onSuccess?.();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setIsSubmitting(false);
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to create review");
+      }
+      toast({
+        title: "Review submitted",
+        description: "Thank you for your review!",
+        variant: "success",
+      });
     }
+
+    onSuccess?.();
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "An error occurred";
+    setError(errorMessage);
+    toast({
+      title: "Failed to submit review",
+      description: errorMessage,
+      variant: "destructive",
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
   };
 
   return (
@@ -125,11 +142,16 @@ export function ReviewForm({
 
       <div className="flex gap-2">
         <Button type="submit" disabled={rating === 0 || isSubmitting}>
-          {isSubmitting
-            ? "Submitting..."
-            : existingReview
-            ? "Update Review"
-            : "Submit Review"}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              {existingReview ? "Updating..." : "Submitting..."}
+            </>
+          ) : existingReview ? (
+            "Update Review"
+          ) : (
+            "Submit Review"
+          )}
         </Button>
         {onCancel && (
           <Button type="button" variant="outline" onClick={onCancel}>

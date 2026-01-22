@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   GraduationCap,
+  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -26,6 +27,7 @@ const navigation = [
   { name: "My Courses", href: "/library", icon: BookOpen },
   { name: "Browse Courses", href: "/courses", icon: GraduationCap },
   { name: "Activity", href: "/activity", icon: Activity },
+  { name: "Profile", href: "/profile", icon: User },
 ];
 
 export function AppLayoutClient({ children }: { children: React.ReactNode }) {

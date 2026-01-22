@@ -1,13 +1,18 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getLearningPathBySlug } from "@/lib/learning-paths";
+import { redirect, notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { getLearningPathBySlug, createLearningPathPurchases, hasEnrolledInLearningPath } from "@/lib/learning-paths";
+import { createPayPalOrder } from "@/lib/paypal";
+import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, BookOpen, CheckCircle2 } from "lucide-react";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateLearningPathSchema } from "@/lib/seo/schemas";
+import { LearningPathEnrollment } from "@/components/learning-paths/LearningPathEnrollment";
 
 type LearningPathDetailPageProps = {
   params: Promise<{ pathId: string }>;
@@ -162,16 +167,35 @@ export default async function LearningPathDetailPage({
                   <p className="text-2xl font-bold">
                     ${(totalPrice / 100).toFixed(2)}
                   </p>
+                  {isEnrolled && (
+                    <Badge variant="default" className="mt-2">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      Enrolled
+                    </Badge>
+                  )}
                 </div>
-                <Button size="lg" disabled>
-                  Enroll in Full Path (Coming Soon)
-                </Button>
+                {session?.user ? (
+                  isEnrolled ? (
+                    <Link href="/library">
+                      <Button size="lg">Go to Library</Button>
+                    </Link>
+                  ) : (
+                    <LearningPathEnrollment
+                      pathId={pathId}
+                      totalPriceCents={totalPrice}
+                      enrollAction={enrollInLearningPathAction.bind(null, pathId)}
+                    />
+                  )
+                ) : (
+                  <Link href={`/sign-in?callbackUrl=${encodeURIComponent(`/learning-paths/${pathId}`)}`}>
+                    <Button size="lg">Sign in to Enroll</Button>
+                  </Link>
+                )}
               </div>
             </CardContent>
           </Card>
         </>
       )}
     </section>
-    </>
   );
 }

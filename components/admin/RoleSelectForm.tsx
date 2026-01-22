@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -10,6 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { toast } from "@/lib/toast";
 import type { Role } from "@/lib/rbac";
 
 interface RoleSelectFormProps {
@@ -74,7 +77,14 @@ export function RoleSelectForm({
         type="submit" 
         disabled={isCurrentUser || isSubmitting || selectedRole === currentRole}
       >
-        {isSubmitting ? "Updating..." : "Update Role"}
+        {isSubmitting ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Updating...
+          </>
+        ) : (
+          "Update Role"
+        )}
       </Button>
     </form>
   );
