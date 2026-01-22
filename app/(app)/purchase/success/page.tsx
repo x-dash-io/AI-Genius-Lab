@@ -89,7 +89,7 @@ export default async function CheckoutSuccessPage({
     const invoiceNumber = generateInvoiceNumber(purchases[0].id);
 
     return (
-      <section className="grid gap-4 max-w-4xl mx-auto px-4 print:px-0">
+      <section className="grid gap-4 max-w-4xl mx-auto px-4 print:max-w-full print:mx-0 print:px-2">
         {/* Success Header */}
         <div className="text-center print:hidden">
           <div className="flex justify-center mb-4">

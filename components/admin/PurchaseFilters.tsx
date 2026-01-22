@@ -46,7 +46,6 @@ export function PurchaseFilters() {
           <SelectItem value="all">All Status</SelectItem>
           <SelectItem value="pending">Pending</SelectItem>
           <SelectItem value="paid">Paid</SelectItem>
-          <SelectItem value="refunded">Refunded</SelectItem>
         </SelectContent>
       </Select>
       <Select value={provider} onValueChange={setProvider}>

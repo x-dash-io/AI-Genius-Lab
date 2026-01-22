@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/access";
-import { getAllPurchases, refundPurchase } from "@/lib/admin/purchases";
+import { getAllPurchases } from "@/lib/admin/purchases";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,14 +13,6 @@ function formatCurrency(cents: number) {
     style: "currency",
     currency: "USD",
   }).format(cents / 100);
-}
-
-async function refundPurchaseAction(purchaseId: string) {
-  "use server";
-  await requireRole("admin");
-
-  await refundPurchase(purchaseId);
-  redirect("/admin/purchases");
 }
 
 export default async function AdminPurchasesPage({
@@ -68,7 +60,7 @@ export default async function AdminPurchasesPage({
           Purchases
         </h1>
         <p className="mt-2 text-lg text-muted-foreground">
-          View and manage all course purchases and refunds.
+          View and manage all course purchases.
         </p>
       </div>
 
@@ -92,16 +84,6 @@ export default async function AdminPurchasesPage({
           <CardContent>
             <div className="text-2xl font-bold">
               {purchases.filter((p) => p.status === "pending").length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Refunded</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {purchases.filter((p) => p.status === "refunded").length}
             </div>
           </CardContent>
         </Card>
@@ -138,8 +120,6 @@ export default async function AdminPurchasesPage({
                         variant={
                           purchase.status === "paid"
                             ? "default"
-                            : purchase.status === "refunded"
-                            ? "destructive"
                             : "secondary"
                         }
                       >
@@ -168,13 +148,6 @@ export default async function AdminPurchasesPage({
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {purchase.status === "paid" && (
-                      <form action={refundPurchaseAction.bind(null, purchase.id)}>
-                        <Button type="submit" variant="destructive" size="sm">
-                          Refund
-                        </Button>
-                      </form>
-                    )}
                     <Link href={`/admin/courses/${purchase.course.id}/edit`}>
                       <Button variant="outline" size="sm">
                         View Course

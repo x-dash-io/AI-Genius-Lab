@@ -194,7 +194,7 @@ body {
     background: white !important;
   }
 
-  /* Card styling for print */
+  /* Card styling for print - modern invoice layout */
   [class*="Card"],
   [class*="card"] {
     border: 1px solid #ddd !important;
@@ -202,6 +202,28 @@ body {
     background: white !important;
     page-break-inside: avoid;
     display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  /* Modern invoice layout - two column header */
+  [class*="CardContent"] {
+    padding: 1rem !important;
+  }
+  
+  /* Invoice header - compact */
+  [class*="bg-gradient-to-r"] {
+    padding: 1rem !important;
+  }
+  
+  /* Invoice body - compact spacing */
+  [class*="space-y-4"] > * + * {
+    margin-top: 1rem !important;
+  }
+  
+  [class*="space-y-8"] > * + * {
+    margin-top: 1rem !important;
   }
   
   /* Remove background colors and gradients for printing */
@@ -296,5 +318,54 @@ body {
   div[class*="p-"] {
     display: block !important;
     visibility: visible !important;
+  }
+  
+  /* Modern invoice layout optimizations */
+  /* Only remove flex from layout containers, keep invoice flex layouts */
+  body > div[class*="flex"],
+  main > div[class*="flex"] {
+    display: block !important;
+  }
+  
+  /* Keep invoice internal layouts intact */
+  section [class*="flex"],
+  [class*="Card"] [class*="flex"] {
+    display: flex !important;
+  }
+  
+  /* Keep grid layouts for invoice content */
+  section [class*="grid"],
+  [class*="Card"] [class*="grid"] {
+    display: grid !important;
+  }
+  
+  /* Ensure table cells don't break */
+  td, th {
+    page-break-inside: avoid !important;
+  }
+  
+  /* Modern invoice: ensure proper spacing */
+  [class*="gap-"] {
+    gap: 0.5rem !important;
+  }
+  
+  /* Remove background blobs and decorative elements */
+  [class*="BackgroundBlobs"],
+  [class*="blob"],
+  [class*="Blob"] {
+    display: none !important;
+  }
+  
+  /* Ensure invoice is centered and properly sized */
+  
+  /* Modern invoice: clean typography */
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  }
+  
+  /* Ensure proper invoice width */
+  section[class*="max-w"] {
+    max-width: 100% !important;
+    width: 100% !important;
   }
 }
