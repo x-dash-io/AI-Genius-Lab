@@ -105,7 +105,7 @@ export default function SignInPage() {
               Access your purchased courses and continue learning.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <AnimatePresence mode="wait">
               {isRedirecting ? (
                 <motion.div
@@ -128,6 +128,7 @@ export default function SignInPage() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
+                  className="space-y-6"
                 >
                   <form className="space-y-4" onSubmit={handleSubmit}>
                     <FloatingInput
@@ -170,7 +171,7 @@ export default function SignInPage() {
                       )}
                     </Button>
                   </form>
-                  <div className="relative">
+                  <div className="relative py-2">
                     <div className="absolute inset-0 flex items-center">
                       <Separator />
                     </div>

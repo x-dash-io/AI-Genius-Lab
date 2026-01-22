@@ -42,7 +42,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="hidden w-64 flex-col gap-6 border-r bg-card/80 backdrop-blur-md pl-6 pr-6 pt-8 pb-8 md:flex"
+          className="hidden w-64 flex-col gap-6 border-r bg-card/80 backdrop-blur-md pl-3 pr-6 pt-8 pb-8 md:flex"
         >
           <motion.div
             whileHover={{ scale: 1.05 }}
@@ -65,7 +65,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-3 rounded-lg pl-2 pr-3 py-2 text-sm font-medium transition-colors",
+                      "flex items-center gap-3 rounded-lg pl-1 pr-3 py-2 text-sm font-medium transition-colors",
                       isActive
                         ? "bg-primary text-primary-foreground"
                         : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
@@ -141,7 +141,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                         href={item.href}
                         onClick={() => setMobileMenuOpen(false)}
                         className={cn(
-                          "flex items-center gap-3 rounded-lg pl-2 pr-3 py-2 text-sm font-medium transition-colors",
+                          "flex items-center gap-3 rounded-lg pl-1 pr-3 py-2 text-sm font-medium transition-colors",
                           isActive
                             ? "bg-primary text-primary-foreground"
                             : "text-muted-foreground hover:bg-accent"

@@ -30,7 +30,13 @@ export default function SignUpPage() {
     const email = String(formData.get("email") ?? "");
     const password = String(formData.get("password") ?? "");
     const confirmPassword = String(formData.get("confirmPassword") ?? "");
-    const name = String(formData.get("name") ?? "");
+    const name = String(formData.get("name") ?? "").trim();
+
+    if (!name) {
+      setError("Name is required");
+      setIsLoading(false);
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
@@ -50,7 +56,7 @@ export default function SignUpPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password, name: name || null }),
+        body: JSON.stringify({ email, password, name }),
       });
 
       const signupData = await signupResponse.json();
@@ -113,7 +119,7 @@ export default function SignUpPage() {
               Create an account to purchase courses and start learning.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <AnimatePresence mode="wait">
               {isRedirecting ? (
                 <motion.div
@@ -136,18 +142,18 @@ export default function SignUpPage() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
+                  className="space-y-6"
                 >
                   <form className="space-y-4" onSubmit={handleSubmit}>
-                    <div>
-                      <FloatingInput
-                        id="name"
-                        name="name"
-                        type="text"
-                        label="Name (optional)"
-                        placeholder="John Doe"
-                        disabled={isLoading || isRedirecting}
-                      />
-                    </div>
+                    <FloatingInput
+                      id="name"
+                      name="name"
+                      type="text"
+                      required
+                      label="Name"
+                      placeholder="John Doe"
+                      disabled={isLoading || isRedirecting}
+                    />
                     <FloatingInput
                       id="email"
                       name="email"
@@ -204,7 +210,7 @@ export default function SignUpPage() {
                       )}
                     </Button>
                   </form>
-                  <div className="relative">
+                  <div className="relative py-2">
                     <div className="absolute inset-0 flex items-center">
                       <Separator />
                     </div>
