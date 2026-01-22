@@ -65,16 +65,23 @@ export const authOptions = {
       // For OAuth providers, ensure new users get customer role
       if (account?.provider !== "credentials" && user.email) {
         try {
+          console.log("OAuth sign-in for:", user.email);
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email },
           });
 
-          // If user exists but has no role, set it to customer
-          if (existingUser && !existingUser.role) {
-            await prisma.user.update({
-              where: { id: existingUser.id },
-              data: { role: "customer" },
-            });
+          if (existingUser) {
+            console.log("Existing user found:", existingUser.id, "Role:", existingUser.role);
+            // If user exists but has no role, set it to customer
+            if (!existingUser.role) {
+              await prisma.user.update({
+                where: { id: existingUser.id },
+                data: { role: "customer" },
+              });
+              console.log("Updated user role to customer");
+            }
+          } else {
+            console.log("New OAuth user - PrismaAdapter will create it");
           }
         } catch (error) {
           console.error("SignIn callback error:", error);

@@ -47,6 +47,8 @@ export async function POST(request: Request) {
     // Hash password and create user
     const passwordHash = await hashPassword(password);
 
+    console.log("Creating user with email:", email.toLowerCase().trim());
+    
     const user = await prisma.user.create({
       data: {
         email: email.toLowerCase().trim(),
@@ -55,6 +57,8 @@ export async function POST(request: Request) {
         role: "customer",
       },
     });
+
+    console.log("User created successfully:", { id: user.id, email: user.email });
 
     return NextResponse.json(
       {
@@ -69,8 +73,13 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     console.error("Sign-up error:", error);
+    console.error("Error details:", error instanceof Error ? error.message : String(error));
+    console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
     return NextResponse.json(
-      { error: "An error occurred while creating your account" },
+      { 
+        error: "An error occurred while creating your account",
+        details: process.env.NODE_ENV === "development" && error instanceof Error ? error.message : undefined
+      },
       { status: 500 }
     );
   }

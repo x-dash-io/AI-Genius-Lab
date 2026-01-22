@@ -21,5 +21,6 @@ export const config = {
     "/dashboard/:path*",
     "/library/:path*",
     "/activity/:path*",
+    "/admin/:path*",
   ],
 };
