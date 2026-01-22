@@ -81,10 +81,7 @@ export default async function ProfilePage() {
                 currentImage={profile.image}
                 userEmail={profile.email}
                 userName={profile.name}
-                onAvatarUpdate={async (imageUrl) => {
-                  "use server";
-                  await updateAvatarAction(session.user.id, imageUrl);
-                }}
+                onAvatarUpdate={updateAvatarAction.bind(null, session.user.id)}
               />
             </div>
             <Separator />
@@ -135,7 +132,7 @@ export default async function ProfilePage() {
               </span>
             </div>
             <Separator />
-            <div className="space-y-2">
+            <div className="flex flex-col gap-3">
               <Link href="/library">
                 <Button variant="outline" className="w-full" size="sm">
                   View My Courses

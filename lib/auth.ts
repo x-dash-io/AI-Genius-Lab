@@ -47,6 +47,7 @@ export const authOptions = {
             id: user.id,
             email: user.email,
             name: user.name,
+            image: user.image,
             role: user.role,
           };
         } catch (error) {
@@ -102,9 +103,26 @@ export const authOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (session.user && token) {
+      if (session.user && token && token.id) {
         session.user.id = token.id as string;
         session.user.role = (token.role as Role) || "customer";
+        
+        // Fetch user data from database to get latest image and name
+        try {
+          const user = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { name: true, email: true, image: true },
+          });
+          
+          if (user) {
+            session.user.name = user.name;
+            session.user.email = user.email;
+            session.user.image = user.image;
+          }
+        } catch (error) {
+          console.error("Error fetching user in session callback:", error);
+          // Continue with existing session data if fetch fails
+        }
       }
       return session;
     },

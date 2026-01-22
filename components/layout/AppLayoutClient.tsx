@@ -14,7 +14,7 @@ import {
   User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SignOutButton } from "@/components/auth/SignOutButton";
@@ -92,18 +92,39 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
           <div className="flex-shrink-0 border-t p-4 space-y-4">
             {session?.user && (
               <>
-                <div className="flex items-center gap-3">
-                  <Avatar className="ring-2 ring-primary ring-offset-2 ring-offset-card">
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      {session.user.email?.charAt(0).toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 overflow-hidden">
-                    <p className="truncate text-sm font-medium">
-                      {session.user.email}
-                    </p>
-                  </div>
-                </div>
+                <Link href="/profile">
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
+                  >
+                    <Avatar className="h-10 w-10 ring-2 ring-primary ring-offset-2 ring-offset-card">
+                      <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "User"} />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                        {(() => {
+                          const name = session.user.name;
+                          const email = session.user.email || "";
+                          if (name && name.trim()) {
+                            const nameParts = name.trim().split(/\s+/);
+                            // Use first letter of first name
+                            return nameParts[0][0].toUpperCase();
+                          }
+                          // Fallback to email first letter if no name
+                          return email.charAt(0).toUpperCase();
+                        })()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 overflow-hidden min-w-0">
+                      <p className="truncate text-sm font-semibold">
+                        {session.user.name || session.user.email}
+                      </p>
+                      {session.user.name && (
+                        <p className="truncate text-xs text-muted-foreground">
+                          {session.user.email}
+                        </p>
+                      )}
+                    </div>
+                  </motion.div>
+                </Link>
                 <div className="flex items-center gap-2">
                   <ThemeToggle />
                   <SignOutButton />
@@ -182,18 +203,36 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                 </div>
                 {session?.user && (
                   <div className="mt-4 space-y-3 border-t pt-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="ring-2 ring-primary ring-offset-2 ring-offset-card">
-                        <AvatarFallback className="bg-primary text-primary-foreground">
-                          {session.user.email?.charAt(0).toUpperCase() || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 overflow-hidden">
-                        <p className="truncate text-sm font-medium">
-                          {session.user.email}
-                        </p>
+                    <Link href="/profile">
+                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
+                        <Avatar className="h-10 w-10 ring-2 ring-primary ring-offset-2 ring-offset-card">
+                          <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "User"} />
+                          <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                            {(() => {
+                              const name = session.user.name;
+                              const email = session.user.email || "";
+                              if (name && name.trim()) {
+                                const nameParts = name.trim().split(/\s+/);
+                                // Use first letter of first name
+                                return nameParts[0][0].toUpperCase();
+                              }
+                              // Fallback to email first letter if no name
+                              return email.charAt(0).toUpperCase();
+                            })()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 overflow-hidden min-w-0">
+                          <p className="truncate text-sm font-semibold">
+                            {session.user.name || session.user.email}
+                          </p>
+                          {session.user.name && (
+                            <p className="truncate text-xs text-muted-foreground">
+                              {session.user.email}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    </Link>
                     <div className="flex items-center gap-2">
                       <ThemeToggle />
                       <SignOutButton />
