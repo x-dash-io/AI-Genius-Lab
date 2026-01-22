@@ -9,17 +9,20 @@ import {
   BookOpen,
   Users,
   ShoppingCart,
+  Receipt,
   Settings,
   Menu,
   X,
   Shield,
   Route,
+  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { BackgroundBlobs } from "@/components/ui/background-blobs";
+import { CartIcon } from "@/components/cart/CartIcon";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
@@ -28,7 +31,8 @@ const adminNavigation = [
   { name: "Courses", href: "/admin/courses", icon: BookOpen },
   { name: "Learning Paths", href: "/admin/learning-paths", icon: Route },
   { name: "Users", href: "/admin/users", icon: Users },
-  { name: "Purchases", href: "/admin/purchases", icon: ShoppingCart },
+  { name: "Purchases", href: "/admin/purchases", icon: Receipt },
+  { name: "Profile", href: "/profile", icon: User },
 ];
 
 const regularNavigation = [
@@ -175,6 +179,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                   </motion.div>
                 </Link>
                 <div className="flex items-center gap-2">
+                  <CartIcon />
                   <ThemeToggle />
                   <SignOutButton />
                 </div>
@@ -210,6 +215,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                 </Link>
               </div>
               <div className="flex items-center gap-2">
+                <CartIcon />
                 <ThemeToggle />
                 <Button
                   variant="ghost"
@@ -292,7 +298,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                 </div>
                 {session?.user && (
                   <div className="mt-4 space-y-3 border-t pt-4">
-                    <Link href="/admin/users">
+                    <Link href="/profile">
                       <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
                         <Avatar className="h-10 w-10 ring-2 ring-primary ring-offset-2 ring-offset-card">
                           <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "Admin"} />
@@ -321,6 +327,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                       </div>
                     </Link>
                     <div className="flex items-center gap-2">
+                      <CartIcon />
                       <ThemeToggle />
                       <SignOutButton />
                     </div>

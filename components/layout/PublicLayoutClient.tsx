@@ -11,6 +11,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { BackgroundBlobs } from "@/components/ui/background-blobs";
 import { Footer } from "@/components/layout/Footer";
+import { CartIcon } from "@/components/cart/CartIcon";
 
 export function PublicLayoutClient({
   children,
@@ -53,6 +54,7 @@ export function PublicLayoutClient({
                 </Link>
               </>
             )}
+            {!isAuthPage && <CartIcon />}
             <ThemeToggle />
             {!isAuthPage && session?.user ? (
               <>

@@ -4,7 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
-import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { CartProvider } from "@/components/cart/CartProvider";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateOrganizationSchema } from "@/lib/seo/schemas";
 import "./globals.css";
@@ -65,7 +65,9 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <SessionProvider>
-            <ToastProvider>{children}</ToastProvider>
+            <CartProvider>
+              <ToastProvider>{children}</ToastProvider>
+            </CartProvider>
           </SessionProvider>
         </ThemeProvider>
         <Analytics />

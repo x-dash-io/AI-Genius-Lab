@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateCourseSchema } from "@/lib/seo/schemas";
 
@@ -102,9 +103,14 @@ export default async function CourseDetailPage({
         </CardContent>
       </Card>
       <div className="flex flex-wrap gap-4">
+        <AddToCartButton
+          courseId={course.id}
+          priceCents={course.priceCents}
+          size="lg"
+        />
         <Link href={`/checkout?course=${course.slug}`}>
-          <Button size="lg">
-            Buy for ${(course.priceCents / 100).toFixed(2)}
+          <Button size="lg" variant="outline">
+            Buy Now · ${(course.priceCents / 100).toFixed(2)}
           </Button>
         </Link>
         <Link href="/courses">

@@ -5,13 +5,14 @@ import { authOptions } from "@/lib/auth";
 import { getCoursePreviewBySlug } from "@/lib/courses";
 import { prisma } from "@/lib/prisma";
 import { createPayPalOrder } from "@/lib/paypal";
+import { getCartFromCookies } from "@/lib/cart/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type CheckoutPageProps = {
-  searchParams: Promise<{ course?: string }>;
+  searchParams: Promise<{ course?: string; items?: string }>;
 };
 
 async function createCheckoutSession(formData: FormData) {
@@ -78,8 +79,94 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
   const session = await getServerSession(authOptions);
   const resolvedSearchParams = await searchParams;
   const slug = resolvedSearchParams?.course;
+  const itemsParam = resolvedSearchParams?.items;
   const checkoutStatus = resolvedSearchParams?.checkout;
-  
+
+  // Handle cart checkout (multiple items)
+  if (itemsParam) {
+    const courseIds = itemsParam.split(",").filter(Boolean);
+    if (courseIds.length === 0) {
+      redirect("/cart");
+    }
+
+    const cart = getCartFromCookies();
+    if (cart.items.length === 0) {
+      redirect("/cart");
+    }
+
+    // Verify all items in cart match the requested items
+    const requestedItems = cart.items.filter((item) =>
+      courseIds.includes(item.courseId)
+    );
+
+    if (requestedItems.length === 0) {
+      redirect("/cart");
+    }
+
+    if (!session?.user) {
+      return (
+        <section className="grid gap-8">
+          <div>
+            <h1 className="font-display text-4xl font-bold tracking-tight">Checkout</h1>
+            <p className="mt-2 text-lg text-muted-foreground">
+              Sign in to complete your purchase.
+            </p>
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Sign In Required</CardTitle>
+              <CardDescription>
+                Please sign in to proceed with checkout
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <Link href={`/sign-in?callbackUrl=${encodeURIComponent(`/checkout?items=${itemsParam}`)}`}>
+                <Button size="lg" className="w-full">
+                  Sign in to purchase
+                </Button>
+              </Link>
+              <Link href="/cart">
+                <Button variant="outline" className="w-full">
+                  Back to cart
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </section>
+      );
+    }
+
+    return (
+      <section className="grid gap-8">
+        <div>
+          <h1 className="font-display text-4xl font-bold tracking-tight">Checkout</h1>
+          <p className="mt-2 text-lg text-muted-foreground">
+            Complete your purchase to unlock your courses.
+          </p>
+        </div>
+
+        {checkoutStatus === "cancelled" && (
+          <Alert variant="warning">
+            <AlertDescription>
+              Checkout was cancelled. You can try again when you're ready.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {checkoutStatus === "failed" && (
+          <Alert variant="destructive">
+            <AlertDescription>
+              Payment failed. Please try again or contact support if the problem persists.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <CheckoutCartForm items={requestedItems} />
+      </section>
+    );
+  }
+
+  // Handle single course checkout (legacy)
   if (!slug) {
     redirect("/courses");
   }
