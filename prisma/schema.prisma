@@ -26,6 +26,7 @@ model User {
   purchases     Purchase[]
   reviews       Review[]
   sessions      Session[]
+  certificates  Certificate[]
 }
 
 model Course {
@@ -146,6 +147,7 @@ model LearningPath {
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
   courses     LearningPathCourse[]
+  certificates Certificate[]
 }
 
 model LearningPathCourse {
