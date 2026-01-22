@@ -38,11 +38,10 @@ model User {
   image        String?
   emailVerified DateTime?
   passwordHash String?
-  role         Role         @default(learner)
+  role         Role         @default(customer)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  courses      Course[]     @relation("InstructorCourses")
   purchases    Purchase[]
   enrollments  Enrollment[]
   progress     Progress[]
