@@ -5,7 +5,7 @@ export default async function CoursesPage() {
   const courses = await getPublishedCourses();
 
   return (
-    <section className="grid gap-8">
+    <section className="grid gap-6">
       <div>
         <h1 className="font-display text-4xl font-bold tracking-tight">
           Course Catalog

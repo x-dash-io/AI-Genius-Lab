@@ -20,7 +20,7 @@ export function PublicLayoutClient({
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
       <BackgroundBlobs />
-      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 pt-4 pb-4 sm:px-6 sm:pt-5 sm:pb-5 lg:px-8 overflow-x-hidden">
           <div>
             <Link
@@ -65,7 +65,7 @@ export function PublicLayoutClient({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.1 }}
-        className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8 relative z-10"
+        className="mx-auto w-full max-w-7xl px-4 pt-24 py-10 sm:px-6 sm:pt-28 lg:px-8 relative z-10"
       >
         {children}
       </motion.main>

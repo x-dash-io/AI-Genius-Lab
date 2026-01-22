@@ -42,7 +42,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="hidden w-64 flex-col gap-6 border-r bg-card/80 backdrop-blur-md pl-1 pr-6 pt-8 pb-8 md:flex"
+          className="hidden w-64 flex-col gap-6 border-r bg-card/80 backdrop-blur-md pl-6 pr-6 pt-8 pb-8 md:flex"
         >
           <motion.div
             whileHover={{ scale: 1.05 }}
@@ -65,7 +65,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      "flex items-center gap-3 rounded-lg pl-2 pr-3 py-2 text-sm font-medium transition-colors",
                       isActive
                         ? "bg-primary text-primary-foreground"
                         : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
@@ -104,7 +104,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
 
         {/* Mobile Header */}
         <div className="flex flex-1 flex-col md:hidden">
-          <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+          <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
             <div className="flex items-center justify-between px-4 pt-4 pb-3">
               <Link href="/dashboard" className="font-display text-lg font-bold">
                 SYNAPZE
@@ -141,7 +141,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                         href={item.href}
                         onClick={() => setMobileMenuOpen(false)}
                         className={cn(
-                          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                          "flex items-center gap-3 rounded-lg pl-2 pr-3 py-2 text-sm font-medium transition-colors",
                           isActive
                             ? "bg-primary text-primary-foreground"
                             : "text-muted-foreground hover:bg-accent"
@@ -169,11 +169,11 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
               </motion.nav>
             )}
           </header>
-          <main className="flex-1 px-4 py-6">{children}</main>
+          <main className="flex-1 px-4 py-4 pt-20">{children}</main>
         </div>
 
         {/* Desktop Main Content */}
-        <main className="hidden flex-1 px-6 pt-8 pb-8 md:block">
+        <main className="hidden flex-1 px-4 pt-6 pb-6 md:block">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
