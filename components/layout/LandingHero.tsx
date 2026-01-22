@@ -83,7 +83,7 @@ export function LandingHero() {
               <li className="flex items-start gap-3">
                 <Check className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                 <span className="text-sm">
-                  Stripe checkout and verified webhook-based course grants.
+                  PayPal checkout and verified webhook-based course grants.
                 </span>
               </li>
               <li className="flex items-start gap-3">

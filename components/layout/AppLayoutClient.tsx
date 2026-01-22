@@ -10,6 +10,7 @@ import {
   Activity,
   Menu,
   X,
+  GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -23,6 +24,7 @@ import { useState } from "react";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "My Courses", href: "/library", icon: BookOpen },
+  { name: "Browse Courses", href: "/courses", icon: GraduationCap },
   { name: "Activity", href: "/activity", icon: Activity },
 ];
 

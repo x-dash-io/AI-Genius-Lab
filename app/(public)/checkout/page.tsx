@@ -5,9 +5,11 @@ import { authOptions } from "@/lib/auth";
 import { getCoursePreviewBySlug } from "@/lib/courses";
 import { prisma } from "@/lib/prisma";
 import { createPayPalOrder } from "@/lib/paypal";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 type CheckoutPageProps = {
-  searchParams?: { course?: string };
+  searchParams: Promise<{ course?: string }>;
 };
 
 async function createCheckoutSession(formData: FormData) {
@@ -57,7 +59,7 @@ async function createCheckoutSession(formData: FormData) {
   const { orderId, approvalUrl } = await createPayPalOrder({
     amountCents: course.priceCents,
     currency: "usd",
-    returnUrl: `${appUrl}/checkout/success?course=${course.slug}`,
+    returnUrl: `${appUrl}/api/payments/paypal/capture`,
     cancelUrl: `${appUrl}/courses/${course.slug}?checkout=cancelled`,
     purchaseId: purchase.id,
   });
@@ -72,7 +74,8 @@ async function createCheckoutSession(formData: FormData) {
 
 export default async function CheckoutPage({ searchParams }: CheckoutPageProps) {
   const session = await getServerSession(authOptions);
-  const slug = searchParams?.course;
+  const resolvedSearchParams = await searchParams;
+  const slug = resolvedSearchParams?.course;
   if (!slug) {
     redirect("/courses");
   }
@@ -85,40 +88,79 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
   if (!session?.user) {
     const returnUrl = slug ? `/checkout?course=${slug}` : "/checkout";
     return (
-      <section className="grid gap-6">
+      <section className="grid gap-8">
         <div>
-          <h1 className="text-3xl font-semibold text-zinc-900">Checkout</h1>
-          <p className="mt-2 text-zinc-600">
+          <h1 className="font-display text-4xl font-bold tracking-tight">
+            Checkout
+          </h1>
+          <p className="mt-2 text-lg text-muted-foreground">
             Sign in to purchase and unlock this course.
           </p>
         </div>
-        <Link
-          href={`/sign-in?callbackUrl=${encodeURIComponent(returnUrl)}`}
-          className="w-fit rounded-full bg-zinc-900 px-5 py-2 text-sm font-semibold text-white"
-        >
-          Sign in
-        </Link>
+        <Card>
+          <CardHeader>
+            <CardTitle>{course.title}</CardTitle>
+            <CardDescription>
+              {course.description ?? "Course details coming soon."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <div className="text-2xl font-bold">
+              ${(course.priceCents / 100).toFixed(2)}
+            </div>
+            <Link href={`/sign-in?callbackUrl=${encodeURIComponent(returnUrl)}`}>
+              <Button size="lg" className="w-full">
+                Sign in to purchase
+              </Button>
+            </Link>
+            <Link href={`/courses/${course.slug}`}>
+              <Button variant="outline" className="w-full">
+                Back to course
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
       </section>
     );
   }
 
   return (
-    <section className="grid gap-6">
+    <section className="grid gap-8">
       <div>
-        <h1 className="text-3xl font-semibold text-zinc-900">Checkout</h1>
-        <p className="mt-2 text-zinc-600">
-          You are purchasing <strong>{course.title}</strong>.
+        <h1 className="font-display text-4xl font-bold tracking-tight">
+          Checkout
+        </h1>
+        <p className="mt-2 text-lg text-muted-foreground">
+          Complete your purchase to unlock this course.
         </p>
       </div>
-      <form action={createCheckoutSession} className="grid gap-4">
-        <input type="hidden" name="courseId" value={course.id} />
-        <button
-          type="submit"
-          className="rounded-full bg-zinc-900 px-6 py-3 text-sm font-semibold text-white"
-        >
-          Pay with PayPal · ${(course.priceCents / 100).toFixed(2)}
-        </button>
-      </form>
+      <Card>
+        <CardHeader>
+          <CardTitle>{course.title}</CardTitle>
+          <CardDescription>
+            {course.description ?? "Course details coming soon."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={createCheckoutSession} className="grid gap-4">
+            <input type="hidden" name="courseId" value={course.id} />
+            <div className="flex items-baseline justify-between border-t pt-4">
+              <span className="text-lg font-semibold">Total</span>
+              <span className="text-2xl font-bold">
+                ${(course.priceCents / 100).toFixed(2)}
+              </span>
+            </div>
+            <Button type="submit" size="lg" className="w-full">
+              Pay with PayPal · ${(course.priceCents / 100).toFixed(2)}
+            </Button>
+            <Link href={`/courses/${course.slug}`}>
+              <Button type="button" variant="outline" className="w-full">
+                Cancel
+              </Button>
+            </Link>
+          </form>
+        </CardContent>
+      </Card>
     </section>
   );
 }

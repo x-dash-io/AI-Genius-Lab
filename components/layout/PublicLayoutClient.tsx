@@ -40,28 +40,11 @@ export function PublicLayoutClient({
             <ThemeToggle />
             {session?.user ? (
               <>
-                <Separator orientation="vertical" className="h-6" />
                 <Link href="/dashboard">
                   <Button variant="ghost" size="sm">
-                    Dashboard
+                    Go to Dashboard
                   </Button>
                 </Link>
-                <Link href="/library">
-                  <Button variant="ghost" size="sm">
-                    Library
-                  </Button>
-                </Link>
-                <div className="flex items-center gap-3">
-                  <Avatar className="ring-2 ring-border ring-offset-2 ring-offset-background">
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      {session.user.email?.charAt(0).toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="hidden text-sm sm:block">
-                    <p className="font-medium">{session.user.email}</p>
-                  </div>
-                  <SignOutButton />
-                </div>
               </>
             ) : (
               <>
