@@ -9,15 +9,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 shadow-sm hover:shadow-md",
+        default: "bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:text-white dark:hover:bg-blue-600 shadow-sm hover:shadow-md",
         destructive:
-          "bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 shadow-sm hover:shadow-md",
+          "bg-red-600 text-white hover:bg-red-700 dark:bg-red-500 dark:text-white dark:hover:bg-red-600 shadow-sm hover:shadow-md",
         outline:
-          "border-2 border-gray-300 dark:border-gray-600 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500 text-gray-900 dark:text-gray-100 shadow-sm hover:shadow-md",
+          "border-2 border-gray-400 dark:border-gray-500 bg-blue-50/80 dark:bg-transparent hover:bg-blue-100/80 dark:hover:bg-gray-800 hover:border-gray-500 dark:hover:border-gray-400 shadow-sm hover:shadow-md font-semibold text-black dark:text-white transition-all",
         secondary:
-          "bg-gray-200 text-gray-900 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 shadow-sm hover:shadow-md",
-        ghost: "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100",
-        link: "text-blue-600 dark:text-blue-400 underline-offset-4 hover:underline",
+          "bg-gray-200 text-black hover:bg-gray-300 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 shadow-sm hover:shadow-md font-semibold",
+        ghost: "bg-blue-50/60 dark:bg-transparent hover:bg-blue-200/90 dark:hover:bg-gray-700 font-medium text-black dark:text-white transition-all",
+        link: "text-blue-600 dark:text-blue-400 underline-offset-4 hover:underline font-medium",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -44,6 +44,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
+        data-button-variant={variant}
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}

@@ -52,7 +52,7 @@ export function PublicLayoutClient({
                   </Button>
                 </Link>
                 <div className="flex items-center gap-3">
-                  <Avatar>
+                  <Avatar className="ring-2 ring-border ring-offset-2 ring-offset-background">
                     <AvatarFallback className="bg-primary text-primary-foreground">
                       {session.user.email?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>

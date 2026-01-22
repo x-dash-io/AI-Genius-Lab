@@ -40,7 +40,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="hidden w-64 flex-col gap-6 border-r bg-card/80 backdrop-blur-md px-6 pt-8 pb-8 md:flex"
+          className="hidden w-64 flex-col gap-6 border-r bg-card/80 backdrop-blur-md pl-2 pr-6 pt-8 pb-8 md:flex"
         >
           <motion.div
             whileHover={{ scale: 1.05 }}
@@ -154,7 +154,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                 {session?.user && (
                   <div className="mt-4 space-y-3 border-t pt-4">
                     <div className="flex items-center gap-3">
-                      <Avatar>
+                      <Avatar className="ring-2 ring-border ring-offset-2 ring-offset-card">
                         <AvatarFallback className="bg-primary text-primary-foreground">
                           {session.user.email?.charAt(0).toUpperCase() || "U"}
                         </AvatarFallback>

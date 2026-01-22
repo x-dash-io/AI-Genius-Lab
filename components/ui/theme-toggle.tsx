@@ -23,8 +23,12 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="h-9 w-9 border-0 shadow-none outline-none ring-0">
-        <Sun className="h-[1.2rem] w-[1.2rem]" />
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        className="h-9 w-9 border-0 shadow-none outline-none ring-0 bg-black hover:bg-black/90"
+      >
+        <Sun className="h-[1.2rem] w-[1.2rem] text-white" />
         <span className="sr-only">Toggle theme</span>
       </Button>
     );
@@ -36,10 +40,10 @@ export function ThemeToggle() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-9 w-9 border-0 shadow-none outline-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 hover:bg-accent"
+          className="h-9 w-9 border-0 shadow-none outline-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-black hover:bg-black/90 dark:bg-black dark:hover:bg-black/90"
         >
-          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-white" />
+          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-white" />
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
