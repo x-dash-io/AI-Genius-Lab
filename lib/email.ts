@@ -13,58 +13,47 @@ interface EmailOptions {
 }
 
 const resendApiKey = process.env.RESEND_API_KEY;
-const emailFrom = process.env.EMAIL_FROM || "noreply@aigeniuslab.com";
+// For development: Use Resend's test domain (onboarding@resend.dev)
+const emailFrom = process.env.EMAIL_FROM || (process.env.NODE_ENV === "development" ? "onboarding@resend.dev" : "noreply@aigeniuslab.com");
 
 // Initialize Resend only if API key is available
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 export async function sendEmail(options: EmailOptions): Promise<void> {
-  // In development without Resend API key, log emails instead of sending
-  if (!resend || process.env.NODE_ENV === "development") {
-    console.log("[EMAIL] Email would be sent:", {
+  // If Resend is not configured, log and return
+  if (!resend) {
+    console.log("[EMAIL] Email would be sent (RESEND_API_KEY not set):", {
       to: options.to,
       subject: options.subject,
       preview: options.text || options.html.substring(0, 100),
-      ...(resend ? { using: "Resend" } : { note: "RESEND_API_KEY not set, email not sent" }),
     });
-    
-    // In development, return early to avoid actual sending
-    if (process.env.NODE_ENV === "development") {
-      return;
-    }
+    return;
   }
 
   // Send email using Resend
-  if (resend) {
-    try {
-      const result = await resend.emails.send({
-        from: emailFrom,
-        to: options.to,
-        subject: options.subject,
-        html: options.html,
-        text: options.text,
-      });
-
-      if (result.error) {
-        console.error("[EMAIL] Resend error:", result.error);
-        throw new Error(`Failed to send email: ${result.error.message || "Unknown error"}`);
-      }
-
-      console.log("[EMAIL] Email sent successfully:", {
-        to: options.to,
-        subject: options.subject,
-        id: result.data?.id,
-      });
-    } catch (error) {
-      console.error("[EMAIL] Failed to send email:", error);
-      throw error;
-    }
-  } else {
-    // Fallback: log in production if Resend is not configured
-    console.warn("[EMAIL] RESEND_API_KEY not configured. Email not sent:", {
+  try {
+    const result = await resend.emails.send({
+      from: emailFrom,
       to: options.to,
       subject: options.subject,
+      html: options.html,
+      text: options.text,
     });
+
+    if (result.error) {
+      console.error("[EMAIL] Resend error:", result.error);
+      throw new Error(`Failed to send email: ${result.error.message || "Unknown error"}`);
+    }
+
+    console.log("[EMAIL] Email sent successfully:", {
+      to: options.to,
+      subject: options.subject,
+      id: result.data?.id,
+      from: emailFrom,
+    });
+  } catch (error) {
+    console.error("[EMAIL] Failed to send email:", error);
+    throw error;
   }
 }
 
@@ -137,9 +126,9 @@ export async function sendPurchaseFailedEmail(
 
 export async function sendPasswordResetEmail(
   email: string,
-  resetToken: string
+  resetCode: string
 ) {
-  const resetUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/reset-password?token=${resetToken}`;
+  const resetUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/reset-password`;
   
   await sendEmail({
     to: email,
@@ -148,20 +137,26 @@ export async function sendPasswordResetEmail(
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h1>Reset Your Password</h1>
         <p>You requested to reset your password for your AI Genius Lab account.</p>
-        <p>Click the button below to reset your password. This link will expire in 1 hour.</p>
-        <a href="${resetUrl}" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 6px;">
-          Reset Password
-        </a>
+        <p>Use the code below to reset your password. This code will expire in 15 minutes.</p>
+        <div style="background-color: #f3f4f6; border: 2px dashed #9ca3af; border-radius: 8px; padding: 20px; text-align: center; margin: 30px 0;">
+          <div style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #1f2937; font-family: monospace;">
+            ${resetCode}
+          </div>
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+          <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
+            Go to Reset Password Page
+          </a>
+        </div>
         <p style="margin-top: 30px; font-size: 14px; color: #666;">
           If you didn't request this password reset, you can safely ignore this email. Your password will not be changed.
         </p>
         <p style="margin-top: 10px; font-size: 12px; color: #999;">
-          If the button doesn't work, copy and paste this link into your browser:<br>
-          <a href="${resetUrl}" style="color: #2563eb; word-break: break-all;">${resetUrl}</a>
+          For security reasons, never share this code with anyone.
         </p>
       </div>
     `,
-    text: `Reset Your Password\n\nYou requested to reset your password for your AI Genius Lab account.\n\nClick this link to reset your password (expires in 1 hour):\n${resetUrl}\n\nIf you didn't request this password reset, you can safely ignore this email.`,
+    text: `Reset Your Password\n\nYou requested to reset your password for your AI Genius Lab account.\n\nUse this code to reset your password (expires in 15 minutes):\n\n${resetCode}\n\nGo to: ${resetUrl}\n\nIf you didn't request this password reset, you can safely ignore this email.`,
   });
 }
 

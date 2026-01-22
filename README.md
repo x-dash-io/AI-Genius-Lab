@@ -41,9 +41,12 @@ CLOUDINARY_CLOUD_NAME="replace_with_cloudinary_cloud_name"
 CLOUDINARY_API_KEY="replace_with_cloudinary_api_key"
 CLOUDINARY_API_SECRET="replace_with_cloudinary_api_secret"
 
-# Resend Email (for production email delivery)
+# Resend Email (for email delivery)
 RESEND_API_KEY="replace_with_resend_api_key"
-EMAIL_FROM="noreply@yourdomain.com"
+# For development: Leave EMAIL_FROM unset to use Resend's test domain (onboarding@resend.dev)
+# For production: Set EMAIL_FROM to your verified domain (e.g., noreply@yourdomain.com)
+# You must verify your domain in Resend dashboard before using custom EMAIL_FROM
+EMAIL_FROM="onboarding@resend.dev"
 
 ```
 
@@ -95,8 +98,15 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 1. Sign up for a free account at [Resend](https://resend.com)
 2. Create an API key in the Resend dashboard
 3. Add `RESEND_API_KEY` to your `.env.local` file
-4. Set `EMAIL_FROM` to your verified domain email (e.g., `noreply@yourdomain.com`)
-5. Verify your domain in Resend dashboard (required for production)
+
+**For Development:**
+- Leave `EMAIL_FROM` unset or use `onboarding@resend.dev` (Resend's test domain)
+- Emails will send successfully without domain verification
+
+**For Production:**
+- Verify your domain in Resend dashboard (add DNS records)
+- Set `EMAIL_FROM` to your verified domain email (e.g., `noreply@yourdomain.com`)
+- Without domain verification, emails will fail to send in production
 
 ## PayPal Sandbox Setup (Testing with Fake Money)
 

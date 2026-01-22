@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -10,25 +10,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
+import { OTPInput } from "@/components/auth/OTPInput";
 
 export default function ResetPasswordPage() {
+  const [email, setEmail] = useState("");
+  const [resetCode, setResetCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
+  const [step, setStep] = useState<"email" | "code" | "password">("email");
   const router = useRouter();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const tokenParam = searchParams.get("token");
-    if (!tokenParam) {
-      setError("Invalid or missing reset token");
-    } else {
-      setToken(tokenParam);
-    }
-  }, [searchParams]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -120,25 +114,139 @@ export default function ResetPasswordPage() {
     );
   }
 
-  if (!token) {
+  if (step === "email") {
     return (
       <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="font-display text-2xl font-bold">Invalid Reset Link</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                This password reset link is invalid or has expired. Please request a new one.
-              </AlertDescription>
-            </Alert>
-            <Link href="/forgot-password" className="block mt-4">
-              <Button className="w-full">Request New Reset Link</Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="w-full max-w-md"
+        >
+          <Card>
+            <CardHeader className="space-y-1">
+              <CardTitle className="font-display text-2xl font-bold">Reset Password</CardTitle>
+              <CardDescription>
+                Enter your email address to receive a reset code.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <form className="space-y-4" onSubmit={handleEmailSubmit}>
+                <FloatingInput
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  label="Email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                />
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                  >
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  </motion.div>
+                )}
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <Loader size="sm" inline />
+                      Sending code...
+                    </span>
+                  ) : (
+                    "Send Reset Code"
+                  )}
+                </Button>
+              </form>
+              <div className="text-center text-sm">
+                <Link
+                  href="/sign-in"
+                  className="font-medium text-primary hover:underline"
+                >
+                  Back to Sign In
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (step === "code") {
+    return (
+      <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="w-full max-w-md"
+        >
+          <Card>
+            <CardHeader className="space-y-1">
+              <CardTitle className="font-display text-2xl font-bold">Enter Reset Code</CardTitle>
+              <CardDescription>
+                We've sent a 6-digit code to {email}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <OTPInput
+                  value={resetCode}
+                  onChange={setResetCode}
+                  disabled={isVerifying}
+                />
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                  >
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  </motion.div>
+                )}
+                <Button
+                  type="button"
+                  className="w-full"
+                  onClick={handleCodeVerify}
+                  disabled={resetCode.length !== 6 || isVerifying}
+                >
+                  {isVerifying ? (
+                    <span className="flex items-center gap-2">
+                      <Loader size="sm" inline />
+                      Verifying...
+                    </span>
+                  ) : (
+                    "Verify Code"
+                  )}
+                </Button>
+                <div className="text-center space-y-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setStep("email");
+                      setResetCode("");
+                      setError(null);
+                    }}
+                  >
+                    Back to email
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     );
   }
@@ -159,7 +267,7 @@ export default function ResetPasswordPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <form className="space-y-4" onSubmit={handleSubmit}>
+            <form className="space-y-4" onSubmit={handlePasswordSubmit}>
               <div>
                 <FloatingInput
                   id="password"

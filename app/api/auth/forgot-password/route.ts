@@ -24,33 +24,33 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true });
     }
 
-    // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString("hex");
+    // Generate 6-digit reset code
+    const resetCode = crypto.randomInt(100000, 999999).toString();
     const expires = new Date();
-    expires.setHours(expires.getHours() + 1); // Token expires in 1 hour
+    expires.setMinutes(expires.getMinutes() + 15); // Code expires in 15 minutes
 
-    // Store token in VerificationToken table
+    // Store code in VerificationToken table
     await prisma.verificationToken.upsert({
       where: {
         identifier_token: {
           identifier: email.toLowerCase().trim(),
-          token: resetToken,
+          token: resetCode,
         },
       },
       update: {
-        token: resetToken,
+        token: resetCode,
         expires,
       },
       create: {
         identifier: email.toLowerCase().trim(),
-        token: resetToken,
+        token: resetCode,
         expires,
       },
     });
 
-    // Send password reset email
+    // Send password reset email with code
     try {
-      await sendPasswordResetEmail(user.email, resetToken);
+      await sendPasswordResetEmail(user.email, resetCode);
     } catch (emailError) {
       console.error("Failed to send password reset email:", emailError);
       // Don't fail the request if email fails, but log it

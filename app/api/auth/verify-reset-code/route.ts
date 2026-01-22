@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { hashPassword } from "@/lib/password";
 
 export async function POST(request: Request) {
   try {
-    const { email, code, password } = await request.json();
+    const { email, code } = await request.json();
 
-    if (!email || !code || !password) {
+    if (!email || !code) {
       return NextResponse.json(
-        { error: "Email, code, and password are required" },
+        { error: "Email and code are required" },
         { status: 400 }
       );
     }
@@ -16,13 +15,6 @@ export async function POST(request: Request) {
     if (!/^\d{6}$/.test(code)) {
       return NextResponse.json(
         { error: "Code must be 6 digits" },
-        { status: 400 }
-      );
-    }
-
-    if (password.length < 8) {
-      return NextResponse.json(
-        { error: "Password must be at least 8 characters long" },
         { status: 400 }
       );
     }
@@ -41,7 +33,7 @@ export async function POST(request: Request) {
 
     if (!verificationToken) {
       return NextResponse.json(
-        { error: "Invalid or expired reset code" },
+        { error: "Invalid reset code" },
         { status: 400 }
       );
     }
@@ -62,40 +54,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Find user by email (identifier)
-    const user = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
-    }
-
-    // Hash new password
-    const passwordHash = await hashPassword(password);
-
-    // Update user password
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { passwordHash },
-    });
-
-    // Delete the used code
-    await prisma.verificationToken.delete({
-      where: {
-        identifier_token: {
-          identifier: normalizedEmail,
-          token: code,
-        },
-      },
-    });
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, verified: true });
   } catch (error) {
-    console.error("Password reset error:", error);
+    console.error("Verify reset code error:", error);
     return NextResponse.json(
       { error: "An error occurred. Please try again." },
       { status: 500 }

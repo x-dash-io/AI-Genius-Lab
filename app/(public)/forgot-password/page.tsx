@@ -68,12 +68,15 @@ export default function ForgotPasswordPage() {
                 Check your email
               </CardTitle>
               <CardDescription className="text-center">
-                We've sent a password reset link to {email}
+                We've sent a 6-digit reset code to {email}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground text-center">
-                If an account exists with that email address, you'll receive instructions to reset your password. Please check your spam folder if you don't see it.
+                If an account exists with that email address, you'll receive a 6-digit code to reset your password. Please check your spam folder if you don't see it.
+              </p>
+              <p className="text-sm text-muted-foreground text-center font-medium">
+                Go to <Link href="/reset-password" className="text-primary hover:underline">Reset Password</Link> to enter your code.
               </p>
               <Link href="/sign-in" className="block">
                 <Button className="w-full" variant="outline">
@@ -100,7 +103,7 @@ export default function ForgotPasswordPage() {
           <CardHeader className="space-y-1">
             <CardTitle className="font-display text-2xl font-bold">Forgot Password</CardTitle>
             <CardDescription>
-              Enter your email address and we'll send you a link to reset your password.
+              Enter your email address and we'll send you a 6-digit code to reset your password.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -134,7 +137,7 @@ export default function ForgotPasswordPage() {
                     Sending...
                   </span>
                 ) : (
-                  "Send Reset Link"
+                  "Send Reset Code"
                 )}
               </Button>
             </form>
