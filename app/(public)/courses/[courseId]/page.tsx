@@ -32,7 +32,7 @@ export async function generateMetadata({
     description: course.description || `Learn ${course.title} with structured lessons and progress tracking.`,
     keywords: ["AI course", course.title, "online learning"],
     url: `/courses/${course.slug}`,
-    type: "course",
+    type: "website",
   });
 }
 
@@ -117,6 +117,5 @@ export default async function CourseDetailPage({
       {/* Reviews Section */}
       <ReviewSection courseId={course.id} initialStats={reviewStats} />
     </section>
-    </>
   );
 }

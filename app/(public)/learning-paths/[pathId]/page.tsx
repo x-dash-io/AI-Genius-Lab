@@ -36,7 +36,7 @@ export async function generateMetadata({
     description: path.description || `Follow this structured learning path to master ${path.title}.`,
     keywords: ["learning path", path.title, "structured learning"],
     url: `/learning-paths/${pathId}`,
-    type: "course",
+    type: "website",
   });
 }
 

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { X, GripVertical, Loader2, Plus } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { SortableCourseList } from "@/components/admin/SortableCourseList";
 
 interface Course {
   id: string;
@@ -52,6 +53,7 @@ interface LearningPathEditFormProps {
   deleteAction: () => Promise<void>;
   addCourseAction: (formData: FormData) => Promise<void>;
   removeCourseAction: (courseId: string) => Promise<void>;
+  reorderCoursesAction: (courseIds: string[]) => Promise<void>;
 }
 
 export function LearningPathEditForm({
@@ -61,6 +63,7 @@ export function LearningPathEditForm({
   deleteAction,
   addCourseAction,
   removeCourseAction,
+  reorderCoursesAction,
 }: LearningPathEditFormProps) {
   const router = useRouter();
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
@@ -141,6 +144,24 @@ export function LearningPathEditForm({
         const next = { ...prev };
         delete next[courseId];
         return next;
+      });
+    }
+  };
+
+  const handleReorderCourses = async (courseIds: string[]) => {
+    try {
+      await reorderCoursesAction(courseIds);
+      toast({
+        title: "Courses reordered",
+        description: "Course order has been updated successfully.",
+        variant: "success",
+      });
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Failed to reorder courses",
+        description: error instanceof Error ? error.message : "Failed to reorder courses",
+        variant: "destructive",
       });
     }
   };
@@ -284,7 +305,7 @@ export function LearningPathEditForm({
           <CardDescription>
             {path.courses.length === 0
               ? "No courses added yet. Add courses above to build your learning path."
-              : `Drag to reorder (coming soon). Courses are displayed in order.`}
+              : `Drag courses to reorder them. Courses are displayed in the order shown below.`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -293,44 +314,12 @@ export function LearningPathEditForm({
               No courses in this path yet.
             </p>
           ) : (
-            <div className="space-y-2">
-              {path.courses.map((pathCourse, index) => (
-                <div
-                  key={pathCourse.id}
-                  className="flex items-center justify-between rounded-lg border p-4"
-                >
-                  <div className="flex items-center gap-3">
-                    <GripVertical className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <p className="font-medium">{pathCourse.course.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Order: {index + 1}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Link href={`/admin/courses/${pathCourse.course.id}/edit`}>
-                      <Button variant="outline" size="sm">
-                        View Course
-                      </Button>
-                    </Link>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveCourse(pathCourse.courseId)}
-                      disabled={isRemovingCourse[pathCourse.courseId]}
-                    >
-                      {isRemovingCourse[pathCourse.courseId] ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <X className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <SortableCourseList
+              courses={path.courses}
+              onReorder={handleReorderCourses}
+              onRemove={handleRemoveCourse}
+              isRemoving={isRemovingCourse}
+            />
           )}
         </CardContent>
       </Card>

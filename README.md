@@ -24,6 +24,13 @@ STRIPE_WEBHOOK_SECRET="replace_with_stripe_webhook_secret"
 CLOUDINARY_CLOUD_NAME="replace_with_cloudinary_cloud_name"
 CLOUDINARY_API_KEY="replace_with_cloudinary_api_key"
 CLOUDINARY_API_SECRET="replace_with_cloudinary_api_secret"
+
+# Resend Email (for production email delivery)
+RESEND_API_KEY="replace_with_resend_api_key"
+EMAIL_FROM="noreply@yourdomain.com"
+
+# Google Analytics (optional)
+NEXT_PUBLIC_GA_MEASUREMENT_ID="G-XXXXXXXXXX"
 ```
 
 ### Google OAuth Setup (Optional)
@@ -68,6 +75,28 @@ To learn more about Next.js, take a look at the following resources:
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Email Setup (Resend)
+
+1. Sign up for a free account at [Resend](https://resend.com)
+2. Create an API key in the Resend dashboard
+3. Add `RESEND_API_KEY` to your `.env.local` file
+4. Set `EMAIL_FROM` to your verified domain email (e.g., `noreply@yourdomain.com`)
+5. Verify your domain in Resend dashboard (required for production)
+
+## Analytics Setup
+
+### Vercel Analytics (Automatic)
+- Automatically enabled when deployed to Vercel
+- View analytics in your Vercel dashboard
+- Includes page views, performance metrics, and custom events
+- No additional configuration needed
+
+### Google Analytics (Optional)
+1. Create a Google Analytics 4 property at [Google Analytics](https://analytics.google.com)
+2. Get your Measurement ID (format: `G-XXXXXXXXXX`)
+3. Add `NEXT_PUBLIC_GA_MEASUREMENT_ID` to your `.env.local` file
+4. Analytics will automatically track page views and custom events
 
 ## Deploy on Vercel
 

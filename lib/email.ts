@@ -1,7 +1,9 @@
 /**
- * Email notification service
- * For production, integrate with Resend, SendGrid, or similar service
+ * Email notification service using Resend
+ * Set RESEND_API_KEY and EMAIL_FROM in your environment variables
  */
+
+import { Resend } from "resend";
 
 interface EmailOptions {
   to: string;
@@ -10,33 +12,60 @@ interface EmailOptions {
   text?: string;
 }
 
+const resendApiKey = process.env.RESEND_API_KEY;
+const emailFrom = process.env.EMAIL_FROM || "noreply@synapze.dev";
+
+// Initialize Resend only if API key is available
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
+
 export async function sendEmail(options: EmailOptions): Promise<void> {
-  // In development, log emails instead of sending
-  if (process.env.NODE_ENV === "development") {
+  // In development without Resend API key, log emails instead of sending
+  if (!resend || process.env.NODE_ENV === "development") {
     console.log("[EMAIL] Email would be sent:", {
       to: options.to,
       subject: options.subject,
       preview: options.text || options.html.substring(0, 100),
+      ...(resend ? { using: "Resend" } : { note: "RESEND_API_KEY not set, email not sent" }),
     });
-    return;
+    
+    // In development, return early to avoid actual sending
+    if (process.env.NODE_ENV === "development") {
+      return;
+    }
   }
 
-  // For production, integrate with email service
-  // Example with Resend:
-  // const resend = new Resend(process.env.RESEND_API_KEY);
-  // await resend.emails.send({
-  //   from: process.env.EMAIL_FROM || "noreply@synapze.dev",
-  //   to: options.to,
-  //   subject: options.subject,
-  //   html: options.html,
-  //   text: options.text,
-  // });
+  // Send email using Resend
+  if (resend) {
+    try {
+      const result = await resend.emails.send({
+        from: emailFrom,
+        to: options.to,
+        subject: options.subject,
+        html: options.html,
+        text: options.text,
+      });
 
-  // For now, just log in production too (replace with actual service)
-  console.log("[EMAIL] Email notification:", {
-    to: options.to,
-    subject: options.subject,
-  });
+      if (result.error) {
+        console.error("[EMAIL] Resend error:", result.error);
+        throw new Error(`Failed to send email: ${result.error.message || "Unknown error"}`);
+      }
+
+      console.log("[EMAIL] Email sent successfully:", {
+        to: options.to,
+        subject: options.subject,
+        id: result.data?.id,
+      });
+    } catch (error) {
+      console.error("[EMAIL] Failed to send email:", error);
+      throw error;
+    }
+  } else {
+    // Fallback: log in production if Resend is not configured
+    console.warn("[EMAIL] RESEND_API_KEY not configured. Email not sent:", {
+      to: options.to,
+      subject: options.subject,
+    });
+  }
 }
 
 export async function sendPurchaseConfirmationEmail(

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateOrganizationSchema } from "@/lib/seo/schemas";
 import "./globals.css";
@@ -66,6 +68,8 @@ export default function RootLayout({
             <ToastProvider>{children}</ToastProvider>
           </SessionProvider>
         </ThemeProvider>
+        <Analytics />
+        <GoogleAnalytics />
       </body>
     </html>
   );

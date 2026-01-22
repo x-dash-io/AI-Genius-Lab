@@ -1,11 +1,9 @@
 /**
  * Analytics and monitoring utilities
- * For production, integrate with services like:
- * - Vercel Analytics
- * - Google Analytics
- * - Plausible
- * - Custom analytics service
+ * Integrated with Vercel Analytics and Google Analytics (optional)
  */
+
+import { track as vercelTrack } from "@vercel/analytics";
 
 export interface AnalyticsEvent {
   name: string;
@@ -15,25 +13,33 @@ export interface AnalyticsEvent {
 
 /**
  * Track analytics events
+ * Uses Vercel Analytics for automatic tracking
+ * Optionally sends to Google Analytics if GA_MEASUREMENT_ID is set
  */
 export function trackEvent(event: AnalyticsEvent): void {
-  // In development, log events
+  // Always log in development
   if (process.env.NODE_ENV === "development") {
     console.log("[ANALYTICS] Event:", event);
-    return;
   }
 
-  // For production, send to analytics service
-  // Example with Vercel Analytics:
-  // import { track } from '@vercel/analytics';
-  // track(event.name, event.properties);
+  // Track with Vercel Analytics (works in production automatically)
+  try {
+    vercelTrack(event.name, event.properties);
+  } catch (error) {
+    console.error("[ANALYTICS] Failed to track with Vercel:", error);
+  }
 
-  // Example with custom endpoint:
-  // fetch('/api/analytics', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(event),
-  // }).catch(console.error);
+  // Track with Google Analytics if configured (client-side only)
+  if (typeof window !== "undefined" && (window as any).gtag) {
+    try {
+      (window as any).gtag("event", event.name, {
+        ...event.properties,
+        user_id: event.userId,
+      });
+    } catch (error) {
+      console.error("[ANALYTICS] Failed to track with Google Analytics:", error);
+    }
+  }
 }
 
 /**

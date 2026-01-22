@@ -37,25 +37,33 @@ export function Toast({
 
   if (!isVisible) return null;
 
+  const variantStyles = {
+    default: "bg-blue-900 dark:bg-blue-950 text-white border-blue-700 dark:border-blue-800",
+    destructive: "bg-red-900 dark:bg-red-950 text-white border-red-700 dark:border-red-800",
+    success: "bg-green-900 dark:bg-green-950 text-white border-green-700 dark:border-green-800",
+    warning: "bg-yellow-900 dark:bg-yellow-950 text-white border-yellow-700 dark:border-yellow-800",
+  };
+
   return (
     <Alert
       variant={variant}
       className={cn(
         "min-w-[300px] shadow-lg",
+        variantStyles[variant || "default"],
         isVisible ? "animate-in slide-in-from-top-5" : "animate-out slide-out-to-top-5"
       )}
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          {title && <div className="font-semibold mb-1">{title}</div>}
-          {description && <AlertDescription>{description}</AlertDescription>}
+          {title && <div className="font-semibold mb-1 text-white">{title}</div>}
+          {description && <AlertDescription className="text-white/90">{description}</AlertDescription>}
         </div>
         <button
           onClick={() => {
             setIsVisible(false);
             setTimeout(() => onClose?.(), 300);
           }}
-          className="ml-4 text-muted-foreground hover:text-foreground"
+          className="ml-4 text-white/70 hover:text-white"
         >
           <X className="h-4 w-4" />
         </button>

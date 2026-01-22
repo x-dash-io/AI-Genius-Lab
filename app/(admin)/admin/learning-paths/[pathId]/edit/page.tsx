@@ -6,6 +6,7 @@ import {
   deleteLearningPath,
   addCourseToPath,
   removeCourseFromPath,
+  updateCourseOrder,
 } from "@/lib/admin/learning-paths";
 import { getAllCourses } from "@/lib/admin/courses";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -108,6 +109,7 @@ export default async function EditLearningPathPage({
         deleteAction={deleteLearningPathAction.bind(null, pathId)}
         addCourseAction={addCourseAction.bind(null, pathId)}
         removeCourseAction={removeCourseAction.bind(null, pathId)}
+        reorderCoursesAction={reorderCoursesAction.bind(null, pathId)}
       />
     </div>
   );

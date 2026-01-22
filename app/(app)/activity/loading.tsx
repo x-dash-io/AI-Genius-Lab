@@ -1,4 +1,4 @@
-import { SkeletonList } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonList } from "@/components/ui/skeleton";
 
 export default function ActivityLoading() {
   return (

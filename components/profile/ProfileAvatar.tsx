@@ -48,25 +48,22 @@ export function ProfileAvatar({
     setIsUploading(true);
 
     try {
-      // Upload to Cloudinary
+      // Upload via our API endpoint (allows customers to upload avatars)
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "");
 
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch("/api/profile/avatar", {
+        method: "POST",
+        body: formData,
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to upload image");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to upload image");
       }
 
       const data = await response.json();
-      await onAvatarUpdate(data.secure_url);
+      await onAvatarUpdate(data.secureUrl);
 
       toast({
         title: "Avatar updated",
