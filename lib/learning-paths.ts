@@ -65,6 +65,69 @@ export async function getLearningPathBySlug(slug: string) {
 }
 
 /**
+ * Calculate the price user will pay for a learning path (excluding already purchased courses)
+ */
+export async function calculateLearningPathPrice(userId: string, pathId: string): Promise<{
+  fullPriceCents: number;
+  adjustedPriceCents: number;
+  alreadyPurchasedCents: number;
+  coursesToPurchase: number;
+  totalCourses: number;
+}> {
+  const path = await prisma.learningPath.findUnique({
+    where: { id: pathId },
+    include: {
+      courses: {
+        include: {
+          course: {
+            select: {
+              id: true,
+              priceCents: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!path || path.courses.length === 0) {
+    return {
+      fullPriceCents: 0,
+      adjustedPriceCents: 0,
+      alreadyPurchasedCents: 0,
+      coursesToPurchase: 0,
+      totalCourses: 0,
+    };
+  }
+
+  const courseIds = path.courses.map((pc) => pc.course.id);
+  const existingPurchases = await prisma.purchase.findMany({
+    where: {
+      userId,
+      courseId: { in: courseIds },
+      status: "paid",
+    },
+  });
+
+  const existingCourseIds = new Set(existingPurchases.map((p) => p.courseId));
+  
+  const fullPriceCents = path.courses.reduce((sum, pc) => sum + pc.course.priceCents, 0);
+  const alreadyPurchasedCents = path.courses
+    .filter((pc) => existingCourseIds.has(pc.course.id))
+    .reduce((sum, pc) => sum + pc.course.priceCents, 0);
+  const adjustedPriceCents = fullPriceCents - alreadyPurchasedCents;
+  const coursesToPurchase = path.courses.filter((pc) => !existingCourseIds.has(pc.course.id)).length;
+
+  return {
+    fullPriceCents,
+    adjustedPriceCents,
+    alreadyPurchasedCents,
+    coursesToPurchase,
+    totalCourses: path.courses.length,
+  };
+}
+
+/**
  * Check if user has enrolled in all courses in a learning path
  */
 export async function hasEnrolledInLearningPath(userId: string, pathId: string): Promise<boolean> {

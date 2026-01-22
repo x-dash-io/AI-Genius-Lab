@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getLearningPathBySlug, createLearningPathPurchases, hasEnrolledInLearningPath } from "@/lib/learning-paths";
+import { getLearningPathBySlug, createLearningPathPurchases, hasEnrolledInLearningPath, calculateLearningPathPrice } from "@/lib/learning-paths";
 import { createPayPalOrder } from "@/lib/paypal";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,6 +59,33 @@ export default async function LearningPathDetailPage({
     (sum, pc) => sum + pc.course.priceCents,
     0
   );
+
+  // Calculate adjusted price (excluding already purchased courses)
+  const priceInfo = session?.user
+    ? await calculateLearningPathPrice(session.user.id, path.id)
+    : {
+        fullPriceCents: totalPrice,
+        adjustedPriceCents: totalPrice,
+        alreadyPurchasedCents: 0,
+        coursesToPurchase: path.courses.length,
+        totalCourses: path.courses.length,
+      };
+
+  // Get purchased course IDs for UI display
+  const purchasedCourseIds = session?.user
+    ? new Set(
+        (
+          await prisma.purchase.findMany({
+            where: {
+              userId: session.user.id,
+              courseId: { in: path.courses.map((pc) => pc.course.id) },
+              status: "paid",
+            },
+            select: { courseId: true },
+          })
+        ).map((p) => p.courseId)
+      )
+    : new Set<string>();
 
   async function enrollInLearningPathAction() {
     "use server";
@@ -222,6 +249,12 @@ export default async function LearningPathDetailPage({
                           <Badge variant="secondary">
                             ${(pathCourse.course.priceCents / 100).toFixed(2)}
                           </Badge>
+                          {session?.user && purchasedCourseIds.has(pathCourse.course.id) && (
+                            <Badge variant="default" className="bg-green-600">
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              Already Purchased
+                            </Badge>
+                          )}
                         </div>
                       </div>
                       <Link href={`/courses/${pathCourse.course.slug}`}>
@@ -239,9 +272,30 @@ export default async function LearningPathDetailPage({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Total Path Price</p>
-                  <p className="text-2xl font-bold">
-                    ${(totalPrice / 100).toFixed(2)}
-                  </p>
+                  <div className="space-y-1">
+                    {priceInfo.alreadyPurchasedCents > 0 ? (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <p className="text-lg font-semibold line-through text-muted-foreground">
+                            ${(priceInfo.fullPriceCents / 100).toFixed(2)}
+                          </p>
+                          <p className="text-2xl font-bold text-green-600">
+                            ${(priceInfo.adjustedPriceCents / 100).toFixed(2)}
+                          </p>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          You already own ${(priceInfo.alreadyPurchasedCents / 100).toFixed(2)} worth of courses
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Pay only for {priceInfo.coursesToPurchase} remaining {priceInfo.coursesToPurchase === 1 ? "course" : "courses"}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-2xl font-bold">
+                        ${(priceInfo.fullPriceCents / 100).toFixed(2)}
+                      </p>
+                    )}
+                  </div>
                   {isEnrolled && (
                     <Badge variant="default" className="mt-2">
                       <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -254,10 +308,14 @@ export default async function LearningPathDetailPage({
                     <Link href="/library">
                       <Button size="lg">Go to Library</Button>
                     </Link>
+                  ) : priceInfo.adjustedPriceCents === 0 ? (
+                    <Link href="/library">
+                      <Button size="lg">Go to Library</Button>
+                    </Link>
                   ) : (
                     <LearningPathEnrollment
                       pathId={path.id}
-                      totalPriceCents={totalPrice}
+                      totalPriceCents={priceInfo.adjustedPriceCents}
                       enrollAction={enrollInLearningPathAction}
                     />
                   )
