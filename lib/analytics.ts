@@ -1,6 +1,6 @@
 /**
  * Analytics and monitoring utilities
- * Integrated with Vercel Analytics and Google Analytics (optional)
+ * Integrated with Vercel Analytics
  */
 
 import { track as vercelTrack } from "@vercel/analytics";
@@ -14,7 +14,6 @@ export interface AnalyticsEvent {
 /**
  * Track analytics events
  * Uses Vercel Analytics for automatic tracking
- * Optionally sends to Google Analytics if GA_MEASUREMENT_ID is set
  */
 export function trackEvent(event: AnalyticsEvent): void {
   // Always log in development
@@ -27,18 +26,6 @@ export function trackEvent(event: AnalyticsEvent): void {
     vercelTrack(event.name, event.properties);
   } catch (error) {
     console.error("[ANALYTICS] Failed to track with Vercel:", error);
-  }
-
-  // Track with Google Analytics if configured (client-side only)
-  if (typeof window !== "undefined" && (window as any).gtag) {
-    try {
-      (window as any).gtag("event", event.name, {
-        ...event.properties,
-        user_id: event.userId,
-      });
-    } catch (error) {
-      console.error("[ANALYTICS] Failed to track with Google Analytics:", error);
-    }
   }
 }
 

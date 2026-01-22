@@ -13,7 +13,7 @@ interface EmailOptions {
 }
 
 const resendApiKey = process.env.RESEND_API_KEY;
-const emailFrom = process.env.EMAIL_FROM || "noreply@synapze.dev";
+const emailFrom = process.env.EMAIL_FROM || "noreply@aigeniuslab.com";
 
 // Initialize Resend only if API key is available
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
@@ -132,5 +132,179 @@ export async function sendPurchaseFailedEmail(
       </div>
     `,
     text: `We encountered an issue processing your payment for ${courseTitle}. Please try again or contact support.`,
+  });
+}
+
+export async function sendPasswordResetEmail(
+  email: string,
+  resetToken: string
+) {
+  const resetUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/reset-password?token=${resetToken}`;
+  
+  await sendEmail({
+    to: email,
+    subject: "Reset Your Password - AI Genius Lab",
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1>Reset Your Password</h1>
+        <p>You requested to reset your password for your AI Genius Lab account.</p>
+        <p>Click the button below to reset your password. This link will expire in 1 hour.</p>
+        <a href="${resetUrl}" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 6px;">
+          Reset Password
+        </a>
+        <p style="margin-top: 30px; font-size: 14px; color: #666;">
+          If you didn't request this password reset, you can safely ignore this email. Your password will not be changed.
+        </p>
+        <p style="margin-top: 10px; font-size: 12px; color: #999;">
+          If the button doesn't work, copy and paste this link into your browser:<br>
+          <a href="${resetUrl}" style="color: #2563eb; word-break: break-all;">${resetUrl}</a>
+        </p>
+      </div>
+    `,
+    text: `Reset Your Password\n\nYou requested to reset your password for your AI Genius Lab account.\n\nClick this link to reset your password (expires in 1 hour):\n${resetUrl}\n\nIf you didn't request this password reset, you can safely ignore this email.`,
+  });
+}
+
+export async function sendOTPEmail(
+  email: string,
+  otpCode: string,
+  purpose: string = "verification"
+) {
+  const purposeText = purpose === "signup" 
+    ? "complete your account registration" 
+    : purpose === "signin"
+    ? "sign in to your account"
+    : "verify your email address";
+
+  await sendEmail({
+    to: email,
+    subject: `Your Verification Code - AI Genius Lab`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h1>Your Verification Code</h1>
+        <p>Use the code below to ${purposeText}.</p>
+        <div style="background-color: #f3f4f6; border: 2px dashed #9ca3af; border-radius: 8px; padding: 20px; text-align: center; margin: 30px 0;">
+          <div style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #1f2937; font-family: monospace;">
+            ${otpCode}
+          </div>
+        </div>
+        <p style="font-size: 14px; color: #666;">
+          This code will expire in 10 minutes. If you didn't request this code, you can safely ignore this email.
+        </p>
+        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+          For security reasons, never share this code with anyone.
+        </p>
+      </div>
+    `,
+    text: `Your Verification Code\n\nUse this code to ${purposeText}:\n\n${otpCode}\n\nThis code will expire in 10 minutes. If you didn't request this code, you can safely ignore this email.`,
+  });
+}
+
+interface InvoiceItem {
+  title: string;
+  description?: string;
+  amountCents: number;
+  currency: string;
+}
+
+export async function sendInvoiceEmail(
+  email: string,
+  userName: string,
+  invoiceNumber: string,
+  invoiceDate: Date,
+  items: InvoiceItem[],
+  paymentMethod: string,
+  transactionId?: string
+) {
+  const totalAmount = items.reduce((sum, item) => sum + item.amountCents, 0);
+  const currency = items[0]?.currency || "USD";
+  const formattedTotal = (totalAmount / 100).toFixed(2);
+  const formattedDate = invoiceDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const itemsHtml = items
+    .map(
+      (item) => `
+      <tr>
+        <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
+          <div style="font-weight: 600; margin-bottom: 4px;">${item.title}</div>
+          ${item.description ? `<div style="font-size: 14px; color: #6b7280;">${item.description}</div>` : ""}
+        </td>
+        <td style="padding: 12px; text-align: right; border-bottom: 1px solid #e5e7eb;">
+          $${(item.amountCents / 100).toFixed(2)}
+        </td>
+      </tr>
+    `
+    )
+    .join("");
+
+  await sendEmail({
+    to: email,
+    subject: `Invoice ${invoiceNumber} - AI Genius Lab`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background: linear-gradient(to right, #3b82f6, #2563eb); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">AI Genius Lab</h1>
+          <p style="color: rgba(255, 255, 255, 0.9); margin: 8px 0 0 0;">Invoice</p>
+        </div>
+        <div style="padding: 30px; background-color: #ffffff;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+            <div>
+              <h2 style="margin: 0 0 8px 0; font-size: 18px; color: #111827;">Invoice Details</h2>
+              <p style="margin: 4px 0; color: #6b7280; font-size: 14px;"><strong>Invoice #:</strong> ${invoiceNumber}</p>
+              <p style="margin: 4px 0; color: #6b7280; font-size: 14px;"><strong>Date:</strong> ${formattedDate}</p>
+              <p style="margin: 4px 0; color: #6b7280; font-size: 14px;"><strong>Status:</strong> <span style="color: #10b981; font-weight: 600;">Paid</span></p>
+            </div>
+            <div style="text-align: right;">
+              <h3 style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280; text-transform: uppercase;">Bill To</h3>
+              <p style="margin: 4px 0; color: #111827; font-weight: 600;">${userName}</p>
+              <p style="margin: 4px 0; color: #6b7280; font-size: 14px;">${email}</p>
+            </div>
+          </div>
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <thead>
+              <tr style="background-color: #f9fafb;">
+                <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; border-bottom: 2px solid #e5e7eb;">Item</th>
+                <th style="padding: 12px; text-align: right; font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; border-bottom: 2px solid #e5e7eb;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+          </table>
+          <div style="border-top: 2px solid #e5e7eb; padding-top: 16px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: #6b7280; font-size: 14px;">Subtotal</span>
+              <span style="font-weight: 600;">$${formattedTotal}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: #6b7280; font-size: 14px;">Tax</span>
+              <span style="font-weight: 600;">$0.00</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding-top: 16px; border-top: 2px solid #e5e7eb; margin-top: 16px;">
+              <span style="font-size: 18px; font-weight: 700; color: #111827;">Total</span>
+              <span style="font-size: 24px; font-weight: 700; color: #111827;">$${formattedTotal}</span>
+            </div>
+          </div>
+          <div style="margin-top: 30px; padding: 20px; background-color: #f9fafb; border-radius: 8px;">
+            <h3 style="margin: 0 0 12px 0; font-size: 14px; color: #111827;">Payment Information</h3>
+            <p style="margin: 4px 0; color: #6b7280; font-size: 14px;"><strong>Payment Method:</strong> ${paymentMethod}</p>
+            ${transactionId ? `<p style="margin: 4px 0; color: #6b7280; font-size: 14px;"><strong>Transaction ID:</strong> <span style="font-family: monospace; font-size: 12px;">${transactionId}</span></p>` : ""}
+          </div>
+          <div style="margin-top: 30px; text-align: center;">
+            <a href="${process.env.NEXTAUTH_URL || "http://localhost:3000"}/library" style="display: inline-block; padding: 12px 24px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
+              Access Your Courses
+            </a>
+          </div>
+          <p style="margin-top: 30px; font-size: 12px; color: #9ca3af; text-align: center; line-height: 1.6;">
+            This invoice confirms your purchase. All sales are final. You have immediate access to the purchased courses in your library.
+          </p>
+        </div>
+      </div>
+    `,
+    text: `Invoice ${invoiceNumber}\n\nAI Genius Lab\nInvoice Date: ${formattedDate}\nStatus: Paid\n\nBill To:\n${userName}\n${email}\n\nItems:\n${items.map((item) => `- ${item.title}: $${(item.amountCents / 100).toFixed(2)}`).join("\n")}\n\nSubtotal: $${formattedTotal}\nTax: $0.00\nTotal: $${formattedTotal}\n\nPayment Method: ${paymentMethod}${transactionId ? `\nTransaction ID: ${transactionId}` : ""}\n\nThank you for your purchase!`,
   });
 }

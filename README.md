@@ -1,4 +1,20 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Genius Lab
+
+AI Genius Lab is a modern online learning platform focused on AI education. Built with Next.js, TypeScript, Prisma, and PostgreSQL, it provides structured courses, learning paths, progress tracking, and secure payment processing.
+
+## Features
+
+- **Course Management**: Create and manage AI courses with structured lessons
+- **Learning Paths**: Curated learning pathways for comprehensive skill development
+- **Progress Tracking**: Track lesson completion and learning progress
+- **Certificates**: Generate verifiable certificates upon course completion
+- **Payment Processing**: Secure PayPal integration for course purchases
+- **User Authentication**: Email/password and Google OAuth authentication with OTP verification
+- **Password Reset**: Secure password reset flow via email
+- **Invoice System**: Automated invoice generation and email delivery
+- **Admin Dashboard**: Comprehensive analytics with charts and graphs
+- **Responsive Design**: Mobile-first, fully responsive UI
+- **Dark Mode**: Built-in theme switching
 
 ## Environment Variables
 
@@ -29,8 +45,6 @@ CLOUDINARY_API_SECRET="replace_with_cloudinary_api_secret"
 RESEND_API_KEY="replace_with_resend_api_key"
 EMAIL_FROM="noreply@yourdomain.com"
 
-# Google Analytics (optional)
-NEXT_PUBLIC_GA_MEASUREMENT_ID="G-XXXXXXXXXX"
 ```
 
 ### Google OAuth Setup (Optional)
@@ -231,8 +245,68 @@ When ready for production:
 3. Add `NEXT_PUBLIC_GA_MEASUREMENT_ID` to your `.env.local` file
 4. Analytics will automatically track page views and custom events
 
-## Deploy on Vercel
+## Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Vercel Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Push your code to GitHub/GitLab/Bitbucket
+2. Import your repository in [Vercel](https://vercel.com/new)
+3. Add environment variables in Vercel dashboard
+4. Deploy
+
+Vercel will automatically:
+- Detect Next.js framework
+- Run build commands
+- Optimize for production
+- Enable Vercel Analytics
+
+### Environment Variables for Production
+
+Ensure all environment variables from `.env.local` are set in your Vercel project settings.
+
+### Database Setup
+
+1. Set up a PostgreSQL database (recommended: [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres) or [Supabase](https://supabase.com))
+2. Add `DATABASE_URL` to Vercel environment variables
+3. Run migrations: `npx prisma migrate deploy`
+
+## Development
+
+### Prerequisites
+
+- Node.js 18+ 
+- PostgreSQL database
+- npm/yarn/pnpm
+
+### Setup
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Copy `.env.example` to `.env.local` and fill in values
+4. Run database migrations: `npx prisma migrate dev`
+5. Seed database (optional): `npm run db:seed`
+6. Start development server: `npm run dev`
+
+### Database Commands
+
+- `npm run db:push` - Push schema changes to database
+- `npm run db:seed` - Seed database with sample data
+
+### Testing
+
+- `npm test` - Run tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: NextAuth.js
+- **Payments**: PayPal
+- **Email**: Resend
+- **Styling**: Tailwind CSS
+- **UI Components**: Radix UI
+- **Charts**: Recharts
+- **Analytics**: Vercel Analytics

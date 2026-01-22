@@ -7,6 +7,7 @@ import { BookOpen, Users, DollarSign, GraduationCap, TrendingUp } from "lucide-r
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+import { AnalyticsSection } from "@/components/admin/AnalyticsSection";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Admin Dashboard",
@@ -162,6 +163,17 @@ export default async function AdminDashboardPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Analytics Charts */}
+      <div>
+        <div className="mb-6">
+          <h2 className="font-display text-2xl font-bold tracking-tight">Analytics</h2>
+          <p className="mt-2 text-muted-foreground">
+            Visual insights into platform performance and trends
+          </p>
+        </div>
+        <AnalyticsSection />
+      </div>
 
       {/* Quick Actions */}
       <Card>

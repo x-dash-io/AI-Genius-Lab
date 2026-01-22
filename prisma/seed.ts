@@ -8,8 +8,8 @@ async function main() {
     where: { email: "customer@synapze.dev" },
     update: {},
     create: {
-      email: "customer@synapze.dev",
-      name: "Synapze Customer",
+      email: "customer@aigeniuslab.com",
+      name: "AI Genius Lab Customer",
       passwordHash,
       role: "customer",
     },
@@ -43,7 +43,7 @@ async function main() {
             lessons: {
               create: [
                 {
-                  title: "Welcome to Synapze",
+                  title: "Welcome to AI Genius Lab",
                   contentType: "video",
                   durationSeconds: 420,
                   isLocked: false,

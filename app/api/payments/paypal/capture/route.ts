@@ -21,6 +21,20 @@ function getBaseUrl(requestUrl: URL): string {
   return origin;
 }
 
+function generateInvoiceNumber(purchaseId: string): string {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const suffix = purchaseId.slice(-8).toUpperCase();
+  return `INV-${year}${month}${day}-${suffix}`;
+}
+
+function formatPaymentMethod(provider: string | undefined): string {
+  if (!provider) return "PayPal";
+  return provider.charAt(0).toUpperCase() + provider.slice(1);
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const baseUrl = getBaseUrl(url);
@@ -131,20 +145,43 @@ export async function GET(request: Request) {
       })
     );
 
+    // Fetch payment for invoice
+    const payment = await prisma.payment.findFirst({
+      where: { purchaseId: purchases[0].id },
+      orderBy: { createdAt: "desc" },
+    });
+
     // Send email notifications
     const user = await prisma.user.findUnique({
       where: { id: purchases[0].userId },
-      select: { email: true },
+      select: { email: true, name: true },
     });
 
     if (user) {
       try {
-        const { sendPurchaseConfirmationEmail, sendEnrollmentEmail } = await import("@/lib/email");
+        const { sendPurchaseConfirmationEmail, sendEnrollmentEmail, sendInvoiceEmail } = await import("@/lib/email");
         const courseTitles = purchases.map((p) => p.course.title).join(", ");
         const totalAmount = purchases.reduce((sum, p) => sum + p.amountCents, 0);
+        const invoiceNumber = generateInvoiceNumber(purchases[0].id);
+        const purchaseDate = payment?.createdAt || purchases[0].createdAt;
+        
         await Promise.all([
           sendPurchaseConfirmationEmail(user.email, courseTitles, totalAmount),
           ...purchases.map((p) => sendEnrollmentEmail(user.email, p.course.title)),
+          sendInvoiceEmail(
+            user.email,
+            user.name || "Customer",
+            invoiceNumber,
+            purchaseDate,
+            purchases.map((p) => ({
+              title: p.course.title,
+              description: p.course.description || undefined,
+              amountCents: p.amountCents,
+              currency: p.currency,
+            })),
+            formatPaymentMethod(payment?.provider),
+            payment?.providerRef || undefined
+          ),
         ]);
       } catch (error) {
         console.error("Failed to send email notifications:", error);
@@ -216,18 +253,41 @@ export async function GET(request: Request) {
       },
     });
 
+    // Fetch payment for invoice
+    const payment = await prisma.payment.findFirst({
+      where: { purchaseId: purchase.id },
+      orderBy: { createdAt: "desc" },
+    });
+
     // Send email notifications
     const user = await prisma.user.findUnique({
       where: { id: purchase.userId },
-      select: { email: true },
+      select: { email: true, name: true },
     });
 
     if (user && purchase.course) {
       try {
-        const { sendPurchaseConfirmationEmail, sendEnrollmentEmail } = await import("@/lib/email");
+        const { sendPurchaseConfirmationEmail, sendEnrollmentEmail, sendInvoiceEmail } = await import("@/lib/email");
+        const invoiceNumber = generateInvoiceNumber(purchase.id);
+        const purchaseDate = payment?.createdAt || purchase.createdAt;
+        
         await Promise.all([
           sendPurchaseConfirmationEmail(user.email, purchase.course.title, purchase.amountCents),
           sendEnrollmentEmail(user.email, purchase.course.title),
+          sendInvoiceEmail(
+            user.email,
+            user.name || "Customer",
+            invoiceNumber,
+            purchaseDate,
+            [{
+              title: purchase.course.title,
+              description: purchase.course.description || undefined,
+              amountCents: purchase.amountCents,
+              currency: purchase.currency,
+            }],
+            formatPaymentMethod(payment?.provider),
+            payment?.providerRef || undefined
+          ),
         ]);
       } catch (error) {
         console.error("Failed to send email notifications:", error);

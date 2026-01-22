@@ -12,45 +12,114 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
+import { OTPInput } from "@/components/auth/OTPInput";
 
 export default function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [step, setStep] = useState<"form" | "otp">("form");
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [isSendingOTP, setIsSendingOTP] = useState(false);
+  const [isVerifyingOTP, setIsVerifyingOTP] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     setIsLoading(true);
 
     const formData = new FormData(event.currentTarget);
-    const email = String(formData.get("email") ?? "");
-    const password = String(formData.get("password") ?? "");
+    const emailValue = String(formData.get("email") ?? "");
+    const passwordValue = String(formData.get("password") ?? "");
     const confirmPassword = String(formData.get("confirmPassword") ?? "");
-    const name = String(formData.get("name") ?? "").trim();
+    const nameValue = String(formData.get("name") ?? "").trim();
 
-    if (!name) {
+    if (!nameValue) {
       setError("Name is required");
       setIsLoading(false);
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (passwordValue !== confirmPassword) {
       setError("Passwords do not match");
       setIsLoading(false);
       return;
     }
 
-    if (password.length < 8) {
+    if (passwordValue.length < 8) {
       setError("Password must be at least 8 characters long");
       setIsLoading(false);
       return;
     }
 
+    // Store form data
+    setEmail(emailValue);
+    setName(nameValue);
+    setPassword(passwordValue);
+
+    // Send OTP
+    setIsSendingOTP(true);
     try {
+      const otpResponse = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: emailValue, purpose: "signup" }),
+      });
+
+      if (!otpResponse.ok) {
+        const otpData = await otpResponse.json();
+        setError(otpData.error || "Failed to send verification code");
+        setIsLoading(false);
+        setIsSendingOTP(false);
+        return;
+      }
+
+      setIsLoading(false);
+      setIsSendingOTP(false);
+      setStep("otp");
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+      setIsLoading(false);
+      setIsSendingOTP(false);
+    }
+  }
+
+  async function handleOTPSubmit() {
+    if (otp.length !== 6) {
+      setError("Please enter the 6-digit verification code");
+      return;
+    }
+
+    setError(null);
+    setIsVerifyingOTP(true);
+
+    try {
+      // Verify OTP
+      const verifyResponse = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, otp }),
+      });
+
+      const verifyData = await verifyResponse.json();
+
+      if (!verifyResponse.ok) {
+        setError(verifyData.error || "Invalid verification code");
+        setIsVerifyingOTP(false);
+        return;
+      }
+
+      // Create account
       const signupResponse = await fetch("/api/auth/signup", {
         method: "POST",
         headers: {
@@ -63,10 +132,11 @@ export default function SignUpPage() {
 
       if (!signupResponse.ok) {
         setError(signupData.error || "Failed to create account");
-        setIsLoading(false);
+        setIsVerifyingOTP(false);
         return;
       }
 
+      // Sign in
       const result = await signIn("credentials", {
         email,
         password,
@@ -75,14 +145,13 @@ export default function SignUpPage() {
 
       if (result?.error) {
         setError("Account created but sign-in failed. Please try signing in.");
-        setIsLoading(false);
+        setIsVerifyingOTP(false);
         return;
       }
 
-      setIsLoading(false);
+      setIsVerifyingOTP(false);
       setIsRedirecting(true);
       
-      // Wait a moment for session to update, then check role and redirect
       setTimeout(async () => {
         const sessionResponse = await fetch("/api/auth/session");
         const session = await sessionResponse.json();
@@ -92,7 +161,32 @@ export default function SignUpPage() {
       }, 500);
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
-      setIsLoading(false);
+      setIsVerifyingOTP(false);
+    }
+  }
+
+  async function handleResendOTP() {
+    setError(null);
+    setIsSendingOTP(true);
+    setOtp("");
+
+    try {
+      const otpResponse = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, purpose: "signup" }),
+      });
+
+      if (!otpResponse.ok) {
+        const otpData = await otpResponse.json();
+        setError(otpData.error || "Failed to resend verification code");
+      }
+    } catch (err) {
+      setError("Failed to resend verification code");
+    } finally {
+      setIsSendingOTP(false);
     }
   }
 
@@ -138,6 +232,82 @@ export default function SignUpPage() {
                     Redirecting to dashboard...
                   </p>
                 </motion.div>
+              ) : step === "otp" ? (
+                <motion.div
+                  key="otp"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-6"
+                >
+                  <div className="text-center space-y-2">
+                    <CardTitle className="text-xl">Verify your email</CardTitle>
+                    <CardDescription>
+                      We've sent a 6-digit verification code to {email}
+                    </CardDescription>
+                  </div>
+                  <div className="space-y-4">
+                    <OTPInput
+                      value={otp}
+                      onChange={setOtp}
+                      disabled={isVerifyingOTP || isSendingOTP}
+                    />
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                      >
+                        <Alert variant="destructive">
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                      </motion.div>
+                    )}
+                    <Button
+                      type="button"
+                      className="w-full"
+                      onClick={handleOTPSubmit}
+                      disabled={otp.length !== 6 || isVerifyingOTP}
+                    >
+                      {isVerifyingOTP ? (
+                        <span className="flex items-center gap-2">
+                          <Loader size="sm" inline />
+                          Verifying...
+                        </span>
+                      ) : (
+                        "Verify & Create Account"
+                      )}
+                    </Button>
+                    <div className="text-center space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        Didn't receive the code?
+                      </p>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleResendOTP}
+                        disabled={isSendingOTP}
+                      >
+                        {isSendingOTP ? "Sending..." : "Resend Code"}
+                      </Button>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        setStep("form");
+                        setOtp("");
+                        setError(null);
+                      }}
+                    >
+                      Back to form
+                    </Button>
+                  </div>
+                </motion.div>
               ) : (
                 <motion.div
                   key="form"
@@ -147,7 +317,7 @@ export default function SignUpPage() {
                   transition={{ duration: 0.2 }}
                   className="space-y-6"
                 >
-                  <form className="space-y-4" onSubmit={handleSubmit}>
+                  <form className="space-y-4" onSubmit={handleFormSubmit}>
                     <FloatingInput
                       id="name"
                       name="name"
@@ -164,7 +334,7 @@ export default function SignUpPage() {
                       required
                       label="Email"
                       placeholder="you@example.com"
-                      disabled={isLoading || isRedirecting}
+                      disabled={isLoading || isRedirecting || isSendingOTP}
                     />
                     <div>
                       <FloatingInput

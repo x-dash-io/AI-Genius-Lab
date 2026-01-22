@@ -11,11 +11,11 @@ export interface SEOConfig {
   nofollow?: boolean;
 }
 
-const defaultTitle = "Synapze - Master AI With Curated Learning Paths";
+const defaultTitle = "AI Genius Lab - Master AI With Curated Learning Paths";
 const defaultDescription =
   "Learn AI for business, content, apps, and productivity through structured courses, tracked progress, and instant access after purchase.";
 const defaultImage = "/og-image.jpg";
-const siteUrl = process.env.NEXTAUTH_URL || "https://synapze.dev";
+const siteUrl = process.env.NEXTAUTH_URL || "https://aigeniuslab.com";
 
 /**
  * Generate metadata for a page
@@ -33,7 +33,7 @@ export function generateMetadata(config: SEOConfig = {}): Metadata {
   } = config;
 
   const fullTitle = title
-    ? `${title} | Synapze`
+    ? `${title} | AI Genius Lab`
     : defaultTitle;
 
   const fullImage = image.startsWith("http")
@@ -60,7 +60,7 @@ export function generateMetadata(config: SEOConfig = {}): Metadata {
       title: fullTitle,
       description,
       url: fullUrl,
-      siteName: "Synapze",
+      siteName: "AI Genius Lab",
       images: [
         {
           url: fullImage,
@@ -96,7 +96,7 @@ export function generateOpenGraph(config: SEOConfig) {
     type = "website",
   } = config;
 
-  const fullTitle = title.includes("|") ? title : `${title} | Synapze`;
+  const fullTitle = title.includes("|") ? title : `${title} | AI Genius Lab`;
   const fullImage = image.startsWith("http") ? image : `${siteUrl}${image}`;
   const fullUrl = url.startsWith("http") ? url : `${siteUrl}${url}`;
 
@@ -106,7 +106,7 @@ export function generateOpenGraph(config: SEOConfig) {
     "og:image": fullImage,
     "og:url": fullUrl,
     "og:type": type,
-    "og:site_name": "Synapze",
+    "og:site_name": "AI Genius Lab",
     "og:locale": "en_US",
   };
 }
@@ -121,7 +121,7 @@ export function generateTwitterCard(config: SEOConfig) {
     image = defaultImage,
   } = config;
 
-  const fullTitle = title.includes("|") ? title : `${title} | Synapze`;
+  const fullTitle = title.includes("|") ? title : `${title} | AI Genius Lab`;
   const fullImage = image.startsWith("http") ? image : `${siteUrl}${image}`;
 
   return {

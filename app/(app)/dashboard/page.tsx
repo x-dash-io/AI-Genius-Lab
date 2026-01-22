@@ -62,7 +62,7 @@ export default async function DashboardPage({
           Customer Dashboard
         </p>
         <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
-          Welcome back to Synapze.
+          Welcome back to AI Genius Lab.
         </h1>
         <p className="mt-2 text-lg text-muted-foreground">
           Resume learning and track your progress across purchased courses.

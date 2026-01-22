@@ -33,7 +33,7 @@ export function PublicLayoutClient({
               href="/"
               className="font-display text-xl font-bold tracking-tight"
             >
-              SYNAPZE
+              AI GENIUS LAB
             </Link>
           </div>
           <nav className="flex items-center gap-6 flex-wrap">

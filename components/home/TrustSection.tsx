@@ -32,7 +32,7 @@ export function TrustSection() {
     <section className="grid gap-8">
       <div className="text-center">
         <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-          Why Synapze?
+          Why AI Genius Lab?
         </h2>
         <p className="mt-2 text-lg text-muted-foreground">
           Built for focused, outcome-driven learning

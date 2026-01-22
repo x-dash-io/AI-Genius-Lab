@@ -17,7 +17,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "Synapze",
+  title: "AI Genius Lab",
   description:
     "Learn AI for business, content, apps, and productivity through structured courses, tracked progress, and instant access after purchase.",
   keywords: [
@@ -69,7 +69,6 @@ export default function RootLayout({
           </SessionProvider>
         </ThemeProvider>
         <Analytics />
-        <GoogleAnalytics />
       </body>
     </html>
   );

@@ -11,7 +11,7 @@ export function Footer() {
       <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-8 md:grid-cols-4">
           <div className="grid gap-4">
-            <h3 className="font-display text-lg font-bold">Synapze</h3>
+            <h3 className="font-display text-lg font-bold">AI Genius Lab</h3>
             <p className="text-sm text-muted-foreground">
               Premium AI learning platform with structured courses and secure commerce.
             </p>
@@ -96,7 +96,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Synapze. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} AI Genius Lab. All rights reserved.</p>
         </div>
       </div>
     </footer>

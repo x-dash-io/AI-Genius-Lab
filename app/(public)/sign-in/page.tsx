@@ -143,15 +143,25 @@ export default function SignInPage() {
                       placeholder="you@example.com"
                       disabled={isLoading || isRedirecting}
                     />
-                    <FloatingInput
-                      id="password"
-                      name="password"
-                      type="password"
-                      required
-                      label="Password"
-                      placeholder="••••••••"
-                      disabled={isLoading || isRedirecting}
-                    />
+                    <div>
+                      <FloatingInput
+                        id="password"
+                        name="password"
+                        type="password"
+                        required
+                        label="Password"
+                        placeholder="••••••••"
+                        disabled={isLoading || isRedirecting}
+                      />
+                      <div className="mt-2 text-right">
+                        <Link
+                          href="/forgot-password"
+                          className="text-sm font-medium text-primary hover:underline"
+                        >
+                          Forgot password?
+                        </Link>
+                      </div>
+                    </div>
                     {error && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}

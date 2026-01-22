@@ -116,7 +116,7 @@ export default async function CheckoutSuccessPage({
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-6 w-6 text-primary" />
-                      <h2 className="text-2xl font-bold font-display">Synapze</h2>
+                      <h2 className="text-2xl font-bold font-display">AI Genius Lab</h2>
                     </div>
                     <p className="text-sm text-muted-foreground">Online Learning Platform</p>
                   </div>
@@ -343,7 +343,7 @@ export default async function CheckoutSuccessPage({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Building2 className="h-6 w-6 text-primary" />
-                    <h2 className="text-2xl font-bold font-display">Synapze</h2>
+                    <h2 className="text-2xl font-bold font-display">AI Genius Lab</h2>
                   </div>
                     <p className="text-sm text-muted-foreground">Online Learning Platform</p>
                   </div>
