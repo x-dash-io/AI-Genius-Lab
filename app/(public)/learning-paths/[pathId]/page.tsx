@@ -85,15 +85,48 @@ export default async function LearningPathDetailPage({
 
     // Create PayPal order for all purchases
     const purchaseIds = purchases.map((p) => p.id).join(",");
-    const order = await createPayPalOrder({
-      purchaseIds,
+    const appUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+    
+    // For multiple purchases, pass them as query parameter
+    // PayPal will append ?token=ORDER_ID to this URL
+    const returnUrl = `${appUrl}/api/payments/paypal/capture?purchases=${encodeURIComponent(purchaseIds)}`;
+    const cancelUrl = `${appUrl}/learning-paths/${pathId}?checkout=cancelled`;
+    
+    console.log("Creating PayPal order:", {
+      amountCents: totalAmountCents,
+      returnUrl,
+      cancelUrl,
+      purchaseId: purchases[0].id,
+    });
+    
+    // Use the first purchase ID for custom_id (PayPal requires a single ID)
+    const { orderId, approvalUrl } = await createPayPalOrder({
       amountCents: totalAmountCents,
       currency: "usd",
+      returnUrl,
+      cancelUrl,
+      purchaseId: purchases[0].id, // Use first purchase ID for custom_id
+    });
+
+    console.log("PayPal order created:", { orderId, approvalUrl });
+
+    if (!approvalUrl) {
+      throw new Error("Failed to get PayPal approval URL");
+    }
+
+    // Update all purchases with the order ID
+    await prisma.purchase.updateMany({
+      where: {
+        id: { in: purchases.map((p) => p.id) },
+      },
+      data: {
+        providerRef: orderId,
+      },
     });
 
     return {
-      orderId: order.id,
-      approvalUrl: order.links?.find((link: any) => link.rel === "approve")?.href || null,
+      orderId,
+      approvalUrl,
     };
   }
 

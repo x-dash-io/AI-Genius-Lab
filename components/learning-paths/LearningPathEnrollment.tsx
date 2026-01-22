@@ -24,16 +24,21 @@ export function LearningPathEnrollment({
     setIsEnrolling(true);
     try {
       const result = await enrollAction();
+      console.log("Enrollment result:", result); // Debug log
+      
       if (result.approvalUrl) {
+        // Redirect to PayPal
         window.location.href = result.approvalUrl;
       } else {
         toast({
-          title: "Enrollment started",
-          description: "Redirecting to PayPal...",
-          variant: "info",
+          title: "Enrollment failed",
+          description: "No PayPal approval URL received",
+          variant: "destructive",
         });
+        setIsEnrolling(false);
       }
     } catch (error) {
+      console.error("Enrollment error:", error); // Debug log
       const errorMessage = error instanceof Error ? error.message : "Failed to start enrollment";
       toast({
         title: "Enrollment failed",
