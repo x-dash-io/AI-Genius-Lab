@@ -1,9 +1,9 @@
-export const ROLES = ["learner", "admin"] as const;
+export const ROLES = ["customer", "admin"] as const;
 
 export type Role = (typeof ROLES)[number];
 
 const roleRank: Record<Role, number> = {
-  learner: 1,
+  customer: 1,
   admin: 2,
 };
 

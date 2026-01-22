@@ -24,9 +24,6 @@ export default async function CoursesPage() {
             <p className="mt-2 text-sm text-zinc-600">
               {course.description ?? "Course details coming soon."}
             </p>
-            <p className="mt-3 text-xs uppercase tracking-[0.2em] text-zinc-500">
-              {course.instructor?.name ?? "Synapze Faculty"}
-            </p>
             <Link
               href={`/courses/${course.slug}`}
               className="mt-4 inline-flex text-sm font-semibold text-zinc-900"

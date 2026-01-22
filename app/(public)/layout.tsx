@@ -16,11 +16,8 @@ export default function PublicLayout({
             <Link href="/courses" className="hover:text-zinc-900">
               Courses
             </Link>
-            <Link href="/instructors" className="hover:text-zinc-900">
-              Instructors
-            </Link>
             <Link href="/dashboard" className="hover:text-zinc-900">
-              Learner Portal
+              Customer Portal
             </Link>
             <Link href="/sign-in" className="hover:text-zinc-900">
               Sign in

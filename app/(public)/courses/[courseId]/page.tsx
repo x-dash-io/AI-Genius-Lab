@@ -26,10 +26,7 @@ export default async function CourseDetailPage({
         </h1>
         <p className="mt-3 max-w-2xl text-zinc-600">
           {course.description ??
-            "Detailed course pages will include lesson previews, outcomes, and instructor profiles."}
-        </p>
-        <p className="mt-3 text-xs uppercase tracking-[0.2em] text-zinc-500">
-          Instructor: {course.instructor?.name ?? "Synapze Faculty"}
+            "Detailed course pages will include lesson previews, outcomes, and learning resources."}
         </p>
       </div>
       <div className="grid gap-4 rounded-2xl border border-dashed border-zinc-300 p-5 text-sm text-zinc-600">

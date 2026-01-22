@@ -8,7 +8,7 @@ datasource db {
 }
 
 enum Role {
-  learner
+  customer
   admin
 }
 
@@ -60,11 +60,9 @@ model Course {
   description  String?
   priceCents   Int
   isPublished  Boolean     @default(false)
-  instructorId String?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
-  instructor   User?       @relation("InstructorCourses", fields: [instructorId], references: [id])
   sections     Section[]
   purchases    Purchase[]
   enrollments  Enrollment[]

@@ -25,7 +25,7 @@ export default async function DashboardPage() {
     <section className="grid gap-6">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">
-          Learner Dashboard
+          Customer Dashboard
         </p>
         <h1 className="mt-2 text-3xl font-semibold text-white">
           Welcome back to Synapze.

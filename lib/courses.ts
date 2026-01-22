@@ -9,9 +9,6 @@ export async function getPublishedCourses() {
       title: true,
       description: true,
       priceCents: true,
-      instructor: {
-        select: { name: true },
-      },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -26,9 +23,6 @@ export async function getCoursePreviewBySlug(slug: string) {
       title: true,
       description: true,
       priceCents: true,
-      instructor: {
-        select: { name: true },
-      },
       sections: {
         orderBy: { sortOrder: "asc" },
         select: {

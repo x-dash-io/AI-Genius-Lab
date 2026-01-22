@@ -4,14 +4,14 @@ import { hashPassword } from "@/lib/password";
 async function main() {
   const passwordHash = await hashPassword("password123");
 
-  const learner = await prisma.user.upsert({
-    where: { email: "learner@synapze.dev" },
+  const customer = await prisma.user.upsert({
+    where: { email: "customer@synapze.dev" },
     update: {},
     create: {
-      email: "learner@synapze.dev",
-      name: "Synapze Learner",
+      email: "customer@synapze.dev",
+      name: "Synapze Customer",
       passwordHash,
-      role: "learner",
+      role: "customer",
     },
   });
 
@@ -35,7 +35,6 @@ async function main() {
       description: "Build a strong foundation in AI concepts and workflows.",
       priceCents: 12900,
       isPublished: true,
-      instructorId: admin.id,
       sections: {
         create: [
           {
@@ -88,13 +87,13 @@ async function main() {
   await prisma.enrollment.upsert({
     where: {
       userId_courseId: {
-        userId: learner.id,
+        userId: customer.id,
         courseId: course.id,
       },
     },
     update: {},
     create: {
-      userId: learner.id,
+      userId: customer.id,
       courseId: course.id,
       grantedAt: new Date(),
     },
