@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/access";
 import { getAdminStats } from "@/lib/admin/stats";
@@ -5,6 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { BookOpen, Users, DollarSign, GraduationCap, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = generateSEOMetadata({
+  title: "Admin Dashboard",
+  description: "Administrative dashboard",
+  noindex: true,
+  nofollow: true,
+});
 
 export default async function AdminDashboardPage() {
   await requireRole("admin");

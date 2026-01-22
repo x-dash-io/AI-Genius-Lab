@@ -1,5 +1,14 @@
+import { Metadata } from "next";
 import { getPublishedCourses } from "@/lib/courses";
 import { CourseList } from "@/components/courses/CourseList";
+import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = generateSEOMetadata({
+  title: "Course Catalog",
+  description:
+    "Browse curated AI courses with previews and structured learning paths. Learn AI for business, content, apps, and productivity.",
+  keywords: ["AI courses", "course catalog", "online courses", "AI training"],
+});
 
 export default async function CoursesPage() {
   const courses = await getPublishedCourses();

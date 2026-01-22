@@ -13,7 +13,7 @@ interface EmailOptions {
 export async function sendEmail(options: EmailOptions): Promise<void> {
   // In development, log emails instead of sending
   if (process.env.NODE_ENV === "development") {
-    console.log("📧 Email would be sent:", {
+    console.log("[EMAIL] Email would be sent:", {
       to: options.to,
       subject: options.subject,
       preview: options.text || options.html.substring(0, 100),
@@ -33,7 +33,7 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
   // });
 
   // For now, just log in production too (replace with actual service)
-  console.log("📧 Email notification:", {
+  console.log("[EMAIL] Email notification:", {
     to: options.to,
     subject: options.subject,
   });

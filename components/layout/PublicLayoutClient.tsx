@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { BackgroundBlobs } from "@/components/ui/background-blobs";
+import { Footer } from "@/components/layout/Footer";
 
 export function PublicLayoutClient({
   children,
@@ -76,6 +77,7 @@ export function PublicLayoutClient({
       >
         {children}
       </motion.main>
+      <Footer />
     </div>
   );
 }

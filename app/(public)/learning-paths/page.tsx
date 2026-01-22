@@ -1,9 +1,18 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import { getAllPublishedLearningPaths } from "@/lib/learning-paths";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Route, BookOpen } from "lucide-react";
+import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = generateSEOMetadata({
+  title: "Learning Paths",
+  description:
+    "Follow curated learning paths designed to take you from beginner to expert. Structured courses organized by outcomes.",
+  keywords: ["learning paths", "structured learning", "AI curriculum", "course paths"],
+});
 
 export default async function LearningPathsPage() {
   const paths = await getAllPublishedLearningPaths();

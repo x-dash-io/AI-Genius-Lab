@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { cache, cacheKeys } from "@/lib/cache";
 
 export async function getPublishedCourses() {
   return prisma.course.findMany({
@@ -8,6 +9,22 @@ export async function getPublishedCourses() {
       slug: true,
       title: true,
       description: true,
+      category: true,
+      priceCents: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function getPublishedCoursesByCategory(category: string) {
+  return prisma.course.findMany({
+    where: { isPublished: true, category },
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      description: true,
+      category: true,
       priceCents: true,
     },
     orderBy: { createdAt: "desc" },

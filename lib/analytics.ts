@@ -19,7 +19,7 @@ export interface AnalyticsEvent {
 export function trackEvent(event: AnalyticsEvent): void {
   // In development, log events
   if (process.env.NODE_ENV === "development") {
-    console.log("📊 Analytics Event:", event);
+    console.log("[ANALYTICS] Event:", event);
     return;
   }
 

@@ -5,6 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -99,6 +106,23 @@ export default async function NewCoursePage() {
                 className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 placeholder="Course description..."
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select name="category" defaultValue="">
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No category</SelectItem>
+                  <SelectItem value="business">Make Money & Business</SelectItem>
+                  <SelectItem value="content">Create Content & Video</SelectItem>
+                  <SelectItem value="marketing">Marketing & Traffic</SelectItem>
+                  <SelectItem value="apps">Build Apps & Tech</SelectItem>
+                  <SelectItem value="productivity">Productivity & Tools</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">

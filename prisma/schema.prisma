@@ -32,6 +32,7 @@ model Course {
   slug        String               @unique
   title       String
   description String?
+  category    String? // e.g., "business", "content", "marketing", "apps", "productivity"
   priceCents  Int
   isPublished Boolean              @default(false)
   createdAt   DateTime             @default(now())

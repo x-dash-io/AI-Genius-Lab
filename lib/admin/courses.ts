@@ -35,6 +35,7 @@ export async function createCourse(data: {
   title: string;
   slug: string;
   description?: string;
+  category?: string;
   priceCents: number;
   isPublished?: boolean;
 }) {
@@ -43,6 +44,7 @@ export async function createCourse(data: {
       title: data.title,
       slug: data.slug,
       description: data.description,
+      category: data.category,
       priceCents: data.priceCents,
       isPublished: data.isPublished ?? false,
     },
@@ -55,6 +57,7 @@ export async function updateCourse(
     title?: string;
     slug?: string;
     description?: string;
+    category?: string;
     priceCents?: number;
     isPublished?: boolean;
   }

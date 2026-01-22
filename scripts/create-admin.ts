@@ -28,7 +28,7 @@ async function main() {
     },
   });
 
-  console.log(`✅ Admin user created/updated:`);
+  console.log(`[SUCCESS] Admin user created/updated:`);
   console.log(`   Email: ${user.email}`);
   console.log(`   Name: ${user.name}`);
   console.log(`   Role: ${user.role}`);

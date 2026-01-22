@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLearningPathBySlug } from "@/lib/learning-paths";
@@ -5,10 +6,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, BookOpen, CheckCircle2 } from "lucide-react";
+import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+import { generateLearningPathSchema } from "@/lib/seo/schemas";
 
 type LearningPathDetailPageProps = {
   params: Promise<{ pathId: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: LearningPathDetailPageProps): Promise<Metadata> {
+  const { pathId } = await params;
+  const path = await getLearningPathBySlug(pathId);
+
+  if (!path) {
+    return generateSEOMetadata({
+      title: "Learning Path Not Found",
+      noindex: true,
+    });
+  }
+
+  return generateSEOMetadata({
+    title: path.title,
+    description: path.description || `Follow this structured learning path to master ${path.title}.`,
+    keywords: ["learning path", path.title, "structured learning"],
+    url: `/learning-paths/${pathId}`,
+    type: "course",
+  });
+}
 
 export default async function LearningPathDetailPage({
   params,
@@ -24,6 +49,16 @@ export default async function LearningPathDetailPage({
     (sum, pc) => sum + pc.course.priceCents,
     0
   );
+
+  const learningPathSchema = generateLearningPathSchema({
+    name: path.title,
+    description: path.description || `Follow this structured learning path to master ${path.title}.`,
+    url: `/learning-paths/${pathId}`,
+    courses: path.courses.map((pc) => ({
+      name: pc.course.title,
+      url: `/courses/${pc.course.slug}`,
+    })),
+  });
 
   return (
     <section className="grid gap-8">
@@ -137,5 +172,6 @@ export default async function LearningPathDetailPage({
         </>
       )}
     </section>
+    </>
   );
 }

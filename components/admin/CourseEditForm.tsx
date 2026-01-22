@@ -99,6 +99,23 @@ export function CourseEditForm({
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select name="category" defaultValue={course.category || ""}>
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No category</SelectItem>
+                  <SelectItem value="business">Make Money & Business</SelectItem>
+                  <SelectItem value="content">Create Content & Video</SelectItem>
+                  <SelectItem value="marketing">Marketing & Traffic</SelectItem>
+                  <SelectItem value="apps">Build Apps & Tech</SelectItem>
+                  <SelectItem value="productivity">Productivity & Tools</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="priceCents">Price (USD) *</Label>
               <Input
                 id="priceCents"

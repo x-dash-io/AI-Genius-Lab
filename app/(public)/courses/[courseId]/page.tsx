@@ -1,3 +1,4 @@
+import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCoursePreviewBySlug } from "@/lib/courses";
@@ -6,10 +7,34 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
+import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+import { generateCourseSchema } from "@/lib/seo/schemas";
 
 type CourseDetailPageProps = {
-  params: { courseId: string };
+  params: Promise<{ courseId: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: CourseDetailPageProps): Promise<Metadata> {
+  const { courseId } = await params;
+  const course = await getCoursePreviewBySlug(courseId);
+
+  if (!course) {
+    return generateSEOMetadata({
+      title: "Course Not Found",
+      noindex: true,
+    });
+  }
+
+  return generateSEOMetadata({
+    title: course.title,
+    description: course.description || `Learn ${course.title} with structured lessons and progress tracking.`,
+    keywords: ["AI course", course.title, "online learning"],
+    url: `/courses/${course.slug}`,
+    type: "course",
+  });
+}
 
 export default async function CourseDetailPage({
   params,
@@ -21,7 +46,15 @@ export default async function CourseDetailPage({
     notFound();
   }
 
+  const reviewStats = await getCourseReviewStats(course.id);
   const lessons = course.sections.flatMap((section) => section.lessons);
+  
+  const courseSchema = generateCourseSchema({
+    name: course.title,
+    description: course.description || `Learn ${course.title}`,
+    url: `/courses/${course.slug}`,
+    priceCents: course.priceCents,
+  });
 
   return (
     <section className="grid gap-8">
@@ -84,5 +117,6 @@ export default async function CourseDetailPage({
       {/* Reviews Section */}
       <ReviewSection courseId={course.id} initialStats={reviewStats} />
     </section>
+    </>
   );
 }

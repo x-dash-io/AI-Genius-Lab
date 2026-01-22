@@ -16,6 +16,7 @@ async function updateCourseAction(courseId: string, formData: FormData) {
   const title = formData.get("title") as string;
   const slug = formData.get("slug") as string;
   const description = formData.get("description") as string;
+  const category = formData.get("category") as string;
   const priceCents = parseInt(formData.get("priceCents") as string) * 100;
   const isPublished = formData.get("isPublished") === "on";
 
@@ -23,6 +24,7 @@ async function updateCourseAction(courseId: string, formData: FormData) {
     title,
     slug,
     description: description || undefined,
+    category: category || undefined,
     priceCents,
     isPublished,
   });
