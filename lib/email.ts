@@ -42,7 +42,29 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
 
     if (result.error) {
       console.error("[EMAIL] Resend error:", result.error);
-      throw new Error(`Failed to send email: ${result.error.message || "Unknown error"}`);
+      
+      // Handle Resend test domain restriction gracefully
+      // Test domain only allows sending to account owner's email
+      const errorMessage = result.error.message || "";
+      const isTestDomainError = errorMessage.includes("testing emails") || errorMessage.includes("verify a domain");
+      
+      if (isTestDomainError) {
+        console.warn("[EMAIL] Resend test domain restriction:", {
+          message: "Using test domain - emails can only be sent to account owner's email",
+          suggestion: "Verify a domain in Resend dashboard or use account owner's email for testing",
+        });
+        // Extract code from email HTML for development testing
+        if (process.env.NODE_ENV === "development") {
+          const codeMatch = options.html.match(/>(\d{6})</);
+          if (codeMatch) {
+            console.log(`[EMAIL] Development mode - Code from email: ${codeMatch[1]}`);
+          }
+        }
+        // Don't throw - return success to user (security best practice)
+        return;
+      }
+      
+      throw new Error(`Failed to send email: ${errorMessage || "Unknown error"}`);
     }
 
     console.log("[EMAIL] Email sent successfully:", {

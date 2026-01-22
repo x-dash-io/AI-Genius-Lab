@@ -24,14 +24,72 @@ export default function ResetPasswordPage() {
   const [step, setStep] = useState<"email" | "code" | "password">("email");
   const router = useRouter();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleEmailSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setIsLoading(true);
 
-    if (!token) {
-      setError("Invalid reset token");
+    try {
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error || "Failed to send reset code");
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(false);
+      setStep("code");
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+      setIsLoading(false);
+    }
+  }
+
+  async function handleCodeVerify() {
+    if (resetCode.length !== 6) {
+      setError("Please enter the 6-digit code");
       return;
     }
+
+    setError(null);
+    setIsVerifying(true);
+
+    try {
+      const response = await fetch("/api/auth/verify-reset-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, code: resetCode }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Invalid or expired reset code");
+        setIsVerifying(false);
+        return;
+      }
+
+      setIsVerifying(false);
+      setStep("password");
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+      setIsVerifying(false);
+    }
+  }
+
+  async function handlePasswordSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters long");
@@ -51,7 +109,7 @@ export default function ResetPasswordPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ token, password }),
+        body: JSON.stringify({ email, code: resetCode, password }),
       });
 
       const data = await response.json();
@@ -65,7 +123,6 @@ export default function ResetPasswordPage() {
       setSuccess(true);
       setIsLoading(false);
 
-      // Redirect to sign in after 2 seconds
       setTimeout(() => {
         router.push("/sign-in?reset=success");
       }, 2000);

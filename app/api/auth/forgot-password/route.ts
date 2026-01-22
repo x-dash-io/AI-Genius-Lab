@@ -53,7 +53,13 @@ export async function POST(request: Request) {
       await sendPasswordResetEmail(user.email, resetCode);
     } catch (emailError) {
       console.error("Failed to send password reset email:", emailError);
-      // Don't fail the request if email fails, but log it
+      // In development, log the code for testing when email fails
+      if (process.env.NODE_ENV === "development") {
+        console.log(`[DEV] Password reset code for ${user.email}: ${resetCode}`);
+        console.log("[DEV] Note: Resend test domain only allows sending to account owner's email");
+        console.log("[DEV] Use this code to test the reset flow manually");
+      }
+      // Don't fail the request if email fails (security best practice)
     }
 
     return NextResponse.json({ success: true });
