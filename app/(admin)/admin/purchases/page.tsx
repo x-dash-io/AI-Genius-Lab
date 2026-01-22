@@ -4,9 +4,9 @@ import { getAllPurchases, refundPurchase } from "@/lib/admin/purchases";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { ShoppingCart, Search } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import Link from "next/link";
+import { PurchaseFilters } from "@/components/admin/PurchaseFilters";
 
 function formatCurrency(cents: number) {
   return new Intl.NumberFormat("en-US", {
@@ -113,35 +113,7 @@ export default async function AdminPurchasesPage({
           <CardTitle>Filters</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="flex flex-wrap gap-4">
-            <div className="flex-1 min-w-[200px]">
-              <Input
-                name="search"
-                placeholder="Search by user email or course name..."
-                defaultValue={params.search}
-              />
-            </div>
-            <select
-              name="status"
-              defaultValue={params.status || "all"}
-              className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="paid">Paid</option>
-              <option value="refunded">Refunded</option>
-            </select>
-            <select
-              name="provider"
-              defaultValue={params.provider || "all"}
-              className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="all">All Providers</option>
-              <option value="paypal">PayPal</option>
-              <option value="stripe">Stripe</option>
-            </select>
-            <Button type="submit">Apply Filters</Button>
-          </form>
+          <PurchaseFilters />
         </CardContent>
       </Card>
 

@@ -30,7 +30,7 @@ export function RoleSelectForm({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isCurrentUser || isSubmitting) return;
+    if (isCurrentUser || isSubmitting || selectedRole === currentRole) return;
 
     setIsSubmitting(true);
     const formData = new FormData();
@@ -56,8 +56,12 @@ export function RoleSelectForm({
             <SelectValue placeholder="Select a role" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="customer">Customer</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
+            <SelectItem value="customer" disabled={currentRole === "customer"}>
+              Customer
+            </SelectItem>
+            <SelectItem value="admin" disabled={currentRole === "admin"}>
+              Admin
+            </SelectItem>
           </SelectContent>
         </Select>
         {isCurrentUser && (
@@ -66,7 +70,10 @@ export function RoleSelectForm({
           </p>
         )}
       </div>
-      <Button type="submit" disabled={isCurrentUser || isSubmitting}>
+      <Button 
+        type="submit" 
+        disabled={isCurrentUser || isSubmitting || selectedRole === currentRole}
+      >
         {isSubmitting ? "Updating..." : "Update Role"}
       </Button>
     </form>

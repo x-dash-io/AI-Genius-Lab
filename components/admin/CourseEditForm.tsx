@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus, Trash2, ChevronDown, ChevronRight } from "lucide-react";
 import type { Course, Section, Lesson } from "@prisma/client";
 
@@ -35,6 +42,7 @@ export function CourseEditForm({
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [showAddSection, setShowAddSection] = useState(false);
   const [showAddLesson, setShowAddLesson] = useState<string | null>(null);
+  const [contentTypes, setContentTypes] = useState<Record<string, string>>({});
 
   const toggleSection = (sectionId: string) => {
     const newExpanded = new Set(expandedSections);
@@ -221,7 +229,15 @@ export function CourseEditForm({
                         <CardContent className="pt-6">
                           <form
                             action={addLessonAction.bind(null, section.id)}
-                            onSubmit={() => setShowAddLesson(null)}
+                            onSubmit={() => {
+                              setShowAddLesson(null);
+                              // Clear contentType for this section after submission
+                              setContentTypes((prev) => {
+                                const newTypes = { ...prev };
+                                delete newTypes[section.id];
+                                return newTypes;
+                              });
+                            }}
                             className="space-y-4"
                           >
                             <input type="hidden" name="courseId" value={course.id} />
@@ -236,18 +252,30 @@ export function CourseEditForm({
                             </div>
                             <div className="space-y-2">
                               <Label htmlFor={`contentType-${section.id}`}>Content Type *</Label>
-                              <select
-                                id={`contentType-${section.id}`}
+                              <input
+                                type="hidden"
                                 name="contentType"
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                value={contentTypes[section.id] || ""}
+                                required
+                              />
+                              <Select
+                                value={contentTypes[section.id] || ""}
+                                onValueChange={(value) =>
+                                  setContentTypes((prev) => ({ ...prev, [section.id]: value }))
+                                }
                                 required
                               >
-                                <option value="video">Video</option>
-                                <option value="audio">Audio</option>
-                                <option value="pdf">PDF</option>
-                                <option value="link">Link</option>
-                                <option value="file">File</option>
-                              </select>
+                                <SelectTrigger id={`contentType-${section.id}`} className="w-full">
+                                  <SelectValue placeholder="Select content type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="video">Video</SelectItem>
+                                  <SelectItem value="audio">Audio</SelectItem>
+                                  <SelectItem value="pdf">PDF</SelectItem>
+                                  <SelectItem value="link">Link</SelectItem>
+                                  <SelectItem value="file">File</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </div>
                             <div className="space-y-2">
                               <Label htmlFor={`contentUrl-${section.id}`}>Content URL (Cloudinary Public ID)</Label>
