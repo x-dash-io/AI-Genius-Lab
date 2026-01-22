@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -16,6 +17,10 @@ export function PublicLayoutClient({
   children: React.ReactNode;
 }) {
   const { data: session } = useSession();
+  const pathname = usePathname();
+  
+  // Hide dashboard button on sign-in/sign-up pages to avoid conflicts during redirect
+  const isAuthPage = pathname === "/sign-in" || pathname === "/sign-up";
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
@@ -31,14 +36,16 @@ export function PublicLayoutClient({
             </Link>
           </div>
           <nav className="flex items-center gap-6 flex-wrap">
-            <Link
-              href="/courses"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Courses
-            </Link>
+            {!isAuthPage && (
+              <Link
+                href="/courses"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Courses
+              </Link>
+            )}
             <ThemeToggle />
-            {session?.user ? (
+            {!isAuthPage && session?.user ? (
               <>
                 <Link href="/dashboard">
                   <Button variant="ghost" size="sm">
@@ -46,7 +53,7 @@ export function PublicLayoutClient({
                   </Button>
                 </Link>
               </>
-            ) : (
+            ) : !isAuthPage ? (
               <>
                 <Link href="/sign-in">
                   <Button variant="ghost" size="sm">
@@ -57,7 +64,7 @@ export function PublicLayoutClient({
                   <Button size="sm">Sign up</Button>
                 </Link>
               </>
-            )}
+            ) : null}
           </nav>
         </div>
       </header>

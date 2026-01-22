@@ -102,13 +102,15 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                 </nav>
               </div>
 
-              <div>
+              <div className="border-t pt-4 mt-4">
                 <p className="px-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-2">
                   Customer View
                 </p>
                 <nav className="grid gap-2">
                   {regularNavigation.map((item) => {
                     const Icon = item.icon;
+                    const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                    const previewHref = `${item.href}?preview=true`;
                     return (
                       <motion.div
                         key={item.href}
@@ -116,8 +118,15 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                         transition={{ type: "spring", stiffness: 400, damping: 17 }}
                       >
                         <Link
-                          href={item.href}
-                          className="flex items-center gap-3 rounded-lg pl-1 pr-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                          href={previewHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={cn(
+                            "flex items-center gap-3 rounded-lg pl-1 pr-3 py-2 text-sm font-medium transition-colors border-l-2",
+                            isActive
+                              ? "border-primary text-foreground bg-accent/50"
+                              : "border-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:border-muted"
+                          )}
                         >
                           <Icon className="h-4 w-4" />
                           {item.name}
@@ -234,19 +243,28 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                       })}
                     </div>
                   </div>
-                  <div>
+                  <div className="border-t pt-4 mt-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-2">
                       Customer View
                     </p>
                     <div className="space-y-2">
                       {regularNavigation.map((item) => {
                         const Icon = item.icon;
+                        const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                        const previewHref = `${item.href}?preview=true`;
                         return (
                           <Link
                             key={item.href}
-                            href={item.href}
+                            href={previewHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center gap-3 rounded-lg pl-1 pr-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-accent"
+                            className={cn(
+                              "flex items-center gap-3 rounded-lg pl-1 pr-3 py-2 text-sm font-medium transition-colors border-l-2",
+                              isActive
+                                ? "border-primary text-foreground bg-accent/50"
+                                : "border-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:border-muted"
+                            )}
                           >
                             <Icon className="h-4 w-4" />
                             {item.name}

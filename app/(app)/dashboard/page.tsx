@@ -7,14 +7,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { BookOpen, Activity } from "lucide-react";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ preview?: string }>;
+}) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     redirect("/sign-in");
   }
 
-  // Redirect admins to admin dashboard
-  if (session.user.role === "admin") {
+  const resolvedSearchParams = await searchParams;
+  const isPreview = resolvedSearchParams?.preview === "true";
+
+  // Redirect admins to admin dashboard unless in preview mode
+  if (session.user.role === "admin" && !isPreview) {
     redirect("/admin");
   }
 
@@ -31,6 +38,13 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {isPreview && session.user.role === "admin" && (
+        <div className="rounded-lg border-2 border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 p-4">
+          <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+            👁️ Preview Mode: You are viewing the customer dashboard as an admin. This page opened in a new tab.
+          </p>
+        </div>
+      )}
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Customer Dashboard
