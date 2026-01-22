@@ -3,9 +3,19 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Lock, BarChart, GraduationCap } from "lucide-react";
+import { Lock, BarChart, GraduationCap, Sparkles } from "lucide-react";
+import { TypingAnimation } from "@/components/ui/typing-animation";
 
 export function LandingHero() {
+  const typingWords = [
+    "structured paths",
+    "verified access",
+    "real outcomes",
+    "premium learning",
+    "secure commerce",
+    "curated courses",
+  ];
+
   return (
     <section className="grid gap-12">
       <motion.div
@@ -14,9 +24,29 @@ export function LandingHero() {
         transition={{ duration: 0.5 }}
         className="grid gap-6"
       >
-        <h1 className="font-display text-5xl font-bold tracking-tight sm:text-6xl">
-          Master AI With Curated Paths — Not Random Tutorials
-        </h1>
+        <div className="grid gap-3">
+          <h1 className="font-display text-5xl font-bold tracking-tight sm:text-6xl">
+            Master AI With{" "}
+            <TypingAnimation
+              words={typingWords}
+              className="text-primary"
+              typingSpeed={80}
+              deletingSpeed={40}
+              pauseDuration={2500}
+            />
+          </h1>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="flex items-center gap-3 text-xl sm:text-2xl font-semibold text-muted-foreground"
+          >
+            <Sparkles className="h-5 w-5 text-primary" />
+            <span className="italic">Not Random Tutorials</span>
+            <span className="text-primary">—</span>
+            <span className="text-foreground">Real Learning Paths</span>
+          </motion.div>
+        </div>
         <p className="max-w-2xl text-lg text-muted-foreground">
           Learn AI for business, content, apps, and productivity through structured courses, tracked progress, and instant access after purchase.
         </p>

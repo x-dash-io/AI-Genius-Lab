@@ -22,6 +22,9 @@ export function TypingAnimation({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
 
+  // Find the longest word to reserve space
+  const longestWord = words.reduce((a, b) => (a.length > b.length ? a : b), "");
+
   useEffect(() => {
     if (isPaused) {
       const pauseTimer = setTimeout(() => {
@@ -56,5 +59,19 @@ export function TypingAnimation({
     return () => clearTimeout(timer);
   }, [currentText, isDeleting, isPaused, currentWordIndex, words, typingSpeed, deletingSpeed, pauseDuration]);
 
-  return <span className={className}>{currentText}</span>;
+  return (
+    <span className="inline-block relative whitespace-nowrap">
+      {/* Invisible placeholder to reserve space - ensures layout doesn't shift */}
+      <span className={`${className} invisible`} aria-hidden="true">
+        {longestWord}
+      </span>
+      {/* Visible animated text - absolutely positioned over the placeholder */}
+      <span
+        className={`${className} absolute top-0 left-0`}
+        aria-label={currentText || longestWord}
+      >
+        {currentText}
+      </span>
+    </span>
+  );
 }
