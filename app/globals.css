@@ -126,8 +126,25 @@ body {
 
 /* Print styles for invoice */
 @media print {
+  @page {
+    size: A4;
+    margin: 1cm;
+  }
+
+  /* Only apply print styles when actually printing */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html,
   body {
-    background: white;
+    background: white !important;
+    color: #000 !important;
+    font-size: 12pt;
+    line-height: 1.5;
+    width: 100% !important;
+    height: auto !important;
   }
   
   /* Hide navigation and non-essential elements */
@@ -135,27 +152,149 @@ body {
   nav,
   aside,
   footer,
-  button:not(.print-button),
-  a:not(.print-link) {
+  button {
     display: none !important;
   }
   
-  /* Ensure invoice card is visible */
-  section {
-    max-width: 100%;
-    padding: 0;
+  /* Hide elements with print:hidden class (Tailwind utility) */
+  [class*="print:hidden"] {
+    display: none !important;
   }
   
-  /* Remove background colors for printing */
+  /* Style links for print */
+  a {
+    text-decoration: none !important;
+    color: #000 !important;
+  }
+  
+  /* Don't hide all links - only hide action links */
+  a[href^="/library"],
+  a[href^="/courses"],
+  a[href^="/sign"] {
+    display: none !important;
+  }
+  
+  /* Ensure invoice section is visible */
+  section {
+    display: block !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+    background: white !important;
+  }
+  
+  /* Ensure all content containers are visible */
+  main,
+  [role="main"],
+  div,
+  article {
+    display: block !important;
+    background: white !important;
+  }
+
+  /* Card styling for print */
+  [class*="Card"],
+  [class*="card"] {
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+    background: white !important;
+    page-break-inside: avoid;
+    display: block !important;
+  }
+  
+  /* Remove background colors and gradients for printing */
   .bg-background,
   .bg-card,
-  .bg-muted {
+  .bg-muted,
+  .bg-gradient-to-r,
+  [class*="bg-primary"],
+  [class*="bg-green"],
+  [class*="dark:bg"] {
     background: white !important;
+  }
+
+  /* Ensure borders are visible */
+  .border,
+  .border-b,
+  .border-t,
+  [class*="border"] {
+    border-color: #ddd !important;
   }
   
   /* Ensure text is black for printing */
   .text-foreground,
-  .text-muted-foreground {
+  .text-muted-foreground,
+  .text-primary,
+  [class*="text-"] {
     color: #000 !important;
+  }
+  
+  /* Ensure headings are visible */
+  h1, h2, h3, h4, h5, h6,
+  p, span, div, td, th {
+    color: #000 !important;
+  }
+
+  /* Table styling */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    display: table !important;
+  }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  tbody {
+    display: table-row-group !important;
+  }
+
+  tr {
+    display: table-row !important;
+    page-break-inside: avoid;
+  }
+
+  th, td {
+    border: 1px solid #ddd !important;
+    padding: 8pt !important;
+    display: table-cell !important;
+    color: #000 !important;
+  }
+
+  thead th {
+    background: #f5f5f5 !important;
+    font-weight: bold;
+  }
+
+  /* Badge styling */
+  [class*="Badge"],
+  [class*="badge"] {
+    background: #000 !important;
+    color: #fff !important;
+    border: 1px solid #000 !important;
+    display: inline-block !important;
+  }
+
+  /* Ensure proper spacing */
+  .space-y-8 > * + * {
+    margin-top: 1.5rem;
+  }
+
+  /* Prevent page breaks inside important sections */
+  .p-6,
+  .p-8,
+  [class*="p-"] {
+    page-break-inside: avoid;
+  }
+  
+  /* Ensure all content in invoice is visible */
+  [class*="CardContent"],
+  [class*="card-content"],
+  div[class*="p-"] {
+    display: block !important;
+    visibility: visible !important;
   }
 }

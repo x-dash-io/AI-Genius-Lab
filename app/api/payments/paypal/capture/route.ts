@@ -43,7 +43,7 @@ export async function GET(request: Request) {
     });
 
     if (purchases.length === 0) {
-      return NextResponse.redirect(new URL("/courses", url));
+      return NextResponse.redirect(new URL("/courses", baseUrl));
     }
 
     const capture = await capturePayPalOrder(orderId);
@@ -192,7 +192,7 @@ export async function GET(request: Request) {
       }
 
       return NextResponse.redirect(
-        new URL(`/courses/${purchase.course.slug}?checkout=failed`, url)
+        new URL(`/courses/${purchase.course.slug}?checkout=failed`, baseUrl)
       );
     }
 
