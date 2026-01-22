@@ -44,11 +44,12 @@ export default async function LessonPage({ params }: LessonPageProps) {
     redirect("/sign-in");
   }
 
+  const { courseId, lessonId } = await params;
   const { lesson, courseSlug, signedUrl } = await getAuthorizedLessonContent(
-    params.lessonId
+    lessonId
   );
-  if (courseSlug !== params.courseId) {
-    redirect(`/library/${params.courseId}`);
+  if (courseSlug !== courseId) {
+    redirect(`/library/${courseId}`);
   }
 
   const progress = await prisma.progress.findUnique({

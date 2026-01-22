@@ -9,7 +9,8 @@ type CourseDetailPageProps = {
 export default async function CourseDetailPage({
   params,
 }: CourseDetailPageProps) {
-  const course = await getCoursePreviewBySlug(params.courseId);
+  const { courseId } = await params;
+  const course = await getCoursePreviewBySlug(courseId);
 
   if (!course) {
     notFound();
