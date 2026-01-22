@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 import { type Role } from "@/lib/rbac";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const authOptions = {
   adapter: PrismaAdapter(prisma),
   session: { strategy: "database" },
   providers: [
@@ -57,4 +57,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/sign-in",
   },
-});
+};
+
+export const { handlers, auth, signIn, signOut } = NextAuth(authOptions);
