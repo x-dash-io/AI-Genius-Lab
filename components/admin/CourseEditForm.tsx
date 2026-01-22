@@ -210,7 +210,13 @@ export function CourseEditForm({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => setShowAddLesson(section.id)}
+                        onClick={() => {
+                          // Expand section if closed
+                          if (!expandedSections.has(section.id)) {
+                            setExpandedSections(new Set([...expandedSections, section.id]));
+                          }
+                          setShowAddLesson(section.id);
+                        }}
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
@@ -291,12 +297,26 @@ export function CourseEditForm({
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor={`contentUrl-${section.id}`}>Content URL (Cloudinary Public ID)</Label>
-                              <Input
-                                id={`contentUrl-${section.id}`}
+                              <Label htmlFor={`contentUrl-${section.id}`}>Content</Label>
+                              <input
+                                type="hidden"
                                 name="contentUrl"
-                                placeholder="e.g., course/lesson-1-video"
+                                value={contentUrls[section.id] || ""}
                               />
+                              <ContentUpload
+                                sectionId={section.id}
+                                contentType={contentTypes[section.id] || "video"}
+                                value={contentUrls[section.id] || ""}
+                                onChange={(publicId) =>
+                                  setContentUrls((prev) => ({ ...prev, [section.id]: publicId }))
+                                }
+                                onError={(error) =>
+                                  setUploadErrors((prev) => ({ ...prev, [section.id]: error }))
+                                }
+                              />
+                              {uploadErrors[section.id] && (
+                                <p className="text-sm text-destructive">{uploadErrors[section.id]}</p>
+                              )}
                             </div>
                             <div className="space-y-2">
                               <Label htmlFor={`durationSeconds-${section.id}`}>Duration (seconds)</Label>
