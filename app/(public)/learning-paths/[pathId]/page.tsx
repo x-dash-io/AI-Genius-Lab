@@ -50,10 +50,52 @@ export default async function LearningPathDetailPage({
     notFound();
   }
 
+  const session = await getServerSession(authOptions);
+  const isEnrolled = session?.user
+    ? await hasEnrolledInLearningPath(session.user.id, path.id)
+    : false;
+
   const totalPrice = path.courses.reduce(
     (sum, pc) => sum + pc.course.priceCents,
     0
   );
+
+  async function enrollInLearningPathAction() {
+    "use server";
+    
+    const currentSession = await getServerSession(authOptions);
+    if (!currentSession?.user) {
+      throw new Error("You must be signed in to enroll");
+    }
+
+    // Get path again inside server action since we can't use closure
+    const currentPath = await getLearningPathBySlug(pathId);
+    if (!currentPath) {
+      throw new Error("Learning path not found");
+    }
+
+    const { purchases, totalAmountCents } = await createLearningPathPurchases(
+      currentSession.user.id,
+      currentPath.id
+    );
+
+    if (purchases.length === 0) {
+      throw new Error("No courses to purchase");
+    }
+
+    // Create PayPal order for all purchases
+    const purchaseIds = purchases.map((p) => p.id).join(",");
+    const order = await createPayPalOrder({
+      purchaseIds,
+      amountCents: totalAmountCents,
+      currency: "usd",
+    });
+
+    return {
+      orderId: order.id,
+      approvalUrl: order.links?.find((link: any) => link.rel === "approve")?.href || null,
+    };
+  }
 
   const learningPathSchema = generateLearningPathSchema({
     name: path.title,
@@ -181,9 +223,9 @@ export default async function LearningPathDetailPage({
                     </Link>
                   ) : (
                     <LearningPathEnrollment
-                      pathId={pathId}
+                      pathId={path.id}
                       totalPriceCents={totalPrice}
-                      enrollAction={enrollInLearningPathAction.bind(null, pathId)}
+                      enrollAction={enrollInLearningPathAction}
                     />
                   )
                 ) : (
