@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Lock, BarChart, GraduationCap, Sparkles } from "lucide-react";
+import { Lock, BarChart, GraduationCap, Sparkles, Zap } from "lucide-react";
 import { TypingAnimation } from "@/components/ui/typing-animation";
 
 export function LandingHero() {
@@ -50,6 +50,15 @@ export function LandingHero() {
         <p className="max-w-2xl text-lg text-muted-foreground">
           Learn AI for business, content, apps, and productivity through structured courses, tracked progress, and instant access after purchase.
         </p>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="flex items-center gap-2 text-base sm:text-lg font-medium text-primary"
+        >
+          <Zap className="h-4 w-4 sm:h-5 sm:w-5" />
+          <span className="tracking-wide">The future belongs to those who master AI</span>
+        </motion.div>
       </motion.div>
       
       <motion.div
