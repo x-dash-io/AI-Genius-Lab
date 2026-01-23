@@ -13,10 +13,12 @@ const buttonVariants = cva(
           destructive:
             "bg-red-600 text-white hover:bg-red-600/90 dark:bg-red-500 dark:text-white dark:hover:bg-red-500/90 shadow-sm hover:shadow-md",
           outline:
-            "border-2 border-gray-400 dark:border-gray-500 bg-blue-50/80 dark:bg-transparent hover:bg-blue-100/80 dark:hover:bg-gray-800/70 hover:border-gray-500 dark:hover:border-gray-400 shadow-sm hover:shadow-md font-semibold text-black dark:text-white transition-all",
+            "border-2 border-gray-400 dark:border-gray-500 bg-blue-50/80 dark:bg-transparent hover:bg-blue-100/80 dark:hover:bg-gray-800/70 hover:border-gray-500 dark:hover:border-gray-400 shadow-sm hover:shadow-md font-semibold text-foreground transition-all",
           secondary:
-            "bg-gray-200 text-black hover:bg-gray-200/80 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-700/80 shadow-sm hover:shadow-md font-semibold",
-          ghost: "bg-blue-50/60 dark:bg-transparent hover:bg-blue-200/80 dark:hover:bg-gray-700/70 font-medium text-black dark:text-white transition-all",
+            "bg-gray-200 text-foreground hover:bg-gray-200/80 dark:bg-gray-700 dark:hover:bg-gray-700/80 shadow-sm hover:shadow-md font-semibold",
+          // Use theme tokens (foreground) so buttons remain readable even if
+          // a parent accidentally toggles the `dark` class without updating CSS vars.
+          ghost: "bg-blue-50/60 dark:bg-transparent hover:bg-blue-200/80 dark:hover:bg-gray-700/70 font-medium text-foreground transition-all",
           link: "text-blue-600 dark:text-blue-400 underline-offset-4 hover:underline font-medium",
         },
       size: {

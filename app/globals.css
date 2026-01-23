@@ -108,16 +108,11 @@ body {
   background: hsl(var(--muted-foreground) / 0.6);
 }
 
-/* Button text color fixes - ensure proper contrast for outline and ghost buttons */
-[data-button-variant="outline"],
-[data-button-variant="ghost"] {
-  color: rgb(0 0 0) !important;
-}
-
-.dark [data-button-variant="outline"],
-.dark [data-button-variant="ghost"] {
-  color: rgb(255 255 255) !important;
-}
+/* NOTE:
+ * Avoid forcing text color globally for button variants.
+ * It makes icon/buttons (like the theme toggle) hard to style and can override
+ * intended Tailwind classes. Prefer fixing contrast in `components/ui/button.tsx`.
+ */
 
 /* Hide Next.js development indicator in production */
 #__next-build-watcher {

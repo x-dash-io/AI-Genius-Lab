@@ -26,9 +26,9 @@ export function ThemeToggle() {
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 rounded-full border-0 shadow-none outline-none ring-0 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 transition-colors"
+        className="h-8 w-8 rounded-full border-0 shadow-none outline-none ring-0 !bg-slate-900/70 hover:!bg-slate-900/80 dark:!bg-white/10 dark:hover:!bg-white/20 transition-colors"
       >
-        <Sun className="h-4 w-4 text-black dark:text-white" />
+        <Sun className="h-4 w-4 text-yellow-500 dark:text-white" />
         <span className="sr-only">Toggle theme</span>
       </Button>
     );
@@ -40,11 +40,11 @@ export function ThemeToggle() {
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 rounded-full border-0 shadow-none outline-none ring-0 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 bg-black/10 hover:bg-black/20 dark:bg-white/10 dark:hover:bg-white/20 transition-all duration-200 relative overflow-hidden"
+          className="group h-8 w-8 rounded-full border-0 shadow-none outline-none ring-0 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 !bg-slate-900/70 hover:!bg-slate-900/80 dark:!bg-white/10 dark:hover:!bg-white/20 transition-all duration-200 relative overflow-hidden"
         >
           <div className="relative flex items-center justify-center">
-            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all duration-300 ease-in-out dark:-rotate-90 dark:scale-0 dark:opacity-0" style={{ color: '#000000', fill: '#000000' }} />
-            <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all duration-300 ease-in-out opacity-0 dark:rotate-0 dark:scale-100 dark:opacity-100" style={{ color: '#ffffff', fill: '#ffffff' }} />
+            <Sun className="h-4 w-4 text-yellow-500 rotate-0 scale-100 transition-all duration-300 ease-in-out dark:-rotate-90 dark:scale-0 dark:opacity-0" />
+            <Moon className="absolute h-4 w-4 text-slate-100 rotate-90 scale-0 transition-all duration-300 ease-in-out opacity-0 dark:rotate-0 dark:scale-100 dark:opacity-100" />
           </div>
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-yellow-400/20 to-orange-500/20 dark:from-blue-400/20 dark:to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <span className="sr-only">Toggle theme</span>
