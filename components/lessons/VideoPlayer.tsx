@@ -52,12 +52,29 @@ export function VideoPlayer({
       try {
         const response = await fetch(src, { method: 'HEAD' });
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          if (errorData.code === "CONTENT_MISSING_FROM_STORAGE") {
+          // Try to get error details from response
+          let errorData = {};
+          try {
+            const text = await response.text();
+            if (text) {
+              errorData = JSON.parse(text);
+            }
+          } catch (e) {
+            // If not JSON, check status
+            if (response.status === 404) {
+              errorData = {
+                code: "CONTENT_MISSING_FROM_STORAGE",
+                message: "Content file is missing from storage. Please contact support.",
+                adminActionRequired: true
+              };
+            }
+          }
+          
+          if (errorData.code === "CONTENT_MISSING_FROM_STORAGE" || response.status === 404) {
             setError({
-              message: errorData.message || "Content needs to be re-uploaded by an administrator",
+              message: errorData.message || "Content file is missing from storage. Please contact support.",
               adminActionRequired: errorData.adminActionRequired,
-              code: errorData.code
+              code: errorData.code || "CONTENT_MISSING_FROM_STORAGE"
             });
             return;
           }

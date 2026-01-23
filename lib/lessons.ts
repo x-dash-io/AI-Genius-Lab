@@ -149,6 +149,7 @@ export async function getAuthorizedLessonContent(lessonId: string) {
       allowDownload: lesson.allowDownload,
     },
     courseSlug: lesson.section.course.slug,
+    publicId: contentUrl, // Return the original public ID for existence checking
     signedUrl: buildLessonUrl({
       contentType,
       contentUrl,

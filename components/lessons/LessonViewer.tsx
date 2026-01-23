@@ -173,6 +173,72 @@ export function LessonViewer({
   }
 
   // For other content types (PDF, link, file)
+  // Check if content is available before showing link
+  useEffect(() => {
+    const checkContent = async () => {
+      try {
+        const response = await fetch(`/api/content/${lessonId}`, { method: 'HEAD' });
+        if (!response.ok) {
+          let errorData = {};
+          try {
+            const text = await response.text();
+            if (text) {
+              errorData = JSON.parse(text);
+            }
+          } catch (e) {
+            if (response.status === 404) {
+              errorData = {
+                code: "CONTENT_MISSING_FROM_STORAGE",
+                message: "Content file is missing from storage.",
+                adminActionRequired: true
+              };
+            }
+          }
+          
+          if (errorData.code === "CONTENT_MISSING_FROM_STORAGE" || response.status === 404) {
+            setContentError({
+              message: errorData.message || "Content file is missing from storage. Please contact support.",
+              adminActionRequired: errorData.adminActionRequired,
+              code: errorData.code || "CONTENT_MISSING_FROM_STORAGE"
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error checking content:", error);
+      }
+    };
+    
+    checkContent();
+  }, [lessonId]);
+
+  if (contentError?.code === "CONTENT_MISSING_FROM_STORAGE") {
+    return (
+      <div className="rounded-2xl border border-amber-800 bg-amber-900/20 p-6">
+        <div className="text-center">
+          <div className="text-amber-400 mb-4">
+            <svg className="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <h3 className="text-lg font-semibold">Content Unavailable</h3>
+          </div>
+          <p className="text-amber-200 mb-4">{contentError.message}</p>
+          {contentError.adminActionRequired ? (
+            <div className="bg-amber-900/40 rounded-lg p-4 text-left">
+              <p className="text-sm text-amber-100">
+                This content exists in our database but the file is missing from storage. 
+                Please contact support or ask an administrator to re-upload this content.
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-amber-200">
+              Please contact support if this issue persists.
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6">

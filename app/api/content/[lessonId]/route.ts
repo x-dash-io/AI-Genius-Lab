@@ -28,7 +28,7 @@ export async function GET(
     }
 
     // Validate access and get lesson content (this checks purchase status)
-    const { lesson, signedUrl } = await getAuthorizedLessonContent(lessonId);
+    const { lesson, signedUrl, publicId } = await getAuthorizedLessonContent(lessonId);
 
     if (!signedUrl) {
       return NextResponse.json(
@@ -45,34 +45,10 @@ export async function GET(
       return NextResponse.redirect(signedUrl);
     }
 
-    // For Cloudinary content, check if the resource exists before redirecting
-    try {
-      // Extract public ID from signed URL to check existence
-      const url = new URL(signedUrl);
-      const pathParts = url.pathname.split('/').filter(p => p && p !== 'v1');
-      const publicId = pathParts.join('/');
-
-      // Determine resource type from content type
-      const resourceType = lesson.contentType === 'video' || lesson.contentType === 'audio' ? 'video' : 'raw';
-
-      const exists = await checkCloudinaryResourceExists(publicId, resourceType);
-
-      if (!exists) {
-        // Content doesn't exist in Cloudinary - return specific error for admin handling
-        return NextResponse.json(
-          {
-            error: "Content not found in storage",
-            message: "This lesson content exists in our database but the file is missing from storage. An administrator needs to re-upload this content.",
-            code: "CONTENT_MISSING_FROM_STORAGE",
-            adminActionRequired: true
-          },
-          { status: 404 }
-        );
-      }
-    } catch (checkError) {
-      console.error('Error checking content existence:', checkError);
-      // If we can't check existence, proceed with redirect but log the error
-    }
+    // For Cloudinary content, we'll redirect directly to the signed URL
+    // Cloudinary will handle validation - if content doesn't exist, it will return 404
+    // Pre-checking adds latency and can have false negatives, so we let Cloudinary validate
+    // The signed URL will fail if content doesn't exist, and the client will handle the error
 
     // Content exists, redirect to the signed URL
     // The signed URL is already user-specific and expires in 10 minutes

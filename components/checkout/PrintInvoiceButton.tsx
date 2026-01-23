@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, Printer } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 interface PrintInvoiceButtonProps {
@@ -56,16 +56,47 @@ export function PrintInvoiceButton({
       const data = await response.json();
       const pdfUrl = data.pdfUrl;
 
-      // Create a temporary link to download the PDF
-      const link = document.createElement('a');
-      link.href = pdfUrl;
-      link.download = `invoice-${invoiceData.invoiceNumber}.pdf`;
-      link.target = '_blank';
+      if (!pdfUrl) {
+        throw new Error("No PDF URL returned");
+      }
 
-      // Trigger the download
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Try to fetch the PDF as a blob to enable download
+      try {
+        const pdfResponse = await fetch(pdfUrl);
+        if (!pdfResponse.ok) {
+          throw new Error("Failed to fetch PDF");
+        }
+
+        const blob = await pdfResponse.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        // Create a temporary link to download the PDF
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `invoice-${invoiceData.invoiceNumber}.pdf`;
+        link.style.display = 'none';
+
+        // Trigger the download
+        document.body.appendChild(link);
+        link.click();
+        
+        // Clean up
+        setTimeout(() => {
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(blobUrl);
+        }, 100);
+      } catch (fetchError) {
+        // If blob download fails (CORS issue), open in new tab as fallback
+        console.warn("Blob download failed, opening in new tab:", fetchError);
+        window.open(pdfUrl, '_blank');
+        
+        toast({
+          title: "Invoice opened",
+          description: "The invoice has been opened in a new tab. You can download it from there.",
+          variant: "success",
+        });
+        return;
+      }
 
       toast({
         title: "Invoice downloaded",
@@ -85,25 +116,37 @@ export function PrintInvoiceButton({
   }, [invoiceData]);
 
   return (
-    <Button
-      variant={variant}
-      size={size}
-      onClick={handleDownloadPDF}
-      disabled={isGenerating}
-      className={className}
-      type="button"
-    >
-      {isGenerating ? (
-        <>
-          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          Generating PDF...
-        </>
-      ) : (
-        <>
-          <Download className="h-4 w-4 mr-2" />
-          Download Invoice
-        </>
-      )}
-    </Button>
+    <div className={`flex gap-2 ${className}`}>
+      <Button
+        variant={variant}
+        size={size}
+        onClick={handlePrint}
+        className="flex-1"
+        type="button"
+      >
+        <Printer className="h-4 w-4 mr-2" />
+        Print Invoice
+      </Button>
+      <Button
+        variant={variant}
+        size={size}
+        onClick={handleDownloadPDF}
+        disabled={isGenerating}
+        className="flex-1"
+        type="button"
+      >
+        {isGenerating ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Generating...
+          </>
+        ) : (
+          <>
+            <Download className="h-4 w-4 mr-2" />
+            Download PDF
+          </>
+        )}
+      </Button>
+    </div>
   );
 }
