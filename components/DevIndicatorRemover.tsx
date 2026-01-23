@@ -5,6 +5,7 @@ import { useEffect } from "react";
 /**
  * Aggressively removes Next.js development indicator
  * Uses MutationObserver to catch dynamically injected elements
+ * This is needed because Next.js injects it in development mode
  */
 export function DevIndicatorRemover() {
   useEffect(() => {
@@ -51,19 +52,17 @@ export function DevIndicatorRemover() {
         }
       });
 
-      // Also check for elements in shadow DOM or iframes
+      // Also check for elements by scanning all elements
       try {
         const allElements = document.querySelectorAll('*');
         allElements.forEach(el => {
           const id = el.id || '';
-          const className = el.className || '';
+          const className = el.className?.toString() || '';
           const ariaLabel = el.getAttribute('aria-label') || '';
           
           if (
-            id.includes('__next') || 
-            id.includes('nextjs') ||
-            className.includes('__next') ||
-            className.includes('nextjs') ||
+            (id.includes('__next') || id.includes('nextjs')) ||
+            (typeof className === 'string' && (className.includes('__next') || className.includes('nextjs'))) ||
             ariaLabel.includes('Next.js')
           ) {
             el.remove();
@@ -118,12 +117,36 @@ export function DevIndicatorRemover() {
       attributeFilter: ['id', 'class', 'data-nextjs-dialog', 'data-nextjs-toast', 'aria-label'],
     });
 
-    // Also run periodically as a fallback
-    const interval = setInterval(removeDevIndicator, 500);
+    // Also intercept script tags that might create it
+    const scriptObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeName === 'SCRIPT') {
+            const script = node as HTMLScriptElement;
+            if (script.src && (script.src.includes('__next') || script.src.includes('nextjs'))) {
+              script.remove();
+            }
+            if (script.textContent && (script.textContent.includes('__next-build-watcher') || 
+                script.textContent.includes('__next-dev-overlay'))) {
+              script.remove();
+            }
+          }
+        });
+      });
+    });
+
+    scriptObserver.observe(document.head, {
+      childList: true,
+      subtree: true,
+    });
+
+    // Also run periodically as a fallback - very frequent
+    const interval = setInterval(removeDevIndicator, 100);
 
     // Cleanup
     return () => {
       observer.disconnect();
+      scriptObserver.disconnect();
       clearInterval(interval);
     };
   }, []);
