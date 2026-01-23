@@ -34,9 +34,6 @@ PAYPAL_CLIENT_ID="replace_with_paypal_client_id"
 PAYPAL_CLIENT_SECRET="replace_with_paypal_client_secret"
 PAYPAL_WEBHOOK_ID="replace_with_paypal_webhook_id"
 
-STRIPE_SECRET_KEY="replace_with_stripe_secret_key"
-STRIPE_WEBHOOK_SECRET="replace_with_stripe_webhook_secret"
-
 CLOUDINARY_CLOUD_NAME="replace_with_cloudinary_cloud_name"
 CLOUDINARY_API_KEY="replace_with_cloudinary_api_key"
 CLOUDINARY_API_SECRET="replace_with_cloudinary_api_secret"
@@ -47,6 +44,12 @@ RESEND_API_KEY="replace_with_resend_api_key"
 # For production: Set EMAIL_FROM to your verified domain (e.g., noreply@yourdomain.com)
 # You must verify your domain in Resend dashboard before using custom EMAIL_FROM
 EMAIL_FROM="onboarding@resend.dev"
+
+# Upstash Redis (for caching and rate limiting in production)
+# Optional: Falls back to in-memory if not configured
+# Get credentials from https://upstash.com/
+UPSTASH_REDIS_REST_URL="replace_with_upstash_redis_url"
+UPSTASH_REDIS_REST_TOKEN="replace_with_upstash_redis_token"
 
 ```
 

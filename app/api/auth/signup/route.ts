@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? 
              request.headers.get("x-real-ip") ?? 
              "anonymous";
-  const rateLimit = rateLimits.auth(ip);
+  const rateLimit = await rateLimits.auth(ip);
   
   if (!rateLimit.allowed) {
     return NextResponse.json(

@@ -9,7 +9,7 @@ import { type Role } from "@/lib/rbac";
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
   session: { 
-    strategy: "jwt",
+    strategy: "jwt" as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,

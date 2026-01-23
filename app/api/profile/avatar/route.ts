@@ -3,20 +3,28 @@ import { requireUser } from "@/lib/access";
 import { v2 as cloudinary } from "cloudinary";
 import { rateLimits } from "@/lib/rate-limit";
 
-const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-const apiKey = process.env.CLOUDINARY_API_KEY;
-const apiSecret = process.env.CLOUDINARY_API_SECRET;
+let isCloudinaryConfigured = false;
 
-if (!cloudName || !apiKey || !apiSecret) {
-  throw new Error("Missing Cloudinary environment variables.");
+function configureCloudinary() {
+  if (isCloudinaryConfigured) return;
+  
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    throw new Error("Missing Cloudinary environment variables.");
+  }
+
+  cloudinary.config({
+    cloud_name: cloudName,
+    api_key: apiKey,
+    api_secret: apiSecret,
+    secure: true,
+  });
+  
+  isCloudinaryConfigured = true;
 }
-
-cloudinary.config({
-  cloud_name: cloudName,
-  api_key: apiKey,
-  api_secret: apiSecret,
-  secure: true,
-});
 
 // Avatar-specific limits
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -38,13 +46,16 @@ export async function POST(request: NextRequest) {
       request.headers.get("x-forwarded-for")?.split(",")[0] ||
       request.headers.get("x-real-ip") ||
       "unknown";
-    const rateLimitResult = rateLimits.upload(ip);
+    const rateLimitResult = await rateLimits.upload(ip);
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: "Too many upload requests. Please try again later." },
         { status: 429 }
       );
     }
+    
+    // Configure Cloudinary lazily
+    configureCloudinary();
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

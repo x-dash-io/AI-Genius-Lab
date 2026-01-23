@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       request.headers.get("x-forwarded-for")?.split(",")[0] ||
       request.headers.get("x-real-ip") ||
       "unknown";
-    const rateLimitResult = rateLimits.upload(ip);
+    const rateLimitResult = await rateLimits.upload(ip);
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: "Too many upload requests. Please try again later." },

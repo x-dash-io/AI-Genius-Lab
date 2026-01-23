@@ -325,3 +325,63 @@ export async function sendInvoiceEmail(
     text: `Invoice ${invoiceNumber}\n\nAI Genius Lab\nInvoice Date: ${formattedDate}\nStatus: Paid\n\nBill To:\n${userName}\n${email}\n\nItems:\n${items.map((item) => `- ${item.title}: $${(item.amountCents / 100).toFixed(2)}`).join("\n")}\n\nSubtotal: $${formattedTotal}\nTax: $0.00\nTotal: $${formattedTotal}\n\nPayment Method: ${paymentMethod}${transactionId ? `\nTransaction ID: ${transactionId}` : ""}\n\nThank you for your purchase!`,
   });
 }
+
+export async function sendCertificateEmail(
+  email: string,
+  recipientName: string,
+  itemName: string,
+  certificateId: string,
+  pdfUrl: string
+) {
+  const verifyUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/certificates/verify/${certificateId}`;
+  
+  await sendEmail({
+    to: email,
+    subject: `Congratulations! Your Certificate for ${itemName}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background: linear-gradient(to right, #3b82f6, #2563eb); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">🎉 Congratulations!</h1>
+          <p style="color: rgba(255, 255, 255, 0.9); margin: 8px 0 0 0;">You've earned a certificate</p>
+        </div>
+        <div style="padding: 30px; background-color: #ffffff;">
+          <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+            Dear ${recipientName},
+          </p>
+          <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+            Congratulations on successfully completing <strong>${itemName}</strong>! Your dedication and hard work have paid off.
+          </p>
+          <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; border-radius: 12px; padding: 24px; text-align: center; margin: 30px 0;">
+            <div style="font-size: 14px; color: #92400e; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">Certificate ID</div>
+            <div style="font-size: 18px; font-weight: bold; color: #78350f; font-family: monospace;">${certificateId}</div>
+          </div>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${pdfUrl}" style="display: inline-block; padding: 14px 28px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin-right: 10px;">
+              📄 Download Certificate
+            </a>
+          </div>
+          <div style="text-align: center; margin: 20px 0;">
+            <a href="${verifyUrl}" style="display: inline-block; padding: 12px 24px; background-color: #10b981; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+              ✓ Verify Certificate
+            </a>
+          </div>
+          <div style="margin-top: 30px; padding: 20px; background-color: #f9fafb; border-radius: 8px;">
+            <h3 style="margin: 0 0 12px 0; font-size: 14px; color: #111827;">Share Your Achievement</h3>
+            <p style="margin: 4px 0; color: #6b7280; font-size: 14px;">
+              Add this certificate to your LinkedIn profile or resume to showcase your new skills!
+            </p>
+          </div>
+          <p style="margin-top: 30px; font-size: 12px; color: #9ca3af; text-align: center; line-height: 1.6;">
+            This certificate is verifiable at any time using the certificate ID above. Share the verification link with employers or colleagues.
+          </p>
+        </div>
+        <div style="background-color: #f3f4f6; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+          <p style="margin: 0; font-size: 12px; color: #6b7280;">
+            AI Genius Lab - Empowering Your AI Journey
+          </p>
+        </div>
+      </div>
+    `,
+    text: `Congratulations ${recipientName}!\n\nYou have successfully completed ${itemName} and earned a certificate!\n\nCertificate ID: ${certificateId}\n\nDownload your certificate: ${pdfUrl}\n\nVerify your certificate: ${verifyUrl}\n\nShare your achievement on LinkedIn or add it to your resume to showcase your new skills!\n\nCongratulations on your achievement!\n\nAI Genius Lab`,
+  });
+}

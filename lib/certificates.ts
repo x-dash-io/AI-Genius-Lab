@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/access";
 import { getCourseProgress } from "./progress";
 import { hasEnrolledInLearningPath } from "./learning-paths";
+import { generateCertificatePDF } from "./certificate-pdf";
+import { sendCertificateEmail } from "./email";
 
 /**
  * Generate a unique certificate ID
@@ -159,8 +161,36 @@ export async function generateCourseCertificate(courseId: string) {
     },
   });
 
-  // TODO: Generate PDF and upload to Cloudinary
-  // TODO: Send certificate email
+  // Generate PDF and upload to Cloudinary
+  try {
+    const pdfUrl = await generateCertificatePDF({
+      certificateId: certificate.certificateId,
+      recipientName: certificate.user.name || "Student",
+      courseName: certificate.course?.title,
+      issuedAt: certificate.issuedAt,
+      type: "course",
+    });
+
+    // Update certificate with PDF URL
+    await prisma.certificate.update({
+      where: { id: certificate.id },
+      data: { pdfUrl },
+    });
+
+    // Send certificate email
+    if (certificate.user.email) {
+      await sendCertificateEmail(
+        certificate.user.email,
+        certificate.user.name || "Student",
+        certificate.course?.title || "Course",
+        certificate.certificateId,
+        pdfUrl
+      );
+    }
+  } catch (error) {
+    console.error("Failed to generate certificate PDF or send email:", error);
+    // Don't fail the certificate generation if PDF/email fails
+  }
 
   return certificate;
 }
@@ -260,8 +290,36 @@ export async function generatePathCertificate(pathId: string) {
     },
   });
 
-  // TODO: Generate PDF and upload to Cloudinary
-  // TODO: Send certificate email
+  // Generate PDF and upload to Cloudinary
+  try {
+    const pdfUrl = await generateCertificatePDF({
+      certificateId: certificate.certificateId,
+      recipientName: certificate.user.name || "Student",
+      pathName: certificate.path?.title,
+      issuedAt: certificate.issuedAt,
+      type: "learning_path",
+    });
+
+    // Update certificate with PDF URL
+    await prisma.certificate.update({
+      where: { id: certificate.id },
+      data: { pdfUrl },
+    });
+
+    // Send certificate email
+    if (certificate.user.email) {
+      await sendCertificateEmail(
+        certificate.user.email,
+        certificate.user.name || "Student",
+        certificate.path?.title || "Learning Path",
+        certificate.certificateId,
+        pdfUrl
+      );
+    }
+  } catch (error) {
+    console.error("Failed to generate certificate PDF or send email:", error);
+    // Don't fail the certificate generation if PDF/email fails
+  }
 
   return certificate;
 }

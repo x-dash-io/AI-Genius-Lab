@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { cache, cacheKeys } from "@/lib/cache";
+import { getCached, cacheKeys } from "@/lib/cache";
 
 export async function getPublishedCourses() {
   return prisma.course.findMany({
@@ -34,44 +34,41 @@ export async function getPublishedCoursesByCategory(category: string) {
 }
 
 export async function getCoursePreviewBySlug(slug: string) {
-  // Check cache first
   const cacheKey = cacheKeys.coursePreview(slug);
-  const cached = cache.get(cacheKey);
-  if (cached) {
-    return cached;
-  }
-  const course = await prisma.course.findUnique({
-    where: { slug },
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      description: true,
-      priceCents: true,
-      sections: {
-        orderBy: { sortOrder: "asc" },
+  
+  return getCached(
+    cacheKey,
+    async () => {
+      const course = await prisma.course.findUnique({
+        where: { slug },
         select: {
           id: true,
+          slug: true,
           title: true,
-          lessons: {
+          description: true,
+          priceCents: true,
+          sections: {
             orderBy: { sortOrder: "asc" },
             select: {
               id: true,
               title: true,
-              contentType: true,
-              isLocked: true,
+              lessons: {
+                orderBy: { sortOrder: "asc" },
+                select: {
+                  id: true,
+                  title: true,
+                  contentType: true,
+                  isLocked: true,
+                },
+              },
             },
           },
         },
-      },
+      });
+      return course;
     },
-  });
-
-  if (course) {
-    cache.set(cacheKey, course, 300); // Cache for 5 minutes
-  }
-  
-  return course;
+    300 // Cache for 5 minutes
+  );
 }
 
 export async function getCourseForLibraryBySlug(slug: string) {
