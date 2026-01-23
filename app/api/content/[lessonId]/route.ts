@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getAuthorizedLessonContent } from "@/lib/lessons";
+import { checkCloudinaryResourceExists } from "@/lib/cloudinary";
 
 /**
  * Proxy endpoint for content delivery with per-request validation
@@ -31,7 +32,10 @@ export async function GET(
 
     if (!signedUrl) {
       return NextResponse.json(
-        { error: "Content not available" },
+        {
+          error: "Content not available",
+          message: "This lesson content has not been uploaded yet. Please contact support if this issue persists."
+        },
         { status: 404 }
       );
     }
@@ -41,7 +45,36 @@ export async function GET(
       return NextResponse.redirect(signedUrl);
     }
 
-    // For Cloudinary content, redirect to the signed URL
+    // For Cloudinary content, check if the resource exists before redirecting
+    try {
+      // Extract public ID from signed URL to check existence
+      const url = new URL(signedUrl);
+      const pathParts = url.pathname.split('/').filter(p => p && p !== 'v1');
+      const publicId = pathParts.join('/');
+
+      // Determine resource type from content type
+      const resourceType = lesson.contentType === 'video' || lesson.contentType === 'audio' ? 'video' : 'raw';
+
+      const exists = await checkCloudinaryResourceExists(publicId, resourceType);
+
+      if (!exists) {
+        // Content doesn't exist in Cloudinary - return specific error for admin handling
+        return NextResponse.json(
+          {
+            error: "Content not found in storage",
+            message: "This lesson content exists in our database but the file is missing from storage. An administrator needs to re-upload this content.",
+            code: "CONTENT_MISSING_FROM_STORAGE",
+            adminActionRequired: true
+          },
+          { status: 404 }
+        );
+      }
+    } catch (checkError) {
+      console.error('Error checking content existence:', checkError);
+      // If we can't check existence, proceed with redirect but log the error
+    }
+
+    // Content exists, redirect to the signed URL
     // The signed URL is already user-specific and expires in 10 minutes
     // Each request generates a fresh URL, so sharing won't work
     return NextResponse.redirect(signedUrl, {

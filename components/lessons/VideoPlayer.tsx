@@ -20,6 +20,11 @@ export function VideoPlayer({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [error, setError] = useState<{
+    message: string;
+    adminActionRequired?: boolean;
+    code?: string;
+  } | null>(null);
 
   // Debounced progress update to avoid too many API calls
   const debouncedProgressUpdate = useDebouncedCallback(
@@ -42,6 +47,28 @@ export function VideoPlayer({
   );
 
   useEffect(() => {
+    // Check content availability first
+    const checkContentAvailability = async () => {
+      try {
+        const response = await fetch(src, { method: 'HEAD' });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          if (errorData.code === "CONTENT_MISSING_FROM_STORAGE") {
+            setError({
+              message: errorData.message || "Content needs to be re-uploaded by an administrator",
+              adminActionRequired: errorData.adminActionRequired,
+              code: errorData.code
+            });
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Error checking content availability:", error);
+      }
+    };
+
+    checkContentAvailability();
+
     const video = videoRef.current;
     if (!video) return;
 
@@ -49,7 +76,7 @@ export function VideoPlayer({
       const current = video.currentTime;
       const total = video.duration || 0;
       setCurrentTime(current);
-      
+
       if (total > 0) {
         const percent = (current / total) * 100;
         debouncedProgressUpdate(current, percent);
@@ -59,6 +86,10 @@ export function VideoPlayer({
 
     const handleLoadedMetadata = () => {
       setDuration(video.duration);
+    };
+
+    const handleError = () => {
+      setError({ message: "Failed to load video content. The content may not be available yet." });
     };
 
     const handleEnded = async () => {
@@ -82,13 +113,15 @@ export function VideoPlayer({
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
     video.addEventListener("ended", handleEnded);
+    video.addEventListener("error", handleError);
 
     return () => {
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
       video.removeEventListener("ended", handleEnded);
+      video.removeEventListener("error", handleError);
     };
-  }, [lessonId, debouncedProgressUpdate, onProgress]);
+  }, [lessonId, debouncedProgressUpdate, onProgress, src]);
 
   const togglePlay = () => {
     const video = videoRef.current;
@@ -107,6 +140,17 @@ export function VideoPlayer({
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+
+  if (error) {
+    return (
+      <div className="relative w-full bg-black rounded-lg overflow-hidden p-8 text-center">
+        <div className="text-white">
+          <p className="text-lg font-medium mb-2">Content Unavailable</p>
+          <p className="text-sm text-gray-400">{error.message}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full bg-black rounded-lg overflow-hidden">

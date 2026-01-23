@@ -28,6 +28,11 @@ export function LessonViewer({
 }: LessonViewerProps) {
   const [progress, setProgress] = useState(initialProgress);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [contentError, setContentError] = useState<{
+    message: string;
+    adminActionRequired?: boolean;
+    code?: string;
+  } | null>(null);
 
   const handleComplete = async () => {
     setIsCompleting(true);
@@ -78,6 +83,37 @@ export function LessonViewer({
     return (
       <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 text-sm text-zinc-300 text-center">
         <p>No content available for this lesson yet.</p>
+      </div>
+    );
+  }
+
+  // Handle content missing from storage error
+  if (contentError?.code === "CONTENT_MISSING_FROM_STORAGE") {
+    return (
+      <div className="rounded-2xl border border-amber-800 bg-amber-900/20 p-6">
+        <div className="text-center">
+          <div className="text-amber-400 mb-4">
+            <svg className="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+            <h3 className="text-lg font-semibold">Content Needs Re-upload</h3>
+          </div>
+          <p className="text-amber-200 mb-4">{contentError.message}</p>
+          {contentError.adminActionRequired ? (
+            <div className="bg-amber-900/40 rounded-lg p-4 text-left">
+              <p className="text-sm text-amber-100 mb-2">
+                <strong>For Administrators:</strong> This content exists in our database but the file is missing from storage.
+              </p>
+              <p className="text-sm text-amber-100">
+                Please go to the course editor and re-upload the content file for this lesson.
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-amber-200">
+              Please contact support if this issue persists.
+            </p>
+          )}
+        </div>
       </div>
     );
   }

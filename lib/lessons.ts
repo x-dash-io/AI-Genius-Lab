@@ -107,7 +107,13 @@ export async function getAuthorizedLessonContent(lessonId: string) {
 
   // Get content type from the first content item, or default to 'video'
   const firstContent = lesson.contents[0];
-  const contentType = firstContent?.contentType || 'video';
+
+  // Check if there's old contentUrl in the lesson table (migration issue)
+  const oldContentUrl = (lesson as any).contentUrl;
+  const oldContentType = (lesson as any).contentType;
+
+  const contentType = firstContent?.contentType || oldContentType || 'video';
+  const contentUrl = firstContent?.contentUrl || oldContentUrl || null;
 
   return {
     lesson: {
@@ -120,8 +126,8 @@ export async function getAuthorizedLessonContent(lessonId: string) {
     courseSlug: lesson.section.course.slug,
     signedUrl: buildLessonUrl({
       contentType,
-      contentUrl: firstContent?.contentUrl || null,
+      contentUrl,
       allowDownload: lesson.allowDownload,
-    }, user.id), // Pass user ID for user-specific URLs
+    }, user.id),
   };
 }

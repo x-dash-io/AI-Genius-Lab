@@ -1,6 +1,10 @@
 import { v2 as cloudinary } from "cloudinary";
 import crypto from "crypto";
 
+// Cache for content existence checks to avoid repeated API calls
+const existenceCache = new Map<string, { exists: boolean; checkedAt: number }>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 let isConfigured = false;
 
 /**
@@ -34,8 +38,8 @@ function configureCloudinary(): void {
 type CloudinaryResourceType = "image" | "video" | "raw";
 
 /**
- * Enhanced signed URL with user-specific token for better security
- * The token includes user ID and timestamp, making URLs non-shareable
+ * Enhanced signed URL with expiration for security
+ * URLs expire in 10 minutes and are generated per request after authentication
  */
 export function getSignedCloudinaryUrl(
   publicId: string,
@@ -43,34 +47,52 @@ export function getSignedCloudinaryUrl(
   options: { download?: boolean; userId?: string } = {}
 ) {
   configureCloudinary();
-  
-  const expiresAt = Math.floor(Date.now() / 1000) + 60 * 10; // 10 minutes
-  
-  // Add user-specific token to public ID transformation for extra security
-  // This ensures URLs are tied to specific users
-  const transformation: Record<string, any> = {};
-  
-  if (options.userId) {
-    // Create a user-specific token that will be validated server-side
-    const token = crypto
-      .createHash("sha256")
-      .update(`${publicId}:${options.userId}:${expiresAt}:${process.env.CLOUDINARY_API_SECRET}`)
-      .digest("hex")
-      .substring(0, 16);
-    
-    // Store token in transformation metadata (will be validated in proxy)
-    transformation.custom_pre_function = `user_token_${token}`;
+
+  // Validate and clean publicId
+  if (!publicId || typeof publicId !== 'string' || publicId.trim() === '') {
+    console.error('Invalid Cloudinary publicId:', publicId);
+    return null;
   }
-  
-  return cloudinary.url(publicId, {
-    secure: true,
-    sign_url: true,
-    type: "authenticated",
-    resource_type: resourceType,
-    expires_at: expiresAt,
-    attachment: options.download ? publicId : undefined,
-    transformation: Object.keys(transformation).length > 0 ? [transformation] : undefined,
-  });
+
+  let cleanPublicId = publicId.trim();
+
+  // If it's a full Cloudinary URL, extract the public ID
+  if (cleanPublicId.includes('cloudinary.com')) {
+    try {
+      const url = new URL(cleanPublicId);
+      // Extract path after /v1/ or similar version
+      const pathParts = url.pathname.split('/').filter(p => p && p !== 'v1');
+      cleanPublicId = pathParts.join('/');
+    } catch (error) {
+      console.error('Error parsing Cloudinary URL:', cleanPublicId, error);
+      return null;
+    }
+  }
+
+  // Remove any query parameters or fragments
+  cleanPublicId = cleanPublicId.split('?')[0].split('#')[0];
+
+  // Basic validation - should contain folder structure
+  if (!cleanPublicId.includes('/') || cleanPublicId.length < 10) {
+    console.error('Invalid Cloudinary publicId format:', cleanPublicId, 'from original:', publicId);
+    return null;
+  }
+
+  const expiresAt = Math.floor(Date.now() / 1000) + 60 * 10; // 10 minutes
+
+  try {
+    return cloudinary.url(cleanPublicId, {
+      secure: true,
+      sign_url: true,
+      type: "authenticated",
+      resource_type: resourceType,
+      expires_at: expiresAt,
+      attachment: options.download ? cleanPublicId.split('/').pop() : undefined,
+    });
+  } catch (error) {
+    console.error('Error generating Cloudinary URL for publicId:', cleanPublicId, error);
+    return null;
+  }
 }
 
 /**
@@ -139,6 +161,45 @@ export async function uploadToCloudinary(
         .catch(reject);
     }
   });
+}
+
+/**
+ * Check if a resource exists in Cloudinary
+ * Uses caching to avoid repeated API calls
+ */
+export async function checkCloudinaryResourceExists(
+  publicId: string,
+  resourceType: CloudinaryResourceType = "raw"
+): Promise<boolean> {
+  configureCloudinary();
+
+  // Check cache first
+  const cacheKey = `${resourceType}:${publicId}`;
+  const cached = existenceCache.get(cacheKey);
+  if (cached && (Date.now() - cached.checkedAt) < CACHE_DURATION) {
+    return cached.exists;
+  }
+
+  try {
+    // Use Cloudinary's resource method to check existence
+    const result = await cloudinary.api.resource(publicId, {
+      resource_type: resourceType,
+    });
+
+    const exists = !!result && result.public_id === publicId;
+    existenceCache.set(cacheKey, { exists, checkedAt: Date.now() });
+    return exists;
+  } catch (error: any) {
+    // If error indicates resource not found, cache as not exists
+    if (error?.http_code === 404 || error?.error?.message?.includes('not found')) {
+      existenceCache.set(cacheKey, { exists: false, checkedAt: Date.now() });
+      return false;
+    }
+
+    // For other errors, assume it doesn't exist to be safe
+    console.error('Error checking Cloudinary resource existence:', error);
+    return false;
+  }
 }
 
 /**
