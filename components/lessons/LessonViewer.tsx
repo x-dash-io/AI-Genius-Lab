@@ -34,6 +34,47 @@ export function LessonViewer({
     code?: string;
   } | null>(null);
 
+  // Check content availability for non-video/audio content types
+  useEffect(() => {
+    // Only check for PDF, file, or link content types
+    if (contentType && contentType !== "video" && contentType !== "audio" && contentUrl) {
+      const checkContent = async () => {
+        try {
+          const response = await fetch(`/api/content/${lessonId}`, { method: 'HEAD' });
+          if (!response.ok) {
+            let errorData = {};
+            try {
+              const text = await response.text();
+              if (text) {
+                errorData = JSON.parse(text);
+              }
+            } catch (e) {
+              if (response.status === 404) {
+                errorData = {
+                  code: "CONTENT_MISSING_FROM_STORAGE",
+                  message: "Content file is missing from storage.",
+                  adminActionRequired: true
+                };
+              }
+            }
+            
+            if (errorData.code === "CONTENT_MISSING_FROM_STORAGE" || response.status === 404) {
+              setContentError({
+                message: errorData.message || "Content file is missing from storage. Please contact support.",
+                adminActionRequired: errorData.adminActionRequired,
+                code: errorData.code || "CONTENT_MISSING_FROM_STORAGE"
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error checking content:", error);
+        }
+      };
+      
+      checkContent();
+    }
+  }, [lessonId, contentType, contentUrl]);
+
   const handleComplete = async () => {
     setIsCompleting(true);
     try {
@@ -173,44 +214,6 @@ export function LessonViewer({
   }
 
   // For other content types (PDF, link, file)
-  // Check if content is available before showing link
-  useEffect(() => {
-    const checkContent = async () => {
-      try {
-        const response = await fetch(`/api/content/${lessonId}`, { method: 'HEAD' });
-        if (!response.ok) {
-          let errorData = {};
-          try {
-            const text = await response.text();
-            if (text) {
-              errorData = JSON.parse(text);
-            }
-          } catch (e) {
-            if (response.status === 404) {
-              errorData = {
-                code: "CONTENT_MISSING_FROM_STORAGE",
-                message: "Content file is missing from storage.",
-                adminActionRequired: true
-              };
-            }
-          }
-          
-          if (errorData.code === "CONTENT_MISSING_FROM_STORAGE" || response.status === 404) {
-            setContentError({
-              message: errorData.message || "Content file is missing from storage. Please contact support.",
-              adminActionRequired: errorData.adminActionRequired,
-              code: errorData.code || "CONTENT_MISSING_FROM_STORAGE"
-            });
-          }
-        }
-      } catch (error) {
-        console.error("Error checking content:", error);
-      }
-    };
-    
-    checkContent();
-  }, [lessonId]);
-
   if (contentError?.code === "CONTENT_MISSING_FROM_STORAGE") {
     return (
       <div className="rounded-2xl border border-amber-800 bg-amber-900/20 p-6">
@@ -241,12 +244,12 @@ export function LessonViewer({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6">
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 sm:p-6">
         <a
           href={`/api/content/${lessonId}`}
           target="_blank"
           rel="noreferrer"
-          className="font-semibold text-white underline inline-flex items-center gap-2"
+          className="font-semibold text-white underline inline-flex items-center gap-2 text-sm sm:text-base break-words"
         >
           Open {contentType ? contentType.toUpperCase() : 'UNKNOWN'} content
           {allowDownload && <span className="text-xs">(Downloadable)</span>}
@@ -261,11 +264,11 @@ export function LessonViewer({
           <Progress value={progress.completionPercent} />
         </div>
       )}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+        <div className="text-xs sm:text-sm text-muted-foreground">
           {progress?.completedAt ? (
             <span className="flex items-center gap-2 text-green-600 dark:text-green-400">
-              <CheckCircle2 className="h-4 w-4" />
+              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
               Completed
             </span>
           ) : (
@@ -277,10 +280,12 @@ export function LessonViewer({
             onClick={handleComplete}
             disabled={isCompleting}
             variant="outline"
+            size="sm"
+            className="w-full sm:w-auto"
           >
             {isCompleting ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2 animate-spin" />
                 Marking...
               </>
             ) : (

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   BookOpen,
@@ -24,7 +24,7 @@ import { SignOutButton } from "@/components/auth/SignOutButton";
 import { BackgroundBlobs } from "@/components/ui/background-blobs";
 import { useCart } from "@/components/cart/CartProvider";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PreviewBanner } from "@/components/admin/PreviewBanner";
 
 const navigation = [
@@ -43,6 +43,48 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { cart } = useCart();
+  const menuRef = useRef<HTMLElement>(null);
+
+  // Close menu on scroll
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const handleScroll = () => {
+      setMobileMenuOpen(false);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [mobileMenuOpen]);
+
+  // Close menu when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    // Add slight delay to avoid immediate close on menu open
+    const timeoutId = setTimeout(() => {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleEscape);
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [mobileMenuOpen]);
 
   // Check if admin is in preview mode - preserve preview param in all links
   const isAdmin = session?.user?.role === "admin";
@@ -188,111 +230,141 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
         {/* Mobile Layout */}
         <div className="flex flex-1 flex-col md:hidden">
           <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-            <div className="flex items-center justify-between px-4 pt-4 pb-3">
-              <Link href={getHref("/dashboard")} className="font-display text-lg font-bold">
+            <div className="flex items-center justify-between px-3 sm:px-4 pt-3 sm:pt-4 pb-2 sm:pb-3">
+              <Link href={getHref("/dashboard")} className="font-display text-base sm:text-lg font-bold truncate flex-shrink-0 max-w-[60%]">
                 AI GENIUS LAB
               </Link>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                 <ThemeToggle />
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="h-9 w-9 sm:h-10 sm:w-10"
                 >
                   {mobileMenuOpen ? (
-                    <X className="h-5 w-5" />
+                    <X className="h-4 w-4 sm:h-5 sm:w-5" />
                   ) : (
-                    <Menu className="h-5 w-5" />
+                    <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
                   )}
                 </Button>
               </div>
             </div>
-            {mobileMenuOpen && (
-              <motion.nav
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="border-t bg-card/80 backdrop-blur-md px-4 py-4"
-              >
-                <div className="space-y-2">
-                  {navigation.map((item) => {
-                    const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-                    const Icon = item.icon;
-                    const isCart = item.href === "/cart";
-                    const cartCount = cart?.itemCount || 0;
-                    
-                    return (
-                      <Link
-                        key={item.href}
-                        href={getHref(item.href)}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={cn(
-                          "flex items-center gap-3 rounded-lg pl-1 pr-3 py-2 text-sm font-medium transition-colors",
-                          isActive
-                            ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                        )}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {item.name}
-                        {isCart && cartCount > 0 && (
-                          <Badge 
-                            variant="destructive" 
-                            className="ml-auto h-5 min-w-5 flex items-center justify-center rounded-full px-1.5 text-xs font-bold"
+            <AnimatePresence>
+              {mobileMenuOpen && (
+                <>
+                  {/* Backdrop */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+                    onClick={() => setMobileMenuOpen(false)}
+                  />
+                  
+                  {/* Menu Panel */}
+                  <motion.nav
+                    ref={menuRef}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ 
+                      duration: 0.3,
+                      ease: [0.4, 0, 0.2, 1]
+                    }}
+                    className="relative z-50 border-t bg-background shadow-lg"
+                  >
+                    <div className="px-4 py-6 space-y-1">
+                      {navigation.map((item, index) => {
+                        const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                        const Icon = item.icon;
+                        const isCart = item.href === "/cart";
+                        const cartCount = cart?.itemCount || 0;
+                        
+                        return (
+                          <motion.div
+                            key={item.href}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.05 * (index + 1) }}
                           >
-                            {cartCount > 9 ? "9+" : cartCount}
-                          </Badge>
-                        )}
-                      </Link>
-                    );
-                  })}
-                </div>
-                {session?.user && (
-                  <div className="mt-4 space-y-3 border-t pt-4">
-                    <Link href={getHref("/profile")}>
-                      <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
-                        <Avatar className="h-10 w-10 ring-2 ring-primary ring-offset-2 ring-offset-card">
-                          <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "User"} />
-                          <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                            {(() => {
-                              const name = session.user.name;
-                              const email = session.user.email || "";
-                              if (name && name.trim()) {
-                                const nameParts = name.trim().split(/\s+/);
-                                // Use first letter of first name
-                                return nameParts[0][0].toUpperCase();
-                              }
-                              // Fallback to email first letter if no name
-                              return email.charAt(0).toUpperCase();
-                            })()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 overflow-hidden min-w-0">
-                          <p className="truncate text-sm font-semibold">
-                            {session.user.name || session.user.email}
-                          </p>
-                          {session.user.name && (
-                            <p className="truncate text-xs text-muted-foreground">
-                              {session.user.email}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                    <div className="flex items-center gap-2">
-                      <ThemeToggle />
-                      <SignOutButton />
+                            <Link
+                              href={getHref(item.href)}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className={cn(
+                                "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all active:scale-[0.98]",
+                                isActive
+                                  ? "bg-primary text-primary-foreground shadow-sm"
+                                  : "text-foreground hover:bg-accent hover:text-accent-foreground"
+                              )}
+                            >
+                              <Icon className="h-5 w-5 flex-shrink-0" />
+                              <span className="flex-1">{item.name}</span>
+                              {isCart && cartCount > 0 && (
+                                <Badge 
+                                  variant="destructive" 
+                                  className="h-5 min-w-5 flex items-center justify-center rounded-full px-1.5 text-xs font-bold"
+                                >
+                                  {cartCount > 9 ? "9+" : cartCount}
+                                </Badge>
+                              )}
+                            </Link>
+                          </motion.div>
+                        );
+                      })}
                     </div>
-                  </div>
-                )}
-              </motion.nav>
-            )}
+                    {session?.user && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="border-t px-4 py-4 space-y-3 mt-2"
+                      >
+                        <Link href={getHref("/profile")} onClick={() => setMobileMenuOpen(false)}>
+                          <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors active:scale-[0.98]">
+                            <Avatar className="h-10 w-10 ring-2 ring-primary ring-offset-2 ring-offset-background">
+                              <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "User"} />
+                              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                                {(() => {
+                                  const name = session.user.name;
+                                  const email = session.user.email || "";
+                                  if (name && name.trim()) {
+                                    const nameParts = name.trim().split(/\s+/);
+                                    return nameParts[0][0].toUpperCase();
+                                  }
+                                  return email.charAt(0).toUpperCase();
+                                })()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 overflow-hidden min-w-0">
+                              <p className="truncate text-sm font-semibold">
+                                {session.user.name || session.user.email}
+                              </p>
+                              {session.user.name && (
+                                <p className="truncate text-xs text-muted-foreground">
+                                  {session.user.email}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </Link>
+                        <div className="flex items-center gap-2">
+                          <ThemeToggle />
+                          <SignOutButton />
+                        </div>
+                      </motion.div>
+                    )}
+                  </motion.nav>
+                </>
+              )}
+            </AnimatePresence>
           </header>
           {/* Preview Banner for Admin (Mobile) */}
-          <div className="pt-16">
+          <div className="pt-14 sm:pt-16">
             <PreviewBanner />
           </div>
-          <main className="flex-1 px-4 py-4 overflow-y-auto">{children}</main>
+          <main className="flex-1 px-3 sm:px-4 py-4 overflow-y-auto">{children}</main>
         </div>
       </div>
     </div>

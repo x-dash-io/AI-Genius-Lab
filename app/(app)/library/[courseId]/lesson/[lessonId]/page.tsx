@@ -80,69 +80,69 @@ export default async function LessonPage({ params }: LessonPageProps) {
   };
 
   return (
-    <section className="grid gap-6">
+    <section className="grid gap-4 sm:gap-6">
       {/* Breadcrumb Navigation */}
-      <nav className="flex items-center gap-2 text-sm text-zinc-400">
+      <nav className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-zinc-400 overflow-x-auto">
         <Link
           href="/library"
-          className="hover:text-zinc-200 transition-colors"
+          className="hover:text-zinc-200 transition-colors whitespace-nowrap"
         >
           Library
         </Link>
-        <ChevronRight className="h-4 w-4" />
+        <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
         <Link
           href={`/library/${courseId}`}
-          className="hover:text-zinc-200 transition-colors"
+          className="hover:text-zinc-200 transition-colors whitespace-nowrap"
         >
           Course
         </Link>
-        <ChevronRight className="h-4 w-4" />
-        <span className="text-zinc-200">{lesson.title}</span>
+        <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+        <span className="text-zinc-200 truncate">{lesson.title}</span>
       </nav>
 
       {/* Header */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-800 text-xs font-medium text-zinc-200 uppercase tracking-wide">
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
+              <div className="flex items-center gap-2 px-2 sm:px-3 py-1 rounded-full bg-zinc-800 text-xs font-medium text-zinc-200 uppercase tracking-wide">
                 {getContentTypeIcon(lesson.contentType)}
                 {lesson.contentType?.toUpperCase() || 'UNKNOWN'}
               </div>
               {progress?.completedAt && (
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-900/20 border border-green-800 text-xs font-medium text-green-400">
+                <div className="flex items-center gap-2 px-2 sm:px-3 py-1 rounded-full bg-green-900/20 border border-green-800 text-xs font-medium text-green-400">
                   <CheckCircle2 className="h-3 w-3" />
                   Completed
                 </div>
               )}
             </div>
 
-            <h1 className="text-3xl font-bold text-white mb-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 break-words">
               {lesson.title}
             </h1>
 
-            <div className="flex items-center gap-6 text-sm text-zinc-400">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-zinc-400">
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
+                <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                 {formatDuration(lesson.contentType, lesson.durationSeconds ?? undefined)}
               </div>
 
               {lesson.allowDownload && (
                 <div className="flex items-center gap-2">
-                  <Download className="h-4 w-4" />
+                  <Download className="h-3 w-3 sm:h-4 sm:w-4" />
                   Downloadable
                 </div>
               )}
 
               {progress && (
                 <div className="flex items-center gap-2">
-                  <div className="w-16 h-2 bg-zinc-700 rounded-full overflow-hidden">
+                  <div className="w-12 sm:w-16 h-2 bg-zinc-700 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-blue-500 rounded-full transition-all duration-300"
                       style={{ width: `${progress.completionPercent}%` }}
                     />
                   </div>
-                  <span className="text-xs">{Math.round(progress.completionPercent)}% complete</span>
+                  <span className="text-xs whitespace-nowrap">{Math.round(progress.completionPercent)}% complete</span>
                 </div>
               )}
             </div>
@@ -150,16 +150,16 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
           <Link
             href={`/library/${courseId}`}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-zinc-700 text-sm font-medium text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors"
+            className="flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-4 py-2 rounded-lg border border-zinc-700 text-xs sm:text-sm font-medium text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors whitespace-nowrap flex-shrink-0"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
             Back to Course
           </Link>
         </div>
       </div>
 
       {/* Content Viewer */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6">
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 sm:p-6">
         <LessonViewer
           lessonId={lesson.id}
           contentType={lesson.contentType}
