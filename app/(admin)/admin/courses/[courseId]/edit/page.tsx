@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/access";
-import { getCourseForEdit, updateCourse, createSection, deleteSection, createLesson, deleteLesson } from "@/lib/admin/courses";
+import { getCourseForEdit, updateCourse, createSection, deleteSection, createLesson, deleteLesson, updateLesson, updateLessonContent, deleteLessonContent, createLessonContent } from "@/lib/admin/courses";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { CourseEditForm } from "@/components/admin/CourseEditForm";
@@ -129,6 +129,99 @@ async function deleteLessonAction(lessonId: string, courseId: string) {
   return { success: true };
 }
 
+async function updateLessonAction(lessonId: string, formData: FormData) {
+  "use server";
+  await requireRole("admin");
+
+  const title = formData.get("title") as string;
+  const durationSeconds = formData.get("durationSeconds") ? parseInt(formData.get("durationSeconds") as string) : undefined;
+  const isLocked = formData.get("isLocked") === "on";
+  const allowDownload = formData.get("allowDownload") === "on";
+
+  await updateLesson(lessonId, {
+    title,
+    durationSeconds,
+    isLocked,
+    allowDownload,
+  });
+
+  // Parse and update content data from form
+  const contentData: Array<{ id?: string; contentType: string; contentUrl?: string; title?: string }> = [];
+  let contentIndex = 0;
+
+  while (true) {
+    const contentIdKey = `content-${contentIndex}-id`;
+    const contentTypeKey = `content-${contentIndex}-type`;
+    const contentUrlKey = `content-${contentIndex}-url`;
+    const contentTitleKey = `content-${contentIndex}-title`;
+
+    const contentId = formData.get(contentIdKey);
+    const contentType = formData.get(contentTypeKey);
+    const contentUrl = formData.get(contentUrlKey);
+    const contentTitle = formData.get(contentTitleKey);
+
+    if (!contentType) break;
+
+    contentData.push({
+      id: contentId as string || undefined,
+      contentType: contentType as string,
+      contentUrl: contentUrl as string || undefined,
+      title: contentTitle as string || undefined,
+    });
+
+    contentIndex++;
+  }
+
+  // Get existing content for this lesson
+  const lesson = await getCourseForEdit(formData.get("courseId") as string);
+  if (!lesson) throw new Error("Course not found");
+  
+  const existingContent: Array<{ id: string }> = [];
+  for (const section of lesson.sections) {
+    const foundLesson = section.lessons.find(l => l.id === lessonId);
+    if (foundLesson) {
+      existingContent.push(...(foundLesson.contents || []).map(c => ({ id: c.id })));
+      break;
+    }
+  }
+
+  // Update or create content items
+  const processedContentIds = new Set<string>();
+  
+  for (let i = 0; i < contentData.length; i++) {
+    const content = contentData[i];
+    
+    if (content.id && existingContent.find(ec => ec.id === content.id)) {
+      // Update existing content
+      await updateLessonContent(content.id, {
+        contentType: content.contentType as "video" | "audio" | "pdf" | "link" | "file",
+        contentUrl: content.contentUrl,
+        title: content.title,
+        sortOrder: i,
+      });
+      processedContentIds.add(content.id);
+    } else {
+      // Create new content
+      await createLessonContent({
+        lessonId,
+        contentType: content.contentType as "video" | "audio" | "pdf" | "link" | "file",
+        contentUrl: content.contentUrl,
+        title: content.title,
+        sortOrder: i,
+      });
+    }
+  }
+
+  // Delete content items that were removed
+  for (const existing of existingContent) {
+    if (!processedContentIds.has(existing.id)) {
+      await deleteLessonContent(existing.id);
+    }
+  }
+
+  return { success: true };
+}
+
 export default async function EditCoursePage({
   params,
 }: {
@@ -168,6 +261,7 @@ export default async function EditCoursePage({
         deleteSectionAction={deleteSectionAction}
         addLessonAction={addLessonAction}
         deleteLessonAction={deleteLessonAction}
+        updateLessonAction={updateLessonAction}
       />
     </div>
   );

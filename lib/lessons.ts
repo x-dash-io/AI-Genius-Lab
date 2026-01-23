@@ -117,7 +117,28 @@ export async function getAuthorizedLessonContent(lessonId: string) {
   const oldContentType = (lesson as any).contentType;
 
   const contentType = firstContent?.contentType || oldContentType || 'video';
-  const contentUrl = firstContent?.contentUrl || oldContentUrl || null;
+  let contentUrl = firstContent?.contentUrl || oldContentUrl || null;
+
+  // Clean up contentUrl if it's a full Cloudinary URL - extract just the public ID
+  if (contentUrl && contentUrl.includes('cloudinary.com')) {
+    try {
+      const url = new URL(contentUrl);
+      const pathParts = url.pathname.split('/').filter(p => p && p !== 'v1' && p !== 'upload');
+      // Remove the resource type prefix if present
+      const resourceTypeIndex = pathParts.findIndex(p => ['image', 'video', 'raw'].includes(p));
+      if (resourceTypeIndex >= 0) {
+        pathParts.splice(resourceTypeIndex, 1);
+      }
+      contentUrl = pathParts.join('/');
+    } catch (error) {
+      console.error('Error parsing Cloudinary URL:', contentUrl, error);
+      // If parsing fails, try to extract public ID manually
+      const match = contentUrl.match(/\/(?:image|video|raw)\/upload\/.*?\/(.+)$/);
+      if (match) {
+        contentUrl = match[1].split('?')[0]; // Remove query params
+      }
+    }
+  }
 
   return {
     lesson: {

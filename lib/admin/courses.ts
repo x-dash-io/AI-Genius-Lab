@@ -27,6 +27,11 @@ export async function getCourseForEdit(courseId: string) {
           include: {
             lessons: {
               orderBy: { sortOrder: "asc" },
+              include: {
+                contents: {
+                  orderBy: { sortOrder: "asc" },
+                },
+              },
             },
           },
         },
@@ -233,5 +238,27 @@ export async function deleteLesson(lessonId: string) {
     return prisma.lesson.delete({
       where: { id: lessonId },
     });
+  });
+}
+
+export async function updateLessonContent(
+  contentId: string,
+  data: {
+    contentType?: "video" | "audio" | "pdf" | "link" | "file";
+    contentUrl?: string;
+    title?: string;
+    description?: string;
+    sortOrder?: number;
+  }
+) {
+  return prisma.lessonContent.update({
+    where: { id: contentId },
+    data,
+  });
+}
+
+export async function deleteLessonContent(contentId: string) {
+  return prisma.lessonContent.delete({
+    where: { id: contentId },
   });
 }

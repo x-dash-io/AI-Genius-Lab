@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,14 +15,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ContentUpload } from "@/components/admin/ContentUpload";
-import { Plus, Trash2, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronRight, Loader2, Edit } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { useConfirmDialog } from "@/components/ui/confirm-dialog";
-import type { Course, Section, Lesson } from "@prisma/client";
+import type { Course, Section, Lesson, LessonContent } from "@prisma/client";
 
 type CourseWithSections = Course & {
   sections: (Section & {
-    lessons: Lesson[];
+    lessons: (Lesson & {
+      contents: LessonContent[];
+    })[];
   })[];
 };
 
@@ -33,6 +35,7 @@ type CourseEditFormProps = {
   deleteSectionAction: (sectionId: string, courseId: string) => Promise<{ success: boolean }>;
   addLessonAction: (sectionId: string, formData: FormData) => Promise<Lesson>;
   deleteLessonAction: (lessonId: string, courseId: string) => Promise<{ success: boolean }>;
+  updateLessonAction?: (lessonId: string, formData: FormData) => Promise<{ success: boolean }>;
 };
 
 export function CourseEditForm({
@@ -42,12 +45,14 @@ export function CourseEditForm({
   deleteSectionAction,
   addLessonAction,
   deleteLessonAction,
+  updateLessonAction,
 }: CourseEditFormProps) {
   const router = useRouter();
   const { confirm } = useConfirmDialog();
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [showAddSection, setShowAddSection] = useState(false);
   const [showAddLesson, setShowAddLesson] = useState<string | null>(null);
+  const [editingLesson, setEditingLesson] = useState<string | null>(null);
   const [lessonContents, setLessonContents] = useState<Record<string, Array<{
     id?: string;
     contentType: string;
@@ -61,7 +66,35 @@ export function CourseEditForm({
   const [isDeletingSection, setIsDeletingSection] = useState<Record<string, boolean>>({});
   const [isAddingLesson, setIsAddingLesson] = useState<Record<string, boolean>>({});
   const [isDeletingLesson, setIsDeletingLesson] = useState<Record<string, boolean>>({});
+  const [isUpdatingLesson, setIsUpdatingLesson] = useState<Record<string, boolean>>({});
   const [isEditingCourse, setIsEditingCourse] = useState(false);
+
+  // Load existing lesson content on mount
+  useEffect(() => {
+    const initialContents: Record<string, Array<{
+      id?: string;
+      contentType: string;
+      contentUrl?: string;
+      title?: string;
+      description?: string;
+    }>> = {};
+
+    course.sections.forEach(section => {
+      section.lessons.forEach(lesson => {
+        if (lesson.contents && lesson.contents.length > 0) {
+          initialContents[lesson.id] = lesson.contents.map(content => ({
+            id: content.id,
+            contentType: content.contentType,
+            contentUrl: content.contentUrl || undefined,
+            title: content.title || undefined,
+            description: content.description || undefined,
+          }));
+        }
+      });
+    });
+
+    setLessonContents(initialContents);
+  }, [course]);
 
   const toggleSection = (sectionId: string) => {
     const newExpanded = new Set(expandedSections);
@@ -219,6 +252,44 @@ export function CourseEditForm({
       });
     } finally {
       setIsDeletingLesson((prev) => {
+        const next = { ...prev };
+        delete next[lessonId];
+        return next;
+      });
+    }
+  };
+
+  const handleUpdateLesson = async (lessonId: string, e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!updateLessonAction) {
+      toast({
+        title: "Update not available",
+        description: "Lesson update functionality is not available.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUpdatingLesson((prev) => ({ ...prev, [lessonId]: true }));
+    try {
+      const formData = new FormData(e.currentTarget);
+      formData.append("courseId", course.id);
+      await updateLessonAction(lessonId, formData);
+      toast({
+        title: "Lesson updated",
+        description: "Lesson has been updated successfully.",
+        variant: "success",
+      });
+      setEditingLesson(null);
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Failed to update lesson",
+        description: error instanceof Error ? error.message : "Failed to update lesson",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingLesson((prev) => {
         const next = { ...prev };
         delete next[lessonId];
         return next;
@@ -808,38 +879,280 @@ export function CourseEditForm({
 
                     <div className="space-y-2">
                       {section.lessons.map((lesson) => (
-                        <div
-                          key={lesson.id}
-                          className="flex items-center justify-between rounded-lg border p-3"
-                        >
-                          <div className="flex-1">
-                            <p className="font-medium">{lesson.title}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              {/* We'll show content count here once we load lesson contents */}
-                              <Badge variant="outline">{/* Content count will be shown here */}Lesson</Badge>
-                              {lesson.durationSeconds && (
-                                <span className="text-xs text-muted-foreground">
-                                  {Math.floor(lesson.durationSeconds / 60)}m {lesson.durationSeconds % 60}s
-                                </span>
-                              )}
-                              {lesson.isLocked && (
-                                <Badge variant="secondary">Locked</Badge>
-                              )}
+                        <div key={lesson.id}>
+                          {editingLesson === lesson.id ? (
+                            <Card className="mb-4">
+                              <CardContent className="pt-6">
+                                <form
+                                  onSubmit={(e) => handleUpdateLesson(lesson.id, e)}
+                                  className="space-y-4"
+                                >
+                                  <input type="hidden" name="courseId" value={course.id} />
+                                  <div className="space-y-2">
+                                    <Label htmlFor={`lessonTitle-edit-${lesson.id}`}>Lesson Title *</Label>
+                                    <Input
+                                      id={`lessonTitle-edit-${lesson.id}`}
+                                      name="title"
+                                      defaultValue={lesson.title}
+                                      required
+                                    />
+                                  </div>
+
+                                  <div className="space-y-2">
+                                    <Label htmlFor={`durationSeconds-edit-${lesson.id}`}>Duration (seconds)</Label>
+                                    <Input
+                                      id={`durationSeconds-edit-${lesson.id}`}
+                                      name="durationSeconds"
+                                      type="number"
+                                      min="0"
+                                      defaultValue={lesson.durationSeconds || ""}
+                                    />
+                                  </div>
+
+                                  <div className="flex items-center space-x-4">
+                                    <div className="flex items-center space-x-2">
+                                      <input
+                                        type="checkbox"
+                                        id={`isLocked-edit-${lesson.id}`}
+                                        name="isLocked"
+                                        defaultChecked={lesson.isLocked}
+                                        className="h-4 w-4 rounded border-gray-300"
+                                      />
+                                      <Label htmlFor={`isLocked-edit-${lesson.id}`} className="cursor-pointer">
+                                        Locked
+                                      </Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <input
+                                        type="checkbox"
+                                        id={`allowDownload-edit-${lesson.id}`}
+                                        name="allowDownload"
+                                        defaultChecked={lesson.allowDownload}
+                                        className="h-4 w-4 rounded border-gray-300"
+                                      />
+                                      <Label htmlFor={`allowDownload-edit-${lesson.id}`} className="cursor-pointer">
+                                        Allow Download
+                                      </Label>
+                                    </div>
+                                  </div>
+
+                                  {/* Lesson Content Management */}
+                                  <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                      <Label>Lesson Content</Label>
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          const contents = lessonContents[lesson.id] || [];
+                                          setLessonContents(prev => ({
+                                            ...prev,
+                                            [lesson.id]: [...contents, {
+                                              contentType: 'video',
+                                              title: `Content ${contents.length + 1}`,
+                                            }]
+                                          }));
+                                        }}
+                                      >
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        Add Content
+                                      </Button>
+                                    </div>
+
+                                    {(lessonContents[lesson.id] || []).map((content, index) => (
+                                      <Card key={index} className="p-4">
+                                        <input type="hidden" name={`content-${index}-id`} value={content.id || ''} />
+                                        <input type="hidden" name={`content-${index}-type`} value={content.contentType} />
+                                        <input type="hidden" name={`content-${index}-url`} value={content.contentUrl || ''} />
+                                        <input type="hidden" name={`content-${index}-title`} value={content.title || ''} />
+
+                                        <div className="space-y-4">
+                                          <div className="flex items-center justify-between">
+                                            <Label className="text-sm font-medium">Content #{index + 1}</Label>
+                                            <Button
+                                              type="button"
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => {
+                                                const contents = lessonContents[lesson.id] || [];
+                                                setLessonContents(prev => ({
+                                                  ...prev,
+                                                  [lesson.id]: contents.filter((_, i) => i !== index)
+                                                }));
+                                              }}
+                                            >
+                                              <Trash2 className="h-4 w-4 text-destructive" />
+                                            </Button>
+                                          </div>
+
+                                          <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                              <Label>Content Type</Label>
+                                              <Select
+                                                value={content.contentType}
+                                                onValueChange={(value) => {
+                                                  const contents = lessonContents[lesson.id] || [];
+                                                  const updated = [...contents];
+                                                  updated[index] = { ...updated[index], contentType: value };
+                                                  setLessonContents(prev => ({
+                                                    ...prev,
+                                                    [lesson.id]: updated
+                                                  }));
+                                                }}
+                                              >
+                                                <SelectTrigger>
+                                                  <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  <SelectItem value="video">Video</SelectItem>
+                                                  <SelectItem value="audio">Audio</SelectItem>
+                                                  <SelectItem value="pdf">PDF</SelectItem>
+                                                  <SelectItem value="link">Link</SelectItem>
+                                                  <SelectItem value="file">File</SelectItem>
+                                                </SelectContent>
+                                              </Select>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                              <Label>Title (Optional)</Label>
+                                              <Input
+                                                value={content.title || ''}
+                                                onChange={(e) => {
+                                                  const contents = lessonContents[lesson.id] || [];
+                                                  const updated = [...contents];
+                                                  updated[index] = { ...updated[index], title: e.target.value };
+                                                  setLessonContents(prev => ({
+                                                    ...prev,
+                                                    [lesson.id]: updated
+                                                  }));
+                                                }}
+                                                placeholder="e.g., Main Video"
+                                              />
+                                            </div>
+                                          </div>
+
+                                          <div className="space-y-2">
+                                            <Label>Content {content.contentType === 'link' ? 'URL' : 'Upload'}</Label>
+                                            {content.contentType === 'link' ? (
+                                              <Input
+                                                value={content.contentUrl || ''}
+                                                onChange={(e) => {
+                                                  const contents = lessonContents[lesson.id] || [];
+                                                  const updated = [...contents];
+                                                  updated[index] = { ...updated[index], contentUrl: e.target.value };
+                                                  setLessonContents(prev => ({
+                                                    ...prev,
+                                                    [lesson.id]: updated
+                                                  }));
+                                                }}
+                                                placeholder="https://example.com/resource"
+                                              />
+                                            ) : (
+                                              <ContentUpload
+                                                sectionId={`${lesson.id}-${index}`}
+                                                contentType={content.contentType}
+                                                value={content.contentUrl || ''}
+                                                onChange={(publicId) => {
+                                                  const contents = lessonContents[lesson.id] || [];
+                                                  const updated = [...contents];
+                                                  updated[index] = { ...updated[index], contentUrl: publicId };
+                                                  setLessonContents(prev => ({
+                                                    ...prev,
+                                                    [lesson.id]: updated
+                                                  }));
+                                                }}
+                                                onError={(error) =>
+                                                  setUploadErrors((prev) => ({ ...prev, [`${lesson.id}-${index}`]: error }))
+                                                }
+                                              />
+                                            )}
+                                            {uploadErrors[`${lesson.id}-${index}`] && (
+                                              <p className="text-sm text-destructive">{uploadErrors[`${lesson.id}-${index}`]}</p>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </Card>
+                                    ))}
+
+                                    {(lessonContents[lesson.id] || []).length === 0 && (
+                                      <p className="text-sm text-muted-foreground text-center py-4 border-2 border-dashed rounded-lg">
+                                        No content added yet. Click "Add Content" to add video, PDF, or other materials.
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <div className="flex gap-2">
+                                    <Button type="submit" size="sm" disabled={isUpdatingLesson[lesson.id]}>
+                                      {isUpdatingLesson[lesson.id] ? (
+                                        <>
+                                          <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+                                          Saving...
+                                        </>
+                                      ) : (
+                                        "Save Lesson"
+                                      )}
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => setEditingLesson(null)}
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </div>
+                                </form>
+                              </CardContent>
+                            </Card>
+                          ) : (
+                            <div className="flex items-center justify-between rounded-lg border p-3">
+                              <div className="flex-1">
+                                <p className="font-medium">{lesson.title}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge variant="outline">
+                                    {lesson.contents?.length || 0} content item{(lesson.contents?.length || 0) !== 1 ? 's' : ''}
+                                  </Badge>
+                                  {lesson.durationSeconds && (
+                                    <span className="text-xs text-muted-foreground">
+                                      {Math.floor(lesson.durationSeconds / 60)}m {lesson.durationSeconds % 60}s
+                                    </span>
+                                  )}
+                                  {lesson.isLocked && (
+                                    <Badge variant="secondary">Locked</Badge>
+                                  )}
+                                  {!lesson.contents || lesson.contents.length === 0 || !lesson.contents[0]?.contentUrl ? (
+                                    <Badge variant="destructive">No Content</Badge>
+                                  ) : null}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {updateLessonAction && (
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setEditingLesson(lesson.id)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                )}
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteLesson(lesson.id)}
+                                  disabled={isDeletingLesson[lesson.id]}
+                                >
+                                  {isDeletingLesson[lesson.id] ? (
+                                    <Loader2 className="h-4 w-4 animate-spin text-destructive" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                  )}
+                                </Button>
+                              </div>
                             </div>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteLesson(lesson.id)}
-                            disabled={isDeletingLesson[lesson.id]}
-                          >
-                            {isDeletingLesson[lesson.id] ? (
-                              <Loader2 className="h-4 w-4 animate-spin text-destructive" />
-                            ) : (
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            )}
-                          </Button>
+                          )}
                         </div>
                       ))}
                       {section.lessons.length === 0 && (
