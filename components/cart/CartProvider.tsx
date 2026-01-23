@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { Cart, CartItem } from "@/lib/cart/types";
 import { toast } from "@/lib/toast";
+import { safeJsonParse } from "@/lib/utils";
 
 interface CartContextType {
   cart: Cart;
@@ -25,7 +26,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await fetch("/api/cart");
       if (response.ok) {
-        const data = await response.json();
+        const data = await safeJsonParse(response);
         setCart(data);
       }
     } catch (error) {
@@ -47,7 +48,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ action: "add", courseId }),
       });
 
-      const data = await response.json();
+      const data = await safeJsonParse(response);
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to add to cart");
@@ -78,7 +79,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ action: "remove", courseId }),
       });
 
-      const data = await response.json();
+      const data = await safeJsonParse(response);
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to remove from cart");
@@ -108,7 +109,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ action: "clear" }),
       });
 
-      const data = await response.json();
+      const data = await safeJsonParse(response);
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to clear cart");
@@ -142,7 +143,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ action: "updateQuantity", courseId, quantity }),
       });
 
-      const data = await response.json();
+      const data = await safeJsonParse(response);
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to update quantity");
@@ -170,7 +171,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         });
 
         if (response.ok) {
-          const data = await response.json();
+          const data = await safeJsonParse(response);
           setCart(data);
         }
       }

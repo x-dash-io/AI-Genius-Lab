@@ -93,13 +93,15 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
       <BackgroundBlobs />
-      <div className="flex h-screen overflow-hidden">
+      
+      {/* Desktop Layout */}
+      <div className="hidden md:flex h-screen overflow-hidden">
         {/* Desktop Sidebar - Fixed */}
         <motion.aside
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="hidden w-64 flex-col border-r bg-card/80 backdrop-blur-md md:flex fixed left-0 top-0 bottom-0 z-20"
+          className="w-64 flex-col border-r bg-card/80 backdrop-blur-md flex fixed left-0 top-0 bottom-0 z-20"
         >
           {/* Sidebar Header - Fixed at top */}
           <div className="flex-shrink-0 border-b p-4">
@@ -231,10 +233,10 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
         </motion.aside>
 
         {/* Desktop Main Content Area */}
-        <div className="flex-1 flex flex-col md:ml-64 overflow-hidden">
+        <div className="flex-1 flex flex-col ml-64 overflow-hidden">
           {/* Scrollable Main Content */}
           <main className="flex-1 overflow-y-auto">
-            <div className="mx-auto w-full max-w-7xl px-6 py-6">
+            <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-4 sm:py-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -245,9 +247,10 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
             </div>
           </main>
         </div>
+      </div>
 
-        {/* Mobile Layout */}
-        <div className="flex flex-1 flex-col md:hidden">
+      {/* Mobile Layout */}
+      <div className="flex md:hidden flex-col min-h-screen">
           <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
             <div className="flex items-center justify-between px-3 sm:px-4 pt-3 sm:pt-4 pb-2 sm:pb-3">
               <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 min-w-0">
@@ -424,9 +427,16 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
               )}
             </AnimatePresence>
           </header>
-          <main className="flex-1 px-3 sm:px-4 py-4 pt-16 sm:pt-20 overflow-y-auto">{children}</main>
+          <main className="flex-1 px-3 sm:px-4 py-4 pt-16 sm:pt-20 pb-6 overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {children}
+            </motion.div>
+          </main>
         </div>
-      </div>
     </div>
   );
 }

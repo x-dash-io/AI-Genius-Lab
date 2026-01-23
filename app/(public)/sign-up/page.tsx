@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { update } from "next-auth/react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ export default function SignUpPage() {
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
       const redirectUrl = session.user.role === "admin" ? "/admin" : callbackUrl;
+      // Use replace to avoid adding to history
       router.replace(redirectUrl);
     }
   }, [status, session, router, callbackUrl]);
@@ -178,14 +180,9 @@ export default function SignUpPage() {
 
       setIsVerifyingOTP(false);
       setIsRedirecting(true);
-      
-      setTimeout(async () => {
-        const sessionResponse = await fetch("/api/auth/session");
-        const session = await sessionResponse.json();
-        const redirectUrl = session?.user?.role === "admin" ? "/admin" : "/dashboard";
-        router.push(redirectUrl);
-        router.refresh();
-      }, 500);
+      // Force session refresh and let useEffect handle redirect
+      router.refresh();
+      // The useEffect hook will handle the redirect when session updates
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
       setIsVerifyingOTP(false);

@@ -102,13 +102,15 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
       <BackgroundBlobs />
-      <div className="flex h-screen overflow-hidden">
+      
+      {/* Desktop Layout */}
+      <div className="hidden md:flex h-screen overflow-hidden">
         {/* Desktop Sidebar - Fixed */}
         <motion.aside
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="hidden w-64 flex-col border-r bg-card/80 backdrop-blur-md md:flex fixed left-0 top-0 bottom-0 z-20"
+          className="w-64 flex-col border-r bg-card/80 backdrop-blur-md flex fixed left-0 top-0 bottom-0 z-20"
         >
           {/* Sidebar Header - Fixed at top */}
           <div className="flex-shrink-0 border-b p-4">
@@ -210,12 +212,12 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
         </motion.aside>
 
         {/* Desktop Main Content Area */}
-        <div className="flex-1 flex flex-col md:ml-64 overflow-hidden">
+        <div className="flex-1 flex flex-col ml-64 overflow-hidden">
           {/* Preview Banner for Admin */}
           <PreviewBanner />
           {/* Scrollable Main Content */}
           <main className="flex-1 overflow-y-auto">
-            <div className="mx-auto w-full max-w-7xl px-6 py-6">
+            <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-4 sm:py-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -226,9 +228,10 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
             </div>
           </main>
         </div>
+      </div>
 
-        {/* Mobile Layout */}
-        <div className="flex flex-1 flex-col md:hidden">
+      {/* Mobile Layout */}
+      <div className="flex md:hidden flex-col min-h-screen">
           <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
             <div className="flex items-center justify-between px-3 sm:px-4 pt-3 sm:pt-4 pb-2 sm:pb-3">
               <Link href={getHref("/dashboard")} className="font-display text-base sm:text-lg font-bold truncate flex-shrink-0 max-w-[60%]">
@@ -263,19 +266,35 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                     onClick={() => setMobileMenuOpen(false)}
                   />
                   
-                  {/* Menu Panel */}
+                  {/* Menu Panel - Slides from Left */}
                   <motion.nav
                     ref={menuRef}
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
+                    initial={{ x: -280 }}
+                    animate={{ x: 0 }}
+                    exit={{ x: -280 }}
                     transition={{ 
-                      duration: 0.3,
-                      ease: [0.4, 0, 0.2, 1]
+                      type: "spring",
+                      damping: 30,
+                      stiffness: 300
                     }}
-                    className="relative z-50 border-t bg-background shadow-lg"
+                    className="fixed left-0 top-0 bottom-0 z-50 w-72 bg-card/95 backdrop-blur-md border-r shadow-2xl overflow-y-auto"
                   >
-                    <div className="px-4 py-6 space-y-1">
+                    {/* Menu Header */}
+                    <div className="border-b p-4 flex items-center justify-between">
+                      <Link href={getHref("/dashboard")} onClick={() => setMobileMenuOpen(false)} className="font-display text-lg font-bold">
+                        AI GENIUS LAB
+                      </Link>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="h-8 w-8"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    <div className="px-3 py-4 space-y-1">
                       {navigation.map((item, index) => {
                         const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                         const Icon = item.icon;
@@ -364,9 +383,16 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
           <div className="pt-14 sm:pt-16">
             <PreviewBanner />
           </div>
-          <main className="flex-1 px-3 sm:px-4 py-4 overflow-y-auto">{children}</main>
+          <main className="flex-1 px-3 sm:px-4 py-4 pb-6 overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {children}
+            </motion.div>
+          </main>
         </div>
-      </div>
     </div>
   );
 }

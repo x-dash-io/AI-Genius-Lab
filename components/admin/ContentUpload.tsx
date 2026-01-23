@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Upload, Link as LinkIcon, FileText, Loader2, File } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { safeJsonParse } from "@/lib/utils";
 
 interface ContentUploadProps {
   sectionId: string;
@@ -63,7 +64,7 @@ export function ContentUpload({
         body: formData,
       });
 
-      const data = await response.json();
+      const data = await safeJsonParse(response);
 
       if (!response.ok) {
         throw new Error(data.error || "Upload failed");
@@ -107,7 +108,7 @@ export function ContentUpload({
         }),
       });
 
-      const data = await response.json();
+      const data = await safeJsonParse(response);
 
       if (!response.ok) {
         throw new Error(data.error || "Upload failed");

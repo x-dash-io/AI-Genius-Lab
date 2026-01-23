@@ -26,6 +26,7 @@ export default function SignInPage() {
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
       const redirectUrl = session.user.role === "admin" ? "/admin" : callbackUrl;
+      // Use replace to avoid adding to history
       router.replace(redirectUrl);
     }
   }, [status, session, router, callbackUrl]);
@@ -85,15 +86,9 @@ export default function SignInPage() {
       if (result?.ok) {
         setIsLoading(false);
         setIsRedirecting(true);
-        
-        // Wait a moment for session to update, then check role and redirect
-        setTimeout(async () => {
-          const sessionResponse = await fetch("/api/auth/session");
-          const session = await sessionResponse.json();
-          const redirectUrl = session?.user?.role === "admin" ? "/admin" : callbackUrl;
-          router.push(redirectUrl);
-          router.refresh();
-        }, 500);
+        // Force session refresh and let useEffect handle redirect
+        router.refresh();
+        // The useEffect hook will handle the redirect when session updates
       } else {
         setError("Sign in failed. Please try again.");
         setIsLoading(false);

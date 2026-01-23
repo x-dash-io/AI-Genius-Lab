@@ -248,7 +248,7 @@ export function PublicLayoutClient({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, delay: 0.1 }}
-        className="mx-auto w-full max-w-7xl px-3 sm:px-4 md:px-6 lg:px-8 pt-20 sm:pt-24 md:pt-28 py-6 sm:py-10 relative z-10"
+        className="mx-auto w-full max-w-7xl px-3 sm:px-4 md:px-6 lg:px-8 pt-20 sm:pt-24 md:pt-28 pb-6 sm:pb-10 relative z-10"
       >
         {children}
       </motion.main>
