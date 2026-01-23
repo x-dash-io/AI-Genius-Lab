@@ -104,27 +104,29 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
           className="w-64 flex-col border-r bg-card/80 backdrop-blur-md flex fixed left-0 top-0 bottom-0 z-20"
         >
           {/* Sidebar Header - Fixed at top */}
-          <div className="flex-shrink-0 border-b p-4">
+          <div className="flex-shrink-0 border-b p-6">
             <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               className="flex items-center gap-2"
             >
-              <Shield className="h-5 w-5 text-primary" />
-              <Link href="/admin" className="font-display text-xl font-bold tracking-tight">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <Link href="/admin" className="font-display text-lg font-bold tracking-tight">
                 ADMIN
               </Link>
             </motion.div>
           </div>
           
           {/* Scrollable Navigation */}
-          <div className="flex-1 overflow-y-auto px-3 py-4">
-            <div className="space-y-4">
+          <div className="flex-1 overflow-y-auto px-4 py-6">
+            <div className="space-y-6">
               <div>
-                <p className="px-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-2">
+                <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-3">
                   Admin Panel
                 </p>
-                <nav className="grid gap-2">
+                <nav className="space-y-1">
                   {adminNavigation.map((item) => {
                     const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                     const Icon = item.icon;
@@ -137,13 +139,13 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                         <Link
                           href={item.href}
                           className={cn(
-                            "flex items-center gap-3 rounded-lg pl-1 pr-3 py-2 text-sm font-medium transition-colors",
+                            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
                             isActive
-                              ? "bg-primary text-primary-foreground"
+                              ? "bg-primary text-primary-foreground shadow-sm"
                               : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                           )}
                         >
-                          <Icon className="h-4 w-4" />
+                          <Icon className="h-5 w-5 flex-shrink-0" />
                           {item.name}
                         </Link>
                       </motion.div>
@@ -152,17 +154,17 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                 </nav>
               </div>
 
-              <div className="border-t pt-4 mt-4">
-                <div className="px-3 flex items-center gap-2 mb-2">
-                  <Eye className="h-3 w-3 text-amber-500" />
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              <div className="border-t pt-6">
+                <div className="px-3 flex items-center gap-2 mb-3">
+                  <Eye className="h-3.5 w-3.5 text-amber-500" />
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                     Customer Preview
                   </p>
                 </div>
                 <p className="px-3 text-xs text-muted-foreground mb-3">
                   View pages as customers see them
                 </p>
-                <nav className="grid gap-1">
+                <nav className="space-y-1">
                   {customerPreviewLinks.map((item) => {
                     const Icon = item.icon;
                     const previewHref = `${item.href}?preview=true`;
@@ -176,9 +178,9 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                           href={previewHref}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-3 rounded-lg pl-1 pr-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-amber-500/10 hover:text-amber-700 dark:hover:text-amber-300"
+                          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all text-muted-foreground hover:bg-amber-500/10 hover:text-amber-700 dark:hover:text-amber-300"
                         >
-                          <Icon className="h-4 w-4" />
+                          <Icon className="h-5 w-5 flex-shrink-0" />
                           {item.name}
                         </Link>
                       </motion.div>
@@ -190,17 +192,17 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Sidebar Footer - Fixed at bottom */}
-          <div className="flex-shrink-0 border-t p-4 space-y-4">
+          <div className="flex-shrink-0 border-t p-4">
             {session?.user && (
-              <>
+              <div className="space-y-3">
                 <Link href="/admin/profile">
                   <motion.div
                     whileHover={{ scale: 1.02 }}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer"
                   >
-                    <Avatar className="h-10 w-10 ring-2 ring-primary ring-offset-2 ring-offset-card">
+                    <Avatar className="h-9 w-9 ring-2 ring-primary/20">
                       <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "Admin"} />
-                      <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
                         {(() => {
                           const name = session.user.name;
                           const email = session.user.email || "";
@@ -213,7 +215,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 overflow-hidden min-w-0">
-                      <p className="truncate text-sm font-semibold">
+                      <p className="truncate text-sm font-medium">
                         {session.user.name || session.user.email}
                       </p>
                       <p className="truncate text-xs text-muted-foreground">
@@ -222,12 +224,12 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                     </div>
                   </motion.div>
                 </Link>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 px-1">
                   <CartIcon />
                   <ThemeToggle />
                   <SignOutButton />
                 </div>
-              </>
+              </div>
             )}
           </div>
         </motion.aside>
@@ -251,192 +253,207 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
 
       {/* Mobile Layout */}
       <div className="flex md:hidden flex-col min-h-screen">
-          <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-            <div className="flex items-center justify-between px-3 sm:px-4 pt-3 sm:pt-4 pb-2 sm:pb-3">
-              <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 min-w-0">
-                <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
-                <Link href="/admin" className="font-display text-base sm:text-lg font-bold truncate">
-                  ADMIN
-                </Link>
+        <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 h-16">
+          <div className="flex items-center justify-between px-4 h-full">
+            <Link href="/admin" className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
+                <Shield className="h-5 w-5 text-white" />
               </div>
-              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                <CartIcon />
-                <ThemeToggle />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="h-9 w-9 sm:h-10 sm:w-10"
-                >
-                  {mobileMenuOpen ? (
-                    <X className="h-4 w-4 sm:h-5 sm:w-5" />
-                  ) : (
-                    <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
-                  )}
-                </Button>
-              </div>
+              <span className="font-display text-lg font-bold tracking-tight">
+                ADMIN
+              </span>
+            </Link>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <CartIcon />
+              <ThemeToggle />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="h-10 w-10"
+              >
+                {mobileMenuOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
+              </Button>
             </div>
-            <AnimatePresence>
-              {mobileMenuOpen && (
-                <>
-                  {/* Backdrop */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-                    onClick={() => setMobileMenuOpen(false)}
-                  />
-                  
-                  {/* Menu Panel */}
-                  <motion.nav
-                    ref={menuRef}
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ 
-                      duration: 0.3,
-                      ease: [0.4, 0, 0.2, 1]
-                    }}
-                    className="relative z-50 border-t bg-background shadow-lg"
-                  >
-                    <div className="px-4 py-6 space-y-6">
-                      <div>
-                        <motion.p
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.1 }}
-                          className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-3 px-1"
-                        >
-                          Admin Panel
-                        </motion.p>
-                        <div className="space-y-1">
-                          {adminNavigation.map((item, index) => {
-                            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-                            const Icon = item.icon;
-                            return (
-                              <motion.div
-                                key={item.href}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.05 * (index + 1) + 0.15 }}
+          </div>
+        </header>
+
+        {/* Mobile Menu Overlay */}
+        <AnimatePresence mode="wait">
+          {mobileMenuOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                key="backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+                onClick={() => setMobileMenuOpen(false)}
+              />
+              
+              {/* Menu Panel - Slides from Left */}
+              <motion.nav
+                key="menu"
+                ref={menuRef}
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%" }}
+                transition={{ 
+                  type: "spring",
+                  damping: 30,
+                  stiffness: 300
+                }}
+                className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-card/95 backdrop-blur-md border-r shadow-2xl overflow-y-auto md:hidden"
+              >
+                {/* Menu Header */}
+                <div className="border-b p-4 flex items-center justify-between sticky top-0 bg-card/95 backdrop-blur-md z-10 h-16">
+                  <Link href="/admin" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
+                      <Shield className="h-5 w-5 text-white" />
+                    </div>
+                    <span className="font-display text-lg font-bold">
+                      ADMIN
+                    </span>
+                  </Link>
+                </div>
+
+                {/* Navigation Items */}
+                <div className="px-3 py-4 pb-32">
+                  <div className="space-y-4">
+                    <div>
+                      <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-2">
+                        Admin Panel
+                      </p>
+                      <div className="space-y-1">
+                        {adminNavigation.map((item, index) => {
+                          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                          const Icon = item.icon;
+                          return (
+                            <motion.div
+                              key={item.href}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: 0.05 * (index + 1) }}
+                            >
+                              <Link
+                                href={item.href}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className={cn(
+                                  "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all active:scale-[0.98]",
+                                  isActive
+                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                    : "text-foreground hover:bg-accent hover:text-accent-foreground"
+                                )}
                               >
-                                <Link
-                                  href={item.href}
-                                  onClick={() => setMobileMenuOpen(false)}
-                                  className={cn(
-                                    "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all active:scale-[0.98]",
-                                    isActive
-                                      ? "bg-primary text-primary-foreground shadow-sm"
-                                      : "text-foreground hover:bg-accent hover:text-accent-foreground"
-                                  )}
-                                >
-                                  <Icon className="h-5 w-5 flex-shrink-0" />
-                                  <span>{item.name}</span>
-                                </Link>
-                              </motion.div>
-                            );
-                          })}
-                        </div>
+                                <Icon className="h-5 w-5 flex-shrink-0" />
+                                <span>{item.name}</span>
+                              </Link>
+                            </motion.div>
+                          );
+                        })}
                       </div>
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                        className="border-t pt-4"
-                      >
-                        <div className="flex items-center gap-2 mb-2 px-1">
-                          <Eye className="h-4 w-4 text-amber-500" />
-                          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                            Customer Preview
+                    </div>
+
+                    <div className="border-t pt-4">
+                      <div className="flex items-center gap-2 mb-2 px-3">
+                        <Eye className="h-3.5 w-3.5 text-amber-500" />
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                          Customer Preview
+                        </p>
+                      </div>
+                      <p className="px-3 text-xs text-muted-foreground mb-2">
+                        Opens in new tab
+                      </p>
+                      <div className="space-y-1">
+                        {customerPreviewLinks.map((item, index) => {
+                          const Icon = item.icon;
+                          const previewHref = `${item.href}?preview=true`;
+                          return (
+                            <motion.div
+                              key={item.href}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: 0.05 * (index + 4) }}
+                            >
+                              <Link
+                                href={previewHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all text-foreground hover:bg-amber-500/10 hover:text-amber-700 dark:hover:text-amber-300 active:scale-[0.98]"
+                              >
+                                <Icon className="h-5 w-5 flex-shrink-0" />
+                                <span>{item.name}</span>
+                              </Link>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* User Profile Section */}
+                {session?.user && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="border-t px-4 py-4 space-y-3 sticky bottom-0 bg-card/95 backdrop-blur-md"
+                  >
+                    <Link href="/admin/profile" onClick={() => setMobileMenuOpen(false)}>
+                      <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors active:scale-[0.98]">
+                        <Avatar className="h-10 w-10 ring-2 ring-primary/20">
+                          <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "Admin"} />
+                          <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                            {(() => {
+                              const name = session.user.name;
+                              const email = session.user.email || "";
+                              if (name && name.trim()) {
+                                const nameParts = name.trim().split(/\s+/);
+                                return nameParts[0][0].toUpperCase();
+                              }
+                              return email.charAt(0).toUpperCase();
+                            })()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 overflow-hidden min-w-0">
+                          <p className="truncate text-sm font-semibold">
+                            {session.user.name || session.user.email}
+                          </p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            Admin
                           </p>
                         </div>
-                        <p className="text-xs text-muted-foreground mb-3 px-1">
-                          Opens in new tab
-                        </p>
-                        <div className="space-y-1">
-                          {customerPreviewLinks.map((item, index) => {
-                            const Icon = item.icon;
-                            const previewHref = `${item.href}?preview=true`;
-                            return (
-                              <motion.div
-                                key={item.href}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.05 * index + 0.45 }}
-                              >
-                                <Link
-                                  href={previewHref}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  onClick={() => setMobileMenuOpen(false)}
-                                  className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all text-foreground hover:bg-amber-500/10 hover:text-amber-700 dark:hover:text-amber-300 active:scale-[0.98]"
-                                >
-                                  <Icon className="h-5 w-5 flex-shrink-0" />
-                                  <span>{item.name}</span>
-                                </Link>
-                              </motion.div>
-                            );
-                          })}
-                        </div>
-                      </motion.div>
+                      </div>
+                    </Link>
+                    <div className="flex items-center gap-2 px-1">
+                      <SignOutButton className="flex-1" />
                     </div>
-                    {session?.user && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6 }}
-                        className="border-t px-4 py-4 space-y-3 mt-2"
-                      >
-                        <Link href="/admin/profile" onClick={() => setMobileMenuOpen(false)}>
-                          <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors active:scale-[0.98]">
-                            <Avatar className="h-10 w-10 ring-2 ring-primary ring-offset-2 ring-offset-background">
-                              <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "Admin"} />
-                              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                                {(() => {
-                                  const name = session.user.name;
-                                  const email = session.user.email || "";
-                                  if (name && name.trim()) {
-                                    const nameParts = name.trim().split(/\s+/);
-                                    return nameParts[0][0].toUpperCase();
-                                  }
-                                  return email.charAt(0).toUpperCase();
-                                })()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 overflow-hidden min-w-0">
-                              <p className="truncate text-sm font-semibold">
-                                {session.user.name || session.user.email}
-                              </p>
-                              <p className="truncate text-xs text-muted-foreground">
-                                Admin
-                              </p>
-                            </div>
-                          </div>
-                        </Link>
-                        <div className="flex items-center gap-2">
-                          <CartIcon />
-                          <ThemeToggle />
-                          <SignOutButton />
-                        </div>
-                      </motion.div>
-                    )}
-                  </motion.nav>
-                </>
-              )}
-            </AnimatePresence>
-          </header>
-          <main className="flex-1 px-3 sm:px-4 py-4 pt-16 sm:pt-20 pb-6 overflow-y-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {children}
-            </motion.div>
-          </main>
-        </div>
+                  </motion.div>
+                )}
+              </motion.nav>
+            </>
+          )}
+        </AnimatePresence>
+        
+        {/* Main Content */}
+        <main className="flex-1 px-3 sm:px-4 py-4 pt-20 pb-6 overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {children}
+          </motion.div>
+        </main>
+      </div>
     </div>
   );
 }
