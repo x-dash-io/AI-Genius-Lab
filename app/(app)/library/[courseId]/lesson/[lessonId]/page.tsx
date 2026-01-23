@@ -26,9 +26,21 @@ export default async function LessonPage({ params }: LessonPageProps) {
   }
 
   const { courseId, lessonId } = await params;
-  const { lesson, courseSlug, signedUrl } = await getAuthorizedLessonContent(
-    lessonId
-  );
+
+  let lesson, courseSlug, signedUrl;
+  try {
+    const result = await getAuthorizedLessonContent(lessonId);
+    lesson = result.lesson;
+    courseSlug = result.courseSlug;
+    signedUrl = result.signedUrl;
+  } catch (error) {
+    // If lesson doesn't exist, redirect to course page
+    if (error instanceof Error && error.message === "NOT_FOUND") {
+      redirect(`/library/${courseId}`);
+    }
+    throw error;
+  }
+
   if (courseSlug !== courseId) {
     redirect(`/library/${courseId}`);
   }

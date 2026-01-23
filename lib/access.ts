@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { prisma, withRetry } from "@/lib/prisma";
 import { hasRole, type Role } from "@/lib/rbac";
 
 export async function requireUser() {
@@ -24,13 +24,15 @@ export function isAdmin(role: Role) {
 }
 
 export async function hasPurchasedCourse(userId: string, courseId: string) {
-  const purchase = await prisma.purchase.findFirst({
-    where: {
-      userId,
-      courseId,
-      status: "paid",
-    },
-    select: { id: true },
+  const purchase = await withRetry(async () => {
+    return prisma.purchase.findFirst({
+      where: {
+        userId,
+        courseId,
+        status: "paid",
+      },
+      select: { id: true },
+    });
   });
 
   return Boolean(purchase);

@@ -4,7 +4,7 @@ import type { Session, User, Account } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
-import { prisma } from "@/lib/prisma";
+import { prisma, withRetry } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 import { type Role } from "@/lib/rbac";
 
@@ -111,9 +111,11 @@ export const authOptions = {
         
         // Fetch user data from database to get latest image and name
         try {
-          const user = await prisma.user.findUnique({
-            where: { id: token.id as string },
-            select: { name: true, email: true, image: true },
+          const user = await withRetry(async () => {
+            return await prisma.user.findUnique({
+              where: { id: token.id as string },
+              select: { name: true, email: true, image: true },
+            });
           });
           
           if (user) {

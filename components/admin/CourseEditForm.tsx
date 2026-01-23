@@ -61,6 +61,7 @@ export function CourseEditForm({
   const [isDeletingSection, setIsDeletingSection] = useState<Record<string, boolean>>({});
   const [isAddingLesson, setIsAddingLesson] = useState<Record<string, boolean>>({});
   const [isDeletingLesson, setIsDeletingLesson] = useState<Record<string, boolean>>({});
+  const [isEditingCourse, setIsEditingCourse] = useState(false);
 
   const toggleSection = (sectionId: string) => {
     const newExpanded = new Set(expandedSections);
@@ -83,6 +84,7 @@ export function CourseEditForm({
         description: "Course details have been saved successfully.",
         variant: "success",
       });
+      setIsEditingCourse(false);
       router.refresh();
     } catch (error) {
       toast({
@@ -229,110 +231,191 @@ export function CourseEditForm({
       {/* Course Details */}
       <Card>
         <CardHeader>
-          <CardTitle>Course Details</CardTitle>
-          <CardDescription>Basic information about your course</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Course Details</CardTitle>
+              <CardDescription>Basic information about your course</CardDescription>
+            </div>
+            {!isEditingCourse && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditingCourse(true)}
+              >
+                Edit Course
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleUpdateCourse} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
-              <Input
-                id="title"
-                name="title"
-                defaultValue={course.title}
-                required
-              />
-            </div>
+          {isEditingCourse ? (
+            <form onSubmit={handleUpdateCourse} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="title">Title *</Label>
+                <Input
+                  id="title"
+                  name="title"
+                  defaultValue={course.title}
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="slug">Slug *</Label>
-              <Input
-                id="slug"
-                name="slug"
-                defaultValue={course.slug}
-                required
-                pattern="[a-z0-9\-]+"
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="slug">Slug *</Label>
+                <Input
+                  id="slug"
+                  name="slug"
+                  defaultValue={course.slug}
+                  required
+                  pattern="[a-z0-9\-]+"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <textarea
-                id="description"
-                name="description"
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                defaultValue={course.description || ""}
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <textarea
+                  id="description"
+                  name="description"
+                  className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  defaultValue={course.description || ""}
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Select name="category" defaultValue={course.category || "none"}>
-                <SelectTrigger id="category">
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No category</SelectItem>
-                  <SelectItem value="business">Make Money & Business</SelectItem>
-                  <SelectItem value="content">Create Content & Video</SelectItem>
-                  <SelectItem value="marketing">Marketing & Traffic</SelectItem>
-                  <SelectItem value="apps">Build Apps & Tech</SelectItem>
-                  <SelectItem value="productivity">Productivity & Tools</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select name="category" defaultValue={course.category || "none"}>
+                  <SelectTrigger id="category">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No category</SelectItem>
+                    <SelectItem value="business">Make Money & Business</SelectItem>
+                    <SelectItem value="content">Create Content & Video</SelectItem>
+                    <SelectItem value="marketing">Marketing & Traffic</SelectItem>
+                    <SelectItem value="apps">Build Apps & Tech</SelectItem>
+                    <SelectItem value="productivity">Productivity & Tools</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="priceCents">Price (USD) *</Label>
-              <Input
-                id="priceCents"
-                name="priceCents"
-                type="number"
-                step="0.01"
-                min="0"
-                defaultValue={(course.priceCents / 100).toFixed(2)}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="inventory">Inventory</Label>
-              <Input
-                id="inventory"
-                name="inventory"
-                type="number"
-                min="0"
-                placeholder="Leave empty for unlimited"
-                defaultValue={course.inventory ?? ""}
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Leave empty for unlimited inventory. Set a number to limit available quantity.
-              </p>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="priceCents">Price (USD) *</Label>
+                <Input
+                  id="priceCents"
+                  name="priceCents"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  defaultValue={(course.priceCents / 100).toFixed(2)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="inventory">Inventory</Label>
+                <Input
+                  id="inventory"
+                  name="inventory"
+                  type="number"
+                  min="0"
+                  placeholder="Leave empty for unlimited"
+                  defaultValue={course.inventory ?? ""}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Leave empty for unlimited inventory. Set a number to limit available quantity.
+                </p>
+              </div>
 
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="isPublished"
-                name="isPublished"
-                defaultChecked={course.isPublished}
-                className="h-4 w-4 rounded border-gray-300"
-              />
-              <Label htmlFor="isPublished" className="cursor-pointer">
-                Published
-              </Label>
-            </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="isPublished"
+                  name="isPublished"
+                  defaultChecked={course.isPublished}
+                  className="h-4 w-4 rounded border-gray-300"
+                />
+                <Label htmlFor="isPublished" className="cursor-pointer">
+                  Published
+                </Label>
+              </div>
 
-            <Button type="submit" disabled={isSavingCourse}>
-              {isSavingCourse ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save Course"
+              <div className="flex gap-2">
+                <Button type="submit" disabled={isSavingCourse}>
+                  {isSavingCourse ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save Course"
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsEditingCourse(false)}
+                  disabled={isSavingCourse}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Title</Label>
+                    <p className="text-lg font-semibold">{course.title}</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Slug</Label>
+                    <p className="text-sm font-mono">{course.slug}</p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Price</Label>
+                    <p className="text-lg font-semibold">${(course.priceCents / 100).toFixed(2)}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Category</Label>
+                    <p className="text-sm">
+                      {course.category ? course.category.replace(/^\w/, c => c.toUpperCase()).replace(/-/g, ' ') : 'No category'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Status</Label>
+                    <div className="flex items-center gap-2">
+                      {course.isPublished ? (
+                        <Badge variant="default">Published</Badge>
+                      ) : (
+                        <Badge variant="secondary">Draft</Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium text-muted-foreground">Inventory</Label>
+                    <p className="text-sm">
+                      {course.inventory ? `${course.inventory} units` : 'Unlimited'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {course.description && (
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Description</Label>
+                  <p className="text-sm mt-1">{course.description}</p>
+                </div>
               )}
-            </Button>
-          </form>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -567,24 +650,40 @@ export function CourseEditForm({
                                     </div>
 
                                     <div className="space-y-2">
-                                      <Label>Content Upload</Label>
-                                      <ContentUpload
-                                        sectionId={`${section.id}-${index}`}
-                                        contentType={content.contentType}
-                                        value={content.contentUrl || ''}
-                                        onChange={(publicId) => {
-                                          const contents = lessonContents[section.id] || [];
-                                          const updated = [...contents];
-                                          updated[index] = { ...updated[index], contentUrl: publicId };
-                                          setLessonContents(prev => ({
-                                            ...prev,
-                                            [section.id]: updated
-                                          }));
-                                        }}
-                                        onError={(error) =>
-                                          setUploadErrors((prev) => ({ ...prev, [`${section.id}-${index}`]: error }))
-                                        }
-                                      />
+                                      <Label>Content {content.contentType === 'link' ? 'URL' : 'Upload'}</Label>
+                                      {content.contentType === 'link' ? (
+                                        <Input
+                                          value={content.contentUrl || ''}
+                                          onChange={(e) => {
+                                            const contents = lessonContents[section.id] || [];
+                                            const updated = [...contents];
+                                            updated[index] = { ...updated[index], contentUrl: e.target.value };
+                                            setLessonContents(prev => ({
+                                              ...prev,
+                                              [section.id]: updated
+                                            }));
+                                          }}
+                                          placeholder="https://example.com/resource"
+                                        />
+                                      ) : (
+                                        <ContentUpload
+                                          sectionId={`${section.id}-${index}`}
+                                          contentType={content.contentType}
+                                          value={content.contentUrl || ''}
+                                          onChange={(publicId) => {
+                                            const contents = lessonContents[section.id] || [];
+                                            const updated = [...contents];
+                                            updated[index] = { ...updated[index], contentUrl: publicId };
+                                            setLessonContents(prev => ({
+                                              ...prev,
+                                              [section.id]: updated
+                                            }));
+                                          }}
+                                          onError={(error) =>
+                                            setUploadErrors((prev) => ({ ...prev, [`${section.id}-${index}`]: error }))
+                                          }
+                                        />
+                                      )}
                                       {uploadErrors[`${section.id}-${index}`] && (
                                         <p className="text-sm text-destructive">{uploadErrors[`${section.id}-${index}`]}</p>
                                       )}
@@ -601,14 +700,54 @@ export function CourseEditForm({
                             </div>
 
                             <div className="space-y-2">
-                              <Label htmlFor={`durationSeconds-${section.id}`}>Duration (seconds)</Label>
-                              <Input
-                                id={`durationSeconds-${section.id}`}
-                                name="durationSeconds"
-                                type="number"
-                                min="0"
-                                placeholder="420"
-                              />
+                              {(() => {
+                                const firstContent = (lessonContents[section.id] || [])[0];
+                                const contentType = firstContent?.contentType || 'video';
+
+                                const getDurationLabel = () => {
+                                  switch (contentType) {
+                                    case 'pdf':
+                                      return 'Pages';
+                                    case 'file':
+                                      return 'File Size (MB)';
+                                    case 'link':
+                                      return 'Estimated Duration (minutes)';
+                                    case 'video':
+                                    case 'audio':
+                                    default:
+                                      return 'Duration (seconds)';
+                                  }
+                                };
+
+                                const getDurationPlaceholder = () => {
+                                  switch (contentType) {
+                                    case 'pdf':
+                                      return '25';
+                                    case 'file':
+                                      return '5.2';
+                                    case 'link':
+                                      return '15';
+                                    case 'video':
+                                    case 'audio':
+                                    default:
+                                      return '420';
+                                  }
+                                };
+
+                                return (
+                                  <>
+                                    <Label htmlFor={`durationSeconds-${section.id}`}>{getDurationLabel()}</Label>
+                                    <Input
+                                      id={`durationSeconds-${section.id}`}
+                                      name="durationSeconds"
+                                      type="number"
+                                      min="0"
+                                      step={contentType === 'file' ? '0.1' : '1'}
+                                      placeholder={getDurationPlaceholder()}
+                                    />
+                                  </>
+                                );
+                              })()}
                             </div>
                             <div className="flex items-center space-x-4">
                               <div className="flex items-center space-x-2">

@@ -1,7 +1,48 @@
 import { requireRole } from "@/lib/access";
+import { createCourse } from "@/lib/admin/courses";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { CourseCreationForm } from "../../../../../components/admin/CourseCreationForm";
+
+async function createCourseAction(formData: FormData) {
+  "use server";
+  await requireRole("admin");
+
+  const title = formData.get("title") as string;
+  const slug = formData.get("slug") as string;
+  const description = formData.get("description") as string;
+  const category = formData.get("category") as string;
+  const priceCents = parseInt(formData.get("priceCents") as string) * 100;
+  const inventoryStr = formData.get("inventory") as string;
+  const inventory = inventoryStr && inventoryStr.trim() !== "" ? parseInt(inventoryStr) : null;
+  const isPublished = formData.get("isPublished") === "on";
+
+  if (!title || !slug || !priceCents) {
+    throw new Error("Missing required fields");
+  }
+
+  try {
+    const course = await createCourse({
+      title,
+      slug,
+      description: description || undefined,
+      category: category === "none" ? undefined : category || undefined,
+      priceCents,
+      inventory,
+      isPublished,
+    });
+
+    return course;
+  } catch (error: any) {
+    // Handle Prisma unique constraint errors
+    if (error.code === 'P2002' && error.meta?.target?.includes('slug')) {
+      throw new Error(`A course with the slug "${slug}" already exists. Please choose a different slug.`);
+    }
+
+    // Re-throw other errors
+    throw error;
+  }
+}
 
 export default async function NewCoursePage() {
   await requireRole("admin");
@@ -27,7 +68,7 @@ export default async function NewCoursePage() {
         </p>
       </div>
 
-      <CourseCreationForm />
+      <CourseCreationForm createCourseAction={createCourseAction} />
     </div>
   );
 }

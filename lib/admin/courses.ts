@@ -1,33 +1,37 @@
-import { prisma } from "@/lib/prisma";
+import { prisma, withRetry } from "@/lib/prisma";
 
 export async function getAllCourses() {
-  return prisma.course.findMany({
-    include: {
-      _count: {
-        select: {
-          sections: true,
-          purchases: true,
-          enrollments: true,
+  return withRetry(async () => {
+    return prisma.course.findMany({
+      include: {
+        _count: {
+          select: {
+            sections: true,
+            purchases: true,
+            enrollments: true,
+          },
         },
       },
-    },
-    orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "desc" },
+    });
   });
 }
 
 export async function getCourseForEdit(courseId: string) {
-  return prisma.course.findUnique({
-    where: { id: courseId },
-    include: {
-      sections: {
-        orderBy: { sortOrder: "asc" },
-        include: {
-          lessons: {
-            orderBy: { sortOrder: "asc" },
+  return withRetry(async () => {
+    return prisma.course.findUnique({
+      where: { id: courseId },
+      include: {
+        sections: {
+          orderBy: { sortOrder: "asc" },
+          include: {
+            lessons: {
+              orderBy: { sortOrder: "asc" },
+            },
           },
         },
       },
-    },
+    });
   });
 }
 
@@ -72,8 +76,21 @@ export async function updateCourse(
 }
 
 export async function deleteCourse(courseId: string) {
-  return prisma.course.delete({
-    where: { id: courseId },
+  // Check if course has any purchases
+  const purchaseCount = await withRetry(async () => {
+    return prisma.purchase.count({
+      where: { courseId, status: "paid" },
+    });
+  });
+
+  if (purchaseCount > 0) {
+    throw new Error(`Cannot delete course: ${purchaseCount} user(s) have purchased this course.`);
+  }
+
+  return withRetry(async () => {
+    return prisma.course.delete({
+      where: { id: courseId },
+    });
   });
 }
 
@@ -98,8 +115,33 @@ export async function updateSection(
 }
 
 export async function deleteSection(sectionId: string) {
-  return prisma.section.delete({
-    where: { id: sectionId },
+  // Get the course ID for this section to check for purchases
+  const section = await withRetry(async () => {
+    return prisma.section.findUnique({
+      where: { id: sectionId },
+      select: { courseId: true },
+    });
+  });
+
+  if (!section) {
+    throw new Error("Section not found");
+  }
+
+  // Check if course has any purchases
+  const purchaseCount = await withRetry(async () => {
+    return prisma.purchase.count({
+      where: { courseId: section.courseId, status: "paid" },
+    });
+  });
+
+  if (purchaseCount > 0) {
+    throw new Error(`Cannot delete section: ${purchaseCount} user(s) have purchased this course.`);
+  }
+
+  return withRetry(async () => {
+    return prisma.section.delete({
+      where: { id: sectionId },
+    });
   });
 }
 
@@ -160,7 +202,36 @@ export async function updateLesson(
 }
 
 export async function deleteLesson(lessonId: string) {
-  return prisma.lesson.delete({
-    where: { id: lessonId },
+  // Get the course ID for this lesson to check for purchases
+  const lesson = await withRetry(async () => {
+    return prisma.lesson.findUnique({
+      where: { id: lessonId },
+      select: {
+        section: {
+          select: { courseId: true },
+        },
+      },
+    });
+  });
+
+  if (!lesson) {
+    throw new Error("Lesson not found");
+  }
+
+  // Check if course has any purchases
+  const purchaseCount = await withRetry(async () => {
+    return prisma.purchase.count({
+      where: { courseId: lesson.section.courseId, status: "paid" },
+    });
+  });
+
+  if (purchaseCount > 0) {
+    throw new Error(`Cannot delete lesson: ${purchaseCount} user(s) have purchased this course.`);
+  }
+
+  return withRetry(async () => {
+    return prisma.lesson.delete({
+      where: { id: lessonId },
+    });
   });
 }

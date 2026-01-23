@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
+import { prisma, withRetry } from "@/lib/prisma";
 import { hasCourseAccess, requireUser } from "@/lib/access";
 import { getSignedCloudinaryUrl } from "@/lib/cloudinary";
 
@@ -39,17 +39,19 @@ function buildLessonUrl(lesson: {
 export async function requireLessonAccess(lessonId: string) {
   const user = await requireUser();
 
-  const lesson = await prisma.lesson.findUnique({
-    where: { id: lessonId },
-    select: {
-      id: true,
-      section: {
-        select: {
-          courseId: true,
-          course: { select: { slug: true } },
+  const lesson = await withRetry(async () => {
+    return prisma.lesson.findUnique({
+      where: { id: lessonId },
+      select: {
+        id: true,
+        section: {
+          select: {
+            courseId: true,
+            course: { select: { slug: true } },
+          },
         },
       },
-    },
+    });
   });
 
   if (!lesson) {
@@ -76,19 +78,21 @@ export async function requireLessonAccess(lessonId: string) {
 export async function getAuthorizedLessonContent(lessonId: string) {
   const user = await requireUser();
 
-  const lesson = await prisma.lesson.findUnique({
-    where: { id: lessonId },
-    include: {
-      section: {
-        include: {
-          course: true,
+  const lesson = await withRetry(async () => {
+    return prisma.lesson.findUnique({
+      where: { id: lessonId },
+      include: {
+        section: {
+          include: {
+            course: true,
+          },
+        },
+        contents: {
+          orderBy: { sortOrder: "asc" },
+          take: 1,
         },
       },
-      contents: {
-        orderBy: { sortOrder: "asc" },
-        take: 1,
-      },
-    },
+    });
   });
 
   if (!lesson) {

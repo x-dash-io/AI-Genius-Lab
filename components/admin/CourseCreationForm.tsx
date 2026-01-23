@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,12 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ContentUpload } from "@/components/admin/ContentUpload";
 import { Plus, Trash2, ChevronDown, ChevronUp, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { useConfirmDialog } from "@/components/ui/confirm-dialog";
-import { createCourse, createSection, updateSection, deleteSection, createLesson, updateLesson, deleteLesson } from "@/lib/admin/courses";
-import { courseSchema, safeParse } from "@/lib/validation";
 import type { Course, Section, Lesson } from "@prisma/client";
 
 type CourseWithSections = Course & {
@@ -28,109 +25,11 @@ type CourseWithSections = Course & {
   })[];
 };
 
-async function createCourseAction(formData: FormData) {
-  const title = formData.get("title") as string;
-  const slug = formData.get("slug") as string;
-  const description = formData.get("description") as string;
-  const category = formData.get("category") as string;
-  const priceCents = parseInt(formData.get("priceCents") as string) * 100;
-  const inventoryStr = formData.get("inventory") as string;
-  const inventory = inventoryStr && inventoryStr.trim() !== "" ? parseInt(inventoryStr) : null;
-  const isPublished = formData.get("isPublished") === "on";
-
-  if (!title || !slug || !priceCents) {
-    throw new Error("Missing required fields");
-  }
-
-  const course = await createCourse({
-    title,
-    slug,
-    description: description || undefined,
-    category: category === "none" ? undefined : category || undefined,
-    priceCents,
-    inventory,
-    isPublished,
-  });
-
-  return course;
-}
-
-async function addSectionAction(courseId: string, formData: FormData) {
-  const title = formData.get("title") as string;
-
-  // Mock getting course sections to find max sort order
-  const maxSortOrder = 0; // For new courses, start with 0
-  const section = await createSection(courseId, title, maxSortOrder + 1);
-
-  return section;
-}
-
-async function deleteSectionAction(sectionId: string) {
-  await deleteSection(sectionId);
-}
-
-async function addLessonAction(sectionId: string, formData: FormData) {
-  const title = formData.get("title") as string;
-  const durationSeconds = formData.get("durationSeconds") ? parseInt(formData.get("durationSeconds") as string) : undefined;
-  const isLocked = formData.get("isLocked") === "on";
-  const allowDownload = formData.get("allowDownload") === "on";
-
-  const lesson = await createLesson({
-    sectionId,
-    title,
-    durationSeconds,
-    isLocked,
-    allowDownload,
-    sortOrder: 0, // Will be updated based on existing lessons
-  });
-
-  // Parse content data from form
-  const contentData: Array<{ contentType: string; contentUrl?: string; title?: string }> = [];
-  let contentIndex = 0;
-
-  while (true) {
-    const contentTypeKey = `content-${contentIndex}-type`;
-    const contentUrlKey = `content-${contentIndex}-url`;
-    const contentTitleKey = `content-${contentIndex}-title`;
-
-    const contentType = formData.get(contentTypeKey);
-    const contentUrl = formData.get(contentUrlKey);
-    const contentTitle = formData.get(contentTitleKey);
-
-    if (!contentType) break;
-
-    contentData.push({
-      contentType: contentType as string,
-      contentUrl: contentUrl as string || undefined,
-      title: contentTitle as string || undefined,
-    });
-
-    contentIndex++;
-  }
-
-  // Create lesson content items
-  if (contentData.length > 0) {
-    const { createLessonContent } = await import("@/lib/admin/courses");
-    for (let i = 0; i < contentData.length; i++) {
-      const content = contentData[i];
-      await createLessonContent({
-        lessonId: lesson.id,
-        contentType: content.contentType as "video" | "audio" | "pdf" | "link" | "file",
-        contentUrl: content.contentUrl,
-        title: content.title,
-        sortOrder: i,
-      });
-    }
-  }
-
-  return lesson;
-}
-
-async function deleteLessonAction(lessonId: string) {
-  await deleteLesson(lessonId);
-}
-
-export function CourseCreationForm() {
+export function CourseCreationForm({
+  createCourseAction,
+}: {
+  createCourseAction: (formData: FormData) => Promise<Course>;
+}) {
   const router = useRouter();
   const { confirm } = useConfirmDialog();
   const [createdCourse, setCreatedCourse] = useState<CourseWithSections | null>(null);
@@ -322,18 +221,20 @@ export function CourseCreationForm() {
       {/* Created Course Display */}
       {createdCourse && (
         <>
-          <Card className="border-green-200 bg-green-50/50">
+          <Card className="border-green-600 bg-green-900/20">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <CardTitle className="text-green-800">Course Created Successfully</CardTitle>
+                <CheckCircle className="h-5 w-5 text-green-400" />
+                <CardTitle className="text-green-200">Course Created Successfully</CardTitle>
               </div>
-              <CardDescription className="text-green-700">
-                {createdCourse.title} - ${(createdCourse.priceCents / 100).toFixed(2)}
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-green-300">
+                  {createdCourse.title} - ${(createdCourse.priceCents / 100).toFixed(2)}
+                </span>
                 {createdCourse.isPublished && (
-                  <Badge variant="secondary" className="ml-2">Published</Badge>
+                  <Badge variant="secondary" className="bg-green-800 text-green-200 border-green-600">Published</Badge>
                 )}
-              </CardDescription>
+              </div>
             </CardHeader>
           </Card>
 
