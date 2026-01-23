@@ -1,21 +1,13 @@
 
 /**
- * Email notification service using Nodemailer.
- * 
- * To use this service, you need to set the following environment variables:
- * - EMAIL_SERVICE: The email service provider (e.g., "gmail", "sendgrid"). Defaults to "gmail".
- * - EMAIL_USER: The email address to send from.
- * - EMAIL_PASS: The password or app-specific password for the email account.
- * - EMAIL_FROM: The "from" address that will appear in the email.
- *               e.g., "Your Name <your-email@example.com>"
- * 
- * For Gmail, you may need to use an "App Password" instead of your regular password.
- * See: https://support.google.com/accounts/answer/185833
+ * Email notification service using Resend
+ * Set RESEND_API_KEY and EMAIL_FROM in your environment variables
+ *
+ * For development without domain verification, set BYPASS_EMAIL=true
+ * to skip email sending and log OTP codes instead.
  */
 
-
-
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 interface EmailOptions {
   to: string;
@@ -24,26 +16,40 @@ interface EmailOptions {
   text?: string;
 }
 
-// Nodemailer transporter setup
-const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE || "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const resendApiKey = process.env.RESEND_API_KEY;
+// For development: Use Resend's test domain (onboarding@resend.dev)
+const emailFrom = process.env.EMAIL_FROM || (process.env.NODE_ENV === "development" ? "onboarding@resend.dev" : "noreply@aigeniuslab.com");
+const bypassEmail = process.env.BYPASS_EMAIL === "true";
 
-const emailFrom = process.env.EMAIL_FROM || `"${process.env.EMAIL_USER_NAME}" <${process.env.EMAIL_USER}>`;
+// Initialize Resend only if API key is available
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 
 export async function sendEmail(options: EmailOptions): Promise<void> {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.log("[EMAIL] Email would be sent (EMAIL_USER or EMAIL_PASS not set):", {
+  // If bypass email is enabled, log the email instead of sending
+  if (bypassEmail) {
+    console.log("[EMAIL] BYPASS_EMAIL=true - Email would be sent:", {
       to: options.to,
       subject: options.subject,
       preview: options.text || options.html.substring(0, 100),
     });
-    // In development, extract code from email HTML for testing
+    // Extract OTP code from email HTML for development testing
+    const codeMatch = options.html.match(/>(\d{6})</);
+    if (codeMatch) {
+      console.log(`[EMAIL] OTP Code for testing: ${codeMatch[1]}`);
+      console.log(`[EMAIL] Use this code to complete signup/verification for: ${options.to}`);
+    }
+    return;
+  }
+
+  // If Resend is not configured, log and return
+  if (!resend) {
+    console.log("[EMAIL] Email would be sent (RESEND_API_KEY not set):", {
+      to: options.to,
+      subject: options.subject,
+      preview: options.text || options.html.substring(0, 100),
+    });
+    // Extract code from email HTML for development testing
     if (process.env.NODE_ENV === "development") {
       const codeMatch = options.html.match(/>(\d{6})</);
       if (codeMatch) {
@@ -53,18 +59,47 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
     return;
   }
 
+  // Send email using Resend
   try {
-    const info = await transporter.sendMail({
+    const result = await resend.emails.send({
       from: emailFrom,
       to: options.to,
       subject: options.subject,
       html: options.html,
       text: options.text,
     });
+
+    if (result.error) {
+      console.error("[EMAIL] Resend error:", result.error);
+
+      // Handle Resend test domain restriction gracefully
+      // Test domain only allows sending to account owner's email
+      const errorMessage = result.error.message || "";
+      const isTestDomainError = errorMessage.includes("testing emails") ||
+                               errorMessage.includes("verify a domain");
+
+      if (isTestDomainError) {
+        console.warn("[EMAIL] Resend test domain restriction:", {
+          message: "Using test domain - emails can only be sent to account owner's email",
+          suggestion: "Verify a domain in Resend dashboard or use account owner's email for testing",
+        });
+        // Extract OTP code from email HTML for development testing
+        const codeMatch = options.html.match(/>(\d{6})</);
+        if (codeMatch) {
+          console.log(`[EMAIL] Test domain restriction - OTP Code: ${codeMatch[1]}`);
+          console.log(`[EMAIL] Use this code to complete verification for: ${options.to}`);
+        }
+        // Don't throw - return success to user (security best practice)
+        return;
+      }
+
+      throw new Error(`Failed to send email: ${errorMessage || "Unknown error"}`);
+    }
+
     console.log("[EMAIL] Email sent successfully:", {
       to: options.to,
       subject: options.subject,
-      messageId: info.messageId,
+      id: result.data?.id,
       from: emailFrom,
     });
   } catch (error) {

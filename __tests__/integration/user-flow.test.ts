@@ -245,6 +245,7 @@ describeMaybeSkip("Lesson Progress Flow", () => {
   let testLesson: Lesson;
 
   beforeAll(async () => {
+    await prisma.$connect();
     await cleanupAllTestData();
     testUser = await createTestUser({ email: "progress-test@example.com" });
     testCourse = await createTestCourse({ slug: "test-progress-course" });
@@ -354,6 +355,7 @@ describeMaybeSkip("Review System Flow", () => {
   let testCourse: Course;
 
   beforeAll(async () => {
+    await prisma.$connect();
     await cleanupAllTestData();
     testUser = await createTestUser({ email: "review-test@example.com" });
     testCourse = await createTestCourse({ slug: "test-review-course" });
@@ -446,6 +448,7 @@ describeMaybeSkip("Certificate Generation Flow", () => {
   let testLesson: Lesson;
 
   beforeAll(async () => {
+    await prisma.$connect();
     await cleanupAllTestData();
     testUser = await createTestUser({ email: "cert-test@example.com" });
     testCourse = await createTestCourse({ slug: "test-cert-course" });
