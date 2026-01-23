@@ -89,8 +89,16 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
       redirect("/cart");
     }
 
-    const cart = getCartFromCookies();
-    if (cart.items.length === 0) {
+    let cart;
+    try {
+      cart = await getCartFromCookies();
+    } catch (error) {
+      console.error("Error loading cart:", error);
+      cart = { items: [], totalCents: 0, itemCount: 0 };
+    }
+
+    // Ensure cart has valid structure
+    if (!cart || !cart.items || !Array.isArray(cart.items) || cart.items.length === 0) {
       redirect("/cart");
     }
 

@@ -276,6 +276,20 @@ export function CourseEditForm({
                 required
               />
             </div>
+            <div>
+              <Label htmlFor="inventory">Inventory</Label>
+              <Input
+                id="inventory"
+                name="inventory"
+                type="number"
+                min="0"
+                placeholder="Leave empty for unlimited"
+                defaultValue={course.inventory ?? ""}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Leave empty for unlimited inventory. Set a number to limit available quantity.
+              </p>
+            </div>
 
             <div className="flex items-center space-x-2">
               <input

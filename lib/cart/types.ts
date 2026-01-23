@@ -3,6 +3,8 @@ export interface CartItem {
   courseSlug: string;
   title: string;
   priceCents: number;
+  quantity: number;
+  availableInventory: number | null; // null = unlimited
   image?: string;
 }
 

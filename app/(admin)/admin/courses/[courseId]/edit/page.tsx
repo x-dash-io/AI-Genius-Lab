@@ -18,6 +18,8 @@ async function updateCourseAction(courseId: string, formData: FormData) {
   const description = formData.get("description") as string;
   const category = formData.get("category") as string;
   const priceCents = parseInt(formData.get("priceCents") as string) * 100;
+  const inventoryStr = formData.get("inventory") as string;
+  const inventory = inventoryStr && inventoryStr.trim() !== "" ? parseInt(inventoryStr) : null;
   const isPublished = formData.get("isPublished") === "on";
 
   await updateCourse(courseId, {
@@ -26,6 +28,7 @@ async function updateCourseAction(courseId: string, formData: FormData) {
     description: description || undefined,
     category: category || undefined,
     priceCents,
+    inventory,
     isPublished,
   });
 

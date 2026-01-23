@@ -1,5 +1,4 @@
 import { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getCartFromCookies } from "@/lib/cart/utils";
@@ -14,11 +13,18 @@ export const metadata: Metadata = generateSEOMetadata({
 
 export default async function CartPage() {
   const session = await getServerSession(authOptions);
-  const cart = getCartFromCookies();
+  let cart;
+  
+  try {
+    cart = await getCartFromCookies();
+  } catch (error) {
+    console.error("Error loading cart:", error);
+    cart = { items: [], totalCents: 0, itemCount: 0 };
+  }
 
-  // If cart is empty, redirect to courses
-  if (cart.items.length === 0) {
-    redirect("/courses");
+  // Ensure cart has valid structure
+  if (!cart || !cart.items || !Array.isArray(cart.items)) {
+    cart = { items: [], totalCents: 0, itemCount: 0 };
   }
 
   return (
@@ -26,7 +32,9 @@ export default async function CartPage() {
       <div>
         <h1 className="font-display text-4xl font-bold tracking-tight">Shopping Cart</h1>
         <p className="mt-2 text-lg text-muted-foreground">
-          Review your selected courses and proceed to checkout
+          {cart.items.length > 0 
+            ? "Review your selected courses and proceed to checkout"
+            : "Your shopping cart"}
         </p>
       </div>
 

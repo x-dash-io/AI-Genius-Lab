@@ -22,7 +22,10 @@ async function createCourseAction(formData: FormData) {
   const title = formData.get("title") as string;
   const slug = formData.get("slug") as string;
   const description = formData.get("description") as string;
+  const category = formData.get("category") as string;
   const priceCents = parseInt(formData.get("priceCents") as string) * 100;
+  const inventoryStr = formData.get("inventory") as string;
+  const inventory = inventoryStr && inventoryStr.trim() !== "" ? parseInt(inventoryStr) : null;
   const isPublished = formData.get("isPublished") === "on";
 
   if (!title || !slug || !priceCents) {
@@ -33,7 +36,9 @@ async function createCourseAction(formData: FormData) {
     title,
     slug,
     description: description || undefined,
+    category: category || undefined,
     priceCents,
+    inventory,
     isPublished,
   });
 
@@ -138,6 +143,20 @@ export default async function NewCoursePage() {
               />
               <p className="text-xs text-muted-foreground">
                 Enter price in dollars (e.g., 129.00 for $129.00)
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="inventory">Inventory</Label>
+              <Input
+                id="inventory"
+                name="inventory"
+                type="number"
+                min="0"
+                placeholder="Leave empty for unlimited"
+              />
+              <p className="text-xs text-muted-foreground">
+                Leave empty for unlimited inventory. Set a number to limit available quantity.
               </p>
             </div>
 

@@ -37,6 +37,7 @@ export async function createCourse(data: {
   description?: string;
   category?: string;
   priceCents: number;
+  inventory?: number | null;
   isPublished?: boolean;
 }) {
   return prisma.course.create({
@@ -46,6 +47,7 @@ export async function createCourse(data: {
       description: data.description,
       category: data.category,
       priceCents: data.priceCents,
+      inventory: data.inventory ?? null,
       isPublished: data.isPublished ?? false,
     },
   });
@@ -59,6 +61,7 @@ export async function updateCourse(
     description?: string;
     category?: string;
     priceCents?: number;
+    inventory?: number | null;
     isPublished?: boolean;
   }
 ) {

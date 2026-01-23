@@ -11,6 +11,7 @@ export async function getPublishedCourses() {
       description: true,
       category: true,
       priceCents: true,
+      inventory: true,
     },
     orderBy: { createdAt: "desc" },
   });
@@ -26,6 +27,7 @@ export async function getPublishedCoursesByCategory(category: string) {
       description: true,
       category: true,
       priceCents: true,
+      inventory: true,
     },
     orderBy: { createdAt: "desc" },
   });

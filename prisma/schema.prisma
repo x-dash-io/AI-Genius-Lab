@@ -36,6 +36,7 @@ model Course {
   description String?
   category    String? // e.g., "business", "content", "marketing", "apps", "productivity"
   priceCents  Int
+  inventory   Int?                 // null = unlimited, number = available quantity
   isPublished Boolean              @default(false)
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt

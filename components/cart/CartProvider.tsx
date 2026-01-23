@@ -9,6 +9,7 @@ interface CartContextType {
   isLoading: boolean;
   addToCart: (courseId: string) => Promise<void>;
   removeFromCart: (courseId: string) => Promise<void>;
+  updateQuantity: (courseId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
   refreshCart: () => Promise<void>;
   removePurchasedItems: (courseIds: string[]) => Promise<void>;
@@ -128,6 +129,31 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     await fetchCart();
   }, [fetchCart]);
 
+  const updateQuantity = useCallback(async (courseId: string, quantity: number) => {
+    try {
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "updateQuantity", courseId, quantity }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update quantity");
+      }
+
+      setCart(data);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to update quantity";
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  }, []);
+
   const removePurchasedItems = useCallback(async (courseIds: string[]) => {
     try {
       // Remove each course ID from the cart
@@ -157,6 +183,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         addToCart,
         removeFromCart,
+        updateQuantity,
         clearCart,
         refreshCart,
         removePurchasedItems,

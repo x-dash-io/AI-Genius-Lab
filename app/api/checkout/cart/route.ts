@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createPayPalOrder } from "@/lib/paypal";
-import { getCartFromCookies } from "@/lib/cart/utils";
 
 export async function POST(request: NextRequest) {
   try {

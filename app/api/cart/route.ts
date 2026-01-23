@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCartFromCookies, setCartInCookies, addItemToCart, removeItemFromCart, clearCart } from "@/lib/cart/utils";
+import { getCartFromCookies, setCartInCookies, addItemToCart, removeItemFromCart, updateItemQuantity, clearCart } from "@/lib/cart/utils";
 import { CartItem } from "@/lib/cart/types";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const cart = getCartFromCookies();
+    const cart = await getCartFromCookies();
     return NextResponse.json(cart);
   } catch (error) {
     console.error("Error getting cart:", error);
@@ -16,20 +16,20 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { action, courseId } = body;
+    const { action, courseId, quantity } = body;
 
     if (!action) {
       return NextResponse.json({ error: "Action is required" }, { status: 400 });
     }
 
-    const currentCart = getCartFromCookies();
+    const currentCart = await getCartFromCookies();
 
     if (action === "add") {
       if (!courseId) {
         return NextResponse.json({ error: "Course ID is required" }, { status: 400 });
       }
 
-      // Fetch course details
+      // Fetch course details with inventory
       const course = await prisma.course.findUnique({
         where: { id: courseId },
         select: {
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
           slug: true,
           title: true,
           priceCents: true,
-          image: true,
+          inventory: true,
         },
       });
 
@@ -45,9 +45,16 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Course not found" }, { status: 404 });
       }
 
-      // Check if already in cart
-      if (currentCart.items.some((item) => item.courseId === courseId)) {
-        return NextResponse.json({ error: "Course already in cart" }, { status: 400 });
+      // Check inventory availability
+      const existingCartItem = currentCart.items.find((item) => item.courseId === courseId);
+      const currentQuantity = existingCartItem?.quantity || 0;
+      const requestedQuantity = currentQuantity + 1;
+
+      if (course.inventory !== null && requestedQuantity > course.inventory) {
+        return NextResponse.json(
+          { error: `Only ${course.inventory} available in inventory` },
+          { status: 400 }
+        );
       }
 
       const newItem: CartItem = {
@@ -55,17 +62,54 @@ export async function POST(request: NextRequest) {
         courseSlug: course.slug,
         title: course.title,
         priceCents: course.priceCents,
-        image: course.image || undefined,
+        quantity: 1,
+        availableInventory: course.inventory,
       };
 
       const updatedItems = addItemToCart(currentCart.items, newItem);
-      setCartInCookies(updatedItems);
+      await setCartInCookies(updatedItems);
 
-      const totalCents = updatedItems.reduce((sum, item) => sum + item.priceCents, 0);
+      const totalCents = updatedItems.reduce((sum, item) => sum + item.priceCents * item.quantity, 0);
+      const itemCount = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
       return NextResponse.json({
         items: updatedItems,
         totalCents,
-        itemCount: updatedItems.length,
+        itemCount,
+      });
+    }
+
+    if (action === "updateQuantity") {
+      if (!courseId || quantity === undefined) {
+        return NextResponse.json({ error: "Course ID and quantity are required" }, { status: 400 });
+      }
+
+      // Fetch course inventory
+      const course = await prisma.course.findUnique({
+        where: { id: courseId },
+        select: { inventory: true },
+      });
+
+      if (!course) {
+        return NextResponse.json({ error: "Course not found" }, { status: 404 });
+      }
+
+      // Check inventory limits
+      if (course.inventory !== null && quantity > course.inventory) {
+        return NextResponse.json(
+          { error: `Only ${course.inventory} available in inventory` },
+          { status: 400 }
+        );
+      }
+
+      const updatedItems = updateItemQuantity(currentCart.items, courseId, quantity);
+      await setCartInCookies(updatedItems);
+
+      const totalCents = updatedItems.reduce((sum, item) => sum + item.priceCents * item.quantity, 0);
+      const itemCount = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
+      return NextResponse.json({
+        items: updatedItems,
+        totalCents,
+        itemCount,
       });
     }
 
@@ -75,18 +119,19 @@ export async function POST(request: NextRequest) {
       }
 
       const updatedItems = removeItemFromCart(currentCart.items, courseId);
-      setCartInCookies(updatedItems);
+      await setCartInCookies(updatedItems);
 
-      const totalCents = updatedItems.reduce((sum, item) => sum + item.priceCents, 0);
+      const totalCents = updatedItems.reduce((sum, item) => sum + item.priceCents * item.quantity, 0);
+      const itemCount = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
       return NextResponse.json({
         items: updatedItems,
         totalCents,
-        itemCount: updatedItems.length,
+        itemCount,
       });
     }
 
     if (action === "clear") {
-      setCartInCookies(clearCart());
+      await setCartInCookies(clearCart());
       return NextResponse.json({
         items: [],
         totalCents: 0,
