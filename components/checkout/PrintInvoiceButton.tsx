@@ -36,6 +36,11 @@ export function PrintInvoiceButton({
 }: PrintInvoiceButtonProps) {
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const handlePrint = useCallback(() => {
+    // Use browser's native print functionality
+    window.print();
+  }, []);
+
   const handleDownloadPDF = useCallback(async () => {
     setIsGenerating(true);
 
