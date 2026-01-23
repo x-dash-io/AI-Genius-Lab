@@ -3,15 +3,15 @@ import { requireRole } from "@/lib/access";
 import { uploadToCloudinary, getResourceTypeFromFile } from "@/lib/cloudinary";
 import { rateLimits } from "@/lib/rate-limit";
 
-// File size limits (in bytes)
+// File size limits (in bytes) - much more generous for videos and large files
 const MAX_FILE_SIZES = {
-  video: 500 * 1024 * 1024, // 500 MB
-  audio: 100 * 1024 * 1024, // 100 MB
-  pdf: 50 * 1024 * 1024, // 50 MB
-  file: 100 * 1024 * 1024, // 100 MB
+  video: 5 * 1024 * 1024 * 1024, // 5 GB for videos
+  audio: 500 * 1024 * 1024, // 500 MB for audio
+  pdf: 500 * 1024 * 1024, // 500 MB for PDFs
+  file: 2 * 1024 * 1024 * 1024, // 2 GB for other files
 };
 
-// Allowed MIME types
+// Allowed MIME types - expanded to cover more formats
 const ALLOWED_MIME_TYPES = {
   video: [
     "video/mp4",
@@ -19,15 +19,41 @@ const ALLOWED_MIME_TYPES = {
     "video/x-msvideo",
     "video/webm",
     "video/x-matroska",
+    "video/avi",
+    "video/mov",
+    "video/wmv",
+    "video/flv",
+    "video/mkv",
   ],
-  audio: ["audio/mpeg", "audio/wav", "audio/ogg", "audio/aac", "audio/mp4"],
+  audio: [
+    "audio/mpeg",
+    "audio/wav",
+    "audio/ogg",
+    "audio/aac",
+    "audio/mp4",
+    "audio/m4a",
+    "audio/flac",
+    "audio/wma",
+  ],
   pdf: ["application/pdf"],
   file: [
     "application/pdf",
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     "application/zip",
     "application/x-rar-compressed",
+    "application/x-7z-compressed",
+    "text/plain",
+    "text/csv",
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "image/svg+xml",
   ],
 };
 
@@ -99,14 +125,14 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Determine resource type
+    // Determine resource type - ensure PDFs and documents are uploaded as raw
     const resourceType = getResourceTypeFromFile(file.name, file.type);
 
-    // Upload to Cloudinary
+    // Upload to Cloudinary - remove restrictive allowedFormats that cause issues
     const result = await uploadToCloudinary(buffer, {
       folder,
       resourceType,
-      allowedFormats: allowedMimeTypes,
+      // allowedFormats removed to prevent upload failures
     });
 
     return NextResponse.json({

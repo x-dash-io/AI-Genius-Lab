@@ -15,10 +15,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ContentUpload } from "@/components/admin/ContentUpload";
-import { Plus, Trash2, ChevronDown, ChevronUp, Loader2, CheckCircle } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronUp, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 import { createCourse, createSection, updateSection, deleteSection, createLesson, updateLesson, deleteLesson } from "@/lib/admin/courses";
+import { courseSchema, safeParse } from "@/lib/validation";
 import type { Course, Section, Lesson } from "@prisma/client";
 
 type CourseWithSections = Course & {
@@ -135,6 +136,7 @@ export function CourseCreationForm() {
   const [createdCourse, setCreatedCourse] = useState<CourseWithSections | null>(null);
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
   const [isCreatingCourse, setIsCreatingCourse] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const handleCreateCourse = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -218,7 +220,7 @@ export function CourseCreationForm() {
                   name="slug"
                   placeholder="e.g., ai-foundations"
                   required
-                  pattern="[a-z0-9-]+"
+                  pattern="[a-z0-9\-]+"
                   disabled={isCreatingCourse}
                 />
                 <p className="text-xs text-muted-foreground">

@@ -9,7 +9,7 @@ import { toast } from "@/lib/toast";
 
 interface LessonViewerProps {
   lessonId: string;
-  contentType: string;
+  contentType: string | undefined;
   contentUrl: string | null;
   allowDownload: boolean;
   initialProgress?: {
@@ -146,7 +146,7 @@ export function LessonViewer({
           rel="noreferrer"
           className="font-semibold text-white underline inline-flex items-center gap-2"
         >
-          Open {contentType.toUpperCase()} content
+          Open {contentType ? contentType.toUpperCase() : 'UNKNOWN'} content
           {allowDownload && <span className="text-xs">(Downloadable)</span>}
         </a>
       </div>

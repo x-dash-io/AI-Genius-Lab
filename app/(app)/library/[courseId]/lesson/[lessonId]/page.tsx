@@ -36,8 +36,10 @@ export default async function LessonPage({ params }: LessonPageProps) {
           {lesson.title}
         </h1>
         <p className="mt-2 text-zinc-400">
-          Content type: {lesson.contentType.toUpperCase()} ·{" "}
-          {lesson.durationSeconds ?? 0}s
+          Content type: {lesson.contentType ? lesson.contentType.toUpperCase() : 'UNKNOWN'} ·{" "}
+          {lesson.contentType === 'pdf' || lesson.contentType === 'file'
+            ? `${lesson.durationSeconds ?? 0} pages`
+            : `${lesson.durationSeconds ?? 0}s`}
         </p>
       </div>
       

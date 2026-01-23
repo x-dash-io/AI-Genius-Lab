@@ -1,88 +1,102 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2, Printer } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 interface PrintInvoiceButtonProps {
   variant?: "default" | "outline" | "ghost";
   size?: "default" | "sm" | "lg";
   className?: string;
+  invoiceData: {
+    invoiceNumber: string;
+    purchaseDate: Date;
+    customerName: string;
+    customerEmail: string;
+    paymentMethod: string;
+    transactionId?: string;
+    items: Array<{
+      id: string;
+      title: string;
+      description?: string | null;
+      amountCents: number;
+      currency: string;
+    }>;
+    totalAmount: number;
+    currency: string;
+  };
 }
 
-export function PrintInvoiceButton({ 
-  variant = "outline", 
+export function PrintInvoiceButton({
+  variant = "outline",
   size = "lg",
-  className = "flex-1"
+  className = "flex-1",
+  invoiceData,
 }: PrintInvoiceButtonProps) {
-  const [isPrinting, setIsPrinting] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const handlePrint = useCallback(() => {
-    setIsPrinting(true);
+  const handleDownloadPDF = useCallback(async () => {
+    setIsGenerating(true);
 
-    // Store current theme state
-    const htmlElement = document.documentElement;
-    const currentTheme = htmlElement.classList.contains("dark") ? "dark" : "light";
-    const currentColorScheme = htmlElement.style.colorScheme;
-    
-    // Add print-mode class for additional styling control
-    htmlElement.classList.add("printing");
-    
-    // Use requestAnimationFrame to ensure styles are applied before print
-    requestAnimationFrame(() => {
-      window.print();
-      
-      // Clean up after print dialog closes
-      // Use both afterprint event and timeout as fallback
-      const cleanup = () => {
-        htmlElement.classList.remove("printing");
-        
-        // Restore theme state (fixes theme flickering bug)
-        if (currentTheme === "dark") {
-          htmlElement.classList.add("dark");
-          htmlElement.style.colorScheme = "dark";
-        } else {
-          htmlElement.classList.remove("dark");
-          htmlElement.style.colorScheme = "light";
-        }
-        
-        // Also restore any stored color scheme
-        if (currentColorScheme) {
-          htmlElement.style.colorScheme = currentColorScheme;
-        }
-        
-        setIsPrinting(false);
-      };
-      
-      // Listen for afterprint event
-      const handleAfterPrint = () => {
-        cleanup();
-        window.removeEventListener("afterprint", handleAfterPrint);
-      };
-      
-      window.addEventListener("afterprint", handleAfterPrint);
-      
-      // Fallback timeout in case afterprint doesn't fire (some browsers)
-      setTimeout(() => {
-        window.removeEventListener("afterprint", handleAfterPrint);
-        cleanup();
-      }, 1000);
-    });
-  }, []);
+    try {
+      // Call the API to generate PDF
+      const response = await fetch("/api/invoice-pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(invoiceData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate PDF");
+      }
+
+      const data = await response.json();
+      const pdfUrl = data.pdfUrl;
+
+      // Create a temporary link to download the PDF
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = `invoice-${invoiceData.invoiceNumber}.pdf`;
+      link.target = '_blank';
+
+      // Trigger the download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: "Invoice downloaded",
+        description: "Your invoice PDF has been downloaded successfully.",
+        variant: "success",
+      });
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      toast({
+        title: "Download failed",
+        description: "Failed to generate invoice PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [invoiceData]);
 
   return (
     <Button
       variant={variant}
       size={size}
-      onClick={handlePrint}
-      disabled={isPrinting}
-      className={`print:hidden ${className}`}
+      onClick={handleDownloadPDF}
+      disabled={isGenerating}
+      className={className}
       type="button"
     >
-      {isPrinting ? (
+      {isGenerating ? (
         <>
           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-          Preparing...
+          Generating PDF...
         </>
       ) : (
         <>

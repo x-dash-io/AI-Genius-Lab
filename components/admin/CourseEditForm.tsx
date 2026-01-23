@@ -28,11 +28,11 @@ type CourseWithSections = Course & {
 
 type CourseEditFormProps = {
   course: CourseWithSections;
-  updateCourseAction: (formData: FormData) => Promise<void>;
-  addSectionAction: (formData: FormData) => Promise<void>;
-  deleteSectionAction: (sectionId: string, courseId: string) => Promise<void>;
-  addLessonAction: (sectionId: string, formData: FormData) => Promise<void>;
-  deleteLessonAction: (lessonId: string, courseId: string) => Promise<void>;
+  updateCourseAction: (formData: FormData) => Promise<{ success: boolean }>;
+  addSectionAction: (formData: FormData) => Promise<Section & { lessons: Lesson[] }>;
+  deleteSectionAction: (sectionId: string, courseId: string) => Promise<{ success: boolean }>;
+  addLessonAction: (sectionId: string, formData: FormData) => Promise<Lesson>;
+  deleteLessonAction: (lessonId: string, courseId: string) => Promise<{ success: boolean }>;
 };
 
 export function CourseEditForm({
@@ -251,7 +251,7 @@ export function CourseEditForm({
                 name="slug"
                 defaultValue={course.slug}
                 required
-                pattern="[a-z0-9-]+"
+                pattern="[a-z0-9\-]+"
               />
             </div>
 

@@ -91,7 +91,7 @@ export default async function CourseDetailPage({
                   <div>
                     <p className="font-medium">{lesson.title}</p>
                     <Badge variant="secondary" className="mt-1">
-                      {lesson.contentType.toUpperCase()}
+                      {(lesson.contents?.[0]?.contentType?.toUpperCase()) || "LESSON"}
                     </Badge>
                   </div>
                 </li>

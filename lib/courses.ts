@@ -35,7 +35,7 @@ export async function getPublishedCoursesByCategory(category: string) {
 
 export async function getCoursePreviewBySlug(slug: string) {
   const cacheKey = cacheKeys.coursePreview(slug);
-  
+
   return getCached(
     cacheKey,
     async () => {
@@ -57,8 +57,14 @@ export async function getCoursePreviewBySlug(slug: string) {
                 select: {
                   id: true,
                   title: true,
-                  contentType: true,
                   isLocked: true,
+                  contents: {
+                    orderBy: { sortOrder: "asc" },
+                    take: 1,
+                    select: {
+                      contentType: true,
+                    },
+                  },
                 },
               },
             },

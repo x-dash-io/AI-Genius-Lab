@@ -84,6 +84,10 @@ export async function getAuthorizedLessonContent(lessonId: string) {
           course: true,
         },
       },
+      contents: {
+        orderBy: { sortOrder: "asc" },
+        take: 1,
+      },
     },
   });
 
@@ -101,15 +105,23 @@ export async function getAuthorizedLessonContent(lessonId: string) {
     throw new Error("FORBIDDEN");
   }
 
+  // Get content type from the first content item, or default to 'video'
+  const firstContent = lesson.contents[0];
+  const contentType = firstContent?.contentType || 'video';
+
   return {
     lesson: {
       id: lesson.id,
       title: lesson.title,
-      contentType: lesson.contentType,
+      contentType,
       durationSeconds: lesson.durationSeconds,
       allowDownload: lesson.allowDownload,
     },
     courseSlug: lesson.section.course.slug,
-    signedUrl: buildLessonUrl(lesson, user.id), // Pass user ID for user-specific URLs
+    signedUrl: buildLessonUrl({
+      contentType,
+      contentUrl: firstContent?.contentUrl || null,
+      allowDownload: lesson.allowDownload,
+    }, user.id), // Pass user ID for user-specific URLs
   };
 }

@@ -108,7 +108,7 @@ function ProfessionalInvoice({
       </div>
 
       {/* Professional Invoice Card */}
-      <Card className="overflow-hidden border-0 shadow-2xl dark:shadow-primary/5 print:shadow-none print:border print:border-gray-200" id="invoice">
+      <Card className="overflow-hidden border-2 border-primary/20 shadow-2xl dark:shadow-primary/5 print:shadow-none print:border print:border-gray-200" id="invoice">
         <CardContent className="p-0">
           {/* Invoice Header - Gradient Banner */}
           <div className="relative overflow-hidden">
@@ -333,7 +333,19 @@ function ProfessionalInvoice({
                   </Button>
                 </Link>
               )}
-              <PrintInvoiceButton />
+              <PrintInvoiceButton
+                invoiceData={{
+                  invoiceNumber,
+                  purchaseDate,
+                  customerName,
+                  customerEmail,
+                  paymentMethod,
+                  transactionId,
+                  items,
+                  totalAmount,
+                  currency,
+                }}
+              />
             </div>
           </div>
 

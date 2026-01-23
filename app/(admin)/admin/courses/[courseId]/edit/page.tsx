@@ -1,12 +1,8 @@
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/access";
-import { getCourseForEdit, updateCourse, createSection, updateSection, deleteSection, createLesson, updateLesson, deleteLesson } from "@/lib/admin/courses";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { getCourseForEdit, updateCourse, createSection, deleteSection, createLesson, deleteLesson } from "@/lib/admin/courses";
 import Link from "next/link";
-import { ArrowLeft, Plus, Trash2, GripVertical } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { CourseEditForm } from "@/components/admin/CourseEditForm";
 
 async function updateCourseAction(courseId: string, formData: FormData) {
@@ -32,7 +28,7 @@ async function updateCourseAction(courseId: string, formData: FormData) {
     isPublished,
   });
 
-  redirect(`/admin/courses/${courseId}/edit`);
+  return { success: true };
 }
 
 async function addSectionAction(courseId: string, formData: FormData) {
@@ -44,9 +40,9 @@ async function addSectionAction(courseId: string, formData: FormData) {
   if (!course) throw new Error("Course not found");
 
   const maxSortOrder = Math.max(...course.sections.map(s => s.sortOrder), -1);
-  await createSection(courseId, title, maxSortOrder + 1);
+  const section = await createSection(courseId, title, maxSortOrder + 1);
 
-  redirect(`/admin/courses/${courseId}/edit`);
+  return { ...section, lessons: [] };
 }
 
 async function deleteSectionAction(sectionId: string, courseId: string) {
@@ -54,7 +50,7 @@ async function deleteSectionAction(sectionId: string, courseId: string) {
   await requireRole("admin");
 
   await deleteSection(sectionId);
-  redirect(`/admin/courses/${courseId}/edit`);
+  return { success: true };
 }
 
 async function addLessonAction(sectionId: string, formData: FormData) {
@@ -74,7 +70,6 @@ async function addLessonAction(sectionId: string, formData: FormData) {
 
   const maxSortOrder = Math.max(...section.lessons.map(l => l.sortOrder), -1);
 
-  // Create the lesson first
   const lesson = await createLesson({
     sectionId,
     title,
@@ -97,7 +92,7 @@ async function addLessonAction(sectionId: string, formData: FormData) {
     const contentUrl = formData.get(contentUrlKey);
     const contentTitle = formData.get(contentTitleKey);
 
-    if (!contentType) break; // No more content items
+    if (!contentType) break;
 
     contentData.push({
       contentType: contentType as string,
@@ -123,7 +118,7 @@ async function addLessonAction(sectionId: string, formData: FormData) {
     }
   }
 
-  redirect(`/admin/courses/${formData.get("courseId")}/edit`);
+  return lesson;
 }
 
 async function deleteLessonAction(lessonId: string, courseId: string) {
@@ -131,7 +126,7 @@ async function deleteLessonAction(lessonId: string, courseId: string) {
   await requireRole("admin");
 
   await deleteLesson(lessonId);
-  redirect(`/admin/courses/${courseId}/edit`);
+  return { success: true };
 }
 
 export default async function EditCoursePage({
