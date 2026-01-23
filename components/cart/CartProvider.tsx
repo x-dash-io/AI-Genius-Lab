@@ -115,6 +115,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
 
       setCart(data);
+      toast({
+        title: "Cart cleared",
+        description: "All items have been removed from your cart",
+        variant: "success",
+      });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to clear cart";
       toast({

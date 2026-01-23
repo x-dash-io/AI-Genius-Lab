@@ -5,6 +5,7 @@ import { SessionProvider } from "@/components/providers/SessionProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { CartProvider } from "@/components/cart/CartProvider";
+import { ConfirmDialogProvider } from "@/components/ui/confirm-dialog";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateOrganizationSchema } from "@/lib/seo/schemas";
 import "./globals.css";
@@ -66,7 +67,9 @@ export default function RootLayout({
         <ThemeProvider>
           <SessionProvider>
             <CartProvider>
-              <ToastProvider>{children}</ToastProvider>
+              <ConfirmDialogProvider>
+                <ToastProvider>{children}</ToastProvider>
+              </ConfirmDialogProvider>
             </CartProvider>
           </SessionProvider>
         </ThemeProvider>

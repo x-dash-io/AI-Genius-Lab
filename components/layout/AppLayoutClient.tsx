@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import {
@@ -40,8 +40,22 @@ const navigation = [
 export function AppLayoutClient({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { cart } = useCart();
+
+  // Check if admin is in preview mode - preserve preview param in all links
+  const isAdmin = session?.user?.role === "admin";
+  const isPreviewMode = searchParams.get("preview") === "true";
+  const shouldPreservePreview = isAdmin && isPreviewMode;
+
+  // Helper to add preview param to links for admin users
+  const getHref = (baseHref: string) => {
+    if (shouldPreservePreview) {
+      return `${baseHref}?preview=true`;
+    }
+    return baseHref;
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
@@ -60,7 +74,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Link href="/dashboard" className="font-display text-xl font-bold tracking-tight">
+              <Link href={getHref("/dashboard")} className="font-display text-xl font-bold tracking-tight">
                 AI GENIUS LAB
               </Link>
             </motion.div>
@@ -82,7 +96,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                     transition={{ type: "spring", stiffness: 400, damping: 17 }}
                   >
                     <Link
-                      href={item.href}
+                      href={getHref(item.href)}
                       className={cn(
                         "flex items-center gap-3 rounded-lg pl-1 pr-3 py-2 text-sm font-medium transition-colors",
                         isActive
@@ -111,7 +125,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
           <div className="flex-shrink-0 border-t p-4 space-y-4">
             {session?.user && (
               <>
-                <Link href="/profile">
+                <Link href={getHref("/profile")}>
                   <motion.div
                     whileHover={{ scale: 1.02 }}
                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
@@ -175,7 +189,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
         <div className="flex flex-1 flex-col md:hidden">
           <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
             <div className="flex items-center justify-between px-4 pt-4 pb-3">
-              <Link href="/dashboard" className="font-display text-lg font-bold">
+              <Link href={getHref("/dashboard")} className="font-display text-lg font-bold">
                 AI GENIUS LAB
               </Link>
               <div className="flex items-center gap-2">
@@ -210,7 +224,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                     return (
                       <Link
                         key={item.href}
-                        href={item.href}
+                        href={getHref(item.href)}
                         onClick={() => setMobileMenuOpen(false)}
                         className={cn(
                           "flex items-center gap-3 rounded-lg pl-1 pr-3 py-2 text-sm font-medium transition-colors",
@@ -235,7 +249,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                 </div>
                 {session?.user && (
                   <div className="mt-4 space-y-3 border-t pt-4">
-                    <Link href="/profile">
+                    <Link href={getHref("/profile")}>
                       <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
                         <Avatar className="h-10 w-10 ring-2 ring-primary ring-offset-2 ring-offset-card">
                           <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "User"} />

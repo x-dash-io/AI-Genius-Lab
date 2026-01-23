@@ -25,6 +25,7 @@ import {
 import Link from "next/link";
 import { format } from "date-fns";
 import { PrintInvoiceButton } from "@/components/checkout/PrintInvoiceButton";
+import { CartClearer } from "@/components/cart/CartClearer";
 
 type CheckoutSuccessPageProps = {
   searchParams: Promise<{ purchase?: string; purchases?: string }>;
@@ -411,8 +412,13 @@ export default async function CheckoutSuccessPage({
     const purchaseDate = payment?.createdAt || purchases[0].createdAt;
     const invoiceNumber = generateInvoiceNumber(purchases[0].id);
 
+    // Get course IDs for cart clearing
+    const purchasedCourseIds = purchases.map(p => p.course.id);
+
     return (
       <section className="grid gap-8 max-w-4xl mx-auto px-4 py-8 print:max-w-full print:mx-0 print:px-0 print:py-0">
+        {/* Clear purchased items from cart */}
+        <CartClearer courseIds={purchasedCourseIds} />
         <ProfessionalInvoice
           invoiceNumber={invoiceNumber}
           purchaseDate={purchaseDate}
@@ -471,6 +477,8 @@ export default async function CheckoutSuccessPage({
 
   return (
     <section className="grid gap-8 max-w-4xl mx-auto px-4 py-8 print:max-w-full print:mx-0 print:px-0 print:py-0">
+      {/* Clear purchased item from cart */}
+      <CartClearer courseIds={[purchase.course.id]} />
       <ProfessionalInvoice
         invoiceNumber={invoiceNumber}
         purchaseDate={purchaseDate}

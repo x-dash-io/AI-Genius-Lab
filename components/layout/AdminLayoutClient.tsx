@@ -110,11 +110,14 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
               </div>
 
               <div className="border-t pt-4 mt-4">
-                <p className="px-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-2">
-                  Customer Preview
-                </p>
+                <div className="px-3 flex items-center gap-2 mb-2">
+                  <Eye className="h-3 w-3 text-amber-500" />
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    Customer Preview
+                  </p>
+                </div>
                 <p className="px-3 text-xs text-muted-foreground mb-3">
-                  Opens in new tab as customer view
+                  View pages as customers see them
                 </p>
                 <nav className="grid gap-1">
                   {customerPreviewLinks.map((item) => {
@@ -264,9 +267,12 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                     </div>
                   </div>
                   <div className="border-t pt-4 mt-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-2">
-                      Customer Preview
-                    </p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Eye className="h-3 w-3 text-amber-500" />
+                      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                        Customer Preview
+                      </p>
+                    </div>
                     <p className="text-xs text-muted-foreground mb-3">
                       Opens in new tab
                     </p>

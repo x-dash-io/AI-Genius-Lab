@@ -22,12 +22,14 @@ import {
   Calendar,
   Filter,
   Loader2,
-  X
+  X,
+  ShieldAlert
 } from "lucide-react";
-import { formatDistanceToNow, format } from "date-fns";
+import { formatDistanceToNow, format, subDays, subHours } from "date-fns";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast";
+import { useAdminPreview } from "@/components/admin/PreviewBanner";
 
 interface ActivityEntry {
   id: string;
@@ -56,6 +58,61 @@ const activityLabels: Record<string, string> = {
   course_started: "Course Started",
   review_created: "Review Created",
   certificate_earned: "Certificate Earned",
+};
+
+// Sample activity data for admin preview
+const getSampleActivityData = (): ActivityEntry[] => {
+  const now = new Date();
+  return [
+    {
+      id: "sample-1",
+      type: "purchase_completed",
+      metadata: { courseTitle: "AI Fundamentals for Business", courseSlug: "ai-fundamentals" },
+      createdAt: subHours(now, 2),
+    },
+    {
+      id: "sample-2",
+      type: "course_started",
+      metadata: { courseTitle: "AI Fundamentals for Business", courseSlug: "ai-fundamentals" },
+      createdAt: subHours(now, 2),
+    },
+    {
+      id: "sample-3",
+      type: "lesson_completed",
+      metadata: { lessonTitle: "Introduction to AI", courseSlug: "ai-fundamentals", lessonId: "lesson-1" },
+      createdAt: subHours(now, 1),
+    },
+    {
+      id: "sample-4",
+      type: "lesson_completed",
+      metadata: { lessonTitle: "Machine Learning Basics", courseSlug: "ai-fundamentals", lessonId: "lesson-2" },
+      createdAt: subHours(now, 1),
+    },
+    {
+      id: "sample-5",
+      type: "purchase_completed",
+      metadata: { courseTitle: "Prompt Engineering Masterclass", courseSlug: "prompt-engineering" },
+      createdAt: subDays(now, 1),
+    },
+    {
+      id: "sample-6",
+      type: "course_started",
+      metadata: { courseTitle: "Prompt Engineering Masterclass", courseSlug: "prompt-engineering" },
+      createdAt: subDays(now, 1),
+    },
+    {
+      id: "sample-7",
+      type: "review_created",
+      metadata: { courseTitle: "AI Fundamentals for Business", courseSlug: "ai-fundamentals" },
+      createdAt: subDays(now, 2),
+    },
+    {
+      id: "sample-8",
+      type: "certificate_earned",
+      metadata: { courseTitle: "AI Fundamentals for Business" },
+      createdAt: subDays(now, 3),
+    },
+  ];
 };
 
 function ActivitySkeleton() {
@@ -93,6 +150,7 @@ function ActivitySkeleton() {
 }
 
 export default function ActivityPage() {
+  const { isAdminPreview } = useAdminPreview();
   const [activity, setActivity] = useState<ActivityEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,18 +159,36 @@ export default function ActivityPage() {
   const [allActivityTypes, setAllActivityTypes] = useState<string[]>([]);
 
   useEffect(() => {
-    fetchActivity();
-  }, []);
+    if (isAdminPreview) {
+      // Use sample data for admin preview
+      const sampleData = getSampleActivityData();
+      setActivity(sampleData);
+      const types = Array.from(new Set(sampleData.map((a) => a.type))) as string[];
+      setAllActivityTypes(types);
+      setLoading(false);
+    } else {
+      fetchActivity();
+    }
+  }, [isAdminPreview]);
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading && !isAdminPreview) {
       startTransition(() => {
         fetchActivity();
       });
+    } else if (isAdminPreview && filter !== "all") {
+      // Filter sample data for admin preview
+      const sampleData = getSampleActivityData();
+      const filtered = sampleData.filter(a => a.type === filter);
+      setActivity(filtered);
+    } else if (isAdminPreview && filter === "all") {
+      setActivity(getSampleActivityData());
     }
-  }, [filter]);
+  }, [filter, isAdminPreview]);
 
   const fetchActivity = async () => {
+    if (isAdminPreview) return; // Skip fetch for admin preview
+    
     if (!loading) {
       // Don't set loading for filter changes, use isFiltering instead
     } else {
@@ -250,11 +326,27 @@ export default function ActivityPage() {
 
   return (
     <div className="space-y-8">
+      {isAdminPreview && (
+        <div className="flex items-center gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+          <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+              Sample Activity Data
+            </p>
+            <p className="text-xs text-amber-700 dark:text-amber-300">
+              This is sample data showing how the activity page appears to customers. No real data is displayed.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="font-display text-4xl font-bold tracking-tight">Activity</h1>
           <p className="mt-2 text-lg text-muted-foreground">
-            Your learning activity and purchase history.
+            {isAdminPreview 
+              ? "Sample learning activity and purchase history."
+              : "Your learning activity and purchase history."}
           </p>
         </div>
         {allActivityTypes.length > 0 && (

@@ -17,6 +17,7 @@ import {
 import { ContentUpload } from "@/components/admin/ContentUpload";
 import { Plus, Trash2, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { Course, Section, Lesson } from "@prisma/client";
 
 type CourseWithSections = Course & {
@@ -43,6 +44,7 @@ export function CourseEditForm({
   deleteLessonAction,
 }: CourseEditFormProps) {
   const router = useRouter();
+  const { confirm } = useConfirmDialog();
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [showAddSection, setShowAddSection] = useState(false);
   const [showAddLesson, setShowAddLesson] = useState<string | null>(null);
@@ -113,7 +115,15 @@ export function CourseEditForm({
   };
 
   const handleDeleteSection = async (sectionId: string) => {
-    if (!confirm("Are you sure you want to delete this section? All lessons in this section will also be deleted.")) {
+    const confirmed = await confirm({
+      title: "Delete Section",
+      description: "Are you sure you want to delete this section? All lessons in this section will also be deleted. This action cannot be undone.",
+      confirmText: "Delete Section",
+      cancelText: "Cancel",
+      variant: "destructive",
+    });
+
+    if (!confirmed) {
       return;
     }
     setIsDeletingSection((prev) => ({ ...prev, [sectionId]: true }));
@@ -179,7 +189,15 @@ export function CourseEditForm({
   };
 
   const handleDeleteLesson = async (lessonId: string) => {
-    if (!confirm("Are you sure you want to delete this lesson?")) {
+    const confirmed = await confirm({
+      title: "Delete Lesson",
+      description: "Are you sure you want to delete this lesson? This action cannot be undone.",
+      confirmText: "Delete Lesson",
+      cancelText: "Cancel",
+      variant: "destructive",
+    });
+
+    if (!confirmed) {
       return;
     }
     setIsDeletingLesson((prev) => ({ ...prev, [lessonId]: true }));

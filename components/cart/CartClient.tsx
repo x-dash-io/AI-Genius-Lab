@@ -1,17 +1,19 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Cart, CartItem } from "@/lib/cart/types";
 import { isCartItemValid, canIncreaseQuantity } from "@/lib/cart/validation";
 import { useCart } from "./CartProvider";
+import { useAdminPreview } from "@/components/admin/PreviewBanner";
+import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Trash2, ArrowRight, BookOpen, Loader2, Plus, Minus, AlertCircle } from "lucide-react";
+import { ShoppingCart, Trash2, ArrowRight, BookOpen, Loader2, Plus, Minus, AlertCircle, ShieldAlert } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -23,11 +25,21 @@ interface CartClientProps {
 export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
   const router = useRouter();
   const { cart, removeFromCart, updateQuantity, clearCart, isLoading } = useCart();
+  const { isAdminPreview } = useAdminPreview();
+  const { confirm } = useConfirmDialog();
   const [isRemoving, setIsRemoving] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-
-  const displayCart = cart.items.length > 0 ? cart : initialCart;
+  const [isClearing, setIsClearing] = useState(false);
+  
+  // Track if the cart context has loaded - only use initialCart during initial load
+  const hasCartLoaded = useRef(false);
+  if (!isLoading && !hasCartLoaded.current) {
+    hasCartLoaded.current = true;
+  }
+  
+  // Use cart from context once loaded, only fallback to initialCart during initial loading
+  const displayCart = hasCartLoaded.current ? cart : (cart.items.length > 0 ? cart : initialCart);
   
   // Validate all cart items
   const invalidItems = useMemo(() => {
@@ -76,6 +88,16 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
   };
 
   const handleCheckout = async () => {
+    // Prevent admin checkout in preview mode
+    if (isAdminPreview) {
+      toast({
+        title: "Preview Mode",
+        description: "Checkout is disabled in admin preview mode. This is a read-only preview of the customer experience.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!isAuthenticated) {
       router.push(`/sign-in?callbackUrl=${encodeURIComponent("/cart")}`);
       return;
@@ -107,9 +129,27 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
   };
 
   const handleClearCart = async () => {
-    if (confirm("Are you sure you want to clear your cart?")) {
-      await clearCart();
-      router.push("/courses");
+    const confirmed = await confirm({
+      title: "Clear Shopping Cart",
+      description: "Are you sure you want to remove all items from your cart? This action cannot be undone.",
+      confirmText: "Clear Cart",
+      cancelText: "Keep Items",
+      variant: "destructive",
+    });
+
+    if (confirmed) {
+      setIsClearing(true);
+      try {
+        await clearCart();
+        // Small delay to ensure state is updated before redirect
+        setTimeout(() => {
+          router.push("/courses");
+        }, 100);
+      } catch (error) {
+        // Error is handled by toast in CartProvider
+      } finally {
+        setIsClearing(false);
+      }
     }
   };
 
@@ -175,8 +215,12 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
           <h2 className="text-xl font-semibold">
             {displayCart.items.length} {displayCart.items.length === 1 ? "Course" : "Courses"}
           </h2>
-          <Button variant="ghost" size="sm" onClick={handleClearCart} disabled={isLoading}>
-            <Trash2 className="h-4 w-4 mr-2" />
+          <Button variant="ghost" size="sm" onClick={handleClearCart} disabled={isLoading || isClearing}>
+            {isClearing ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4 mr-2" />
+            )}
             Clear Cart
           </Button>
         </div>
@@ -344,11 +388,20 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
               <span>${(displayCart.totalCents / 100).toFixed(2)}</span>
             </div>
 
+            {isAdminPreview && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 mb-2">
+                <ShieldAlert className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <p className="text-xs text-amber-700 dark:text-amber-300">
+                  Checkout disabled in preview mode
+                </p>
+              </div>
+            )}
+
             <Button
               size="lg"
               className="w-full"
               onClick={handleCheckout}
-              disabled={isCheckingOut || isLoading || hasInvalidItems}
+              disabled={isCheckingOut || isLoading || hasInvalidItems || isAdminPreview}
             >
               {isCheckingOut ? (
                 <>
@@ -359,6 +412,11 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Loading...
+                </>
+              ) : isAdminPreview ? (
+                <>
+                  <ShieldAlert className="h-4 w-4 mr-2" />
+                  Preview Only
                 </>
               ) : (
                 <>

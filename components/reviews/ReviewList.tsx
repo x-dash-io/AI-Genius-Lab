@@ -9,6 +9,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "@/lib/toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Review {
   id: string;
@@ -33,6 +34,7 @@ export function ReviewList({ courseId, currentUserId }: ReviewListProps) {
   const [loading, setLoading] = useState(true);
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null);
+  const { confirm } = useConfirmDialog();
 
   useEffect(() => {
     fetchReviews();
@@ -56,7 +58,15 @@ export function ReviewList({ courseId, currentUserId }: ReviewListProps) {
   };
 
   const handleDelete = async (reviewId: string) => {
-    if (!confirm("Are you sure you want to delete this review?")) {
+    const confirmed = await confirm({
+      title: "Delete Review",
+      description: "Are you sure you want to delete this review? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "destructive",
+    });
+
+    if (!confirmed) {
       return;
     }
 

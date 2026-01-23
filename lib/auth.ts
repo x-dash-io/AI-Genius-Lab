@@ -1,4 +1,6 @@
 import NextAuth from "next-auth";
+import type { JWT } from "next-auth/jwt";
+import type { Session, User, Account } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
@@ -57,12 +59,12 @@ export const authOptions = {
       },
     }),
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account }: { user: User; account: Account | null }) {
       // For OAuth providers, ensure new users get customer role
       if (account?.provider !== "credentials" && user.email) {
         try {
@@ -92,17 +94,17 @@ export const authOptions = {
       // For credentials provider, user is already authenticated by authorize function
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
       // Initial sign in - user object is available
       if (user) {
         token.id = user.id;
         // For credentials provider, role comes from authorize function
         // For OAuth, PrismaAdapter will create user with default role from schema
-        token.role = (user as any).role || "customer";
+        token.role = (user as User & { role?: Role }).role || "customer";
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user && token && token.id) {
         session.user.id = token.id as string;
         session.user.role = (token.role as Role) || "customer";
@@ -126,7 +128,7 @@ export const authOptions = {
       }
       return session;
     },
-    async redirect({ url, baseUrl }) {
+    async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
       // Redirect admins to admin dashboard after sign-in
       if (url.startsWith("/dashboard") || url === baseUrl || url === `${baseUrl}/`) {
         // We'll handle admin redirect in the dashboard page itself

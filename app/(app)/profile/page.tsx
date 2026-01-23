@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { PasswordChangeForm } from "@/components/profile/PasswordChangeForm";
+import { ProfilePreviewBanner } from "@/components/profile/ProfilePreviewBanner";
 import { Separator } from "@/components/ui/separator";
 import { BookOpen, DollarSign, GraduationCap, Calendar } from "lucide-react";
 import Link from "next/link";
@@ -61,6 +62,8 @@ export default async function ProfilePage() {
 
   return (
     <div className="space-y-8">
+      <ProfilePreviewBanner />
+      
       <div>
         <h1 className="font-display text-4xl font-bold tracking-tight">Profile</h1>
         <p className="mt-2 text-lg text-muted-foreground">

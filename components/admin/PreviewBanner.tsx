@@ -1,18 +1,31 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Eye, ArrowLeft, ExternalLink } from "lucide-react";
+import { Eye, ArrowLeft, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+
+// Helper to check if pathname is a customer page
+function isCustomerPagePath(pathname: string): boolean {
+  return pathname.startsWith("/dashboard") || 
+    pathname.startsWith("/library") || 
+    pathname.startsWith("/cart") || 
+    pathname.startsWith("/activity") || 
+    pathname.startsWith("/profile");
+}
 
 export function PreviewBanner() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
-  const isPreview = searchParams.get("preview") === "true";
+  const pathname = usePathname();
+  const isPreviewParam = searchParams.get("preview") === "true";
 
-  // Only show for admin users in preview mode
-  if (!isPreview || session?.user?.role !== "admin") {
+  const isAdmin = session?.user?.role === "admin";
+  const isCustomerPage = isCustomerPagePath(pathname);
+
+  // Only show for admin users on customer pages WITH preview=true param
+  if (!isAdmin || !isCustomerPage || !isPreviewParam) {
     return null;
   }
 
@@ -28,12 +41,16 @@ export function PreviewBanner() {
               Customer Preview Mode
             </p>
             <p className="text-xs text-amber-700 dark:text-amber-300">
-              You're viewing this page as a customer would see it
+              You're viewing this page as a customer would see it. Some actions are restricted.
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/admin" target="_blank">
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/20 text-xs font-medium text-amber-700 dark:text-amber-300">
+            <ShieldAlert className="h-3 w-3" />
+            Admin Preview
+          </div>
+          <Link href="/admin">
             <Button 
               size="sm" 
               variant="outline"
@@ -47,4 +64,24 @@ export function PreviewBanner() {
       </div>
     </div>
   );
+}
+
+/**
+ * Hook to check if the current user is an admin in preview mode
+ * Preview mode requires both: admin user AND ?preview=true in URL
+ */
+export function useAdminPreview() {
+  const { data: session } = useSession();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  
+  const isAdmin = session?.user?.role === "admin";
+  const isCustomerPage = isCustomerPagePath(pathname);
+  const isPreviewParam = searchParams.get("preview") === "true";
+
+  return {
+    isAdminPreview: isAdmin && isCustomerPage && isPreviewParam,
+    isAdmin,
+    isPreviewMode: isPreviewParam,
+  };
 }

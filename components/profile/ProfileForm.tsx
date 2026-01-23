@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShieldAlert } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { useAdminPreview } from "@/components/admin/PreviewBanner";
 
 interface ProfileFormProps {
   initialData: {
@@ -18,9 +19,20 @@ interface ProfileFormProps {
 
 export function ProfileForm({ initialData, updateProfileAction }: ProfileFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isAdminPreview } = useAdminPreview();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (isAdminPreview) {
+      toast({
+        title: "Preview Mode",
+        description: "Profile updates are disabled in admin preview mode.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -43,6 +55,12 @@ export function ProfileForm({ initialData, updateProfileAction }: ProfileFormPro
     }
   };
 
+  // Sample data for admin preview
+  const displayData = isAdminPreview ? {
+    name: "Sample Customer",
+    bio: "This is a sample customer bio. In a real customer account, their personal bio would appear here.",
+  } : initialData;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
@@ -50,8 +68,10 @@ export function ProfileForm({ initialData, updateProfileAction }: ProfileFormPro
         <Input
           id="name"
           name="name"
-          defaultValue={initialData.name || ""}
+          defaultValue={displayData.name || ""}
           placeholder="Your name"
+          readOnly={isAdminPreview}
+          className={isAdminPreview ? "bg-muted cursor-not-allowed" : ""}
         />
       </div>
 
@@ -60,18 +80,25 @@ export function ProfileForm({ initialData, updateProfileAction }: ProfileFormPro
         <Textarea
           id="bio"
           name="bio"
-          defaultValue={initialData.bio || ""}
+          defaultValue={displayData.bio || ""}
           placeholder="Tell us about yourself..."
           rows={4}
           maxLength={500}
+          readOnly={isAdminPreview}
+          className={isAdminPreview ? "bg-muted cursor-not-allowed" : ""}
         />
         <p className="text-xs text-muted-foreground">
-          {(initialData.bio || "").length}/500 characters
+          {(displayData.bio || "").length}/500 characters
         </p>
       </div>
 
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? (
+      <Button type="submit" disabled={isSubmitting || isAdminPreview}>
+        {isAdminPreview ? (
+          <>
+            <ShieldAlert className="h-4 w-4 mr-2" />
+            Preview Only
+          </>
+        ) : isSubmitting ? (
           <>
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             Saving...

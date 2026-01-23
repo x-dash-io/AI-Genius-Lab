@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Loader2, Upload, User } from "lucide-react";
+import { Loader2, Upload, User, ShieldAlert } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { useAdminPreview } from "@/components/admin/PreviewBanner";
 
 interface ProfileAvatarProps {
   currentImage: string | null;
@@ -21,8 +22,13 @@ export function ProfileAvatar({
   onAvatarUpdate,
 }: ProfileAvatarProps) {
   const router = useRouter();
+  const { isAdminPreview } = useAdminPreview();
   const [isUploading, setIsUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(currentImage);
+
+  // Use sample name for preview
+  const displayName = isAdminPreview ? "Sample Customer" : userName;
+  const displayEmail = isAdminPreview ? "customer@example.com" : userEmail;
 
   // Sync imageUrl when currentImage prop changes (e.g., after page refresh)
   useEffect(() => {
@@ -30,6 +36,15 @@ export function ProfileAvatar({
   }, [currentImage]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isAdminPreview) {
+      toast({
+        title: "Preview Mode",
+        description: "Avatar uploads are disabled in admin preview mode.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -102,8 +117,10 @@ export function ProfileAvatar({
 
   // Get initials from name first, fallback to email
   const getInitials = () => {
-    if (userName && userName.trim()) {
-      const nameParts = userName.trim().split(/\s+/);
+    const name = displayName;
+    const email = displayEmail;
+    if (name && name.trim()) {
+      const nameParts = name.trim().split(/\s+/);
       if (nameParts.length >= 2) {
         // First letter of first name + first letter of last name
         return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase();
@@ -116,7 +133,7 @@ export function ProfileAvatar({
       }
     }
     // Fallback to email
-    return userEmail.charAt(0).toUpperCase();
+    return email.charAt(0).toUpperCase();
   };
 
   const initials = getInitials();
@@ -124,7 +141,7 @@ export function ProfileAvatar({
   return (
     <div className="flex flex-col items-center gap-4">
       <Avatar className="h-24 w-24 border-2 border-border/50">
-        <AvatarImage src={imageUrl || undefined} alt={userName || userEmail} />
+        <AvatarImage src={isAdminPreview ? undefined : (imageUrl || undefined)} alt={displayName || displayEmail} />
         <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
           {initials}
         </AvatarFallback>
@@ -136,16 +153,21 @@ export function ProfileAvatar({
           accept="image/*"
           onChange={handleFileChange}
           className="hidden"
-          disabled={isUploading}
+          disabled={isUploading || isAdminPreview}
         />
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={() => document.getElementById("avatar-upload")?.click()}
-          disabled={isUploading}
+          disabled={isUploading || isAdminPreview}
         >
-          {isUploading ? (
+          {isAdminPreview ? (
+            <>
+              <ShieldAlert className="h-4 w-4 mr-2" />
+              Preview Only
+            </>
+          ) : isUploading ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               Uploading...

@@ -4,8 +4,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShieldAlert } from "lucide-react";
 import { toast } from "@/lib/toast";
+import { useAdminPreview } from "@/components/admin/PreviewBanner";
 
 interface PasswordChangeFormProps {
   changePasswordAction: (formData: FormData) => Promise<void>;
@@ -14,9 +15,20 @@ interface PasswordChangeFormProps {
 export function PasswordChangeForm({ changePasswordAction }: PasswordChangeFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPasswords, setShowPasswords] = useState(false);
+  const { isAdminPreview } = useAdminPreview();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (isAdminPreview) {
+      toast({
+        title: "Preview Mode",
+        description: "Password changes are disabled in admin preview mode.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
@@ -74,7 +86,9 @@ export function PasswordChangeForm({ changePasswordAction }: PasswordChangeFormP
           name="currentPassword"
           type={showPasswords ? "text" : "password"}
           required
-          placeholder="Enter current password"
+          placeholder={isAdminPreview ? "••••••••" : "Enter current password"}
+          readOnly={isAdminPreview}
+          className={isAdminPreview ? "bg-muted cursor-not-allowed" : ""}
         />
       </div>
 
@@ -85,8 +99,10 @@ export function PasswordChangeForm({ changePasswordAction }: PasswordChangeFormP
           name="newPassword"
           type={showPasswords ? "text" : "password"}
           required
-          placeholder="Enter new password (min 8 characters)"
+          placeholder={isAdminPreview ? "••••••••" : "Enter new password (min 8 characters)"}
           minLength={8}
+          readOnly={isAdminPreview}
+          className={isAdminPreview ? "bg-muted cursor-not-allowed" : ""}
         />
       </div>
 
@@ -97,8 +113,10 @@ export function PasswordChangeForm({ changePasswordAction }: PasswordChangeFormP
           name="confirmPassword"
           type={showPasswords ? "text" : "password"}
           required
-          placeholder="Confirm new password"
+          placeholder={isAdminPreview ? "••••••••" : "Confirm new password"}
           minLength={8}
+          readOnly={isAdminPreview}
+          className={isAdminPreview ? "bg-muted cursor-not-allowed" : ""}
         />
       </div>
 
@@ -109,14 +127,20 @@ export function PasswordChangeForm({ changePasswordAction }: PasswordChangeFormP
           checked={showPasswords}
           onChange={(e) => setShowPasswords(e.target.checked)}
           className="h-4 w-4 rounded border-gray-300"
+          disabled={isAdminPreview}
         />
         <Label htmlFor="showPasswords" className="text-sm font-normal cursor-pointer">
           Show passwords
         </Label>
       </div>
 
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? (
+      <Button type="submit" disabled={isSubmitting || isAdminPreview}>
+        {isAdminPreview ? (
+          <>
+            <ShieldAlert className="h-4 w-4 mr-2" />
+            Preview Only
+          </>
+        ) : isSubmitting ? (
           <>
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             Changing...
