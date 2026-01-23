@@ -1,7 +1,11 @@
+import { Suspense } from "react";
 import { Metadata } from "next";
 import { getPublishedCourses } from "@/lib/courses";
 import { CourseList } from "@/components/courses/CourseList";
+import { CourseFilters } from "@/components/courses/CourseFilters";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+import { Card, CardContent } from "@/components/ui/card";
+import { BookOpen } from "lucide-react";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Course Catalog",
@@ -10,8 +14,54 @@ export const metadata: Metadata = generateSEOMetadata({
   keywords: ["AI courses", "course catalog", "online courses", "AI training"],
 });
 
-export default async function CoursesPage() {
-  const courses = await getPublishedCourses();
+interface CoursesPageProps {
+  searchParams: Promise<{ search?: string; category?: string; sort?: string }>;
+}
+
+export default async function CoursesPage({ searchParams }: CoursesPageProps) {
+  const params = await searchParams;
+  const allCourses = await getPublishedCourses();
+  
+  let courses = [...allCourses];
+
+  // Apply search filter
+  if (params.search) {
+    const searchLower = params.search.toLowerCase();
+    courses = courses.filter(
+      (course) =>
+        course.title.toLowerCase().includes(searchLower) ||
+        course.description?.toLowerCase().includes(searchLower)
+    );
+  }
+
+  // Apply category filter
+  if (params.category) {
+    courses = courses.filter((course) => course.category === params.category);
+  }
+
+  // Apply sorting
+  if (params.sort) {
+    switch (params.sort) {
+      case "oldest":
+        // Already sorted by createdAt desc from the query, reverse it
+        courses = courses.reverse();
+        break;
+      case "price-low":
+        courses = courses.sort((a, b) => a.priceCents - b.priceCents);
+        break;
+      case "price-high":
+        courses = courses.sort((a, b) => b.priceCents - a.priceCents);
+        break;
+      case "title":
+        courses = courses.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      // "newest" is the default from the query
+    }
+  }
+
+  const totalCourses = allCourses.length;
+  const filteredCount = courses.length;
+  const hasFilters = params.search || params.category || params.sort;
 
   return (
     <section className="grid gap-6">
@@ -20,10 +70,32 @@ export default async function CoursesPage() {
           Course Catalog
         </h1>
         <p className="mt-2 text-lg text-muted-foreground">
-          Browse curated AI courses with previews and structured learning paths.
+          {hasFilters
+            ? `Showing ${filteredCount} of ${totalCourses} courses`
+            : `Browse ${totalCourses} curated AI courses with previews and structured learning paths.`}
         </p>
       </div>
-      <CourseList courses={courses} />
+      
+      {/* Filters */}
+      <Suspense fallback={<div className="h-12 animate-pulse bg-muted rounded" />}>
+        <CourseFilters />
+      </Suspense>
+
+      {/* Course List */}
+      {courses.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">
+              {hasFilters
+                ? "No courses match your search criteria. Try adjusting your filters."
+                : "No published courses yet. Seed data to preview the catalog."}
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <CourseList courses={courses} />
+      )}
     </section>
   );
 }

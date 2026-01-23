@@ -25,6 +25,7 @@ import { BackgroundBlobs } from "@/components/ui/background-blobs";
 import { useCart } from "@/components/cart/CartProvider";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { PreviewBanner } from "@/components/admin/PreviewBanner";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -154,6 +155,8 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
 
         {/* Desktop Main Content Area */}
         <div className="flex-1 flex flex-col md:ml-64 overflow-hidden">
+          {/* Preview Banner for Admin */}
+          <PreviewBanner />
           {/* Scrollable Main Content */}
           <main className="flex-1 overflow-y-auto">
             <div className="mx-auto w-full max-w-7xl px-6 py-6">
@@ -271,7 +274,11 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
               </motion.nav>
             )}
           </header>
-          <main className="flex-1 px-4 py-4 pt-20 overflow-y-auto">{children}</main>
+          {/* Preview Banner for Admin (Mobile) */}
+          <div className="pt-16">
+            <PreviewBanner />
+          </div>
+          <main className="flex-1 px-4 py-4 overflow-y-auto">{children}</main>
         </div>
       </div>
     </div>

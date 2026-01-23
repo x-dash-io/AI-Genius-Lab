@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Activity, Eye } from "lucide-react";
+import { BookOpen, Activity } from "lucide-react";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = generateSEOMetadata({
@@ -47,16 +47,6 @@ export default async function DashboardPage({
 
   return (
     <div className="space-y-8">
-      {isPreview && session.user.role === "admin" && (
-        <div className="rounded-lg border-2 border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 p-4">
-          <div className="flex items-center gap-2">
-            <Eye className="h-4 w-4 text-yellow-800 dark:text-yellow-200" />
-            <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-              Preview Mode: You are viewing the customer dashboard as an admin. This page opened in a new tab.
-            </p>
-          </div>
-        </div>
-      )}
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Customer Dashboard

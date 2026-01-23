@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 async function createLearningPathAction(formData: FormData) {
   "use server";
@@ -77,7 +78,12 @@ export default async function NewLearningPathPage() {
               />
             </div>
             <div className="flex gap-2">
-              <Button type="submit">Create Learning Path</Button>
+              <SubmitButton
+                loadingText="Creating..."
+                icon={<Plus className="h-4 w-4 mr-2" />}
+              >
+                Create Learning Path
+              </SubmitButton>
               <Link href="/admin/learning-paths">
                 <Button type="button" variant="outline">
                   Cancel

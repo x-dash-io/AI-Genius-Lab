@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback, useState, useTransition, useRef, useEffect } from "react";
+import { useCallback, useState, useTransition, useEffect } from "react";
 import { SearchInput } from "@/components/ui/search-input";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,27 +13,22 @@ import {
 } from "@/components/ui/select";
 import { X } from "lucide-react";
 
-export function PurchaseFilters() {
+export function UserFilters() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   
   const currentSearch = searchParams.get("search") || "";
-  const currentStatus = searchParams.get("status") || "all";
-  const currentProvider = searchParams.get("provider") || "all";
+  const currentRole = searchParams.get("role") || "all";
   
-  const [status, setStatus] = useState(currentStatus);
-  const [provider, setProvider] = useState(currentProvider);
-  
-  // Track if we're actively filtering (user initiated action)
+  const [role, setRole] = useState(currentRole);
   const [isFiltering, setIsFiltering] = useState(false);
 
-  // Sync state with URL params when they change externally
+  // Sync state with URL params
   useEffect(() => {
-    setStatus(currentStatus);
-    setProvider(currentProvider);
-  }, [currentStatus, currentProvider]);
+    setRole(currentRole);
+  }, [currentRole]);
 
   // Reset filtering state when transition completes
   useEffect(() => {
@@ -55,44 +50,29 @@ export function PurchaseFilters() {
     });
   }, [router, pathname, searchParams]);
 
-  const handleStatusChange = useCallback((value: string) => {
-    setStatus(value);
+  const handleRoleChange = useCallback((value: string) => {
+    setRole(value);
     setIsFiltering(true);
     startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
       if (value && value !== "all") {
-        params.set("status", value);
+        params.set("role", value);
       } else {
-        params.delete("status");
-      }
-      router.push(`${pathname}?${params.toString()}`);
-    });
-  }, [router, pathname, searchParams]);
-
-  const handleProviderChange = useCallback((value: string) => {
-    setProvider(value);
-    setIsFiltering(true);
-    startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (value && value !== "all") {
-        params.set("provider", value);
-      } else {
-        params.delete("provider");
+        params.delete("role");
       }
       router.push(`${pathname}?${params.toString()}`);
     });
   }, [router, pathname, searchParams]);
 
   const handleClearAll = useCallback(() => {
-    setStatus("all");
-    setProvider("all");
+    setRole("all");
     setIsFiltering(true);
     startTransition(() => {
       router.push(pathname);
     });
   }, [router, pathname]);
 
-  const hasFilters = currentSearch || currentStatus !== "all" || currentProvider !== "all";
+  const hasFilters = currentSearch || currentRole !== "all";
   const showLoading = isPending && isFiltering;
 
   return (
@@ -100,32 +80,21 @@ export function PurchaseFilters() {
       <div className="flex flex-wrap gap-4">
         <div className="flex-1 min-w-[250px]">
           <SearchInput
-            placeholder="Search by user email, name, or course..."
+            placeholder="Search by name or email..."
             value={currentSearch}
             onSearch={handleSearch}
             isLoading={showLoading}
             debounceMs={400}
           />
         </div>
-        <Select value={status} onValueChange={handleStatusChange}>
+        <Select value={role} onValueChange={handleRoleChange}>
           <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="All Status" />
+            <SelectValue placeholder="All Roles" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="paid">Paid</SelectItem>
-            <SelectItem value="refunded">Refunded</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={provider} onValueChange={handleProviderChange}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="All Providers" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Providers</SelectItem>
-            <SelectItem value="paypal">PayPal</SelectItem>
-            <SelectItem value="stripe">Stripe</SelectItem>
+            <SelectItem value="all">All Roles</SelectItem>
+            <SelectItem value="customer">Customer</SelectItem>
+            <SelectItem value="admin">Admin</SelectItem>
           </SelectContent>
         </Select>
         {hasFilters && (

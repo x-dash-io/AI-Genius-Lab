@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { VideoPlayer } from "./VideoPlayer";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, PlayCircle } from "lucide-react";
+import { CheckCircle2, PlayCircle, Loader2 } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 interface LessonViewerProps {
@@ -121,7 +121,14 @@ export function LessonViewer({
               disabled={isCompleting}
               variant="outline"
             >
-              {isCompleting ? "Marking..." : "Mark as Complete"}
+              {isCompleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Marking...
+                </>
+              ) : (
+                "Mark as Complete"
+              )}
             </Button>
           )}
         </div>
@@ -169,7 +176,14 @@ export function LessonViewer({
             disabled={isCompleting}
             variant="outline"
           >
-            {isCompleting ? "Marking..." : "Mark as Complete"}
+            {isCompleting ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Marking...
+              </>
+            ) : (
+              "Mark as Complete"
+            )}
           </Button>
         )}
       </div>

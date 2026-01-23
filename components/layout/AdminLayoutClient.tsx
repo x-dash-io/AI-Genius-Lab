@@ -16,6 +16,8 @@ import {
   Shield,
   Route,
   User,
+  Eye,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -32,13 +34,14 @@ const adminNavigation = [
   { name: "Learning Paths", href: "/admin/learning-paths", icon: Route },
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Purchases", href: "/admin/purchases", icon: Receipt },
-  { name: "Profile", href: "/profile", icon: User },
+  { name: "Profile", href: "/admin/profile", icon: User },
 ];
 
-const regularNavigation = [
-  { name: "Customer Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "My Courses", href: "/library", icon: BookOpen },
-  { name: "Browse Courses", href: "/courses", icon: BookOpen },
+const customerPreviewLinks = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Course Library", href: "/library", icon: BookOpen },
+  { name: "Course Catalog", href: "/courses", icon: BookOpen },
+  { name: "Learning Paths", href: "/learning-paths", icon: Route },
 ];
 
 export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
@@ -108,12 +111,14 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
 
               <div className="border-t pt-4 mt-4">
                 <p className="px-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-2">
-                  Customer View
+                  Customer Preview
                 </p>
-                <nav className="grid gap-2">
-                  {regularNavigation.map((item) => {
+                <p className="px-3 text-xs text-muted-foreground mb-3">
+                  Opens in new tab as customer view
+                </p>
+                <nav className="grid gap-1">
+                  {customerPreviewLinks.map((item) => {
                     const Icon = item.icon;
-                    const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                     const previewHref = `${item.href}?preview=true`;
                     return (
                       <motion.div
@@ -125,12 +130,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                           href={previewHref}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={cn(
-                            "flex items-center gap-3 rounded-lg pl-1 pr-3 py-2 text-sm font-medium transition-colors border-l-2",
-                            isActive
-                              ? "border-primary text-foreground bg-accent/50"
-                              : "border-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:border-muted"
-                          )}
+                          className="flex items-center gap-3 rounded-lg pl-1 pr-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-amber-500/10 hover:text-amber-700 dark:hover:text-amber-300"
                         >
                           <Icon className="h-4 w-4" />
                           {item.name}
@@ -147,7 +147,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
           <div className="flex-shrink-0 border-t p-4 space-y-4">
             {session?.user && (
               <>
-                <Link href="/admin/users">
+                <Link href="/admin/profile">
                   <motion.div
                     whileHover={{ scale: 1.02 }}
                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors cursor-pointer"
@@ -160,10 +160,8 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                           const email = session.user.email || "";
                           if (name && name.trim()) {
                             const nameParts = name.trim().split(/\s+/);
-                            // Use first letter of first name
                             return nameParts[0][0].toUpperCase();
                           }
-                          // Fallback to email first letter if no name
                           return email.charAt(0).toUpperCase();
                         })()}
                       </AvatarFallback>
@@ -267,12 +265,14 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                   </div>
                   <div className="border-t pt-4 mt-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-2">
-                      Customer View
+                      Customer Preview
                     </p>
-                    <div className="space-y-2">
-                      {regularNavigation.map((item) => {
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Opens in new tab
+                    </p>
+                    <div className="space-y-1">
+                      {customerPreviewLinks.map((item) => {
                         const Icon = item.icon;
-                        const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                         const previewHref = `${item.href}?preview=true`;
                         return (
                           <Link
@@ -281,12 +281,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => setMobileMenuOpen(false)}
-                            className={cn(
-                              "flex items-center gap-3 rounded-lg pl-1 pr-3 py-2 text-sm font-medium transition-colors border-l-2",
-                              isActive
-                                ? "border-primary text-foreground bg-accent/50"
-                                : "border-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:border-muted"
-                            )}
+                            className="flex items-center gap-3 rounded-lg pl-1 pr-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:bg-amber-500/10 hover:text-amber-700 dark:hover:text-amber-300"
                           >
                             <Icon className="h-4 w-4" />
                             {item.name}
@@ -298,7 +293,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                 </div>
                 {session?.user && (
                   <div className="mt-4 space-y-3 border-t pt-4">
-                    <Link href="/profile">
+                    <Link href="/admin/profile">
                       <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors">
                         <Avatar className="h-10 w-10 ring-2 ring-primary ring-offset-2 ring-offset-card">
                           <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "Admin"} />
@@ -308,10 +303,8 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                               const email = session.user.email || "";
                               if (name && name.trim()) {
                                 const nameParts = name.trim().split(/\s+/);
-                                // Use first letter of first name
                                 return nameParts[0][0].toUpperCase();
                               }
-                              // Fallback to email first letter if no name
                               return email.charAt(0).toUpperCase();
                             })()}
                           </AvatarFallback>

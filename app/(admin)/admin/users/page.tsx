@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -8,14 +9,41 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Users, User, Shield } from "lucide-react";
+import { UserFilters } from "@/components/admin/UserFilters";
+import { FilterSkeleton } from "@/components/ui/filter-skeleton";
 
-export default async function AdminUsersPage() {
+interface AdminUsersPageProps {
+  searchParams: Promise<{ search?: string; role?: string }>;
+}
+
+export default async function AdminUsersPage({ searchParams }: AdminUsersPageProps) {
   const session = await getServerSession(authOptions);
   await requireRole("admin");
 
+  const params = await searchParams;
   const allUsers = await getAllUsers();
+  
   // Filter out current admin's account
-  const users = allUsers.filter((user) => user.id !== session?.user?.id);
+  let users = allUsers.filter((user) => user.id !== session?.user?.id);
+
+  // Apply search filter
+  if (params.search) {
+    const searchLower = params.search.toLowerCase();
+    users = users.filter(
+      (user) =>
+        user.email.toLowerCase().includes(searchLower) ||
+        user.name?.toLowerCase().includes(searchLower)
+    );
+  }
+
+  // Apply role filter
+  if (params.role) {
+    users = users.filter((user) => user.role === params.role);
+  }
+
+  const totalUsers = allUsers.filter((u) => u.id !== session?.user?.id).length;
+  const filteredCount = users.length;
+  const hasFilters = params.search || params.role;
 
   return (
     <div className="space-y-8">
@@ -31,11 +59,39 @@ export default async function AdminUsersPage() {
         </p>
       </div>
 
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Search & Filter</CardTitle>
+          <CardDescription>
+            {hasFilters
+              ? `Showing ${filteredCount} of ${totalUsers} users`
+              : `${totalUsers} users total`}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Suspense fallback={<div className="h-10 animate-pulse bg-muted rounded" />}>
+            <UserFilters />
+          </Suspense>
+        </CardContent>
+      </Card>
+
       {users.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No users found.</p>
+            <p className="text-muted-foreground">
+              {hasFilters
+                ? "No users match your search criteria."
+                : "No users found."}
+            </p>
+            {hasFilters && (
+              <Link href="/admin/users" className="mt-4 inline-block">
+                <Button variant="outline" size="sm">
+                  Clear Filters
+                </Button>
+              </Link>
+            )}
           </CardContent>
         </Card>
       ) : (

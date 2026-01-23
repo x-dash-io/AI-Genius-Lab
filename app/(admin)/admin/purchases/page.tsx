@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/access";
 import { getAllPurchases } from "@/lib/admin/purchases";
@@ -15,15 +16,16 @@ function formatCurrency(cents: number) {
   }).format(cents / 100);
 }
 
-export default async function AdminPurchasesPage({
-  searchParams,
-}: {
+interface AdminPurchasesPageProps {
   searchParams: Promise<{ status?: string; provider?: string; search?: string }>;
-}) {
+}
+
+export default async function AdminPurchasesPage({ searchParams }: AdminPurchasesPageProps) {
   await requireRole("admin");
 
   const params = await searchParams;
-  let purchases = await getAllPurchases();
+  const allPurchases = await getAllPurchases();
+  let purchases = [...allPurchases];
 
   // Filter by status
   if (params.status && params.status !== "all") {
@@ -50,6 +52,14 @@ export default async function AdminPurchasesPage({
     .filter((p) => p.status === "paid")
     .reduce((sum, p) => sum + p.amountCents, 0);
 
+  const allTimeTotalRevenue = allPurchases
+    .filter((p) => p.status === "paid")
+    .reduce((sum, p) => sum + p.amountCents, 0);
+
+  const totalPurchases = allPurchases.length;
+  const filteredCount = purchases.length;
+  const hasFilters = params.status || params.provider || params.search;
+
   return (
     <div className="space-y-8">
       <div>
@@ -68,13 +78,20 @@ export default async function AdminPurchasesPage({
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {hasFilters ? "Filtered Revenue" : "Total Revenue"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalRevenue)}</div>
             <p className="text-xs text-muted-foreground mt-1">
               From {purchases.filter((p) => p.status === "paid").length} paid purchases
             </p>
+            {hasFilters && (
+              <p className="text-xs text-muted-foreground">
+                All-time: {formatCurrency(allTimeTotalRevenue)}
+              </p>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -85,6 +102,18 @@ export default async function AdminPurchasesPage({
             <div className="text-2xl font-bold">
               {purchases.filter((p) => p.status === "pending").length}
             </div>
+            <p className="text-xs text-muted-foreground mt-1">Awaiting payment</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Total Purchases</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{filteredCount}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {hasFilters ? `of ${totalPurchases} total` : "All purchases"}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -92,10 +121,17 @@ export default async function AdminPurchasesPage({
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle className="text-base">Search & Filter</CardTitle>
+          <CardDescription>
+            {hasFilters
+              ? `Showing ${filteredCount} of ${totalPurchases} purchases`
+              : `${totalPurchases} purchases total`}
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <PurchaseFilters />
+          <Suspense fallback={<div className="h-10 animate-pulse bg-muted rounded" />}>
+            <PurchaseFilters />
+          </Suspense>
         </CardContent>
       </Card>
 
@@ -104,7 +140,18 @@ export default async function AdminPurchasesPage({
         <Card>
           <CardContent className="py-12 text-center">
             <ShoppingCart className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No purchases found.</p>
+            <p className="text-muted-foreground mb-4">
+              {hasFilters
+                ? "No purchases match your search criteria."
+                : "No purchases found."}
+            </p>
+            {hasFilters && (
+              <Link href="/admin/purchases">
+                <Button variant="outline" size="sm">
+                  Clear Filters
+                </Button>
+              </Link>
+            )}
           </CardContent>
         </Card>
       ) : (
@@ -114,12 +161,14 @@ export default async function AdminPurchasesPage({
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <CardTitle className="text-xl">{purchase.course.title}</CardTitle>
                       <Badge
                         variant={
                           purchase.status === "paid"
                             ? "default"
+                            : purchase.status === "refunded"
+                            ? "destructive"
                             : "secondary"
                         }
                       >
@@ -135,7 +184,7 @@ export default async function AdminPurchasesPage({
                         {purchase.user.name || purchase.user.email}
                       </Link>
                     </CardDescription>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
                       <span>{formatCurrency(purchase.amountCents)}</span>
                       <span>•</span>
                       <span>{new Date(purchase.createdAt).toLocaleDateString()}</span>

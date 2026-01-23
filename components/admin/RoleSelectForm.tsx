@@ -28,6 +28,7 @@ export function RoleSelectForm({
   isCurrentUser,
   changeRoleAction,
 }: RoleSelectFormProps) {
+  const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<Role>(currentRole);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -36,10 +37,28 @@ export function RoleSelectForm({
     if (isCurrentUser || isSubmitting || selectedRole === currentRole) return;
 
     setIsSubmitting(true);
-    const formData = new FormData();
-    formData.set("role", selectedRole);
-    await changeRoleAction(userId, formData);
-    setIsSubmitting(false);
+    try {
+      const formData = new FormData();
+      formData.set("role", selectedRole);
+      await changeRoleAction(userId, formData);
+      toast({
+        title: "Role updated",
+        description: `User role has been changed to ${selectedRole}.`,
+        variant: "success",
+      });
+      router.refresh();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to update role";
+      toast({
+        title: "Update failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      // Reset to current role on failure
+      setSelectedRole(currentRole);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

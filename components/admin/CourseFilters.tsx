@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback, useState, useTransition, useRef, useEffect } from "react";
+import { useCallback, useState, useTransition, useEffect } from "react";
 import { SearchInput } from "@/components/ui/search-input";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { X } from "lucide-react";
 
-export function PurchaseFilters() {
+export function CourseFilters() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -21,19 +21,17 @@ export function PurchaseFilters() {
   
   const currentSearch = searchParams.get("search") || "";
   const currentStatus = searchParams.get("status") || "all";
-  const currentProvider = searchParams.get("provider") || "all";
+  const currentCategory = searchParams.get("category") || "all";
   
   const [status, setStatus] = useState(currentStatus);
-  const [provider, setProvider] = useState(currentProvider);
-  
-  // Track if we're actively filtering (user initiated action)
+  const [category, setCategory] = useState(currentCategory);
   const [isFiltering, setIsFiltering] = useState(false);
 
-  // Sync state with URL params when they change externally
+  // Sync state with URL params
   useEffect(() => {
     setStatus(currentStatus);
-    setProvider(currentProvider);
-  }, [currentStatus, currentProvider]);
+    setCategory(currentCategory);
+  }, [currentStatus, currentCategory]);
 
   // Reset filtering state when transition completes
   useEffect(() => {
@@ -69,15 +67,15 @@ export function PurchaseFilters() {
     });
   }, [router, pathname, searchParams]);
 
-  const handleProviderChange = useCallback((value: string) => {
-    setProvider(value);
+  const handleCategoryChange = useCallback((value: string) => {
+    setCategory(value);
     setIsFiltering(true);
     startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
       if (value && value !== "all") {
-        params.set("provider", value);
+        params.set("category", value);
       } else {
-        params.delete("provider");
+        params.delete("category");
       }
       router.push(`${pathname}?${params.toString()}`);
     });
@@ -85,14 +83,14 @@ export function PurchaseFilters() {
 
   const handleClearAll = useCallback(() => {
     setStatus("all");
-    setProvider("all");
+    setCategory("all");
     setIsFiltering(true);
     startTransition(() => {
       router.push(pathname);
     });
   }, [router, pathname]);
 
-  const hasFilters = currentSearch || currentStatus !== "all" || currentProvider !== "all";
+  const hasFilters = currentSearch || currentStatus !== "all" || currentCategory !== "all";
   const showLoading = isPending && isFiltering;
 
   return (
@@ -100,7 +98,7 @@ export function PurchaseFilters() {
       <div className="flex flex-wrap gap-4">
         <div className="flex-1 min-w-[250px]">
           <SearchInput
-            placeholder="Search by user email, name, or course..."
+            placeholder="Search by title or description..."
             value={currentSearch}
             onSearch={handleSearch}
             isLoading={showLoading}
@@ -113,19 +111,21 @@ export function PurchaseFilters() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="paid">Paid</SelectItem>
-            <SelectItem value="refunded">Refunded</SelectItem>
+            <SelectItem value="published">Published</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={provider} onValueChange={handleProviderChange}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="All Providers" />
+        <Select value={category} onValueChange={handleCategoryChange}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Providers</SelectItem>
-            <SelectItem value="paypal">PayPal</SelectItem>
-            <SelectItem value="stripe">Stripe</SelectItem>
+            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value="business">Make Money & Business</SelectItem>
+            <SelectItem value="content">Create Content & Video</SelectItem>
+            <SelectItem value="marketing">Marketing & Traffic</SelectItem>
+            <SelectItem value="apps">Build Apps & Tech</SelectItem>
+            <SelectItem value="productivity">Productivity & Tools</SelectItem>
           </SelectContent>
         </Select>
         {hasFilters && (

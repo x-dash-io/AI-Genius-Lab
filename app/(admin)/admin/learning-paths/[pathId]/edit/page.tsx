@@ -63,6 +63,14 @@ async function removeCourseAction(pathId: string, courseId: string) {
   redirect(`/admin/learning-paths/${pathId}/edit`);
 }
 
+async function reorderCoursesAction(pathId: string, courseIds: string[]) {
+  "use server";
+  await requireRole("admin");
+
+  await updateCourseOrder(pathId, courseIds);
+  redirect(`/admin/learning-paths/${pathId}/edit`);
+}
+
 export default async function EditLearningPathPage({
   params,
 }: {

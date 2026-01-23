@@ -13,7 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
+import { SubmitButton } from "@/components/ui/submit-button";
 
 async function createCourseAction(formData: FormData) {
   "use server";
@@ -173,7 +174,12 @@ export default async function NewCoursePage() {
             </div>
 
             <div className="flex gap-4">
-              <Button type="submit">Create Course</Button>
+              <SubmitButton
+                loadingText="Creating..."
+                icon={<Plus className="h-4 w-4 mr-2" />}
+              >
+                Create Course
+              </SubmitButton>
               <Link href="/admin/courses">
                 <Button type="button" variant="outline">
                   Cancel

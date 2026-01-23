@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { getAllPublishedLearningPaths } from "@/lib/learning-paths";
@@ -6,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Route, BookOpen } from "lucide-react";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+import { LearningPathFilters } from "@/components/learning-paths/LearningPathFilters";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Learning Paths",
@@ -14,8 +16,45 @@ export const metadata: Metadata = generateSEOMetadata({
   keywords: ["learning paths", "structured learning", "AI curriculum", "course paths"],
 });
 
-export default async function LearningPathsPage() {
-  const paths = await getAllPublishedLearningPaths();
+interface LearningPathsPageProps {
+  searchParams: Promise<{ search?: string; sort?: string }>;
+}
+
+export default async function LearningPathsPage({ searchParams }: LearningPathsPageProps) {
+  const params = await searchParams;
+  const allPaths = await getAllPublishedLearningPaths();
+  
+  let paths = [...allPaths];
+
+  // Apply search filter
+  if (params.search) {
+    const searchLower = params.search.toLowerCase();
+    paths = paths.filter(
+      (path) =>
+        path.title.toLowerCase().includes(searchLower) ||
+        path.description?.toLowerCase().includes(searchLower)
+    );
+  }
+
+  // Apply sorting
+  if (params.sort) {
+    switch (params.sort) {
+      case "oldest":
+        paths = paths.reverse();
+        break;
+      case "courses":
+        paths = paths.sort((a, b) => b._count.courses - a._count.courses);
+        break;
+      case "title":
+        paths = paths.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      // "newest" is the default
+    }
+  }
+
+  const totalPaths = allPaths.length;
+  const filteredCount = paths.length;
+  const hasFilters = params.search || params.sort;
 
   return (
     <section className="grid gap-8">
@@ -27,15 +66,26 @@ export default async function LearningPathsPage() {
           Structured Learning Journeys
         </h1>
         <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
-          Follow curated learning paths designed to take you from beginner to expert.
+          {hasFilters
+            ? `Showing ${filteredCount} of ${totalPaths} learning paths`
+            : "Follow curated learning paths designed to take you from beginner to expert."}
         </p>
       </div>
+
+      {/* Filters */}
+      <Suspense fallback={<div className="h-12 animate-pulse bg-muted rounded" />}>
+        <LearningPathFilters />
+      </Suspense>
 
       {paths.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <Route className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No learning paths available yet.</p>
+            <p className="text-muted-foreground">
+              {hasFilters
+                ? "No learning paths match your search criteria."
+                : "No learning paths available yet."}
+            </p>
           </CardContent>
         </Card>
       ) : (

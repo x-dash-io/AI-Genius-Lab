@@ -200,7 +200,7 @@ export function LearningPathEditForm({
           <CardDescription>Update learning path information</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={updateAction} className="space-y-4">
+          <form onSubmit={handleUpdate} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title">Title *</Label>
               <Input
@@ -289,9 +289,18 @@ export function LearningPathEditForm({
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" disabled={!selectedCourseId}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Course
+              <Button type="submit" disabled={!selectedCourseId || isAddingCourse}>
+                {isAddingCourse ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Course
+                  </>
+                )}
               </Button>
             </form>
           </CardContent>
