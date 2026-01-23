@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { getCartFromCookies, setCartInCookies, addItemToCart, removeItemFromCart, updateItemQuantity, clearCart } from "@/lib/cart/utils";
 import { CartItem } from "@/lib/cart/types";
 import { prisma } from "@/lib/prisma";
@@ -6,6 +8,52 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   try {
     const cart = await getCartFromCookies();
+    
+    // If user is logged in, filter out already purchased courses
+    const session = await getServerSession(authOptions);
+    if (session?.user && cart.items.length > 0) {
+      const courseIds = cart.items.map((item) => item.courseId);
+      
+      // Get purchased courses
+      const purchases = await prisma.purchase.findMany({
+        where: {
+          userId: session.user.id,
+          courseId: { in: courseIds },
+          status: "paid",
+        },
+        select: { courseId: true },
+      });
+      
+      const purchasedIds = new Set(purchases.map((p) => p.courseId));
+      
+      // Filter out purchased items
+      if (purchasedIds.size > 0) {
+        const filteredItems = cart.items.filter(
+          (item) => !purchasedIds.has(item.courseId)
+        );
+        
+        // Update cart if items were removed
+        if (filteredItems.length !== cart.items.length) {
+          await setCartInCookies(filteredItems);
+          const totalCents = filteredItems.reduce(
+            (sum, item) => sum + item.priceCents * item.quantity,
+            0
+          );
+          const itemCount = filteredItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0
+          );
+          
+          return NextResponse.json({
+            items: filteredItems,
+            totalCents,
+            itemCount,
+            removedPurchased: true,
+          });
+        }
+      }
+    }
+    
     return NextResponse.json(cart);
   } catch (error) {
     console.error("Error getting cart:", error);
@@ -27,6 +75,25 @@ export async function POST(request: NextRequest) {
     if (action === "add") {
       if (!courseId) {
         return NextResponse.json({ error: "Course ID is required" }, { status: 400 });
+      }
+
+      // Check if user already owns this course
+      const session = await getServerSession(authOptions);
+      if (session?.user) {
+        const existingPurchase = await prisma.purchase.findFirst({
+          where: {
+            userId: session.user.id,
+            courseId,
+            status: "paid",
+          },
+        });
+        
+        if (existingPurchase) {
+          return NextResponse.json(
+            { error: "You already own this course" },
+            { status: 400 }
+          );
+        }
       }
 
       // Fetch course details with inventory

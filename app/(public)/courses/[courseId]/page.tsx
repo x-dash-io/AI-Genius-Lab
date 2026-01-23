@@ -1,13 +1,11 @@
 import { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCoursePreviewBySlug } from "@/lib/courses";
 import { getCourseReviewStats } from "@/lib/reviews";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
-import { AddToCartButton } from "@/components/cart/AddToCartButton";
+import { CourseActions } from "@/components/courses/CourseActions";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateCourseSchema } from "@/lib/seo/schemas";
 
@@ -102,23 +100,11 @@ export default async function CourseDetailPage({
           )}
         </CardContent>
       </Card>
-      <div className="flex flex-wrap gap-4">
-        <AddToCartButton
-          courseId={course.id}
-          priceCents={course.priceCents}
-          size="lg"
-        />
-        <Link href={`/checkout?course=${course.slug}`}>
-          <Button size="lg" variant="outline">
-            Buy Now · ${(course.priceCents / 100).toFixed(2)}
-          </Button>
-        </Link>
-        <Link href="/courses">
-          <Button variant="outline" size="lg">
-            Back to catalog
-          </Button>
-        </Link>
-      </div>
+      <CourseActions
+        courseId={course.id}
+        courseSlug={course.slug}
+        priceCents={course.priceCents}
+      />
 
       {/* Reviews Section */}
       <ReviewSection courseId={course.id} initialStats={reviewStats} />

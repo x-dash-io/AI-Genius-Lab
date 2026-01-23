@@ -46,9 +46,11 @@ export function CourseList({ courses }: CourseListProps) {
               <div className="flex gap-2">
                 <AddToCartButton
                   courseId={course.id}
+                  courseSlug={course.slug}
                   priceCents={course.priceCents}
                   variant="default"
                   className="flex-1"
+                  checkOwnership
                 />
                 <Link href={`/courses/${course.slug}`} className="flex-1">
                   <Button variant="outline" className="w-full">

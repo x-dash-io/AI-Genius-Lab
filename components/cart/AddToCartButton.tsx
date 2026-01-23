@@ -1,30 +1,63 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Loader2, Check, X } from "lucide-react";
+import { ShoppingCart, Loader2, Check, X, BookOpen } from "lucide-react";
 import { useCart } from "./CartProvider";
 
 interface AddToCartButtonProps {
   courseId: string;
+  courseSlug?: string; // Optional: for linking to library
   priceCents: number;
   inventory?: number | null; // null = unlimited
   variant?: "default" | "outline" | "ghost" | "destructive" | "secondary" | "link";
   size?: "default" | "sm" | "lg" | "icon";
   className?: string;
+  checkOwnership?: boolean; // If true, checks if user already owns the course
 }
 
 export function AddToCartButton({
   courseId,
+  courseSlug,
   priceCents,
   inventory,
   variant = "default",
   size = "default",
   className,
+  checkOwnership = false,
 }: AddToCartButtonProps) {
+  const { data: session } = useSession();
   const { cart, addToCart, isLoading } = useCart();
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+  const [isOwned, setIsOwned] = useState(false);
+  const [isCheckingOwnership, setIsCheckingOwnership] = useState(checkOwnership);
+
+  // Check ownership if enabled
+  useEffect(() => {
+    if (!checkOwnership || !session?.user) {
+      setIsCheckingOwnership(false);
+      return;
+    }
+
+    async function checkCourseOwnership() {
+      try {
+        const response = await fetch(`/api/courses/${courseId}/ownership`);
+        if (response.ok) {
+          const data = await response.json();
+          setIsOwned(data.owned);
+        }
+      } catch (error) {
+        console.error("Failed to check ownership:", error);
+      } finally {
+        setIsCheckingOwnership(false);
+      }
+    }
+
+    checkCourseOwnership();
+  }, [courseId, session, checkOwnership]);
 
   const cartItem = cart.items.find((item) => item.courseId === courseId);
   const isInCart = !!cartItem;
@@ -55,6 +88,36 @@ export function AddToCartButton({
       setIsAdding(false);
     }
   };
+
+  // Show loading while checking ownership
+  if (isCheckingOwnership) {
+    return (
+      <Button variant="outline" size={size} className={className} disabled>
+        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+        Checking...
+      </Button>
+    );
+  }
+
+  // User already owns this course
+  if (isOwned) {
+    if (courseSlug) {
+      return (
+        <Link href={`/library/${courseSlug}`}>
+          <Button variant="default" size={size} className={`${className} bg-green-600 hover:bg-green-700`}>
+            <BookOpen className="h-4 w-4 mr-2" />
+            Go to Course
+          </Button>
+        </Link>
+      );
+    }
+    return (
+      <Button variant="outline" size={size} className={className} disabled>
+        <Check className="h-4 w-4 mr-2 text-green-500" />
+        Already Owned
+      </Button>
+    );
+  }
 
   if (isOutOfStock) {
     return (

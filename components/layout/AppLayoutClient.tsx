@@ -13,13 +13,16 @@ import {
   GraduationCap,
   User,
   Route,
+  ShoppingCart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { BackgroundBlobs } from "@/components/ui/background-blobs";
+import { useCart } from "@/components/cart/CartProvider";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
@@ -28,6 +31,7 @@ const navigation = [
   { name: "My Courses", href: "/library", icon: BookOpen },
   { name: "Browse Courses", href: "/courses", icon: GraduationCap },
   { name: "Learning Paths", href: "/learning-paths", icon: Route },
+  { name: "Cart", href: "/cart", icon: ShoppingCart },
   { name: "Activity", href: "/activity", icon: Activity },
   { name: "Profile", href: "/profile", icon: User },
 ];
@@ -36,6 +40,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { cart } = useCart();
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
@@ -66,6 +71,9 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
               {navigation.map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                 const Icon = item.icon;
+                const isCart = item.href === "/cart";
+                const cartCount = cart?.itemCount || 0;
+                
                 return (
                   <motion.div
                     key={item.href}
@@ -83,6 +91,14 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                     >
                       <Icon className="h-4 w-4" />
                       {item.name}
+                      {isCart && cartCount > 0 && (
+                        <Badge 
+                          variant="destructive" 
+                          className="ml-auto h-5 min-w-5 flex items-center justify-center rounded-full px-1.5 text-xs font-bold"
+                        >
+                          {cartCount > 9 ? "9+" : cartCount}
+                        </Badge>
+                      )}
                     </Link>
                   </motion.div>
                 );
@@ -185,6 +201,9 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                   {navigation.map((item) => {
                     const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                     const Icon = item.icon;
+                    const isCart = item.href === "/cart";
+                    const cartCount = cart?.itemCount || 0;
+                    
                     return (
                       <Link
                         key={item.href}
@@ -199,6 +218,14 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                       >
                         <Icon className="h-4 w-4" />
                         {item.name}
+                        {isCart && cartCount > 0 && (
+                          <Badge 
+                            variant="destructive" 
+                            className="ml-auto h-5 min-w-5 flex items-center justify-center rounded-full px-1.5 text-xs font-bold"
+                          >
+                            {cartCount > 9 ? "9+" : cartCount}
+                          </Badge>
+                        )}
                       </Link>
                     );
                   })}
