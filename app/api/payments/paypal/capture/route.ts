@@ -82,7 +82,7 @@ export async function GET(request: Request) {
       }
 
       return NextResponse.redirect(
-        new URL(`/learning-paths/${purchases[0].course.slug}?checkout=failed`, baseUrl)
+        new URL(`/learning-paths?checkout=failed`, baseUrl)
       );
     }
 
@@ -94,6 +94,18 @@ export async function GET(request: Request) {
             where: { id: purchase.id },
             data: { status: "paid" },
           });
+
+          // Decrement inventory if course has limited inventory
+          if (purchase.course.inventory !== null) {
+            await prisma.course.update({
+              where: { id: purchase.courseId },
+              data: {
+                inventory: {
+                  decrement: 1,
+                },
+              },
+            });
+          }
 
           await prisma.enrollment.upsert({
             where: {
@@ -237,6 +249,18 @@ export async function GET(request: Request) {
       where: { id: purchase.id },
       data: { status: "paid" },
     });
+
+    // Decrement inventory if course has limited inventory
+    if (purchase.course.inventory !== null) {
+      await prisma.course.update({
+        where: { id: purchase.courseId },
+        data: {
+          inventory: {
+            decrement: 1,
+          },
+        },
+      });
+    }
 
     const enrollment = await prisma.enrollment.upsert({
       where: {

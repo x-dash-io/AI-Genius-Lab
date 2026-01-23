@@ -80,6 +80,24 @@ export async function POST(request: Request) {
     data: { status: "paid" },
   });
 
+  // Fetch course to check inventory
+  const courseForInventory = await prisma.course.findUnique({
+    where: { id: purchase.courseId },
+    select: { inventory: true },
+  });
+
+  // Decrement inventory if course has limited inventory
+  if (courseForInventory && courseForInventory.inventory !== null) {
+    await prisma.course.update({
+      where: { id: purchase.courseId },
+      data: {
+        inventory: {
+          decrement: 1,
+        },
+      },
+    });
+  }
+
   const enrollment = await prisma.enrollment.upsert({
     where: {
       userId_courseId: {

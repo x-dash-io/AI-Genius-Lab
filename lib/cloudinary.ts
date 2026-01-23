@@ -1,20 +1,35 @@
 import { v2 as cloudinary } from "cloudinary";
 import crypto from "crypto";
 
-const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-const apiKey = process.env.CLOUDINARY_API_KEY;
-const apiSecret = process.env.CLOUDINARY_API_SECRET;
+let isConfigured = false;
 
-if (!cloudName || !apiKey || !apiSecret) {
-  throw new Error("Missing Cloudinary environment variables.");
+/**
+ * Lazy initialization of Cloudinary configuration.
+ * Validates and configures cloudinary only when first used.
+ * Throws an error if credentials are missing when actually needed.
+ */
+function configureCloudinary(): void {
+  if (isConfigured) {
+    return;
+  }
+
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    throw new Error("Missing Cloudinary environment variables.");
+  }
+
+  cloudinary.config({
+    cloud_name: cloudName,
+    api_key: apiKey,
+    api_secret: apiSecret,
+    secure: true,
+  });
+
+  isConfigured = true;
 }
-
-cloudinary.config({
-  cloud_name: cloudName,
-  api_key: apiKey,
-  api_secret: apiSecret,
-  secure: true,
-});
 
 type CloudinaryResourceType = "image" | "video" | "raw";
 
@@ -27,6 +42,8 @@ export function getSignedCloudinaryUrl(
   resourceType: CloudinaryResourceType,
   options: { download?: boolean; userId?: string } = {}
 ) {
+  configureCloudinary();
+  
   const expiresAt = Math.floor(Date.now() / 1000) + 60 * 10; // 10 minutes
   
   // Add user-specific token to public ID transformation for extra security
@@ -68,6 +85,8 @@ export async function uploadToCloudinary(
     allowedFormats?: string[];
   } = {}
 ): Promise<{ publicId: string; secureUrl: string }> {
+  configureCloudinary();
+  
   const {
     folder = "synapze-content",
     resourceType = "raw",

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Cart, CartItem } from "@/lib/cart/types";
-import { isCartItemValid, canIncreaseQuantity } from "@/lib/cart/utils";
+import { isCartItemValid, canIncreaseQuantity } from "@/lib/cart/validation";
 import { useCart } from "./CartProvider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

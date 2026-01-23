@@ -46,6 +46,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check inventory availability
+    const outOfStockCourses = coursesToPurchase.filter(
+      (course) => course.inventory !== null && course.inventory <= 0
+    );
+
+    if (outOfStockCourses.length > 0) {
+      return NextResponse.json(
+        { 
+          error: `Some courses are out of stock: ${outOfStockCourses.map(c => c.title).join(", ")}`,
+          outOfStock: outOfStockCourses.map(c => c.id),
+        },
+        { status: 400 }
+      );
+    }
+
     // Create purchases
     const purchases = await Promise.all(
       coursesToPurchase.map((course) =>

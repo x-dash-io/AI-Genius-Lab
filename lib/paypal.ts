@@ -23,11 +23,15 @@ const paypalClientId = process.env.PAYPAL_CLIENT_ID;
 const paypalClientSecret = process.env.PAYPAL_CLIENT_SECRET;
 const paypalWebhookId = process.env.PAYPAL_WEBHOOK_ID;
 
-if (!paypalClientId || !paypalClientSecret) {
-  throw new Error("Missing PAYPAL_CLIENT_ID or PAYPAL_CLIENT_SECRET.");
+function validatePayPalCredentials() {
+  if (!paypalClientId || !paypalClientSecret) {
+    throw new Error("Missing PAYPAL_CLIENT_ID or PAYPAL_CLIENT_SECRET.");
+  }
 }
 
 async function getPayPalAccessToken() {
+  validatePayPalCredentials();
+  
   const auth = Buffer.from(
     `${paypalClientId}:${paypalClientSecret}`,
     "utf-8"

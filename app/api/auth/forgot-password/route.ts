@@ -1,9 +1,28 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendPasswordResetEmail } from "@/lib/email";
+import { rateLimits } from "@/lib/rate-limit";
 import crypto from "crypto";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // Rate limiting: 5 password reset attempts per 15 minutes per IP
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? 
+             request.headers.get("x-real-ip") ?? 
+             "anonymous";
+  const rateLimit = rateLimits.auth(ip);
+  
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many attempts. Please try again later." },
+      { 
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil((rateLimit.resetAt - Date.now()) / 1000)),
+        }
+      }
+    );
+  }
+
   try {
     const { email } = await request.json();
 

@@ -9,6 +9,7 @@ import { getCartFromCookies } from "@/lib/cart/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
+import { CheckoutCartForm } from "@/components/checkout/CheckoutCartForm";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type CheckoutPageProps = {
