@@ -2,11 +2,26 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, ArrowLeft, BookOpen, Shield, Lock, Building2, Mail, Phone, Globe } from "lucide-react";
+import { 
+  CheckCircle2, 
+  ArrowLeft, 
+  BookOpen, 
+  Shield, 
+  Lock, 
+  Sparkles,
+  Receipt,
+  CreditCard,
+  Calendar,
+  User,
+  Mail,
+  Hash,
+  FileText,
+  Zap
+} from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { PrintInvoiceButton } from "@/components/checkout/PrintInvoiceButton";
@@ -23,7 +38,6 @@ function formatCurrency(cents: number, currency: string = "usd") {
 }
 
 function generateInvoiceNumber(purchaseId: string): string {
-  // Format: INV-YYYYMMDD-XXXXX (last 8 chars of purchase ID)
   const date = new Date();
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -35,6 +49,316 @@ function generateInvoiceNumber(purchaseId: string): string {
 function formatPaymentMethod(provider: string | undefined): string {
   if (!provider) return "PayPal";
   return provider.charAt(0).toUpperCase() + provider.slice(1);
+}
+
+// Invoice Component for both single and multiple purchases
+interface InvoiceProps {
+  invoiceNumber: string;
+  purchaseDate: Date;
+  customerName: string;
+  customerEmail: string;
+  paymentMethod: string;
+  transactionId?: string;
+  items: Array<{
+    id: string;
+    title: string;
+    description?: string | null;
+    amountCents: number;
+    currency: string;
+  }>;
+  totalAmount: number;
+  currency: string;
+  isSinglePurchase: boolean;
+  courseSlug?: string;
+}
+
+function ProfessionalInvoice({
+  invoiceNumber,
+  purchaseDate,
+  customerName,
+  customerEmail,
+  paymentMethod,
+  transactionId,
+  items,
+  totalAmount,
+  currency,
+  isSinglePurchase,
+  courseSlug,
+}: InvoiceProps) {
+  return (
+    <>
+      {/* Success Animation Header - Hidden when printing */}
+      <div className="text-center print:hidden">
+        <div className="relative inline-flex">
+          <div className="absolute inset-0 animate-ping rounded-full bg-green-400/30" />
+          <div className="relative rounded-full bg-gradient-to-br from-green-400 to-emerald-600 p-4 shadow-lg shadow-green-500/25">
+            <CheckCircle2 className="h-10 w-10 text-white" />
+          </div>
+        </div>
+        <h1 className="mt-6 font-display text-4xl font-bold tracking-tight bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400 bg-clip-text text-transparent">
+          Payment Successful!
+        </h1>
+        <p className="mt-3 text-lg text-muted-foreground max-w-md mx-auto">
+          {isSinglePurchase 
+            ? "Thank you for your purchase. Your course is ready to explore."
+            : "Thank you for your purchase. All courses are now unlocked in your library."
+          }
+        </p>
+      </div>
+
+      {/* Professional Invoice Card */}
+      <Card className="overflow-hidden border-0 shadow-2xl dark:shadow-primary/5 print:shadow-none print:border print:border-gray-200" id="invoice">
+        <CardContent className="p-0">
+          {/* Invoice Header - Gradient Banner */}
+          <div className="relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-primary/80" />
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 left-0 w-40 h-40 bg-white rounded-full -translate-x-20 -translate-y-20" />
+              <div className="absolute bottom-0 right-0 w-60 h-60 bg-white rounded-full translate-x-20 translate-y-20" />
+            </div>
+            
+            <div className="relative px-6 py-8 md:px-10 md:py-10 print:bg-primary print:py-6">
+              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+                {/* Company Branding */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm print:bg-white/10">
+                      <Sparkles className="h-7 w-7 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-white font-display tracking-tight">
+                        AI Genius Lab
+                      </h2>
+                      <p className="text-sm text-white/70">Premium Learning Platform</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Invoice Badge & Number */}
+                <div className="text-left md:text-right space-y-2">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 rounded-full backdrop-blur-sm">
+                    <Receipt className="h-4 w-4 text-white" />
+                    <span className="text-sm font-semibold text-white uppercase tracking-wider">Invoice</span>
+                  </div>
+                  <p className="text-2xl font-bold font-mono text-white tracking-wide">
+                    {invoiceNumber}
+                  </p>
+                  <p className="text-sm text-white/70">
+                    {format(purchaseDate, "MMMM dd, yyyy")}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Invoice Body */}
+          <div className="p-6 md:p-10 space-y-8 bg-gradient-to-b from-muted/30 to-background print:bg-white print:p-6">
+            {/* Status Badge */}
+            <div className="flex justify-center print:justify-start">
+              <Badge className="px-4 py-2 text-sm bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-0 print:bg-green-100 print:text-green-800">
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Payment Confirmed
+              </Badge>
+            </div>
+
+            {/* Billing & Payment Grid */}
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Bill To */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <User className="h-4 w-4" />
+                  <span>Billed To</span>
+                </div>
+                <div className="p-4 rounded-xl bg-card border print:border-gray-200 print:bg-gray-50">
+                  <p className="font-semibold text-lg">{customerName}</p>
+                  <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                    <Mail className="h-4 w-4" />
+                    <span>{customerEmail}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Info */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <CreditCard className="h-4 w-4" />
+                  <span>Payment Information</span>
+                </div>
+                <div className="p-4 rounded-xl bg-card border print:border-gray-200 print:bg-gray-50 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Method</span>
+                    <span className="font-semibold">{paymentMethod}</span>
+                  </div>
+                  {transactionId && (
+                    <div className="flex justify-between items-start">
+                      <span className="text-sm text-muted-foreground">Transaction</span>
+                      <span className="font-mono text-xs text-right max-w-[200px] break-all">
+                        {transactionId}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Date</span>
+                    <span className="font-semibold text-sm">
+                      {format(purchaseDate, "MMM dd, yyyy 'at' h:mm a")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <Separator className="print:border-gray-300" />
+
+            {/* Items Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <FileText className="h-4 w-4" />
+                <span>Purchased Items</span>
+              </div>
+              
+              <div className="rounded-xl border overflow-hidden print:border-gray-300">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-muted/50 print:bg-gray-100">
+                      <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Course
+                      </th>
+                      <th className="text-right p-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground w-32">
+                        Amount
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y print:divide-gray-200">
+                    {items.map((item, index) => (
+                      <tr key={item.id} className="bg-card print:bg-white">
+                        <td className="p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-primary/10 print:bg-gray-100 shrink-0">
+                              <BookOpen className="h-5 w-5 text-primary print:text-gray-600" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-semibold text-base">{item.title}</p>
+                              {item.description && (
+                                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                                  {item.description}
+                                </p>
+                              )}
+                              <div className="flex items-center gap-2 mt-2">
+                                <Hash className="h-3 w-3 text-muted-foreground" />
+                                <span className="text-xs font-mono text-muted-foreground">
+                                  {item.id.slice(-8).toUpperCase()}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4 text-right">
+                          <p className="font-bold text-lg">
+                            {formatCurrency(item.amountCents, item.currency)}
+                          </p>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Totals Section */}
+            <div className="flex justify-end">
+              <div className="w-full md:w-96 space-y-3">
+                <div className="p-4 rounded-xl bg-muted/50 print:bg-gray-50 print:border print:border-gray-200 space-y-3">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="font-semibold">{formatCurrency(totalAmount, currency)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Tax</span>
+                    <span className="font-semibold">{formatCurrency(0, currency)}</span>
+                  </div>
+                  <Separator className="print:border-gray-300" />
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-lg font-bold">Total Paid</span>
+                    <span className="text-2xl font-bold text-primary print:text-black">
+                      {formatCurrency(totalAmount, currency)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Trust Indicators - Hidden when printing */}
+            <div className="grid grid-cols-3 gap-4 pt-6 print:hidden">
+              <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/50 text-center">
+                <Shield className="h-6 w-6 text-green-600 dark:text-green-400" />
+                <span className="text-xs font-medium text-muted-foreground">Secure Payment</span>
+              </div>
+              <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/50 text-center">
+                <Lock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <span className="text-xs font-medium text-muted-foreground">SSL Encrypted</span>
+              </div>
+              <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/50 text-center">
+                <Zap className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                <span className="text-xs font-medium text-muted-foreground">Instant Access</span>
+              </div>
+            </div>
+
+            {/* Terms & Conditions */}
+            <div className="p-4 rounded-xl bg-muted/30 border border-dashed print:border-gray-300 print:bg-gray-50">
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                <strong className="text-foreground print:text-black">Terms & Conditions:</strong>{" "}
+                This invoice confirms your purchase of the listed digital course(s). 
+                All sales are final and non-refundable. You have been granted immediate 
+                and lifetime access to the purchased content in your library. 
+                No physical items will be shipped. For support, contact support@aigeniuslab.com.
+              </p>
+            </div>
+
+            {/* Action Buttons - Hidden when printing */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 print:hidden">
+              {isSinglePurchase && courseSlug ? (
+                <Link href={`/library/${courseSlug}`} className="flex-1">
+                  <Button size="lg" className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70">
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Start Learning Now
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/library" className="flex-1">
+                  <Button size="lg" className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70">
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Go to Library
+                  </Button>
+                </Link>
+              )}
+              <PrintInvoiceButton />
+            </div>
+          </div>
+
+          {/* Footer - Print only */}
+          <div className="hidden print:block p-6 border-t border-gray-200 bg-gray-50 text-center" data-print-show="true">
+            <p className="text-xs text-gray-500">
+              AI Genius Lab • Premium Online Learning Platform • support@aigeniuslab.com
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              Thank you for your purchase!
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Browse More - Hidden when printing */}
+      <div className="text-center print:hidden">
+        <Link href="/courses">
+          <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Browse More Courses
+          </Button>
+        </Link>
+      </div>
+    </>
+  );
 }
 
 export default async function CheckoutSuccessPage({
@@ -60,7 +384,6 @@ export default async function CheckoutSuccessPage({
       where: {
         id: { in: purchaseIds },
         userId: session.user.id,
-        // Don't filter by status - we just completed payment, so it should exist
       },
       include: {
         course: {
@@ -89,193 +412,25 @@ export default async function CheckoutSuccessPage({
     const invoiceNumber = generateInvoiceNumber(purchases[0].id);
 
     return (
-      <section className="grid gap-4 max-w-4xl mx-auto px-4 print:max-w-full print:mx-0 print:px-2">
-        {/* Success Header */}
-        <div className="text-center print:hidden">
-          <div className="flex justify-center mb-4">
-            <div className="rounded-full bg-green-100 dark:bg-green-900/20 p-3">
-              <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
-            </div>
-          </div>
-          <h1 className="font-display text-4xl font-bold tracking-tight">
-            Payment Successful!
-          </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            Thank you for your purchase. You now have access to all courses in this learning path.
-          </p>
-        </div>
-
-        {/* Professional Invoice */}
-        <Card className="border-2 shadow-lg print:shadow-none print:border">
-          <CardContent className="p-0">
-            {/* Invoice Header */}
-            <div className="bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 border-b print:bg-white print:border-b-2">
-              <div className="p-6 md:p-8">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-                  {/* Company Info */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-6 w-6 text-primary" />
-                      <h2 className="text-2xl font-bold font-display">AI Genius Lab</h2>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Online Learning Platform</p>
-                  </div>
-
-                  {/* Invoice Details */}
-                  <div className="text-right space-y-2">
-                    <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide">Invoice Number</p>
-                      <p className="text-base font-bold font-mono">{invoiceNumber}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide">Invoice Date</p>
-                      <p className="text-sm font-semibold">{format(purchaseDate, "MMMM dd, yyyy")}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide">Payment Status</p>
-                      <Badge variant="default" className="mt-1 bg-green-600 hover:bg-green-700">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Paid
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 md:p-8 space-y-8">
-              {/* Billing Information */}
-              <div className="grid md:grid-cols-2 gap-8">
-                <div>
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Bill To</h3>
-                  <div className="space-y-1">
-                    <p className="font-semibold text-base">{session.user.name || "Customer"}</p>
-                    <p className="text-sm text-muted-foreground">{session.user.email}</p>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Payment Details</h3>
-                  <div className="space-y-2">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Payment Method</p>
-                      <p className="font-semibold capitalize">{formatPaymentMethod(payment?.provider)}</p>
-                    </div>
-                    {payment?.providerRef && (
-                      <div>
-                        <p className="text-xs text-muted-foreground">Transaction ID</p>
-                        <p className="font-mono text-xs break-all">{payment.providerRef}</p>
-                      </div>
-                    )}
-                    <div>
-                      <p className="text-xs text-muted-foreground">Payment Date</p>
-                      <p className="font-semibold text-sm">{format(purchaseDate, "MMM dd, yyyy 'at' h:mm a")}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Items Table */}
-              <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-4">Items Purchased</h3>
-                <div className="border rounded-lg overflow-hidden">
-                  <table className="w-full">
-                    <thead className="bg-muted/50">
-                      <tr>
-                        <th className="text-left p-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Item</th>
-                        <th className="text-right p-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {purchases.map((purchase, index) => (
-                        <tr key={purchase.id} className="border-t">
-                          <td className="p-4">
-                            <p className="font-semibold">{purchase.course.title}</p>
-                            {purchase.course.description && (
-                              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                                {purchase.course.description}
-                              </p>
-                            )}
-                            <p className="text-xs text-muted-foreground mt-2">Course ID: {purchase.course.id.slice(-8).toUpperCase()}</p>
-                          </td>
-                          <td className="p-4 text-right">
-                            <p className="font-semibold text-sm">
-                              {formatCurrency(purchase.amountCents, purchase.currency)}
-                            </p>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Totals */}
-              <div className="flex justify-end">
-                <div className="w-full md:w-80 space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b">
-                    <span className="text-sm text-muted-foreground">Subtotal</span>
-                    <span className="font-semibold">{formatCurrency(totalAmount, purchases[0].currency)}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b">
-                    <span className="text-sm text-muted-foreground">Tax</span>
-                    <span className="font-semibold">{formatCurrency(0, purchases[0].currency)}</span>
-                  </div>
-                  <div className="flex justify-between items-center pt-4 border-t-2">
-                    <span className="text-lg font-bold">Total</span>
-                    <span className="text-2xl font-bold">{formatCurrency(totalAmount, purchases[0].currency)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="flex flex-wrap items-center gap-6 pt-6 border-t print:hidden">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Shield className="h-4 w-4" />
-                  <span>Secure Payment</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Lock className="h-4 w-4" />
-                  <span>SSL Encrypted</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle2 className="h-4 w-4" />
-                  <span>Instant Access</span>
-                </div>
-              </div>
-
-              {/* Terms */}
-              <div className="pt-6 border-t">
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  <strong>Terms & Conditions:</strong> This invoice confirms your purchase of the listed courses. 
-                  All sales are final. You have immediate access to the purchased courses in your library. 
-                  This is a digital product and no physical items will be shipped.
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-4 print:hidden">
-                <Link href="/library" className="flex-1">
-                  <Button size="lg" className="w-full">
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    Go to Library
-                  </Button>
-                </Link>
-                <PrintInvoiceButton />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="text-center print:hidden">
-          <Link href="/courses">
-            <Button variant="ghost">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Browse More Courses
-            </Button>
-          </Link>
-        </div>
+      <section className="grid gap-8 max-w-4xl mx-auto px-4 py-8 print:max-w-full print:mx-0 print:px-0 print:py-0">
+        <ProfessionalInvoice
+          invoiceNumber={invoiceNumber}
+          purchaseDate={purchaseDate}
+          customerName={session.user.name || "Customer"}
+          customerEmail={session.user.email!}
+          paymentMethod={formatPaymentMethod(payment?.provider)}
+          transactionId={payment?.providerRef || undefined}
+          items={purchases.map(p => ({
+            id: p.course.id,
+            title: p.course.title,
+            description: p.course.description,
+            amountCents: p.amountCents,
+            currency: p.currency,
+          }))}
+          totalAmount={totalAmount}
+          currency={purchases[0].currency}
+          isSinglePurchase={false}
+        />
       </section>
     );
   }
@@ -289,7 +444,6 @@ export default async function CheckoutSuccessPage({
     where: {
       id: purchaseId,
       userId: session.user.id,
-      // Don't filter by status - we just completed payment, so it should exist
     },
     include: {
       course: {
@@ -316,191 +470,26 @@ export default async function CheckoutSuccessPage({
   const invoiceNumber = generateInvoiceNumber(purchase.id);
 
   return (
-    <section className="grid gap-8 max-w-5xl mx-auto px-4 print:px-0">
-      {/* Success Header */}
-      <div className="text-center print:hidden">
-        <div className="flex justify-center mb-4">
-          <div className="rounded-full bg-green-100 dark:bg-green-900/20 p-3">
-            <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
-          </div>
-        </div>
-        <h1 className="font-display text-4xl font-bold tracking-tight">
-          Payment Successful!
-        </h1>
-        <p className="mt-2 text-lg text-muted-foreground">
-          Thank you for your purchase. You now have access to this course.
-        </p>
-      </div>
-
-      {/* Professional Invoice */}
-      <Card className="border-2 shadow-lg print:shadow-none print:border">
-        <CardContent className="p-0">
-          {/* Invoice Header */}
-          <div className="bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 border-b print:bg-white print:border-b-2">
-            <div className="p-6 md:p-8">
-              <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-                {/* Company Info */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-6 w-6 text-primary" />
-                    <h2 className="text-2xl font-bold font-display">AI Genius Lab</h2>
-                  </div>
-                    <p className="text-sm text-muted-foreground">Online Learning Platform</p>
-                  </div>
-
-                {/* Invoice Details */}
-                <div className="text-right space-y-2">
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Invoice Number</p>
-                    <p className="text-lg font-bold font-mono">{invoiceNumber}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Invoice Date</p>
-                    <p className="text-sm font-semibold">{format(purchaseDate, "MMMM dd, yyyy")}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide">Payment Status</p>
-                    <Badge variant="default" className="mt-1 bg-green-600 hover:bg-green-700">
-                      <CheckCircle2 className="h-3 w-3 mr-1" />
-                      Paid
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 md:p-8 space-y-8">
-            {/* Billing Information */}
-            <div className="grid md:grid-cols-2 gap-8">
-              <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Bill To</h3>
-                <div className="space-y-1">
-                  <p className="font-semibold text-base">{session.user.name || "Customer"}</p>
-                  <p className="text-sm text-muted-foreground">{session.user.email}</p>
-                </div>
-              </div>
-              <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Payment Details</h3>
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Payment Method</p>
-                    <p className="font-semibold capitalize">{formatPaymentMethod(payment?.provider)}</p>
-                  </div>
-                  {payment?.providerRef && (
-                    <div>
-                      <p className="text-xs text-muted-foreground">Transaction ID</p>
-                      <p className="font-mono text-xs break-all">{payment.providerRef}</p>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-xs text-muted-foreground">Payment Date</p>
-                    <p className="font-semibold text-sm">{format(purchaseDate, "MMM dd, yyyy 'at' h:mm a")}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Items Table */}
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-4">Item Purchased</h3>
-              <div className="border rounded-lg overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-muted/50">
-                    <tr>
-                      <th className="text-left p-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Item</th>
-                      <th className="text-right p-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="p-4">
-                        <p className="font-semibold text-base">{purchase.course.title}</p>
-                        {purchase.course.description && (
-                          <p className="text-sm text-muted-foreground mt-2">
-                            {purchase.course.description}
-                          </p>
-                        )}
-                        <p className="text-xs text-muted-foreground mt-2">Course ID: {purchase.course.id.slice(-8).toUpperCase()}</p>
-                      </td>
-                      <td className="p-4 text-right">
-                        <p className="font-semibold text-base">
-                          {formatCurrency(purchase.amountCents, purchase.currency)}
-                        </p>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Totals */}
-            <div className="flex justify-end">
-              <div className="w-full md:w-80 space-y-3">
-                <div className="flex justify-between items-center py-2 border-b">
-                  <span className="text-sm text-muted-foreground">Subtotal</span>
-                  <span className="font-semibold">{formatCurrency(purchase.amountCents, purchase.currency)}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b">
-                  <span className="text-sm text-muted-foreground">Tax</span>
-                  <span className="font-semibold">{formatCurrency(0, purchase.currency)}</span>
-                </div>
-                <div className="flex justify-between items-center pt-4 border-t-2">
-                  <span className="text-lg font-bold">Total</span>
-                  <span className="text-2xl font-bold">{formatCurrency(purchase.amountCents, purchase.currency)}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Trust Indicators */}
-            <div className="flex flex-wrap items-center gap-6 pt-6 border-t print:hidden">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Shield className="h-4 w-4" />
-                <span>Secure Payment</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Lock className="h-4 w-4" />
-                <span>SSL Encrypted</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CheckCircle2 className="h-4 w-4" />
-                <span>Instant Access</span>
-              </div>
-            </div>
-
-            {/* Terms */}
-            <div className="pt-6 border-t">
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                <strong>Terms & Conditions:</strong> This invoice confirms your purchase of the listed course. 
-                All sales are final. You have immediate access to the purchased course in your library. 
-                This is a digital product and no physical items will be shipped.
-              </p>
-            </div>
-
-            {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4 print:hidden">
-              <Link href={`/library/${purchase.course.slug}`} className="flex-1">
-                <Button size="lg" className="w-full">
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  Start Learning
-                </Button>
-              </Link>
-              <PrintInvoiceButton />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="text-center print:hidden">
-        <Link href="/courses">
-          <Button variant="ghost">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Browse More Courses
-          </Button>
-        </Link>
-      </div>
+    <section className="grid gap-8 max-w-4xl mx-auto px-4 py-8 print:max-w-full print:mx-0 print:px-0 print:py-0">
+      <ProfessionalInvoice
+        invoiceNumber={invoiceNumber}
+        purchaseDate={purchaseDate}
+        customerName={session.user.name || "Customer"}
+        customerEmail={session.user.email!}
+        paymentMethod={formatPaymentMethod(payment?.provider)}
+        transactionId={payment?.providerRef || undefined}
+        items={[{
+          id: purchase.course.id,
+          title: purchase.course.title,
+          description: purchase.course.description,
+          amountCents: purchase.amountCents,
+          currency: purchase.currency,
+        }]}
+        totalAmount={purchase.amountCents}
+        currency={purchase.currency}
+        isSinglePurchase={true}
+        courseSlug={purchase.course.slug}
+      />
     </section>
   );
 }
