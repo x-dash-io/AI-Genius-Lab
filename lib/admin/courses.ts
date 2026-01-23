@@ -106,8 +106,6 @@ export async function deleteSection(sectionId: string) {
 export async function createLesson(data: {
   sectionId: string;
   title: string;
-  contentType: "video" | "audio" | "pdf" | "link" | "file";
-  contentUrl?: string;
   durationSeconds?: number;
   isLocked?: boolean;
   allowDownload?: boolean;
@@ -117,11 +115,27 @@ export async function createLesson(data: {
     data: {
       sectionId: data.sectionId,
       title: data.title,
-      contentType: data.contentType,
-      contentUrl: data.contentUrl,
       durationSeconds: data.durationSeconds,
       isLocked: data.isLocked ?? true,
       allowDownload: data.allowDownload ?? false,
+      sortOrder: data.sortOrder,
+    },
+  });
+}
+
+export async function createLessonContent(data: {
+  lessonId: string;
+  contentType: "video" | "audio" | "pdf" | "link" | "file";
+  contentUrl?: string;
+  title?: string;
+  sortOrder: number;
+}) {
+  return prisma.lessonContent.create({
+    data: {
+      lessonId: data.lessonId,
+      contentType: data.contentType,
+      contentUrl: data.contentUrl,
+      title: data.title,
       sortOrder: data.sortOrder,
     },
   });

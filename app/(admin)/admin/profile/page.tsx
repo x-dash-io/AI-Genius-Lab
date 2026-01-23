@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { PasswordChangeForm } from "@/components/profile/PasswordChangeForm";
+import { ProfilePreviewBanner } from "@/components/profile/ProfilePreviewBanner";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -79,6 +80,8 @@ export default async function AdminProfilePage() {
 
   return (
     <div className="space-y-8">
+      <ProfilePreviewBanner />
+
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">

@@ -62,30 +62,66 @@ async function addLessonAction(sectionId: string, formData: FormData) {
   await requireRole("admin");
 
   const title = formData.get("title") as string;
-  const contentType = formData.get("contentType") as "video" | "audio" | "pdf" | "link" | "file";
-  const contentUrl = formData.get("contentUrl") as string;
   const durationSeconds = formData.get("durationSeconds") ? parseInt(formData.get("durationSeconds") as string) : undefined;
   const isLocked = formData.get("isLocked") === "on";
   const allowDownload = formData.get("allowDownload") === "on";
 
   const course = await getCourseForEdit(formData.get("courseId") as string);
   if (!course) throw new Error("Course not found");
-  
+
   const section = course.sections.find(s => s.id === sectionId);
   if (!section) throw new Error("Section not found");
 
   const maxSortOrder = Math.max(...section.lessons.map(l => l.sortOrder), -1);
-  
-  await createLesson({
+
+  // Create the lesson first
+  const lesson = await createLesson({
     sectionId,
     title,
-    contentType,
-    contentUrl: contentUrl || undefined,
     durationSeconds,
     isLocked,
     allowDownload,
     sortOrder: maxSortOrder + 1,
   });
+
+  // Parse content data from form
+  const contentData: Array<{ contentType: string; contentUrl?: string; title?: string }> = [];
+  let contentIndex = 0;
+
+  while (true) {
+    const contentTypeKey = `content-${contentIndex}-type`;
+    const contentUrlKey = `content-${contentIndex}-url`;
+    const contentTitleKey = `content-${contentIndex}-title`;
+
+    const contentType = formData.get(contentTypeKey);
+    const contentUrl = formData.get(contentUrlKey);
+    const contentTitle = formData.get(contentTitleKey);
+
+    if (!contentType) break; // No more content items
+
+    contentData.push({
+      contentType: contentType as string,
+      contentUrl: contentUrl as string || undefined,
+      title: contentTitle as string || undefined,
+    });
+
+    contentIndex++;
+  }
+
+  // Create lesson content items
+  if (contentData.length > 0) {
+    const { createLessonContent } = await import("@/lib/admin/courses");
+    for (let i = 0; i < contentData.length; i++) {
+      const content = contentData[i];
+      await createLessonContent({
+        lessonId: lesson.id,
+        contentType: content.contentType as "video" | "audio" | "pdf" | "link" | "file",
+        contentUrl: content.contentUrl,
+        title: content.title,
+        sortOrder: i,
+      });
+    }
+  }
 
   redirect(`/admin/courses/${formData.get("courseId")}/edit`);
 }

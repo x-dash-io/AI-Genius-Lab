@@ -48,8 +48,13 @@ export function CourseEditForm({
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [showAddSection, setShowAddSection] = useState(false);
   const [showAddLesson, setShowAddLesson] = useState<string | null>(null);
-  const [contentTypes, setContentTypes] = useState<Record<string, string>>({});
-  const [contentUrls, setContentUrls] = useState<Record<string, string>>({});
+  const [lessonContents, setLessonContents] = useState<Record<string, Array<{
+    id?: string;
+    contentType: string;
+    contentUrl?: string;
+    title?: string;
+    description?: string;
+  }>>>({});
   const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
   const [isSavingCourse, setIsSavingCourse] = useState(false);
   const [isAddingSection, setIsAddingSection] = useState(false);
@@ -162,12 +167,7 @@ export function CourseEditForm({
         variant: "success",
       });
       setShowAddLesson(null);
-      setContentTypes((prev) => {
-        const next = { ...prev };
-        delete next[sectionId];
-        return next;
-      });
-      setContentUrls((prev) => {
+      setLessonContents(prev => {
         const next = { ...prev };
         delete next[sectionId];
         return next;
@@ -267,12 +267,12 @@ export function CourseEditForm({
 
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Select name="category" defaultValue={course.category || ""}>
+              <Select name="category" defaultValue={course.category || "none"}>
                 <SelectTrigger id="category">
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No category</SelectItem>
+                  <SelectItem value="none">No category</SelectItem>
                   <SelectItem value="business">Make Money & Business</SelectItem>
                   <SelectItem value="content">Create Content & Video</SelectItem>
                   <SelectItem value="marketing">Marketing & Traffic</SelectItem>
@@ -469,55 +469,137 @@ export function CourseEditForm({
                                 required
                               />
                             </div>
-                            <div className="space-y-2">
-                              <Label htmlFor={`contentType-${section.id}`}>Content Type *</Label>
-                              <input
-                                type="hidden"
-                                name="contentType"
-                                value={contentTypes[section.id] || ""}
-                                required
-                              />
-                              <Select
-                                value={contentTypes[section.id] || ""}
-                                onValueChange={(value) =>
-                                  setContentTypes((prev) => ({ ...prev, [section.id]: value }))
-                                }
-                                required
-                              >
-                                <SelectTrigger id={`contentType-${section.id}`} className="w-full">
-                                  <SelectValue placeholder="Select content type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="video">Video</SelectItem>
-                                  <SelectItem value="audio">Audio</SelectItem>
-                                  <SelectItem value="pdf">PDF</SelectItem>
-                                  <SelectItem value="link">Link</SelectItem>
-                                  <SelectItem value="file">File</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor={`contentUrl-${section.id}`}>Content</Label>
-                              <input
-                                type="hidden"
-                                name="contentUrl"
-                                value={contentUrls[section.id] || ""}
-                              />
-                              <ContentUpload
-                                sectionId={section.id}
-                                contentType={contentTypes[section.id] || "video"}
-                                value={contentUrls[section.id] || ""}
-                                onChange={(publicId) =>
-                                  setContentUrls((prev) => ({ ...prev, [section.id]: publicId }))
-                                }
-                                onError={(error) =>
-                                  setUploadErrors((prev) => ({ ...prev, [section.id]: error }))
-                                }
-                              />
-                              {uploadErrors[section.id] && (
-                                <p className="text-sm text-destructive">{uploadErrors[section.id]}</p>
+
+                            {/* Lesson Content Management */}
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-between">
+                                <Label>Lesson Content</Label>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const contents = lessonContents[section.id] || [];
+                                    setLessonContents(prev => ({
+                                      ...prev,
+                                      [section.id]: [...contents, {
+                                        contentType: 'video',
+                                        title: `Content ${contents.length + 1}`,
+                                      }]
+                                    }));
+                                  }}
+                                >
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  Add Content
+                                </Button>
+                              </div>
+
+                              {(lessonContents[section.id] || []).map((content, index) => (
+                                <Card key={index} className="p-4">
+                                  {/* Hidden inputs for form submission */}
+                                  <input type="hidden" name={`content-${index}-type`} value={content.contentType} />
+                                  <input type="hidden" name={`content-${index}-url`} value={content.contentUrl || ''} />
+                                  <input type="hidden" name={`content-${index}-title`} value={content.title || ''} />
+
+                                  <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                      <Label className="text-sm font-medium">Content #{index + 1}</Label>
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                          const contents = lessonContents[section.id] || [];
+                                          setLessonContents(prev => ({
+                                            ...prev,
+                                            [section.id]: contents.filter((_, i) => i !== index)
+                                          }));
+                                        }}
+                                      >
+                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                      </Button>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div className="space-y-2">
+                                        <Label>Content Type</Label>
+                                        <Select
+                                          value={content.contentType}
+                                          onValueChange={(value) => {
+                                            const contents = lessonContents[section.id] || [];
+                                            const updated = [...contents];
+                                            updated[index] = { ...updated[index], contentType: value };
+                                            setLessonContents(prev => ({
+                                              ...prev,
+                                              [section.id]: updated
+                                            }));
+                                          }}
+                                        >
+                                          <SelectTrigger>
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="video">Video</SelectItem>
+                                            <SelectItem value="audio">Audio</SelectItem>
+                                            <SelectItem value="pdf">PDF</SelectItem>
+                                            <SelectItem value="link">Link</SelectItem>
+                                            <SelectItem value="file">File</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+
+                                      <div className="space-y-2">
+                                        <Label>Title (Optional)</Label>
+                                        <Input
+                                          value={content.title || ''}
+                                          onChange={(e) => {
+                                            const contents = lessonContents[section.id] || [];
+                                            const updated = [...contents];
+                                            updated[index] = { ...updated[index], title: e.target.value };
+                                            setLessonContents(prev => ({
+                                              ...prev,
+                                              [section.id]: updated
+                                            }));
+                                          }}
+                                          placeholder="e.g., Main Video"
+                                        />
+                                      </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <Label>Content Upload</Label>
+                                      <ContentUpload
+                                        sectionId={`${section.id}-${index}`}
+                                        contentType={content.contentType}
+                                        value={content.contentUrl || ''}
+                                        onChange={(publicId) => {
+                                          const contents = lessonContents[section.id] || [];
+                                          const updated = [...contents];
+                                          updated[index] = { ...updated[index], contentUrl: publicId };
+                                          setLessonContents(prev => ({
+                                            ...prev,
+                                            [section.id]: updated
+                                          }));
+                                        }}
+                                        onError={(error) =>
+                                          setUploadErrors((prev) => ({ ...prev, [`${section.id}-${index}`]: error }))
+                                        }
+                                      />
+                                      {uploadErrors[`${section.id}-${index}`] && (
+                                        <p className="text-sm text-destructive">{uploadErrors[`${section.id}-${index}`]}</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </Card>
+                              ))}
+
+                              {(lessonContents[section.id] || []).length === 0 && (
+                                <p className="text-sm text-muted-foreground text-center py-4 border-2 border-dashed rounded-lg">
+                                  No content added yet. Click "Add Content" to add video, PDF, or other materials.
+                                </p>
                               )}
                             </div>
+
                             <div className="space-y-2">
                               <Label htmlFor={`durationSeconds-${section.id}`}>Duration (seconds)</Label>
                               <Input
@@ -568,7 +650,14 @@ export function CourseEditForm({
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setShowAddLesson(null)}
+                                onClick={() => {
+                                  setShowAddLesson(null);
+                                  setLessonContents(prev => {
+                                    const next = { ...prev };
+                                    delete next[section.id];
+                                    return next;
+                                  });
+                                }}
                               >
                                 Cancel
                               </Button>
@@ -587,7 +676,8 @@ export function CourseEditForm({
                           <div className="flex-1">
                             <p className="font-medium">{lesson.title}</p>
                             <div className="flex items-center gap-2 mt-1">
-                              <Badge variant="outline">{lesson.contentType}</Badge>
+                              {/* We'll show content count here once we load lesson contents */}
+                              <Badge variant="outline">{/* Content count will be shown here */}Lesson</Badge>
                               {lesson.durationSeconds && (
                                 <span className="text-xs text-muted-foreground">
                                   {Math.floor(lesson.durationSeconds / 60)}m {lesson.durationSeconds % 60}s

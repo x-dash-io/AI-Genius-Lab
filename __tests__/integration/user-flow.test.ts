@@ -1,4 +1,6 @@
 /**
+ * @jest-environment node
+ * 
  * Integration tests for key user flows
  * These tests verify end-to-end user journeys
  * 
@@ -26,6 +28,7 @@ const describeMaybeSkip = process.env.DATABASE_URL ? describe : describe.skip;
 
 describeMaybeSkip("User Authentication Flow", () => {
   beforeAll(async () => {
+    await prisma.$connect();
     await cleanupAllTestData();
   });
 
@@ -89,6 +92,7 @@ describeMaybeSkip("Course Purchase Flow", () => {
   let testCourse: Course;
 
   beforeAll(async () => {
+    await prisma.$connect();
     await cleanupAllTestData();
     testUser = await createTestUser({ email: "purchase-test@example.com" });
     testCourse = await createTestCourse({ slug: "test-purchase-course" });
@@ -173,6 +177,7 @@ describeMaybeSkip("Learning Path Enrollment Flow", () => {
   let learningPath: LearningPath;
 
   beforeAll(async () => {
+    await prisma.$connect();
     await cleanupAllTestData();
     testUser = await createTestUser({ email: "path-test@example.com" });
     course1 = await createTestCourse({ slug: "test-path-course-1", title: "Course 1" });

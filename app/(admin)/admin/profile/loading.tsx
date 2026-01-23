@@ -1,9 +1,12 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ProfilePreviewBanner } from "@/components/profile/ProfilePreviewBanner";
 
 export default function AdminProfileLoading() {
   return (
     <div className="space-y-8">
+      <ProfilePreviewBanner />
+
       {/* Header */}
       <div>
         <Skeleton className="h-4 w-32 mb-2" />

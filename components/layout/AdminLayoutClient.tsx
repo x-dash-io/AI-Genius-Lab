@@ -39,7 +39,6 @@ const adminNavigation = [
 
 const customerPreviewLinks = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Course Library", href: "/library", icon: BookOpen },
   { name: "Course Catalog", href: "/courses", icon: BookOpen },
   { name: "Learning Paths", href: "/learning-paths", icon: Route },
 ];

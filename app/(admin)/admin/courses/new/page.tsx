@@ -33,11 +33,12 @@ async function createCourseAction(formData: FormData) {
     throw new Error("Missing required fields");
   }
 
+  // For new course creation, we don't need to handle content - that will be added when editing lessons
   const course = await createCourse({
     title,
     slug,
     description: description || undefined,
-    category: category || undefined,
+    category: category === "none" ? undefined : category || undefined,
     priceCents,
     inventory,
     isPublished,
@@ -116,12 +117,12 @@ export default async function NewCoursePage() {
 
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Select name="category" defaultValue="">
+              <Select name="category">
                 <SelectTrigger id="category">
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No category</SelectItem>
+                  <SelectItem value="none">No category</SelectItem>
                   <SelectItem value="business">Make Money & Business</SelectItem>
                   <SelectItem value="content">Create Content & Video</SelectItem>
                   <SelectItem value="marketing">Marketing & Traffic</SelectItem>

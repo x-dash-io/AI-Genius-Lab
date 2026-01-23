@@ -66,6 +66,14 @@ export async function middleware(request: NextRequest) {
       signInUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(signInUrl);
     }
+
+    // Prevent admin users from accessing library and activity pages
+    const adminRestrictedRoutes = ["/library", "/activity"];
+    const isAdminRestrictedRoute = adminRestrictedRoutes.some((route) => pathname.startsWith(route));
+
+    if (isAdminRestrictedRoute && token.role === "admin") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
   }
 
   return response;
