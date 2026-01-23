@@ -402,7 +402,7 @@ export function CourseEditForm({
                   <div>
                     <Label className="text-sm font-medium text-muted-foreground">Inventory</Label>
                     <p className="text-sm">
-                      {course.inventory ? `${course.inventory} units` : 'Unlimited'}
+                      {course.inventory !== null && course.inventory !== undefined ? `${course.inventory} units` : 'Unlimited'}
                     </p>
                   </div>
                 </div>
