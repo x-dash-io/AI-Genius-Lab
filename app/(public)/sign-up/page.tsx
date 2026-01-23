@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,6 +15,7 @@ import { Loader } from "@/components/ui/loader";
 import { OTPInput } from "@/components/auth/OTPInput";
 
 export default function SignUpPage() {
+  const { data: session, status } = useSession();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -28,6 +29,32 @@ export default function SignUpPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+
+  // Redirect authenticated users away from sign-up page
+  useEffect(() => {
+    if (status === "authenticated" && session?.user) {
+      const redirectUrl = session.user.role === "admin" ? "/admin" : callbackUrl;
+      router.replace(redirectUrl);
+    }
+  }, [status, session, router, callbackUrl]);
+
+  // Show loading while checking auth status
+  if (status === "loading") {
+    return (
+      <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
+        <Loader size="lg" text="Loading..." />
+      </div>
+    );
+  }
+
+  // Don't render the form if already authenticated (will redirect)
+  if (status === "authenticated") {
+    return (
+      <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
+        <Loader size="lg" text="Redirecting..." />
+      </div>
+    );
+  }
 
   async function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
