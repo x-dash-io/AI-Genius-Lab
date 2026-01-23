@@ -899,14 +899,59 @@ export function CourseEditForm({
                                   </div>
 
                                   <div className="space-y-2">
-                                    <Label htmlFor={`durationSeconds-edit-${lesson.id}`}>Duration (seconds)</Label>
-                                    <Input
-                                      id={`durationSeconds-edit-${lesson.id}`}
-                                      name="durationSeconds"
-                                      type="number"
-                                      min="0"
-                                      defaultValue={lesson.durationSeconds || ""}
-                                    />
+                                    {(() => {
+                                      const firstContent = (lessonContents[lesson.id] || [])[0];
+                                      const contentType = firstContent?.contentType || lesson.contents?.[0]?.contentType || 'video';
+
+                                      const getDurationLabel = () => {
+                                        switch (contentType) {
+                                          case 'pdf':
+                                            return 'Pages';
+                                          case 'file':
+                                            return 'File Size (MB)';
+                                          case 'link':
+                                            return 'Estimated Duration (minutes)';
+                                          case 'video':
+                                          case 'audio':
+                                          default:
+                                            return 'Duration (seconds)';
+                                        }
+                                      };
+
+                                      const getDurationPlaceholder = () => {
+                                        switch (contentType) {
+                                          case 'pdf':
+                                            return '25';
+                                          case 'file':
+                                            return '5.2';
+                                          case 'link':
+                                            return '15';
+                                          case 'video':
+                                          case 'audio':
+                                          default:
+                                            return '420';
+                                        }
+                                      };
+
+                                      const getStep = () => {
+                                        return contentType === 'file' ? '0.1' : '1';
+                                      };
+
+                                      return (
+                                        <>
+                                          <Label htmlFor={`durationSeconds-edit-${lesson.id}`}>{getDurationLabel()}</Label>
+                                          <Input
+                                            id={`durationSeconds-edit-${lesson.id}`}
+                                            name="durationSeconds"
+                                            type="number"
+                                            min="0"
+                                            step={getStep()}
+                                            placeholder={getDurationPlaceholder()}
+                                            defaultValue={lesson.durationSeconds || ""}
+                                          />
+                                        </>
+                                      );
+                                    })()}
                                   </div>
 
                                   <div className="flex items-center space-x-4">

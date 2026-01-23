@@ -12,6 +12,13 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
   },
+  // Completely disable Next.js development indicator
+  devIndicators: {
+    buildActivity: false,
+    buildActivityPosition: "bottom-right",
+  },
+  // Disable React strict mode warnings in dev (optional, helps reduce noise)
+  reactStrictMode: true,
 };
 
 export default nextConfig;
