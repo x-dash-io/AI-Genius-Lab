@@ -4,8 +4,13 @@ import { signOut } from "next-auth/react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function SignOutButton() {
+interface SignOutButtonProps {
+  className?: string;
+}
+
+export function SignOutButton({ className }: SignOutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSignOut() {
@@ -24,7 +29,7 @@ export function SignOutButton() {
       disabled={isLoading}
       variant="outline"
       size="sm"
-      className="w-full"
+      className={cn("w-full", className)}
     >
       <LogOut className="h-4 w-4" />
       {isLoading ? "Signing out..." : "Sign out"}
