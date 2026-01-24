@@ -14,13 +14,12 @@ import {
 import { X, SlidersHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-const CATEGORIES = [
-  { value: "business", label: "Make Money & Business" },
-  { value: "content", label: "Create Content & Video" },
-  { value: "marketing", label: "Marketing & Traffic" },
-  { value: "apps", label: "Build Apps & Tech" },
-  { value: "productivity", label: "Productivity & Tools" },
-];
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
+};
 
 export function CourseFilters() {
   const router = useRouter();
@@ -35,6 +34,26 @@ export function CourseFilters() {
   const [category, setCategory] = useState(currentCategory);
   const [sortBy, setSortBy] = useState(currentSort);
   const [isFiltering, setIsFiltering] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await fetch("/api/categories");
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data.categories || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    }
+    fetchCategories();
+  }, []);
 
   // Sync state with URL params
   useEffect(() => {
@@ -115,15 +134,15 @@ export function CourseFilters() {
           />
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Select value={category} onValueChange={handleCategoryChange}>
+          <Select value={category} onValueChange={handleCategoryChange} disabled={isLoadingCategories}>
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="All Categories" />
+              <SelectValue placeholder={isLoadingCategories ? "Loading..." : "All Categories"} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              {CATEGORIES.map((cat) => (
-                <SelectItem key={cat.value} value={cat.value}>
-                  {cat.label}
+              {categories.map((cat) => (
+                <SelectItem key={cat.slug} value={cat.slug}>
+                  {cat.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -172,7 +191,7 @@ export function CourseFilters() {
           )}
           {currentCategory !== "all" && (
             <Badge variant="secondary" className="gap-1">
-              {CATEGORIES.find((c) => c.value === currentCategory)?.label || currentCategory}
+              {categories.find((c) => c.slug === currentCategory)?.name || currentCategory}
               <button
                 onClick={() => handleCategoryChange("all")}
                 className="ml-1 hover:text-foreground"

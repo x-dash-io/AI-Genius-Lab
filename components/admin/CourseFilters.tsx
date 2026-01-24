@@ -13,6 +13,13 @@ import {
 } from "@/components/ui/select";
 import { X } from "lucide-react";
 
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
+};
+
 export function CourseFilters() {
   const router = useRouter();
   const pathname = usePathname();
@@ -26,6 +33,26 @@ export function CourseFilters() {
   const [status, setStatus] = useState(currentStatus);
   const [category, setCategory] = useState(currentCategory);
   const [isFiltering, setIsFiltering] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await fetch("/api/categories");
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data.categories || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    }
+    fetchCategories();
+  }, []);
 
   // Sync state with URL params
   useEffect(() => {
@@ -115,17 +142,17 @@ export function CourseFilters() {
             <SelectItem value="draft">Draft</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={category} onValueChange={handleCategoryChange}>
+        <Select value={category} onValueChange={handleCategoryChange} disabled={isLoadingCategories}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="All Categories" />
+            <SelectValue placeholder={isLoadingCategories ? "Loading..." : "All Categories"} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="business">Make Money & Business</SelectItem>
-            <SelectItem value="content">Create Content & Video</SelectItem>
-            <SelectItem value="marketing">Marketing & Traffic</SelectItem>
-            <SelectItem value="apps">Build Apps & Tech</SelectItem>
-            <SelectItem value="productivity">Productivity & Tools</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat.slug} value={cat.slug}>
+                {cat.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         {hasFilters && (

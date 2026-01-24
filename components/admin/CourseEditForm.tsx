@@ -68,6 +68,26 @@ export function CourseEditForm({
   const [isDeletingLesson, setIsDeletingLesson] = useState<Record<string, boolean>>({});
   const [isUpdatingLesson, setIsUpdatingLesson] = useState<Record<string, boolean>>({});
   const [isEditingCourse, setIsEditingCourse] = useState(false);
+  const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string }>>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await fetch("/api/categories");
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data.categories || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    }
+    fetchCategories();
+  }, []);
 
   // Load existing lesson content on mount
   useEffect(() => {
@@ -355,17 +375,17 @@ export function CourseEditForm({
 
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
-                <Select name="category" defaultValue={course.category || "none"}>
+                <Select name="category" defaultValue={course.category || "none"} disabled={isLoadingCategories}>
                   <SelectTrigger id="category">
-                    <SelectValue placeholder="Select a category" />
+                    <SelectValue placeholder={isLoadingCategories ? "Loading..." : "Select a category"} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">No category</SelectItem>
-                    <SelectItem value="business">Make Money & Business</SelectItem>
-                    <SelectItem value="content">Create Content & Video</SelectItem>
-                    <SelectItem value="marketing">Marketing & Traffic</SelectItem>
-                    <SelectItem value="apps">Build Apps & Tech</SelectItem>
-                    <SelectItem value="productivity">Productivity & Tools</SelectItem>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.slug} value={cat.slug}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
