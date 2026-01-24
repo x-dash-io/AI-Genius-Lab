@@ -86,7 +86,7 @@ AI Genius Lab is a production-ready learning management system designed for educ
 
 1. Clone the repository and install dependencies:
 ```bash
-git clone <repository-url>
+git clone https://github.com/SingasonSimon/AI-Genius-Lab.git
 cd ai-genius-lab
 npm install
 ```
