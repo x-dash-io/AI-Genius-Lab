@@ -65,14 +65,18 @@ export async function createTestAdmin(overrides: Partial<typeof TEST_ADMIN> = {}
  */
 export async function createTestCourse(overrides: Partial<typeof TEST_COURSE> = {}) {
   const courseData = { ...TEST_COURSE, ...overrides };
+  const courseId = `course_test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const now = new Date();
 
   return prisma.course.create({
     data: {
+      id: courseId,
       slug: courseData.slug,
       title: courseData.title,
       description: courseData.description,
       priceCents: courseData.priceCents,
       isPublished: courseData.isPublished,
+      updatedAt: now,
     },
   });
 }
@@ -81,11 +85,16 @@ export async function createTestCourse(overrides: Partial<typeof TEST_COURSE> = 
  * Create a test section for a course
  */
 export async function createTestSection(courseId: string, title: string = "Test Section") {
+  const sectionId = `section_test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const now = new Date();
+  
   return prisma.section.create({
     data: {
+      id: sectionId,
       courseId,
       title,
       sortOrder: 0,
+      updatedAt: now,
     },
   });
 }

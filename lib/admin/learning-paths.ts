@@ -59,11 +59,16 @@ export async function createLearningPath(data: {
   description?: string;
 }) {
   await requireRole("admin");
+  
+  const pathId = `path_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const now = new Date();
 
   return prisma.learningPath.create({
     data: {
+      id: pathId,
       title: data.title,
       description: data.description,
+      updatedAt: now,
     },
   });
 }
@@ -120,6 +125,7 @@ export async function addCourseToPath(
 
   return prisma.learningPathCourse.create({
     data: {
+      id: `lpc_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       learningPathId: pathId,
       courseId,
       sortOrder,

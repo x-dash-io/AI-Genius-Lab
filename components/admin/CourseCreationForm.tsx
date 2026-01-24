@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import {
 import { Plus, Trash2, ChevronDown, ChevronUp, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { useConfirmDialog } from "@/components/ui/confirm-dialog";
-import type { Course, Section, Lesson } from "@prisma/client";
+import type { Course, Section, Lesson, Category } from "@prisma/client";
 
 type CourseWithSections = Course & {
   sections: (Section & {
@@ -36,6 +36,31 @@ export function CourseCreationForm({
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
   const [isCreatingCourse, setIsCreatingCourse] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/categories");
+        if (!response.ok) throw new Error("Failed to fetch categories");
+        const data = await response.json();
+        setCategories(data.categories || []);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        toast({
+          title: "Failed to load categories",
+          description: "Using default categories",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleCreateCourse = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -140,17 +165,17 @@ export function CourseCreationForm({
 
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
-                <Select name="category" disabled={isCreatingCourse}>
+                <Select name="category" disabled={isCreatingCourse || isLoadingCategories}>
                   <SelectTrigger id="category">
-                    <SelectValue placeholder="Select a category" />
+                    <SelectValue placeholder={isLoadingCategories ? "Loading categories..." : "Select a category"} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">No category</SelectItem>
-                    <SelectItem value="business">Make Money & Business</SelectItem>
-                    <SelectItem value="content">Create Content & Video</SelectItem>
-                    <SelectItem value="marketing">Marketing & Traffic</SelectItem>
-                    <SelectItem value="apps">Build Apps & Tech</SelectItem>
-                    <SelectItem value="productivity">Productivity & Tools</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.slug}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

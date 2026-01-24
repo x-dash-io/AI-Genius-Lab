@@ -78,6 +78,233 @@ body {
   position: relative;
 }
 
+/* ========================================
+   FONT OVERRIDE PREVENTION
+   Prevents browsers from overriding fonts
+   ======================================== */
+
+/* Prevent font boosting on mobile devices */
+* {
+  -webkit-text-size-adjust: 100% !important;
+  -moz-text-size-adjust: 100% !important;
+  -ms-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
+}
+
+/* Force font family inheritance and prevent overrides */
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video,
+button,
+input,
+select,
+textarea {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
+}
+
+/* Prevent Android and iOS from changing fonts */
+body,
+body * {
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
+}
+
+/* Prevent font inflation on Android */
+@supports (-webkit-touch-callout: none) {
+  body {
+    -webkit-text-size-adjust: 100% !important;
+  }
+}
+
+/* Prevent font changes on Android Chrome */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  select,
+  textarea,
+  input,
+  button {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
+  }
+}
+
+/* Force font on form elements (commonly overridden on mobile) */
+input,
+button,
+select,
+textarea,
+optgroup {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  -webkit-text-size-adjust: 100% !important;
+  -moz-text-size-adjust: 100% !important;
+  -ms-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
+}
+
+/* Prevent font changes in placeholders */
+::placeholder {
+  font-family: inherit !important;
+  opacity: 0.5;
+}
+
+::-webkit-input-placeholder {
+  font-family: inherit !important;
+}
+
+::-moz-placeholder {
+  font-family: inherit !important;
+}
+
+:-ms-input-placeholder {
+  font-family: inherit !important;
+}
+
+/* Prevent font changes on focus */
+input:focus,
+textarea:focus,
+select:focus,
+button:focus {
+  font-family: inherit !important;
+}
+
+/* Android-specific font override prevention */
+@media screen and (max-width: 767px) {
+  * {
+    -webkit-text-size-adjust: none !important;
+    -moz-text-size-adjust: none !important;
+    -ms-text-size-adjust: none !important;
+    text-size-adjust: none !important;
+  }
+  
+  body,
+  body * {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
+  }
+}
+
+/* Tablet-specific (iPad, Android tablets) */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  * {
+    -webkit-text-size-adjust: 100% !important;
+    -moz-text-size-adjust: 100% !important;
+    -ms-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+  }
+  
+  body,
+  body * {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
+  }
+}
+
+/* iOS Safari specific */
+@supports (-webkit-touch-callout: none) {
+  body,
+  body *,
+  input,
+  textarea,
+  select,
+  button {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
+    -webkit-text-size-adjust: 100% !important;
+  }
+}
+
+/* Samsung Internet Browser */
+@supports (-webkit-appearance: none) {
+  body,
+  body * {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
+  }
+}
+
+/* Prevent font changes in WebView (Android apps) */
+@media screen and (max-device-width: 1024px) {
+  * {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
+    -webkit-text-size-adjust: 100% !important;
+  }
+}
+
 /* Custom Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 10px;

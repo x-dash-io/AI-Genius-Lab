@@ -49,8 +49,13 @@ export async function createCourse(data: {
   inventory?: number | null;
   isPublished?: boolean;
 }) {
+  // Generate a unique ID for the course
+  const courseId = `course_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const now = new Date();
+  
   return prisma.course.create({
     data: {
+      id: courseId,
       title: data.title,
       slug: data.slug,
       description: data.description,
@@ -58,6 +63,7 @@ export async function createCourse(data: {
       priceCents: data.priceCents,
       inventory: data.inventory ?? null,
       isPublished: data.isPublished ?? false,
+      updatedAt: now,
     },
   });
 }
@@ -100,11 +106,16 @@ export async function deleteCourse(courseId: string) {
 }
 
 export async function createSection(courseId: string, title: string, sortOrder: number) {
+  const sectionId = `section_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const now = new Date();
+  
   return prisma.section.create({
     data: {
+      id: sectionId,
       courseId,
       title,
       sortOrder,
+      updatedAt: now,
     },
   });
 }
@@ -158,14 +169,19 @@ export async function createLesson(data: {
   allowDownload?: boolean;
   sortOrder: number;
 }) {
+  const lessonId = `lesson_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const now = new Date();
+  
   return prisma.lesson.create({
     data: {
+      id: lessonId,
       sectionId: data.sectionId,
       title: data.title,
       durationSeconds: data.durationSeconds,
       isLocked: data.isLocked ?? true,
       allowDownload: data.allowDownload ?? false,
       sortOrder: data.sortOrder,
+      updatedAt: now,
     },
   });
 }
@@ -177,13 +193,18 @@ export async function createLessonContent(data: {
   title?: string;
   sortOrder: number;
 }) {
+  const contentId = `content_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const now = new Date();
+  
   return prisma.lessonContent.create({
     data: {
+      id: contentId,
       lessonId: data.lessonId,
       contentType: data.contentType,
       contentUrl: data.contentUrl,
       title: data.title,
       sortOrder: data.sortOrder,
+      updatedAt: now,
     },
   });
 }
