@@ -98,16 +98,29 @@ export async function createTestLesson(
   title: string = "Test Lesson",
   contentType: "video" | "audio" | "pdf" | "link" | "file" = "video"
 ) {
-  return prisma.lesson.create({
+  const lesson = await prisma.lesson.create({
     data: {
       sectionId,
       title,
-      contentType,
-      contentUrl: "test-content-url",
       sortOrder: 0,
       isLocked: true,
+      durationSeconds: 300,
+      allowDownload: false,
     },
   });
+
+  // Create lesson content
+  await prisma.lessonContent.create({
+    data: {
+      lessonId: lesson.id,
+      contentType,
+      contentUrl: "test-content-url",
+      title: "Test Content",
+      sortOrder: 1,
+    },
+  });
+
+  return lesson;
 }
 
 /**
