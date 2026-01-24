@@ -130,6 +130,7 @@ export async function POST(request: Request) {
       },
       update: { purchaseId: purchase.id },
       create: {
+        id: `enrollment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         userId: purchase.userId,
         courseId: purchase.courseId,
         purchaseId: purchase.id,
