@@ -21,7 +21,7 @@ type CourseListProps = {
 
 export function CourseList({ courses }: CourseListProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {courses.map((course, index) => (
         <motion.div
           key={course.id}
@@ -31,15 +31,17 @@ export function CourseList({ courses }: CourseListProps) {
           whileHover={{ y: -4 }}
         >
           <Card className="h-full transition-shadow hover:shadow-lg flex flex-col">
-            <CardHeader>
-              <CardTitle className="line-clamp-2">{course.title}</CardTitle>
-              <CardDescription className="line-clamp-3">
+            <CardHeader className="space-y-3">
+              <CardTitle className="line-clamp-2 text-xl leading-tight">
+                {course.title}
+              </CardTitle>
+              <CardDescription className="line-clamp-3 text-sm leading-relaxed">
                 {course.description ?? "Course details coming soon."}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col justify-end space-y-3">
+            <CardContent className="flex-1 flex flex-col justify-end space-y-4">
               <div className="flex items-center justify-between">
-                <Badge variant="secondary" className="text-lg font-semibold">
+                <Badge variant="secondary" className="text-lg font-semibold px-3 py-1">
                   ${(course.priceCents / 100).toFixed(2)}
                 </Badge>
               </div>
