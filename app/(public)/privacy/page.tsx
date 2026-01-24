@@ -1,6 +1,9 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+import { Mail, MessageCircle } from "lucide-react";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Privacy Policy",
@@ -25,7 +28,7 @@ export default function PrivacyPage() {
         </CardHeader>
         <CardContent className="space-y-4 text-muted-foreground">
           <p>
-            AI Genius Lab ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our online learning platform.
+            AI Genius Lab  is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our online learning platform.
           </p>
           <p>
             Please read this Privacy Policy carefully. By using our Platform, you agree to the collection and use of information in accordance with this policy.
@@ -246,14 +249,28 @@ export default function PrivacyPage() {
         <CardHeader>
           <CardTitle>14. Contact Us</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 text-muted-foreground">
-          <p>
+        <CardContent className="space-y-4">
+          <p className="text-muted-foreground">
             If you have any questions about this Privacy Policy or our data practices, please contact us:
           </p>
-          <ul className="list-none space-y-2 ml-4">
-            <li><strong>Email:</strong> support@aigeniuslab.com</li>
-            <li><strong>Platform:</strong> AI Genius Lab</li>
-          </ul>
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Mail className="h-4 w-4" />
+              <a 
+                href="mailto:support@aigeniuslab.com"
+                className="hover:text-primary transition-colors"
+              >
+                support@aigeniuslab.com
+              </a>
+            </div>
+            <span className="hidden sm:inline text-muted-foreground">or</span>
+            <Link href="/contact">
+              <Button variant="outline" size="sm">
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Contact Us
+              </Button>
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>

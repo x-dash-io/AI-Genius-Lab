@@ -1,6 +1,9 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+import { Mail, MessageCircle } from "lucide-react";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Terms and Conditions",
@@ -207,10 +210,28 @@ export default function TermsPage() {
         <CardHeader>
           <CardTitle>15. Contact Information</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 text-muted-foreground">
-          <p>
-            If you have any questions about these Terms and Conditions, please contact us through our support channels or email us at support@aigeniuslab.com.
+        <CardContent className="space-y-4">
+          <p className="text-muted-foreground">
+            If you have any questions about these Terms and Conditions, please contact us:
           </p>
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Mail className="h-4 w-4" />
+              <a 
+                href="mailto:support@aigeniuslab.com"
+                className="hover:text-primary transition-colors"
+              >
+                support@aigeniuslab.com
+              </a>
+            </div>
+            <span className="hidden sm:inline text-muted-foreground">or</span>
+            <Link href="/contact">
+              <Button variant="outline" size="sm">
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Contact Us
+              </Button>
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -2,32 +2,43 @@
 
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Filter, Shield, Route, TrendingUp } from "lucide-react";
+import { Filter, Shield, Route, TrendingUp, BookOpen, Users } from "lucide-react";
+import type { HomepageStats } from "@/lib/homepage-stats";
 
-const trustCards = [
-  {
-    icon: Filter,
-    title: "Curated, Not Crowded",
-    description: "Only proven AI courses — no filler, no outdated content.",
-  },
-  {
-    icon: Shield,
-    title: "Buy Once, Learn Forever",
-    description: "Pay once, unlock full courses with lifetime access.",
-  },
-  {
-    icon: Route,
-    title: "Structured Learning Paths",
-    description: "Courses organized by outcomes, not creators.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Progress You Can See",
-    description: "Track lessons completed, progress %, and activity history.",
-  },
-];
+interface TrustSectionProps {
+  stats: HomepageStats;
+}
 
-export function TrustSection() {
+export function TrustSection({ stats }: TrustSectionProps) {
+  const trustCards = [
+    {
+      icon: Filter,
+      title: "Curated, Not Crowded",
+      description: stats.totalCourses > 0 
+        ? `${stats.totalCourses} carefully selected AI courses — no filler, no outdated content.`
+        : "Only proven AI courses — no filler, no outdated content.",
+    },
+    {
+      icon: Shield,
+      title: "Buy Once, Learn Forever",
+      description: "Pay once, unlock full courses with lifetime access.",
+    },
+    {
+      icon: Route,
+      title: "Structured Learning Paths",
+      description: stats.categoriesWithCourses.length > 0
+        ? `Courses organized across ${stats.categoriesWithCourses.length} categories by outcomes, not creators.`
+        : "Courses organized by outcomes, not creators.",
+    },
+    {
+      icon: TrendingUp,
+      title: "Progress You Can See",
+      description: stats.totalStudents > 0
+        ? `Join ${stats.totalStudents.toLocaleString()} learners tracking lessons, progress %, and activity history.`
+        : "Track lessons completed, progress %, and activity history.",
+    },
+  ];
+
   return (
     <section className="grid gap-8">
       <div className="text-center">

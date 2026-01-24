@@ -7,6 +7,7 @@ import { SocialProof } from "@/components/home/SocialProof";
 import { SecuritySection } from "@/components/home/SecuritySection";
 import { FinalCTA } from "@/components/home/FinalCTA";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+import { getHomepageStats } from "@/lib/homepage-stats";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Master AI With Curated Learning Paths",
@@ -21,14 +22,16 @@ export const metadata: Metadata = generateSEOMetadata({
   ],
 });
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const stats = await getHomepageStats();
+
   return (
     <div className="grid gap-16 md:gap-24">
-      <LandingHero />
-      <TrustSection />
-      <LaunchCurriculum />
+      <LandingHero stats={stats} />
+      <TrustSection stats={stats} />
+      <LaunchCurriculum stats={stats} />
       <HowItWorks />
-      <SocialProof />
+      <SocialProof stats={stats} />
       <SecuritySection />
       <FinalCTA />
     </div>

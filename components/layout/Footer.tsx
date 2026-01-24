@@ -59,23 +59,27 @@ export function Footer() {
             </nav>
           </div>
           <div className="grid gap-4">
-            <h4 className="text-sm font-semibold">Account</h4>
+            <h4 className="text-sm font-semibold">Support</h4>
             <nav className="grid gap-2">
+              <Link
+                href="/faq"
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                FAQ
+              </Link>
+              <Link
+                href="/contact"
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Contact Us
+              </Link>
               {session?.user ? (
-                <>
-                  <Link
-                    href="/dashboard"
-                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    href="/library"
-                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    My Library
-                  </Link>
-                </>
+                <Link
+                  href="/dashboard"
+                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Dashboard
+                </Link>
               ) : (
                 <>
                   <Link
