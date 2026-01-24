@@ -11,8 +11,8 @@ const contactMethods = [
     icon: Mail,
     title: "Email Support",
     description: "Get help via email",
-    detail: "support@aigeniuslab.com",
-    action: "mailto:support@aigeniuslab.com",
+    detail: "support@aigeniusclub.com",
+    action: "mailto:support@aigeniusclub.com",
   },
   {
     icon: Clock,

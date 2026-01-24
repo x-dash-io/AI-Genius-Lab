@@ -19,7 +19,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = generateSEOMetadata({
-  title: "AI Genius Lab",
+  title: "AI Genius Club",
   description:
     "Learn AI for business, content, apps, and productivity through structured courses, tracked progress, and instant access after purchase.",
   keywords: [

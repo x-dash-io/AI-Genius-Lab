@@ -131,7 +131,6 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
     height: 24,
     color: rgb(1, 1, 1),
     opacity: 0.2,
-    borderRadius: 6,
   });
 
   page.drawText("AI Genius Lab", {
@@ -162,7 +161,6 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
     height: 24,
     color: rgb(1, 1, 1),
     opacity: 0.2,
-    borderRadius: 12,
   });
 
   page.drawText("INVOICE", {
@@ -204,7 +202,6 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
     width: 180,
     height: 28,
     color: lightGreen,
-    borderRadius: 14,
   });
 
   // Checkmark icon placeholder
@@ -242,7 +239,6 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
     width: columnWidth - 20,
     height: 70,
     color: veryLightGray,
-    borderRadius: 8,
   });
 
   page.drawText(data.customerName, {
@@ -278,7 +274,6 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
     width: columnWidth - 20,
     height: 70,
     color: veryLightGray,
-    borderRadius: 8,
   });
 
   page.drawText("Method:", {
@@ -378,7 +373,6 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
       width: 30,
       height: 30,
       color: rgb(0.9, 0.93, 0.98),
-      borderRadius: 6,
     });
 
     // Course title
@@ -425,7 +419,6 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
     width: 200,
     height: 90,
     color: veryLightGray,
-    borderRadius: 8,
   });
 
   // Subtotal
@@ -496,7 +489,6 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
     width: width - 100,
     height: 60,
     color: veryLightGray,
-    borderRadius: 8,
     borderColor: rgb(0.85, 0.85, 0.85),
     borderWidth: 1,
   });
@@ -525,7 +517,7 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
   // ===== FOOTER =====
   const footerY = 50;
   
-  page.drawText("AI Genius Lab - Premium Online Learning Platform - support@aigeniuslab.com", {
+  page.drawText("AI Genius Club - Premium Online Learning Platform - support@aigeniusclub.com", {
     x: width / 2 - 180,
     y: footerY + 15,
     size: 7,
