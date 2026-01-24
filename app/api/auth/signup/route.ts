@@ -69,8 +69,12 @@ export async function POST(request: NextRequest) {
 
     console.log("Creating user with email:", email.toLowerCase().trim());
     
+    // Generate unique user ID
+    const userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    
     const user = await prisma.user.create({
       data: {
+        id: userId,
         email: email.toLowerCase().trim(),
         passwordHash,
         name: name.trim(),

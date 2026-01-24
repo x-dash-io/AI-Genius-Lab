@@ -21,6 +21,16 @@ const resendApiKey = process.env.RESEND_API_KEY;
 const emailFrom = process.env.EMAIL_FROM || (process.env.NODE_ENV === "development" ? "onboarding@resend.dev" : "noreply@aigeniuslab.com");
 const bypassEmail = process.env.BYPASS_EMAIL === "true";
 
+// Log email configuration on startup
+if (process.env.NODE_ENV === "development") {
+  console.log("[EMAIL] Configuration:", {
+    bypassEmail,
+    hasResendKey: !!resendApiKey,
+    emailFrom,
+    BYPASS_EMAIL_value: process.env.BYPASS_EMAIL,
+  });
+}
+
 // Initialize Resend only if API key is available
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
@@ -34,10 +44,16 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
       preview: options.text || options.html.substring(0, 100),
     });
     // Extract OTP code from email HTML for development testing
-    const codeMatch = options.html.match(/>(\d{6})</);
+    const codeMatch = options.html.match(/\b(\d{6})\b/) || 
+                     options.text?.match(/\b(\d{6})\b/);
     if (codeMatch) {
-      console.log(`[EMAIL] OTP Code for testing: ${codeMatch[1]}`);
-      console.log(`[EMAIL] Use this code to complete signup/verification for: ${options.to}`);
+      console.log("\n" + "=".repeat(60));
+      console.log("🔐 OTP CODE FOR TESTING (BYPASS_EMAIL=true)");
+      console.log("=".repeat(60));
+      console.log(`📧 Email: ${options.to}`);
+      console.log(`🔢 OTP Code: ${codeMatch[1]}`);
+      console.log(`📝 Subject: ${options.subject}`);
+      console.log("=".repeat(60) + "\n");
     }
     return;
   }
@@ -51,9 +67,16 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
     });
     // Extract code from email HTML for development testing
     if (process.env.NODE_ENV === "development") {
-      const codeMatch = options.html.match(/>(\d{6})</);
+      const codeMatch = options.html.match(/\b(\d{6})\b/) || 
+                       options.text?.match(/\b(\d{6})\b/);
       if (codeMatch) {
-        console.log(`[EMAIL] Development mode - Code from email: ${codeMatch[1]}`);
+        console.log("\n" + "=".repeat(60));
+        console.log("🔐 OTP CODE FOR TESTING (No RESEND_API_KEY)");
+        console.log("=".repeat(60));
+        console.log(`📧 Email: ${options.to}`);
+        console.log(`🔢 OTP Code: ${codeMatch[1]}`);
+        console.log(`📝 Subject: ${options.subject}`);
+        console.log("=".repeat(60) + "\n");
       }
     }
     return;
@@ -84,10 +107,17 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
           suggestion: "Verify a domain in Resend dashboard or use account owner's email for testing",
         });
         // Extract OTP code from email HTML for development testing
-        const codeMatch = options.html.match(/>(\d{6})</);
+        // Match 6-digit codes in various formats
+        const codeMatch = options.html.match(/\b(\d{6})\b/) || 
+                         options.text?.match(/\b(\d{6})\b/);
         if (codeMatch) {
-          console.log(`[EMAIL] Test domain restriction - OTP Code: ${codeMatch[1]}`);
-          console.log(`[EMAIL] Use this code to complete verification for: ${options.to}`);
+          console.log("\n" + "=".repeat(60));
+          console.log("🔐 OTP CODE FOR TESTING (Email Restricted)");
+          console.log("=".repeat(60));
+          console.log(`📧 Email: ${options.to}`);
+          console.log(`🔢 OTP Code: ${codeMatch[1]}`);
+          console.log(`📝 Subject: ${options.subject}`);
+          console.log("=".repeat(60) + "\n");
         }
         // Don't throw - return success to user (security best practice)
         return;
