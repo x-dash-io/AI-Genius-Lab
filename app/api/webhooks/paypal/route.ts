@@ -170,6 +170,7 @@ export async function POST(request: Request) {
     console.log(`[WEBHOOK] Creating payment record`);
     await prisma.payment.create({
       data: {
+        id: `payment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         userId: purchase.userId,
         purchaseId: purchase.id,
         provider: "paypal",
@@ -183,6 +184,7 @@ export async function POST(request: Request) {
     console.log(`[WEBHOOK] Creating activity log`);
     await prisma.activityLog.create({
       data: {
+        id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         userId: purchase.userId,
         type: "purchase_completed",
         metadata: {

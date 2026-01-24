@@ -10,14 +10,12 @@ import {
   Users,
   ShoppingCart,
   Receipt,
-  Settings,
   Menu,
   X,
   Shield,
   Route,
   User,
   Eye,
-  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,6 +23,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { BackgroundBlobs } from "@/components/ui/background-blobs";
 import { CartIcon } from "@/components/cart/CartIcon";
+import { ConfirmDialogProvider } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 
@@ -110,8 +109,9 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   }, [mobileMenuOpen]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
-      <BackgroundBlobs />
+    <ConfirmDialogProvider>
+      <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
+        <BackgroundBlobs />
       
       {/* Desktop Layout */}
       <div className="hidden md:flex h-screen overflow-hidden">
@@ -473,6 +473,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
           </motion.div>
         </main>
       </div>
-    </div>
+      </div>
+    </ConfirmDialogProvider>
   );
 }

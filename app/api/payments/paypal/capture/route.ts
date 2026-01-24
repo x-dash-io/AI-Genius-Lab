@@ -138,6 +138,7 @@ export async function GET(request: Request) {
 
           await prisma.activityLog.create({
             data: {
+              id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
               userId: purchase.userId,
               type: "purchase_completed",
               metadata: {
@@ -335,6 +336,7 @@ export async function GET(request: Request) {
 
     await prisma.activityLog.create({
       data: {
+        id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         userId: purchase.userId,
         type: "purchase_completed",
         metadata: {

@@ -273,7 +273,7 @@ export function CourseEditForm({
       durationSeconds: null,
       isLocked: true,
       allowDownload: false,
-      sortOrder: section?.Lesson.length || 0,
+      sortOrder: (section?.Lesson || []).length,
       createdAt: new Date(),
       updatedAt: new Date(),
       LessonContent: [],

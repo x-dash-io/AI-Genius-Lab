@@ -94,6 +94,13 @@ export function ContentUpload({
       return;
     }
 
+    // Check if it's a YouTube URL
+    const isYouTubeUrl = url.includes('youtube.com') || url.includes('youtu.be');
+    if (isYouTubeUrl) {
+      onError?.("YouTube videos cannot be uploaded to Cloudinary. Please use 'Link' content type instead and paste the YouTube URL directly.");
+      return;
+    }
+
     setUploading(true);
     try {
       const response = await fetch("/api/admin/upload-url", {
@@ -116,6 +123,13 @@ export function ContentUpload({
 
       onChange(data.publicId);
       setUrl("");
+      
+      // Success toast
+      toast({
+        title: "URL uploaded successfully",
+        description: "Content has been uploaded to Cloudinary",
+        variant: "success",
+      });
     } catch (error) {
       onError?.(error instanceof Error ? error.message : "Upload failed");
     } finally {
@@ -295,6 +309,9 @@ export function ContentUpload({
               onChange={(e) => setUrl(e.target.value)}
               disabled={uploading}
             />
+            <p className="text-xs text-muted-foreground">
+              ⚠️ For YouTube videos, use the "Link" content type instead. This uploads the file from the URL to Cloudinary.
+            </p>
             <Button
               type="button"
               onClick={handleUrlUpload}

@@ -357,3 +357,27 @@ prisma.entity.upsert({
 3. Check the schema to see which fields are required
 
 *AI Genius Lab Development Team*
+
+
+## Latest Updates (PayPal Webhook & Capture)
+
+### Additional Fixes Applied:
+- **PayPal Webhook** (`app/api/webhooks/paypal/route.ts`):
+  - Added ID generation for `payment.create()`
+  - Added ID generation for `activityLog.create()`
+  
+- **PayPal Capture** (`app/api/payments/paypal/capture/route.ts`):
+  - Added ID generation for `activityLog.create()` (2 instances)
+
+### Complete ID Prefixes:
+- `activity_` - ActivityLog records
+- `payment_` - Payment records
+- `enrollment_` - Enrollment records
+- `purchase_` - Purchase records
+- `course_` - Course records
+- `section_` - Section records
+- `lesson_` - Lesson records
+- `content_` - LessonContent records
+- `path_` - LearningPath records
+
+All payment and activity logging now works correctly! ✅
