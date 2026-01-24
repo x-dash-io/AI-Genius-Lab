@@ -318,7 +318,7 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
                     <div className="text-muted-foreground truncate">{item.title}</div>
                     {item.quantity > 1 && (
                       <div className="text-xs text-muted-foreground">
-                        Qty: {item.quantity} × ${(item.priceCents / 100).toFixed(2)}
+                        Qty: {item.quantity} x ${(item.priceCents / 100).toFixed(2)}
                       </div>
                     )}
                   </div>

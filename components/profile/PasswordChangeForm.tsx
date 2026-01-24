@@ -86,7 +86,7 @@ export function PasswordChangeForm({ changePasswordAction }: PasswordChangeFormP
           name="currentPassword"
           type={showPasswords ? "text" : "password"}
           required
-          placeholder={isAdminPreview ? "••••••••" : "Enter current password"}
+          placeholder={isAdminPreview ? "********" : "Enter current password"}
           readOnly={isAdminPreview}
           className={isAdminPreview ? "bg-muted cursor-not-allowed" : ""}
         />
@@ -99,7 +99,7 @@ export function PasswordChangeForm({ changePasswordAction }: PasswordChangeFormP
           name="newPassword"
           type={showPasswords ? "text" : "password"}
           required
-          placeholder={isAdminPreview ? "••••••••" : "Enter new password (min 8 characters)"}
+          placeholder={isAdminPreview ? "********" : "Enter new password (min 8 characters)"}
           minLength={8}
           readOnly={isAdminPreview}
           className={isAdminPreview ? "bg-muted cursor-not-allowed" : ""}
@@ -113,7 +113,7 @@ export function PasswordChangeForm({ changePasswordAction }: PasswordChangeFormP
           name="confirmPassword"
           type={showPasswords ? "text" : "password"}
           required
-          placeholder={isAdminPreview ? "••••••••" : "Confirm new password"}
+          placeholder={isAdminPreview ? "********" : "Confirm new password"}
           minLength={8}
           readOnly={isAdminPreview}
           className={isAdminPreview ? "bg-muted cursor-not-allowed" : ""}

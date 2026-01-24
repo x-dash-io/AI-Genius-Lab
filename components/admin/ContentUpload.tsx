@@ -310,7 +310,7 @@ export function ContentUpload({
               disabled={uploading}
             />
             <p className="text-xs text-muted-foreground">
-              ⚠️ For YouTube videos, use the "Link" content type instead. This uploads the file from the URL to Cloudinary.
+              Note: For YouTube videos, use the "Link" content type instead. This uploads the file from the URL to Cloudinary.
             </p>
             <Button
               type="button"

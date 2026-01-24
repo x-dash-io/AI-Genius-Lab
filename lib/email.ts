@@ -48,11 +48,11 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
                      options.text?.match(/\b(\d{6})\b/);
     if (codeMatch) {
       console.log("\n" + "=".repeat(60));
-      console.log("🔐 OTP CODE FOR TESTING (BYPASS_EMAIL=true)");
+      console.log("OTP CODE FOR TESTING (BYPASS_EMAIL=true)");
       console.log("=".repeat(60));
-      console.log(`📧 Email: ${options.to}`);
-      console.log(`🔢 OTP Code: ${codeMatch[1]}`);
-      console.log(`📝 Subject: ${options.subject}`);
+      console.log(`Email: ${options.to}`);
+      console.log(`OTP Code: ${codeMatch[1]}`);
+      console.log(`Subject: ${options.subject}`);
       console.log("=".repeat(60) + "\n");
     }
     return;
@@ -71,11 +71,11 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
                        options.text?.match(/\b(\d{6})\b/);
       if (codeMatch) {
         console.log("\n" + "=".repeat(60));
-        console.log("🔐 OTP CODE FOR TESTING (No RESEND_API_KEY)");
+        console.log("OTP CODE FOR TESTING (No RESEND_API_KEY)");
         console.log("=".repeat(60));
-        console.log(`📧 Email: ${options.to}`);
-        console.log(`🔢 OTP Code: ${codeMatch[1]}`);
-        console.log(`📝 Subject: ${options.subject}`);
+        console.log(`Email: ${options.to}`);
+        console.log(`OTP Code: ${codeMatch[1]}`);
+        console.log(`Subject: ${options.subject}`);
         console.log("=".repeat(60) + "\n");
       }
     }
@@ -112,11 +112,11 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
                          options.text?.match(/\b(\d{6})\b/);
         if (codeMatch) {
           console.log("\n" + "=".repeat(60));
-          console.log("🔐 OTP CODE FOR TESTING (Email Restricted)");
+          console.log("OTP CODE FOR TESTING (Email Restricted)");
           console.log("=".repeat(60));
-          console.log(`📧 Email: ${options.to}`);
-          console.log(`🔢 OTP Code: ${codeMatch[1]}`);
-          console.log(`📝 Subject: ${options.subject}`);
+          console.log(`Email: ${options.to}`);
+          console.log(`OTP Code: ${codeMatch[1]}`);
+          console.log(`Subject: ${options.subject}`);
           console.log("=".repeat(60) + "\n");
         }
         // Don't throw - return success to user (security best practice)
@@ -400,7 +400,7 @@ export async function sendCertificateEmail(
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
         <div style="background: linear-gradient(to right, #3b82f6, #2563eb); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-          <h1 style="color: white; margin: 0; font-size: 24px;">🎉 Congratulations!</h1>
+          <h1 style="color: white; margin: 0; font-size: 24px;">Congratulations!</h1>
           <p style="color: rgba(255, 255, 255, 0.9); margin: 8px 0 0 0;">You've earned a certificate</p>
         </div>
         <div style="padding: 30px; background-color: #ffffff;">
@@ -416,12 +416,12 @@ export async function sendCertificateEmail(
           </div>
           <div style="text-align: center; margin: 30px 0;">
             <a href="${pdfUrl}" style="display: inline-block; padding: 14px 28px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin-right: 10px;">
-              📄 Download Certificate
+              Download Certificate
             </a>
           </div>
           <div style="text-align: center; margin: 20px 0;">
             <a href="${verifyUrl}" style="display: inline-block; padding: 12px 24px; background-color: #10b981; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
-              ✓ Verify Certificate
+              Verify Certificate
             </a>
           </div>
           <div style="margin-top: 30px; padding: 20px; background-color: #f9fafb; border-radius: 8px;">

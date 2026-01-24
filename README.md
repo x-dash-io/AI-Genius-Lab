@@ -1,389 +1,336 @@
-# AI Genius Lab 🎓
+# Synapze Learning Platform
 
-A modern, full-featured online learning platform focused on AI education. Built with Next.js 16, TypeScript, Prisma, and PostgreSQL.
+A comprehensive online learning management system built for modern education. Deliver courses, track progress, issue certificates, and manage payments through a single, powerful platform.
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
 ![Prisma](https://img.shields.io/badge/Prisma-6.0-2D3748)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791)
 
-## ✨ Features
+## Overview
 
-### 🎯 Core Features
-- **Course Management**: Create and manage AI courses with structured sections and lessons
-- **Learning Paths**: Curated learning pathways for comprehensive skill development
-- **Progress Tracking**: Real-time lesson completion and learning progress tracking
-- **Certificates**: Automatic PDF certificate generation with verification system
-- **Payment Processing**: Secure PayPal integration for course purchases
-- **Invoice System**: Automated invoice generation and email delivery
+Synapze is a production-ready learning management system designed for educational institutions, training organizations, and content creators. The platform handles everything from course creation to payment processing, with built-in analytics and certificate generation.
 
-### 🔐 Authentication & Security
-- Email/password authentication with bcrypt hashing
-- Google OAuth integration
-- OTP verification for email confirmation
-- Secure password reset flow via email
-- Role-based access control (Admin/Customer)
-- Rate limiting on sensitive endpoints
+## Core Capabilities
 
-### 📊 Admin Dashboard
-- Comprehensive analytics with interactive charts
-- User management with role assignment
-- Course and learning path management
+### Course Management
+- Structured course creation with sections and lessons
+- Support for video, PDF, and document content
+- Drag-and-drop content organization
+- Category-based course organization
+- Learning path creation for guided curricula
+
+### Student Experience
+- Real-time progress tracking across all courses
+- Automatic certificate generation upon completion
+- Certificate verification system
+- Course reviews and ratings
+- Shopping cart and checkout flow
+- Purchase history and invoices
+
+### Administration
+- Comprehensive analytics dashboard
+- User management and role assignment
+- Content upload and management
 - Purchase tracking and reporting
-- Content upload with Cloudinary integration
+- Revenue analytics with visual charts
 
-### 🎨 User Experience
-- **Responsive Design**: Mobile-first, fully responsive UI
-- **Dark Mode**: Built-in theme switching
-- **Modern UI**: Clean, professional interface with Radix UI components
-- **Animations**: Smooth transitions with Framer Motion
-- **Accessibility**: WCAG compliant components
+### Security & Authentication
+- Email and password authentication
+- Google OAuth integration
+- Two-factor authentication via OTP
+- Secure password reset workflow
+- Role-based access control
+- Rate limiting on API endpoints
 
-### 📱 Mobile Optimized
-- Slide-out navigation menus
-- Touch-friendly interfaces
-- Optimized layouts for all screen sizes
-- Progressive Web App ready
+### Payment Processing
+- PayPal integration for course purchases
+- Automated invoice generation
+- Email delivery of receipts
+- Webhook handling for payment events
+- Support for individual courses and learning paths
 
-## 🚀 Quick Start
+## Technology Stack
 
-### Prerequisites
+### Frontend
+- Next.js 16 with App Router
+- TypeScript for type safety
+- Tailwind CSS for styling
+- Radix UI component library
+- Framer Motion for animations
+- Recharts for data visualization
 
-- Node.js 18+ 
+### Backend
 - PostgreSQL database
-- npm/yarn/pnpm
+- Prisma ORM
+- NextAuth.js for authentication
+- Resend for email delivery
+- Cloudinary for media storage
+- Redis for caching (optional)
+
+### Infrastructure
+- Vercel-ready deployment
+- Serverless API routes
+- Edge-optimized delivery
+- Automatic image optimization
+
+## Getting Started
+
+### Requirements
+
+- Node.js 18 or higher
+- PostgreSQL database
+- Package manager (npm, yarn, or pnpm)
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/ai-genius-lab.git
-   cd ai-genius-lab
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env.local
-   ```
-   Edit `.env.local` with your configuration (see [Environment Variables](#environment-variables))
-
-4. **Set up database**
-   ```bash
-   npx prisma migrate dev
-   npm run db:seed  # Optional: seed with sample data
-   ```
-
-5. **Start development server**
-   ```bash
-   npm run dev
-   ```
-
-6. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-## 🔧 Environment Variables
-
-Create a `.env.local` file with the following:
-
+1. Clone the repository and install dependencies:
 ```bash
-# Database
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DB_NAME"
-DIRECT_URL="postgresql://USER:PASSWORD@HOST:5432/DB_NAME"
+git clone <repository-url>
+cd synapze
+npm install
+```
 
-# NextAuth
+2. Configure environment variables by creating a `.env.local` file:
+```bash
+# Database Connection
+DATABASE_URL="postgresql://username:password@host:5432/database"
+DIRECT_URL="postgresql://username:password@host:5432/database"
+
+# Authentication
 NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="generate_with_openssl_rand_base64_32"
+NEXTAUTH_SECRET="<generate-with-openssl-rand-base64-32>"
 
 # Google OAuth (Optional)
-GOOGLE_CLIENT_ID="your_google_client_id"
-GOOGLE_CLIENT_SECRET="your_google_client_secret"
+GOOGLE_CLIENT_ID="<from-google-cloud-console>"
+GOOGLE_CLIENT_SECRET="<from-google-cloud-console>"
 
-# PayPal
-PAYPAL_ENV="sandbox"  # or "live" for production
-PAYPAL_CLIENT_ID="your_paypal_client_id"
-PAYPAL_CLIENT_SECRET="your_paypal_client_secret"
-PAYPAL_WEBHOOK_ID="your_webhook_id"
+# PayPal Configuration
+PAYPAL_ENV="sandbox"
+PAYPAL_CLIENT_ID="<from-paypal-developer>"
+PAYPAL_CLIENT_SECRET="<from-paypal-developer>"
+PAYPAL_WEBHOOK_ID="<from-paypal-developer>"
 
-# Cloudinary (File Storage)
-CLOUDINARY_CLOUD_NAME="your_cloud_name"
-CLOUDINARY_API_KEY="your_api_key"
-CLOUDINARY_API_SECRET="your_api_secret"
+# Cloudinary Media Storage
+CLOUDINARY_CLOUD_NAME="<from-cloudinary-dashboard>"
+CLOUDINARY_API_KEY="<from-cloudinary-dashboard>"
+CLOUDINARY_API_SECRET="<from-cloudinary-dashboard>"
 
-# Resend (Email)
-RESEND_API_KEY="your_resend_api_key"
-EMAIL_FROM="onboarding@resend.dev"  # Use verified domain in production
+# Email Service
+RESEND_API_KEY="<from-resend-dashboard>"
+EMAIL_FROM="noreply@yourdomain.com"
 
-# Upstash Redis (Optional - for caching)
-UPSTASH_REDIS_REST_URL="your_redis_url"
-UPSTASH_REDIS_REST_TOKEN="your_redis_token"
+# Redis Cache (Optional)
+UPSTASH_REDIS_REST_URL="<from-upstash-console>"
+UPSTASH_REDIS_REST_TOKEN="<from-upstash-console>"
 
-# Prisma
+# Prisma Configuration
 PRISMA_CLIENT_ENGINE_TYPE="library"
 ```
 
-### Detailed Setup Guides
+3. Initialize the database:
+```bash
+npx prisma migrate dev
+npm run db:seed
+```
 
-- **[Google OAuth Setup](docs/GOOGLE_OAUTH_SETUP.md)** - Enable Google sign-in
-- **[PayPal Sandbox Setup](docs/PAYPAL_SANDBOX_SETUP.md)** - Test payments with fake money
-- **[Email Setup (Resend)](docs/EMAIL_SETUP.md)** - Configure email delivery
-- **[Ngrok Setup](docs/NGROK_SETUP.md)** - Test webhooks locally
+4. Start the development server:
+```bash
+npm run dev
+```
 
-## 📚 Documentation
+5. Access the application at `http://localhost:3000`
 
-### Core Documentation
-- **[Implementation Summary](docs/IMPLEMENTATION_SUMMARY.md)** - Complete feature overview
-- **[Certification System](docs/CERTIFICATION_SYSTEM_SUMMARY.md)** - Certificate generation & verification
-- **[Content Security](docs/CONTENT_SECURITY.md)** - Cloudinary integration & signed URLs
-- **[Learning Pathways](docs/LEARNING_PATHWAYS.md)** - Learning path implementation
-- **[Security Audit](docs/SECURITY_AUDIT.md)** - Security best practices
-- **[Testing Guide](docs/TESTING_GUIDE.md)** - Running and writing tests
+### Default Credentials
 
-### Recent Fixes & Improvements
-- **[Mobile Responsiveness](docs/fixes/MOBILE_RESPONSIVENESS_FIXES.md)** - Mobile layout fixes
-- **[Dashboard Improvements](docs/fixes/DASHBOARD_IMPROVEMENTS.md)** - Enhanced customer dashboard
-- **[JSON Parsing Fix](docs/fixes/JSON_PARSING_FIX.md)** - Safe JSON parsing utility
+After seeding, use these credentials to access the platform:
 
-## 🏗️ Tech Stack
+**Administrator Account:**
+- Email: admin@synapze.dev
+- Password: password123
 
-### Frontend
-- **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript 5.0
-- **Styling**: Tailwind CSS
-- **UI Components**: Radix UI
-- **Animations**: Framer Motion
-- **Charts**: Recharts
-- **Forms**: React Hook Form + Zod
+**Customer Account:**
+- Email: customer@aigeniuslab.com
+- Password: password123
 
-### Backend
-- **Database**: PostgreSQL 15
-- **ORM**: Prisma 6.0
-- **Authentication**: NextAuth.js
-- **Email**: Resend
-- **File Storage**: Cloudinary
-- **PDF Generation**: pdf-lib
-- **Caching**: Upstash Redis (optional)
+## Database Management
 
-### Payments & Analytics
-- **Payments**: PayPal SDK
-- **Analytics**: Vercel Analytics
-- **Monitoring**: Built-in logging
+```bash
+# Apply schema changes
+npm run db:push
 
-## 🧪 Testing
+# Create new migration
+npx prisma migrate dev --name migration_name
+
+# Deploy to production
+npx prisma migrate deploy
+
+# Seed sample data
+npm run db:seed
+
+# Open database GUI
+npx prisma studio
+
+# Regenerate Prisma Client
+npx prisma generate
+```
+
+## Testing
+
+The platform includes comprehensive test coverage:
 
 ```bash
 # Run all tests
 npm test
 
-# Run tests in watch mode
+# Watch mode
 npm run test:watch
 
-# Run tests with coverage
+# Coverage report
 npm run test:coverage
 
-# Run specific test file
+# Specific test suite
 npm test -- user-flow
 ```
 
-### Test Coverage
-- ✅ User authentication flow
-- ✅ Course purchase flow
-- ✅ Learning path enrollment
-- ✅ Lesson progress tracking
-- ✅ Review system
-- ✅ Certificate generation & verification
-- ✅ RBAC (Role-Based Access Control)
-- ✅ Password hashing & verification
+Test coverage includes:
+- Authentication workflows
+- Course purchase flows
+- Progress tracking
+- Certificate generation
+- Review system
+- Role-based access control
+- Password security
 
-## 📦 Database Commands
+## Deployment
 
+### Vercel Deployment
+
+1. Push code to GitHub repository
+
+2. Import project to Vercel:
+   - Visit vercel.com/new
+   - Select your repository
+   - Vercel detects Next.js automatically
+
+3. Configure environment variables in Vercel dashboard
+
+4. Deploy - automatic on every push to main branch
+
+### Database Options
+
+**Neon (Recommended)**
+- Serverless PostgreSQL
+- Automatic scaling
+- Free tier available
+- Visit neon.tech
+
+**Vercel Postgres**
+- Integrated with Vercel
+- Simple setup
+- Install: `npm i @vercel/postgres`
+
+**Supabase**
+- PostgreSQL with additional features
+- Real-time capabilities
+- Visit supabase.com
+
+After database setup, run migrations:
 ```bash
-# Push schema changes to database
-npm run db:push
-
-# Create a new migration
-npx prisma migrate dev --name your_migration_name
-
-# Deploy migrations to production
 npx prisma migrate deploy
-
-# Seed database with sample data
-npm run db:seed
-
-# Open Prisma Studio (database GUI)
-npx prisma studio
-
-# Generate Prisma Client
-npx prisma generate
 ```
 
-## 🚢 Deployment
-
-### Vercel (Recommended)
-
-1. **Push to GitHub**
-   ```bash
-   git push origin main
-   ```
-
-2. **Import to Vercel**
-   - Go to [vercel.com/new](https://vercel.com/new)
-   - Import your repository
-   - Vercel auto-detects Next.js
-
-3. **Add Environment Variables**
-   - Copy all variables from `.env.local`
-   - Add them in Vercel project settings
-
-4. **Deploy**
-   - Vercel automatically deploys on push
-   - Production URL provided
-
-### Database Setup for Production
-
-**Option 1: Vercel Postgres**
-```bash
-# Install Vercel Postgres
-npm i @vercel/postgres
-
-# Connect in Vercel dashboard
-# Copy DATABASE_URL to environment variables
-```
-
-**Option 2: Neon (Recommended)**
-- Sign up at [neon.tech](https://neon.tech)
-- Create a new project
-- Copy connection string to `DATABASE_URL`
-- Run migrations: `npx prisma migrate deploy`
-
-**Option 3: Supabase**
-- Sign up at [supabase.com](https://supabase.com)
-- Create a new project
-- Get connection string from settings
-- Add to `DATABASE_URL`
-
-## 🛠️ Development
-
-### Project Structure
+## Project Structure
 
 ```
-ai-genius-lab/
-├── app/                    # Next.js App Router
-│   ├── (admin)/           # Admin routes
-│   ├── (app)/             # Customer routes
-│   ├── (public)/          # Public routes
-│   └── api/               # API routes
+synapze/
+├── app/                    # Next.js application
+│   ├── (admin)/           # Admin dashboard routes
+│   ├── (app)/             # Student portal routes
+│   ├── (public)/          # Public pages
+│   └── api/               # API endpoints
 ├── components/            # React components
-│   ├── admin/            # Admin components
-│   ├── auth/             # Auth components
-│   ├── cart/             # Cart components
+│   ├── admin/            # Admin-specific components
+│   ├── auth/             # Authentication components
+│   ├── cart/             # Shopping cart
 │   ├── layout/           # Layout components
-│   └── ui/               # UI components
+│   └── ui/               # Reusable UI components
 ├── lib/                   # Utility functions
 │   ├── admin/            # Admin utilities
-│   ├── cart/             # Cart utilities
-│   └── seo/              # SEO utilities
-├── prisma/               # Database schema & migrations
-├── __tests__/            # Test files
-├── docs/                 # Documentation
-└── public/               # Static assets
+│   ├── cart/             # Cart logic
+│   └── seo/              # SEO helpers
+├── prisma/               # Database schema
+├── __tests__/            # Test suites
+└── docs/                 # Documentation
 ```
 
-### Key Files
+## Security Features
 
-- `app/layout.tsx` - Root layout with providers
-- `lib/auth.ts` - NextAuth configuration
-- `lib/prisma.ts` - Prisma client with retry logic
-- `middleware.ts` - Route protection & redirects
-- `prisma/schema.prisma` - Database schema
+- bcrypt password hashing
+- JWT-based session management
+- CSRF protection
+- Rate limiting on sensitive endpoints
+- SQL injection prevention via Prisma
+- XSS protection through React
+- Signed URLs for content delivery
+- Role-based access control
 
-### Code Quality
+## Performance Optimizations
+
+- Server-side rendering
+- Automatic code splitting
+- Image optimization
+- Redis caching layer
+- Database query optimization
+- CDN delivery for media
+- Edge function support
+
+## Code Quality
 
 ```bash
-# Lint code
+# Lint codebase
 npm run lint
 
 # Format code
 npm run format
 
-# Type check
+# Type checking
 npm run type-check
 ```
 
-## 🔒 Security Features
+## Documentation
 
-- **Password Hashing**: bcrypt with salt rounds
-- **JWT Tokens**: Secure session management
-- **CSRF Protection**: Built-in with NextAuth
-- **Rate Limiting**: API endpoint protection
-- **SQL Injection Prevention**: Prisma ORM
-- **XSS Protection**: React auto-escaping
-- **Content Security**: Signed Cloudinary URLs
-- **Role-Based Access**: Admin/Customer separation
+Detailed documentation is available in the `docs/` directory:
 
-## 📈 Performance
+- Implementation guides
+- API documentation
+- Security best practices
+- Testing strategies
+- Deployment procedures
 
-- **Server Components**: Reduced client-side JavaScript
-- **Image Optimization**: Next.js Image component
-- **Code Splitting**: Automatic route-based splitting
-- **Caching**: Redis caching for expensive queries
-- **Database Indexing**: Optimized Prisma schema
-- **CDN**: Cloudinary for media delivery
+## Support
 
-## 🤝 Contributing
+For technical support or questions:
+- Review documentation in the `docs/` folder
+- Open an issue on GitHub
+- Contact: support@aigeniuslab.com
 
-Contributions are welcome! Please follow these steps:
+## License
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+This project is licensed under the MIT License. See the LICENSE file for details.
 
-### Coding Standards
+## Acknowledgments
 
-- Use TypeScript for type safety
-- Follow ESLint configuration
-- Write tests for new features
-- Update documentation
-- Use conventional commits
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [Next.js](https://nextjs.org/) - React framework
-- [Prisma](https://www.prisma.io/) - Database ORM
-- [NextAuth.js](https://next-auth.js.org/) - Authentication
-- [Tailwind CSS](https://tailwindcss.com/) - Styling
-- [Radix UI](https://www.radix-ui.com/) - UI components
-- [Cloudinary](https://cloudinary.com/) - Media management
-- [Resend](https://resend.com/) - Email delivery
-- [PayPal](https://developer.paypal.com/) - Payment processing
-
-## 📞 Support
-
-- **Documentation**: Check the [docs](docs/) folder
-- **Issues**: Open an issue on GitHub
-- **Email**: support@aigeniuslab.com
-
-## 🗺️ Roadmap
-
-- [ ] Video streaming with HLS
-- [ ] Live classes with WebRTC
-- [ ] Mobile app (React Native)
-- [ ] AI-powered course recommendations
-- [ ] Gamification (badges, leaderboards)
-- [ ] Multi-language support
-- [ ] Stripe payment integration
-- [ ] Course marketplace
+Built with industry-leading open source technologies:
+- Next.js - React framework
+- Prisma - Database toolkit
+- NextAuth.js - Authentication
+- Tailwind CSS - Utility-first CSS
+- Radix UI - Accessible components
+- Cloudinary - Media management
+- Resend - Email infrastructure
+- PayPal - Payment processing
 
 ---
 
-**Built with ❤️ by the AI Genius Lab Team**
+Built by the Synapze Team

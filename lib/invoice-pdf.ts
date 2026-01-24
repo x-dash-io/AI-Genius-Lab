@@ -525,7 +525,7 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
   // ===== FOOTER =====
   const footerY = 50;
   
-  page.drawText("AI Genius Lab • Premium Online Learning Platform • support@aigeniuslab.com", {
+  page.drawText("AI Genius Lab - Premium Online Learning Platform - support@aigeniuslab.com", {
     x: width / 2 - 180,
     y: footerY + 15,
     size: 7,
