@@ -48,7 +48,7 @@ export async function hasCompletedCourse(userId: string, courseId: string): Prom
   });
 
   // Check if all lessons are completed
-  const completedLessons = progressRecords.filter((p) => p.completedAt !== null).length;
+  const completedLessons = progressRecords.filter((p) => p.completedAt != null).length;
   return completedLessons === lessonIds.length;
 }
 

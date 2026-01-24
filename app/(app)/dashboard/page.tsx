@@ -146,7 +146,7 @@ export default async function DashboardPage({
       });
 
       const totalLessons = lessonIds.length;
-      const completedLessons = progressRecords.filter(p => p.completedAt !== null).length;
+      const completedLessons = progressRecords.filter(p => p.completedAt != null).length;
       const inProgressLessons = progressRecords.filter(p => p.startedAt && !p.completedAt).length;
       const completionPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 

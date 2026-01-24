@@ -82,7 +82,7 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
 
   // Calculate overall progress
   const totalLessons = lessonIds.length;
-  const completedLessons = progressEntries.filter(p => p.completedAt !== null).length;
+  const completedLessons = progressEntries.filter(p => p.completedAt != null).length;
   const overallProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
   return (
@@ -131,7 +131,7 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
         {course.Section.map((section, sectionIndex) => {
           const sectionLessons = section.Lesson;
           const sectionCompleted = sectionLessons.filter(l => 
-            progressMap.get(l.id)?.completedAt !== null
+            progressMap.get(l.id)?.completedAt != null
           ).length;
           const sectionProgress = sectionLessons.length > 0 
             ? Math.round((sectionCompleted / sectionLessons.length) * 100) 
@@ -175,7 +175,7 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
               <div className="divide-y">
                 {sectionLessons.map((lesson, lessonIndex) => {
                   const progress = progressMap.get(lesson.id);
-                  const isCompleted = progress?.completedAt !== null;
+                  const isCompleted = progress?.completedAt != null;
                   const progressPercent = progress?.completionPercent ?? 0;
 
                   return (

@@ -66,7 +66,7 @@ export async function getUserStats(userId: string): Promise<UserStats> {
   });
 
   const totalSpent = purchases.reduce((sum, p) => sum + p.amountCents, 0);
-  const lessonsCompleted = progress.filter((p) => p.completedAt !== null).length;
+  const lessonsCompleted = progress.filter((p) => p.completedAt != null).length;
 
   return {
     coursesPurchased: purchases.length,
