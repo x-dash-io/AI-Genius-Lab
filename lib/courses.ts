@@ -52,18 +52,18 @@ export async function getCoursePreviewBySlug(slug: string) {
             title: true,
             description: true,
             priceCents: true,
-            sections: {
+            Section: {
               orderBy: { sortOrder: "asc" },
               select: {
                 id: true,
                 title: true,
-                lessons: {
+                Lesson: {
                   orderBy: { sortOrder: "asc" },
                   select: {
                     id: true,
                     title: true,
                     isLocked: true,
-                    contents: {
+                    LessonContent: {
                       orderBy: { sortOrder: "asc" },
                       take: 1,
                       select: {
@@ -91,12 +91,12 @@ export async function getCourseForLibraryBySlug(slug: string) {
         id: true,
         slug: true,
         title: true,
-        sections: {
+        Section: {
           orderBy: { sortOrder: "asc" },
           select: {
             id: true,
             title: true,
-            lessons: {
+            Lesson: {
               orderBy: { sortOrder: "asc" },
               select: {
                 id: true,
@@ -115,9 +115,9 @@ export async function getLessonById(lessonId: string) {
     return prisma.lesson.findUnique({
       where: { id: lessonId },
       include: {
-        section: {
+        Section: {
           include: {
-            course: true,
+            Course: true,
           },
         },
       },

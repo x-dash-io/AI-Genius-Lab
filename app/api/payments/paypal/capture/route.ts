@@ -53,7 +53,7 @@ export async function GET(request: Request) {
         id: { in: purchaseIds },
         providerRef: orderId,
       },
-      include: { course: true },
+      include: { Course: true },
     });
 
     if (purchases.length === 0) {
@@ -96,7 +96,7 @@ export async function GET(request: Request) {
           });
 
           // Decrement inventory if course has limited inventory
-          if (purchase.course.inventory !== null) {
+          if (purchase.Course.inventory !== null) {
             await prisma.course.update({
               where: { id: purchase.courseId },
               data: {
@@ -141,8 +141,8 @@ export async function GET(request: Request) {
               metadata: {
                 purchaseId: purchase.id,
                 courseId: purchase.courseId,
-                courseTitle: purchase.course.title,
-                courseSlug: purchase.course.slug,
+                courseTitle: purchase.Course.title,
+                courseSlug: purchase.Course.slug,
               },
             },
           });
@@ -172,22 +172,22 @@ export async function GET(request: Request) {
     if (user) {
       try {
         const { sendPurchaseConfirmationEmail, sendEnrollmentEmail, sendInvoiceEmail } = await import("@/lib/email");
-        const courseTitles = purchases.map((p) => p.course.title).join(", ");
+        const courseTitles = purchases.map((p) => p.Course.title).join(", ");
         const totalAmount = purchases.reduce((sum, p) => sum + p.amountCents, 0);
         const invoiceNumber = generateInvoiceNumber(purchases[0].id);
         const purchaseDate = payment?.createdAt || purchases[0].createdAt;
         
         await Promise.all([
           sendPurchaseConfirmationEmail(user.email, courseTitles, totalAmount),
-          ...purchases.map((p) => sendEnrollmentEmail(user.email, p.course.title)),
+          ...purchases.map((p) => sendEnrollmentEmail(user.email, p.Course.title)),
           sendInvoiceEmail(
             user.email,
             user.name || "Customer",
             invoiceNumber,
             purchaseDate,
             purchases.map((p) => ({
-              title: p.course.title,
-              description: p.course.description || undefined,
+              title: p.Course.title,
+              description: p.Course.description || undefined,
               amountCents: p.amountCents,
               currency: p.currency,
             })),
@@ -210,7 +210,7 @@ export async function GET(request: Request) {
   // Single purchase (existing flow)
   const purchase = await prisma.purchase.findFirst({
     where: { providerRef: orderId },
-    include: { course: true },
+    include: { Course: true },
   });
 
   if (!purchase) {
@@ -227,12 +227,12 @@ export async function GET(request: Request) {
         select: { email: true },
       });
 
-      if (user && purchase.course) {
+      if (user && purchase.Course) {
         try {
           const { sendPurchaseFailedEmail } = await import("@/lib/email");
           await sendPurchaseFailedEmail(
             user.email,
-            purchase.course.title,
+            purchase.Course.title,
             "Payment capture failed"
           );
         } catch (error) {
@@ -241,7 +241,7 @@ export async function GET(request: Request) {
       }
 
       return NextResponse.redirect(
-        new URL(`/courses/${purchase.course.slug}?checkout=failed`, baseUrl)
+        new URL(`/courses/${purchase.Course.slug}?checkout=failed`, baseUrl)
       );
     }
 
@@ -251,7 +251,7 @@ export async function GET(request: Request) {
     });
 
     // Decrement inventory if course has limited inventory
-    if (purchase.course.inventory !== null) {
+    if (purchase.Course.inventory !== null) {
       await prisma.course.update({
         where: { id: purchase.courseId },
         data: {
@@ -289,23 +289,23 @@ export async function GET(request: Request) {
       select: { email: true, name: true },
     });
 
-    if (user && purchase.course) {
+    if (user && purchase.Course) {
       try {
         const { sendPurchaseConfirmationEmail, sendEnrollmentEmail, sendInvoiceEmail } = await import("@/lib/email");
         const invoiceNumber = generateInvoiceNumber(purchase.id);
         const purchaseDate = payment?.createdAt || purchase.createdAt;
         
         await Promise.all([
-          sendPurchaseConfirmationEmail(user.email, purchase.course.title, purchase.amountCents),
-          sendEnrollmentEmail(user.email, purchase.course.title),
+          sendPurchaseConfirmationEmail(user.email, purchase.Course.title, purchase.amountCents),
+          sendEnrollmentEmail(user.email, purchase.Course.title),
           sendInvoiceEmail(
             user.email,
             user.name || "Customer",
             invoiceNumber,
             purchaseDate,
             [{
-              title: purchase.course.title,
-              description: purchase.course.description || undefined,
+              title: purchase.Course.title,
+              description: purchase.Course.description || undefined,
               amountCents: purchase.amountCents,
               currency: purchase.currency,
             }],
@@ -338,8 +338,8 @@ export async function GET(request: Request) {
         metadata: {
           purchaseId: purchase.id,
           courseId: purchase.courseId,
-          courseTitle: purchase.course.title,
-          courseSlug: purchase.course.slug,
+          courseTitle: purchase.Course.title,
+          courseSlug: purchase.Course.slug,
         },
       },
     });

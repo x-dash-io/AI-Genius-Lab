@@ -44,10 +44,10 @@ export async function requireLessonAccess(lessonId: string) {
       where: { id: lessonId },
       select: {
         id: true,
-        section: {
+        Section: {
           select: {
             courseId: true,
-            course: { select: { slug: true } },
+            Course: { select: { slug: true } },
           },
         },
       },
@@ -61,7 +61,7 @@ export async function requireLessonAccess(lessonId: string) {
   const hasAccess = await hasCourseAccess(
     user.id,
     user.role,
-    lesson.section.courseId
+    lesson.Section.courseId
   );
 
   if (!hasAccess) {
@@ -70,7 +70,7 @@ export async function requireLessonAccess(lessonId: string) {
 
   return {
     lessonId: lesson.id,
-    courseSlug: lesson.section.course.slug,
+    courseSlug: lesson.Section.Course.slug,
     userId: user.id,
   };
 }
@@ -82,12 +82,12 @@ export async function getAuthorizedLessonContent(lessonId: string) {
     return prisma.lesson.findUnique({
       where: { id: lessonId },
       include: {
-        section: {
+        Section: {
           include: {
-            course: true,
+            Course: true,
           },
         },
-        contents: {
+        LessonContent: {
           orderBy: { sortOrder: "asc" },
           take: 1,
         },
@@ -102,7 +102,7 @@ export async function getAuthorizedLessonContent(lessonId: string) {
   const hasAccess = await hasCourseAccess(
     user.id,
     user.role,
-    lesson.section.courseId
+    lesson.Section.courseId
   );
 
   if (!hasAccess) {
@@ -110,7 +110,7 @@ export async function getAuthorizedLessonContent(lessonId: string) {
   }
 
   // Get content type from the first content item, or default to 'video'
-  const firstContent = lesson.contents[0];
+  const firstContent = lesson.LessonContent[0];
 
   // Check if there's old contentUrl in the lesson table (migration issue)
   const oldContentUrl = (lesson as any).contentUrl;
@@ -135,9 +135,10 @@ export async function getAuthorizedLessonContent(lessonId: string) {
         durationSeconds: lesson.durationSeconds,
         allowDownload: lesson.allowDownload,
       },
-      courseSlug: lesson.section.course.slug,
+      courseSlug: lesson.Section.Course.slug,
       publicId: null,
       signedUrl: null,
+      contentMetadata: null,
     };
   }
 
@@ -170,12 +171,16 @@ export async function getAuthorizedLessonContent(lessonId: string) {
       durationSeconds: lesson.durationSeconds,
       allowDownload: lesson.allowDownload,
     },
-    courseSlug: lesson.section.course.slug,
+    courseSlug: lesson.Section.Course.slug,
     publicId: contentUrl, // Return the original public ID for existence checking
     signedUrl: buildLessonUrl({
       contentType,
       contentUrl,
       allowDownload: lesson.allowDownload,
     }, user.id),
+    contentMetadata: firstContent ? {
+      title: firstContent.title,
+      description: firstContent.description,
+    } : null,
   };
 }

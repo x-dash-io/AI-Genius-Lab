@@ -29,16 +29,16 @@ export async function POST(request: NextRequest) {
           m.getLessonById(lessonId)
         );
         if (lesson) {
-          trackLessonComplete(lessonId, lesson.section.courseId, user.id);
+          trackLessonComplete(lessonId, lesson.Section.courseId, user.id);
           
           // Check if course is now complete and generate certificate
           try {
             const { hasCompletedCourse, generateCourseCertificate } = await import("@/lib/certificates");
-            const courseCompleted = await hasCompletedCourse(user.id, lesson.section.courseId);
+            const courseCompleted = await hasCompletedCourse(user.id, lesson.Section.courseId);
             
             if (courseCompleted) {
               // Generate certificate asynchronously (don't block the response)
-              generateCourseCertificate(lesson.section.courseId).catch((error) => {
+              generateCourseCertificate(lesson.Section.courseId).catch((error) => {
                 console.error("Failed to generate certificate:", error);
                 // Don't fail the progress update if certificate generation fails
               });

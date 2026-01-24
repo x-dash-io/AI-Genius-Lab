@@ -20,7 +20,7 @@ export async function updateLessonProgress(
       where: { id: lessonId },
       select: {
         id: true,
-        section: {
+        Section: {
           select: {
             courseId: true,
           },
@@ -36,7 +36,7 @@ export async function updateLessonProgress(
   const hasAccess = await hasCourseAccess(
     user.id,
     user.role,
-    lesson.section.courseId
+    lesson.Section.courseId
   );
 
   if (!hasAccess) {
@@ -53,18 +53,21 @@ export async function updateLessonProgress(
         },
       },
       create: {
+        id: `${user.id}-${lessonId}-${Date.now()}`, // Generate unique ID
         userId: user.id,
         lessonId,
         startedAt: data.startedAt || new Date(),
         completedAt: data.completedAt,
         lastPosition: data.lastPosition ?? 0,
         completionPercent: data.completionPercent ?? 0,
+        updatedAt: new Date(),
       },
       update: {
         startedAt: data.startedAt,
         completedAt: data.completedAt,
         lastPosition: data.lastPosition,
         completionPercent: data.completionPercent,
+        updatedAt: new Date(),
       },
     });
   });
@@ -93,9 +96,9 @@ export async function getCourseProgress(courseId: string) {
     return prisma.course.findUnique({
       where: { id: courseId },
       include: {
-        sections: {
+        Section: {
           include: {
-            lessons: {
+            Lesson: {
               select: {
                 id: true,
               },
@@ -110,8 +113,8 @@ export async function getCourseProgress(courseId: string) {
     throw new Error("NOT_FOUND");
   }
 
-  const lessonIds = course.sections.flatMap((s) =>
-    s.lessons.map((l) => l.id)
+  const lessonIds = course.Section.flatMap((s) =>
+    s.Lesson.map((l) => l.id)
   );
 
   const progressRecords = await withRetry(async () => {

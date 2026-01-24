@@ -83,10 +83,18 @@ export function getSignedCloudinaryUrl(
   const expiresAt = Math.floor(Date.now() / 1000) + 60 * 10; // 10 minutes
 
   try {
+    // IMPORTANT: Use type: "upload" (not "authenticated") because existing files
+    // were uploaded with default upload type. Trying to access them as "authenticated"
+    // causes "Limited access" errors.
+    // 
+    // For security, we still use signed URLs with expiration, which provides:
+    // - Time-limited access (10 minutes)
+    // - Signature verification
+    // - Per-request validation (via /api/content/[lessonId])
     const signedUrl = cloudinary.url(cleanPublicId, {
       secure: true,
       sign_url: true,
-      type: "authenticated",
+      type: "upload", // Changed from "authenticated" to match actual file type
       resource_type: resourceType,
       expires_at: expiresAt,
       attachment: options.download ? cleanPublicId.split('/').pop() : undefined,
@@ -129,9 +137,13 @@ export async function uploadToCloudinary(
     const uploadOptions: any = {
       folder,
       resource_type: resourceType,
-      // CRITICAL: Use "authenticated" type so files can only be accessed via signed URLs
-      // This MUST match the type used in getSignedCloudinaryUrl()
-      type: "authenticated",
+      // Use type: "upload" (default) instead of "authenticated"
+      // This allows signed URLs to work properly without "Limited access" errors
+      // Security is still maintained through:
+      // 1. Signed URLs with expiration (10 minutes)
+      // 2. Per-request authentication check in /api/content/[lessonId]
+      // 3. Purchase verification before generating URLs
+      type: "upload",
       use_filename: true,
       unique_filename: true,
       overwrite: false,

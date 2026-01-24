@@ -19,7 +19,7 @@ export default async function LibraryPage() {
       status: "paid",
     },
     include: {
-      course: true,
+      Course: true,
     },
     orderBy: { createdAt: "desc" },
   });
@@ -43,16 +43,16 @@ export default async function LibraryPage() {
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                     Purchased
                   </p>
-                  <CardTitle className="text-xl">{purchase.course.title}</CardTitle>
+                  <CardTitle className="text-xl">{purchase.Course.title}</CardTitle>
                   <CardDescription>
-                    {purchase.course.description || "Continue your learning journey"}
+                    {purchase.Course.description || "Continue your learning journey"}
                   </CardDescription>
                 </div>
                 <BookOpen className="h-5 w-5 text-muted-foreground" />
               </div>
             </CardHeader>
             <CardContent>
-              <Link href={`/library/${purchase.course.slug}`}>
+              <Link href={`/library/${purchase.Course.slug}`}>
                 <Button>Resume Learning</Button>
               </Link>
             </CardContent>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { Loader2 } from "lucide-react";
 
 interface VideoPlayerProps {
   src: string;
@@ -17,9 +18,7 @@ export function VideoPlayer({
   onProgress,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<{
     message: string;
     adminActionRequired?: boolean;
@@ -43,56 +42,16 @@ export function VideoPlayer({
         console.error("Failed to update progress:", error);
       }
     },
-    2000 // Update every 2 seconds
+    3000 // Update every 3 seconds to reduce API calls
   );
 
   useEffect(() => {
-    // Check content availability first
-    const checkContentAvailability = async () => {
-      try {
-        const response = await fetch(src, { method: 'HEAD' });
-        if (!response.ok) {
-          // Try to get error details from response
-          let errorData = {};
-          try {
-            const text = await response.text();
-            if (text) {
-              errorData = JSON.parse(text);
-            }
-          } catch (e) {
-            // If not JSON, check status
-            if (response.status === 404) {
-              errorData = {
-                code: "CONTENT_MISSING_FROM_STORAGE",
-                message: "Content file is missing from storage. Please contact support.",
-                adminActionRequired: true
-              };
-            }
-          }
-          
-          if (errorData.code === "CONTENT_MISSING_FROM_STORAGE" || response.status === 404) {
-            setError({
-              message: errorData.message || "Content file is missing from storage. Please contact support.",
-              adminActionRequired: errorData.adminActionRequired,
-              code: errorData.code || "CONTENT_MISSING_FROM_STORAGE"
-            });
-            return;
-          }
-        }
-      } catch (error) {
-        console.error("Error checking content availability:", error);
-      }
-    };
-
-    checkContentAvailability();
-
     const video = videoRef.current;
     if (!video) return;
 
     const handleTimeUpdate = () => {
       const current = video.currentTime;
       const total = video.duration || 0;
-      setCurrentTime(current);
 
       if (total > 0) {
         const percent = (current / total) * 100;
@@ -102,16 +61,15 @@ export function VideoPlayer({
     };
 
     const handleLoadedMetadata = () => {
-      setDuration(video.duration);
+      setIsLoading(false);
     };
 
     const handleError = () => {
       setError({ message: "Failed to load video content. The content may not be available yet." });
+      setIsLoading(false);
     };
 
     const handleEnded = async () => {
-      setIsPlaying(false);
-      // Mark as completed when video ends
       try {
         await fetch("/api/progress", {
           method: "POST",
@@ -127,65 +85,68 @@ export function VideoPlayer({
       }
     };
 
+    const handleWaiting = () => setIsLoading(true);
+    const handleCanPlay = () => setIsLoading(false);
+    const handleLoadStart = () => setIsLoading(true);
+
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
     video.addEventListener("ended", handleEnded);
     video.addEventListener("error", handleError);
+    video.addEventListener("waiting", handleWaiting);
+    video.addEventListener("canplay", handleCanPlay);
+    video.addEventListener("loadstart", handleLoadStart);
 
     return () => {
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
       video.removeEventListener("ended", handleEnded);
       video.removeEventListener("error", handleError);
+      video.removeEventListener("waiting", handleWaiting);
+      video.removeEventListener("canplay", handleCanPlay);
+      video.removeEventListener("loadstart", handleLoadStart);
     };
-  }, [lessonId, debouncedProgressUpdate, onProgress, src]);
-
-  const togglePlay = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    if (isPlaying) {
-      video.pause();
-    } else {
-      video.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  }, [lessonId, debouncedProgressUpdate, onProgress]);
 
   if (error) {
     return (
-      <div className="relative w-full bg-black rounded-lg overflow-hidden p-8 text-center">
-        <div className="text-white">
-          <p className="text-lg font-medium mb-2">Content Unavailable</p>
-          <p className="text-sm text-gray-400">{error.message}</p>
+      <div className="relative w-full aspect-video bg-muted rounded-xl overflow-hidden flex items-center justify-center border">
+        <div className="text-center p-8 max-w-md">
+          <div className="h-16 w-16 rounded-2xl bg-destructive/10 flex items-center justify-center border border-destructive/20 mx-auto mb-4">
+            <svg className="h-8 w-8 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <p className="text-lg font-semibold mb-2">Content Unavailable</p>
+          <p className="text-sm text-muted-foreground">{error.message}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="relative w-full bg-black rounded-lg overflow-hidden">
-      <video
-        ref={videoRef}
-        src={src}
-        className="w-full"
-        controls={!allowDownload}
-        controlsList={allowDownload ? undefined : "nodownload"}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-      />
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-        <div className="flex items-center gap-2 text-white text-sm">
-          <span>{formatTime(currentTime)}</span>
-          <span>/</span>
-          <span>{formatTime(duration)}</span>
-        </div>
+    <div className="relative w-full">
+      {/* Video Element with Native Controls */}
+      <div className="relative aspect-video bg-black rounded-xl overflow-hidden shadow-lg">
+        <video
+          ref={videoRef}
+          src={src}
+          className="w-full h-full"
+          controls
+          controlsList={allowDownload ? undefined : "nodownload"}
+          preload="metadata"
+          playsInline
+        />
+        
+        {/* Loading Overlay */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm pointer-events-none">
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="h-12 w-12 text-white animate-spin" />
+              <p className="text-sm text-white/80">Loading video...</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

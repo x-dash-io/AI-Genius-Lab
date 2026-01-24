@@ -12,7 +12,8 @@ import {
   FileText,
   PlayCircle,
   Download,
-  ChevronRight
+  ChevronRight,
+  BookOpen
 } from "lucide-react";
 
 type LessonPageProps = {
@@ -27,14 +28,14 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
   const { courseId, lessonId } = await params;
 
-  let lesson, courseSlug, signedUrl;
+  let lesson, courseSlug, signedUrl, contentMetadata;
   try {
     const result = await getAuthorizedLessonContent(lessonId);
     lesson = result.lesson;
     courseSlug = result.courseSlug;
     signedUrl = result.signedUrl;
+    contentMetadata = result.contentMetadata;
   } catch (error) {
-    // If lesson doesn't exist, redirect to course page
     if (error instanceof Error && error.message === "NOT_FOUND") {
       redirect(`/library/${courseId}`);
     }
@@ -58,7 +59,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
       case 'file':
         return <FileText className="h-4 w-4" />;
       default:
-        return <FileText className="h-4 w-4" />;
+        return <BookOpen className="h-4 w-4" />;
     }
   };
 
@@ -80,98 +81,136 @@ export default async function LessonPage({ params }: LessonPageProps) {
   };
 
   return (
-    <section className="grid gap-4 sm:gap-6">
+    <div className="space-y-6">
       {/* Breadcrumb Navigation */}
-      <nav className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-zinc-400 overflow-x-auto">
+      <nav className="flex items-center gap-2 text-sm text-muted-foreground overflow-x-auto pb-2">
         <Link
           href="/library"
-          className="hover:text-zinc-200 transition-colors whitespace-nowrap"
+          className="hover:text-foreground transition-colors whitespace-nowrap flex items-center gap-1.5 hover:underline"
         >
+          <BookOpen className="h-4 w-4" />
           Library
         </Link>
-        <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+        <ChevronRight className="h-4 w-4 flex-shrink-0" />
         <Link
           href={`/library/${courseId}`}
-          className="hover:text-zinc-200 transition-colors whitespace-nowrap"
+          className="hover:text-foreground transition-colors whitespace-nowrap hover:underline"
         >
           Course
         </Link>
-        <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-        <span className="text-zinc-200 truncate">{lesson.title}</span>
+        <ChevronRight className="h-4 w-4 flex-shrink-0" />
+        <span className="text-foreground truncate font-medium">{lesson.title}</span>
       </nav>
 
-      {/* Header */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
-              <div className="flex items-center gap-2 px-2 sm:px-3 py-1 rounded-full bg-zinc-800 text-xs font-medium text-zinc-200 uppercase tracking-wide">
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Main Content Area */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Lesson Header Card */}
+          <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary uppercase tracking-wide">
                 {getContentTypeIcon(lesson.contentType)}
-                {lesson.contentType?.toUpperCase() || 'UNKNOWN'}
+                {lesson.contentType?.toUpperCase() || 'CONTENT'}
               </div>
               {progress?.completedAt && (
-                <div className="flex items-center gap-2 px-2 sm:px-3 py-1 rounded-full bg-green-900/20 border border-green-800 text-xs font-medium text-green-400">
-                  <CheckCircle2 className="h-3 w-3" />
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 text-sm font-medium text-green-600 dark:text-green-400">
+                  <CheckCircle2 className="h-4 w-4" />
                   Completed
                 </div>
               )}
             </div>
 
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 break-words">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 leading-tight">
               {lesson.title}
             </h1>
 
-            <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-zinc-400">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                <Clock className="h-4 w-4" />
                 {formatDuration(lesson.contentType, lesson.durationSeconds ?? undefined)}
               </div>
 
               {lesson.allowDownload && (
-                <div className="flex items-center gap-2">
-                  <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+                <div className="flex items-center gap-2 text-primary">
+                  <Download className="h-4 w-4" />
                   Downloadable
                 </div>
               )}
 
               {progress && (
                 <div className="flex items-center gap-2">
-                  <div className="w-12 sm:w-16 h-2 bg-zinc-700 rounded-full overflow-hidden">
+                  <div className="w-20 h-2 bg-muted rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                      className="h-full bg-primary rounded-full transition-all duration-300"
                       style={{ width: `${progress.completionPercent}%` }}
                     />
                   </div>
-                  <span className="text-xs whitespace-nowrap">{Math.round(progress.completionPercent)}% complete</span>
+                  <span className="text-xs font-medium">{Math.round(progress.completionPercent)}%</span>
                 </div>
               )}
             </div>
           </div>
 
-          <Link
-            href={`/library/${courseId}`}
-            className="flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-4 py-2 rounded-lg border border-zinc-700 text-xs sm:text-sm font-medium text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors whitespace-nowrap flex-shrink-0"
-          >
-            <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-            Back to Course
-          </Link>
+          {/* Content Viewer */}
+          <LessonViewer
+            lessonId={lesson.id}
+            contentType={lesson.contentType}
+            contentUrl={signedUrl}
+            allowDownload={lesson.allowDownload}
+            contentMetadata={contentMetadata}
+            initialProgress={progress ? {
+              lastPosition: progress.lastPosition,
+              completionPercent: progress.completionPercent,
+              completedAt: progress.completedAt,
+            } : null}
+          />
+        </div>
+
+        {/* Sidebar */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Quick Actions Card */}
+          <div className="rounded-xl border bg-card p-6 shadow-sm sticky top-6">
+            <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
+            
+            <div className="space-y-3">
+              <Link
+                href={`/library/${courseId}`}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg border bg-muted/50 hover:bg-muted transition-all group"
+              >
+                <ArrowLeft className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                <span className="font-medium">Back to Course</span>
+              </Link>
+
+              <Link
+                href="/library"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg border bg-muted/50 hover:bg-muted transition-all group"
+              >
+                <BookOpen className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                <span className="font-medium">My Library</span>
+              </Link>
+            </div>
+
+            {/* Progress Summary */}
+            {progress && (
+              <div className="mt-6 pt-6 border-t">
+                <h3 className="text-sm font-medium text-muted-foreground mb-3">Your Progress</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Completion</span>
+                    <span className="font-semibold">{Math.round(progress.completionPercent)}%</span>
+                  </div>
+                  {progress.completedAt && (
+                    <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
+                      <CheckCircle2 className="h-4 w-4" />
+                      Completed on {new Date(progress.completedAt).toLocaleDateString()}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-
-      {/* Content Viewer */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 sm:p-6">
-        <LessonViewer
-          lessonId={lesson.id}
-          contentType={lesson.contentType}
-          contentUrl={signedUrl}
-          allowDownload={lesson.allowDownload}
-          initialProgress={progress ? {
-            lastPosition: progress.lastPosition,
-            completionPercent: progress.completionPercent,
-            completedAt: progress.completedAt,
-          } : null}
-        />
-      </div>
-    </section>
+    </div>
   );
 }

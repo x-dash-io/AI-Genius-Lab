@@ -63,11 +63,11 @@ export default async function DashboardPage({
     prisma.purchase.findMany({
       where: { userId: session.user.id, status: "paid" },
       include: {
-        course: {
+        Course: {
           include: {
-            sections: {
+            Section: {
               include: {
-                lessons: {
+                Lesson: {
                   select: { id: true }
                 }
               }
@@ -82,11 +82,11 @@ export default async function DashboardPage({
     prisma.progress.findMany({
       where: { userId: session.user.id },
       include: {
-        lesson: {
+        Lesson: {
           include: {
-            section: {
+            Section: {
               include: {
-                course: {
+                Course: {
                   select: {
                     id: true,
                     title: true,
@@ -109,7 +109,7 @@ export default async function DashboardPage({
     prisma.certificate.findMany({
       where: { userId: session.user.id },
       include: {
-        course: {
+        Course: {
           select: {
             title: true,
             slug: true
@@ -123,7 +123,7 @@ export default async function DashboardPage({
     prisma.enrollment.findMany({
       where: { userId: session.user.id },
       include: {
-        course: {
+        Course: {
           select: {
             id: true,
             title: true,
@@ -137,7 +137,7 @@ export default async function DashboardPage({
   // Calculate course progress for each purchased course
   const coursesWithProgress = await Promise.all(
     purchases.map(async (purchase) => {
-      const lessonIds = purchase.course.sections.flatMap(s => s.lessons.map(l => l.id));
+      const lessonIds = purchase.Course.Section.flatMap(s => s.Lesson.map(l => l.id));
       const progressRecords = await prisma.progress.findMany({
         where: {
           userId: session.user.id,
@@ -397,7 +397,7 @@ export default async function DashboardPage({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <h3 className="font-semibold text-sm sm:text-base truncate">
-                          {course.course.title}
+                          {course.Course.title}
                         </h3>
                         <Badge variant={course.completionPercent === 100 ? "default" : "secondary"} className="flex-shrink-0">
                           {course.completionPercent}%
@@ -417,7 +417,7 @@ export default async function DashboardPage({
                         )}
                       </div>
                     </div>
-                    <Link href={`/library/${course.course.slug}`} className="w-full sm:w-auto">
+                    <Link href={`/library/${course.Course.slug}`} className="w-full sm:w-auto">
                       <Button className="w-full sm:w-auto" size="sm">
                         {course.completionPercent === 0 ? "Start" : "Continue"}
                       </Button>
@@ -544,10 +544,10 @@ export default async function DashboardPage({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate">
-                      {progress.lesson.title}
+                      {progress.Lesson.title}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
-                      {progress.lesson.section.course.title}
+                      {progress.Lesson.Section.Course.title}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {progress.completedAt ? "Completed" : `${progress.completionPercent}% complete`} • {new Date(progress.updatedAt).toLocaleDateString()}
@@ -585,7 +585,7 @@ export default async function DashboardPage({
                 >
                   <Award className="h-8 w-8 text-amber-600 dark:text-amber-400 mb-2" />
                   <h3 className="font-semibold text-sm mb-1 line-clamp-2">
-                    {cert.course.title}
+                    {cert.Course?.title || 'Certificate'}
                   </h3>
                   <p className="text-xs text-muted-foreground mb-3">
                     Issued {new Date(cert.issuedAt).toLocaleDateString()}

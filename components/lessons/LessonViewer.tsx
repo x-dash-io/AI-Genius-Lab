@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { VideoPlayer } from "./VideoPlayer";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, PlayCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, PlayCircle, Loader2, Download, FileText, ExternalLink } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 interface LessonViewerProps {
@@ -12,6 +12,10 @@ interface LessonViewerProps {
   contentType: string | undefined;
   contentUrl: string | null;
   allowDownload: boolean;
+  contentMetadata?: {
+    title: string | null;
+    description: string | null;
+  } | null;
   initialProgress?: {
     lastPosition: number;
     completionPercent: number;
@@ -24,6 +28,7 @@ export function LessonViewer({
   contentType,
   contentUrl,
   allowDownload,
+  contentMetadata,
   initialProgress,
 }: LessonViewerProps) {
   const [progress, setProgress] = useState(initialProgress);
@@ -36,18 +41,15 @@ export function LessonViewer({
 
   // Check content availability for non-video/audio content types
   useEffect(() => {
-    // Only check for PDF, file, or link content types
     if (contentType && contentType !== "video" && contentType !== "audio" && contentUrl) {
       const checkContent = async () => {
         try {
           const response = await fetch(`/api/content/${lessonId}`, { method: 'HEAD' });
           if (!response.ok) {
-            let errorData = {};
+            let errorData: any = {};
             try {
               const text = await response.text();
-              if (text) {
-                errorData = JSON.parse(text);
-              }
+              if (text) errorData = JSON.parse(text);
             } catch (e) {
               if (response.status === 404) {
                 errorData = {
@@ -122,20 +124,17 @@ export function LessonViewer({
 
   if (!contentUrl) {
     return (
-      <div className="rounded-2xl border border-amber-800 bg-amber-900/20 p-8 text-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-16 w-16 rounded-full bg-amber-500/10 flex items-center justify-center">
-            <svg className="h-8 w-8 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+      <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-8 text-center">
+        <div className="flex flex-col items-center gap-4 max-w-md mx-auto">
+          <div className="h-20 w-20 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+            <svg className="h-10 w-10 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-amber-100 mb-2">Content Not Yet Uploaded</h3>
-            <p className="text-sm text-amber-200/80 mb-4">
-              The instructor hasn't uploaded content for this lesson yet.
-            </p>
-            <p className="text-xs text-amber-300/60">
-              Please check back later or contact support if you believe this is an error.
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold">Content Coming Soon</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              The instructor is preparing content for this lesson. Check back soon!
             </p>
           </div>
         </div>
@@ -146,28 +145,21 @@ export function LessonViewer({
   // Handle content missing from storage error
   if (contentError?.code === "CONTENT_MISSING_FROM_STORAGE") {
     return (
-      <div className="rounded-2xl border border-amber-800 bg-amber-900/20 p-6">
-        <div className="text-center">
-          <div className="text-amber-400 mb-4">
-            <svg className="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+      <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-8">
+        <div className="text-center max-w-md mx-auto">
+          <div className="h-20 w-20 rounded-2xl bg-destructive/10 flex items-center justify-center border border-destructive/20 mx-auto mb-4">
+            <svg className="h-10 w-10 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
-            <h3 className="text-lg font-semibold">Content Needs Re-upload</h3>
           </div>
-          <p className="text-amber-200 mb-4">{contentError.message}</p>
-          {contentError.adminActionRequired ? (
-            <div className="bg-amber-900/40 rounded-lg p-4 text-left">
-              <p className="text-sm text-amber-100 mb-2">
-                <strong>For Administrators:</strong> This content exists in our database but the file is missing from storage.
-              </p>
-              <p className="text-sm text-amber-100">
-                Please go to the course editor and re-upload the content file for this lesson.
+          <h3 className="text-xl font-semibold mb-2">Content Unavailable</h3>
+          <p className="text-sm text-muted-foreground mb-4">{contentError.message}</p>
+          {contentError.adminActionRequired && (
+            <div className="bg-muted rounded-lg p-4 text-left border">
+              <p className="text-sm leading-relaxed">
+                <strong className="font-semibold">For Administrators:</strong> This content exists in the database but the file is missing from storage. Please re-upload the content file for this lesson.
               </p>
             </div>
-          ) : (
-            <p className="text-sm text-amber-200">
-              Please contact support if this issue persists.
-            </p>
           )}
         </div>
       </div>
@@ -177,33 +169,169 @@ export function LessonViewer({
   // For video content, use the VideoPlayer
   if (contentType === "video" || contentType === "audio") {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         <VideoPlayer
           src={`/api/content/${lessonId}`}
           lessonId={lessonId}
           allowDownload={allowDownload}
           onProgress={handleProgressUpdate}
         />
-        {progress && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Progress</span>
-              <span className="font-medium">{Math.round(progress.completionPercent)}%</span>
-            </div>
-            <Progress value={progress.completionPercent} />
+        
+        {/* Progress Section */}
+        <div className="rounded-xl border bg-card p-6">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium text-muted-foreground">Your Progress</span>
+            <span className="text-lg font-bold">{Math.round(progress?.completionPercent || 0)}%</span>
           </div>
-        )}
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
+          <Progress value={progress?.completionPercent || 0} className="h-2" />
+          
+          <div className="flex items-center justify-between mt-6 pt-6 border-t">
+            <div className="text-sm">
+              {progress?.completedAt ? (
+                <span className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium">
+                  <CheckCircle2 className="h-5 w-5" />
+                  Completed
+                </span>
+              ) : (
+                <span className="flex items-center gap-2 text-muted-foreground">
+                  <PlayCircle className="h-5 w-5" />
+                  In Progress
+                </span>
+              )}
+            </div>
+            {!progress?.completedAt && (
+              <Button
+                onClick={handleComplete}
+                disabled={isCompleting}
+              >
+                {isCompleting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Marking...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Mark as Complete
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // For other content types (PDF, link, file)
+  return (
+    <div className="space-y-6">
+      {/* Content Access Card */}
+      <div className="rounded-xl border bg-card p-8">
+        <div className="flex flex-col items-center text-center gap-6 max-w-md mx-auto">
+          <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+            {contentType === 'pdf' ? (
+              <FileText className="h-10 w-10 text-primary" />
+            ) : (
+              <ExternalLink className="h-10 w-10 text-primary" />
+            )}
+          </div>
+          
+          <div className="space-y-3 w-full">
+            <h3 className="text-xl font-semibold">
+              {contentType === 'pdf' ? 'PDF Document' : contentType === 'link' ? 'External Resource' : 'File Resource'}
+            </h3>
+            
+            {/* Smart Metadata Display */}
+            {contentMetadata && (
+              <div className="space-y-2 text-left bg-muted/50 rounded-lg p-4 border">
+                {contentMetadata.title && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">File Name</p>
+                    <p className="text-sm font-medium break-all">{contentMetadata.title}</p>
+                  </div>
+                )}
+                {contentMetadata.description && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Details</p>
+                    <p className="text-sm text-muted-foreground">{contentMetadata.description}</p>
+                  </div>
+                )}
+                {contentType === 'pdf' && (
+                  <div className="flex items-center gap-4 pt-2 border-t text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <FileText className="h-3 w-3" />
+                      PDF Format
+                    </span>
+                    {allowDownload && (
+                      <span className="flex items-center gap-1">
+                        <Download className="h-3 w-3" />
+                        Downloadable
+                      </span>
+                    )}
+                  </div>
+                )}
+                {contentType === 'file' && contentMetadata.title && (
+                  <div className="flex items-center gap-4 pt-2 border-t text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <FileText className="h-3 w-3" />
+                      {contentMetadata.title.split('.').pop()?.toUpperCase() || 'FILE'}
+                    </span>
+                    {allowDownload && (
+                      <span className="flex items-center gap-1">
+                        <Download className="h-3 w-3" />
+                        Downloadable
+                      </span>
+                    )}
+                  </div>
+                )}
+                {contentType === 'link' && (
+                  <div className="flex items-center gap-2 pt-2 border-t text-xs text-muted-foreground">
+                    <ExternalLink className="h-3 w-3" />
+                    Opens in new tab
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {!contentMetadata && (
+              <p className="text-sm text-muted-foreground">
+                Click below to access the {contentType?.toUpperCase()} content
+              </p>
+            )}
+          </div>
+
+          <a
+            href={`/api/content/${lessonId}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm hover:bg-primary/90 transition-all w-full sm:w-auto justify-center"
+          >
+            <ExternalLink className="h-5 w-5" />
+            {contentType === 'link' ? 'Open Link' : allowDownload ? 'Download' : 'Open'} Content
+          </a>
+        </div>
+      </div>
+
+      {/* Progress Section */}
+      <div className="rounded-xl border bg-card p-6">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-sm font-medium text-muted-foreground">Your Progress</span>
+          <span className="text-lg font-bold">{Math.round(progress?.completionPercent || 0)}%</span>
+        </div>
+        <Progress value={progress?.completionPercent || 0} className="h-2" />
+        
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-6 pt-6 border-t">
+          <div className="text-sm">
             {progress?.completedAt ? (
-              <span className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                <CheckCircle2 className="h-4 w-4" />
+              <span className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium">
+                <CheckCircle2 className="h-5 w-5" />
                 Completed
               </span>
             ) : (
-              <span className="flex items-center gap-2">
-                <PlayCircle className="h-4 w-4" />
-                In Progress
+              <span className="flex items-center gap-2 text-muted-foreground">
+                <PlayCircle className="h-5 w-5" />
+                Not completed
               </span>
             )}
           </div>
@@ -211,7 +339,7 @@ export function LessonViewer({
             <Button
               onClick={handleComplete}
               disabled={isCompleting}
-              variant="outline"
+              className="w-full sm:w-auto"
             >
               {isCompleting ? (
                 <>
@@ -219,95 +347,14 @@ export function LessonViewer({
                   Marking...
                 </>
               ) : (
-                "Mark as Complete"
+                <>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Mark as Complete
+                </>
               )}
             </Button>
           )}
         </div>
-      </div>
-    );
-  }
-
-  // For other content types (PDF, link, file)
-  if (contentError?.code === "CONTENT_MISSING_FROM_STORAGE") {
-    return (
-      <div className="rounded-2xl border border-amber-800 bg-amber-900/20 p-6">
-        <div className="text-center">
-          <div className="text-amber-400 mb-4">
-            <svg className="h-12 w-12 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-            <h3 className="text-lg font-semibold">Content Unavailable</h3>
-          </div>
-          <p className="text-amber-200 mb-4">{contentError.message}</p>
-          {contentError.adminActionRequired ? (
-            <div className="bg-amber-900/40 rounded-lg p-4 text-left">
-              <p className="text-sm text-amber-100">
-                This content exists in our database but the file is missing from storage. 
-                Please contact support or ask an administrator to re-upload this content.
-              </p>
-            </div>
-          ) : (
-            <p className="text-sm text-amber-200">
-              Please contact support if this issue persists.
-            </p>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-4 sm:p-6">
-        <a
-          href={`/api/content/${lessonId}`}
-          target="_blank"
-          rel="noreferrer"
-          className="font-semibold text-white underline inline-flex items-center gap-2 text-sm sm:text-base break-words"
-        >
-          Open {contentType ? contentType.toUpperCase() : 'UNKNOWN'} content
-          {allowDownload && <span className="text-xs">(Downloadable)</span>}
-        </a>
-      </div>
-      {progress && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Progress</span>
-            <span className="font-medium">{Math.round(progress.completionPercent)}%</span>
-          </div>
-          <Progress value={progress.completionPercent} />
-        </div>
-      )}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-        <div className="text-xs sm:text-sm text-muted-foreground">
-          {progress?.completedAt ? (
-            <span className="flex items-center gap-2 text-green-600 dark:text-green-400">
-              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4" />
-              Completed
-            </span>
-          ) : (
-            <span>Not completed</span>
-          )}
-        </div>
-        {!progress?.completedAt && (
-          <Button
-            onClick={handleComplete}
-            disabled={isCompleting}
-            variant="outline"
-            size="sm"
-            className="w-full sm:w-auto"
-          >
-            {isCompleting ? (
-              <>
-                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2 animate-spin" />
-                Marking...
-              </>
-            ) : (
-              "Mark as Complete"
-            )}
-          </Button>
-        )}
       </div>
     </div>
   );
