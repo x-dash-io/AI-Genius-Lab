@@ -91,6 +91,11 @@ export function ProfileAvatar({
       // Update local state immediately for instant feedback
       setImageUrl(newImageUrl);
       
+      // Dispatch custom event to update avatar in sidebar
+      window.dispatchEvent(new CustomEvent('avatarUpdated', { 
+        detail: { imageUrl: newImageUrl } 
+      }));
+      
       // Update on server
       await onAvatarUpdate(newImageUrl);
 

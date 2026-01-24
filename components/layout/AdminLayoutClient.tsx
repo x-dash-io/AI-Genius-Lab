@@ -49,6 +49,24 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLElement>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null | undefined>(session?.user?.image);
+
+  // Listen for avatar updates
+  useEffect(() => {
+    const handleAvatarUpdate = (event: CustomEvent) => {
+      setAvatarUrl(event.detail.imageUrl);
+    };
+
+    window.addEventListener('avatarUpdated', handleAvatarUpdate as EventListener);
+    return () => {
+      window.removeEventListener('avatarUpdated', handleAvatarUpdate as EventListener);
+    };
+  }, []);
+
+  // Update avatar when session changes
+  useEffect(() => {
+    setAvatarUrl(session?.user?.image);
+  }, [session?.user?.image]);
 
   // Close menu on scroll
   useEffect(() => {
@@ -202,7 +220,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer"
                   >
                     <Avatar className="h-9 w-9 ring-2 ring-primary/20">
-                      <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "Admin"} />
+                      <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "Admin"} />
                       <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
                         {(() => {
                           const name = session.user.name;
@@ -411,7 +429,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                     <Link href="/admin/profile" onClick={() => setMobileMenuOpen(false)}>
                       <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors active:scale-[0.98]">
                         <Avatar className="h-10 w-10 ring-2 ring-primary/20">
-                          <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "Admin"} />
+                          <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "Admin"} />
                           <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
                             {(() => {
                               const name = session.user.name;
