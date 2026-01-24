@@ -255,7 +255,7 @@ model User {
   passwordHash  String?
   role          Role          @default(customer)
   createdAt     DateTime      @default(now())
-  updatedAt     DateTime
+  updatedAt     DateTime      @updatedAt
   Account       Account[]
   ActivityLog   ActivityLog[]
   Certificate   Certificate[]
