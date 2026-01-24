@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { PasswordChangeForm } from "@/components/profile/PasswordChangeForm";
+import { EmailChangeForm } from "@/components/profile/EmailChangeForm";
 import { ProfilePreviewBanner } from "@/components/profile/ProfilePreviewBanner";
 import { Separator } from "@/components/ui/separator";
 import { BookOpen, DollarSign, GraduationCap, Calendar } from "lucide-react";
@@ -150,6 +151,17 @@ export default async function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Email Change Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Change Email Address</CardTitle>
+          <CardDescription>Update your account email address</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <EmailChangeForm currentEmail={profile.email} />
+        </CardContent>
+      </Card>
 
       {/* Password Change Card */}
       {hasPassword && (

@@ -23,7 +23,22 @@ export const metadata: Metadata = generateSEOMetadata({
 });
 
 export default async function LandingPage() {
-  const stats = await getHomepageStats();
+  // Fetch stats with error handling - page will still render if DB is unavailable
+  let stats;
+  try {
+    stats = await getHomepageStats();
+  } catch (error) {
+    console.error("Failed to fetch homepage stats:", error);
+    // Use empty stats as fallback
+    stats = {
+      totalCourses: 0,
+      totalStudents: 0,
+      totalLessons: 0,
+      averageRating: 0,
+      totalReviews: 0,
+      categoriesWithCourses: [],
+    };
+  }
 
   return (
     <div className="grid gap-16 md:gap-24">

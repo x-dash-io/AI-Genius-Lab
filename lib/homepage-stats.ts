@@ -29,6 +29,16 @@ export interface HomepageStats {
  * This is cached per request to avoid multiple DB calls
  */
 export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
+  // Return empty stats immediately if no database connection
+  const emptyStats: HomepageStats = {
+    totalCourses: 0,
+    totalStudents: 0,
+    totalLessons: 0,
+    averageRating: 0,
+    totalReviews: 0,
+    categoriesWithCourses: [],
+  };
+
   try {
     // Get total published courses
     const totalCourses = await prisma.course.count({
@@ -118,14 +128,7 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
     };
   } catch (error) {
     console.error("Error fetching homepage stats:", error);
-    // Return empty stats on error
-    return {
-      totalCourses: 0,
-      totalStudents: 0,
-      totalLessons: 0,
-      averageRating: 0,
-      totalReviews: 0,
-      categoriesWithCourses: [],
-    };
+    // Return empty stats instead of throwing - page should still render
+    return emptyStats;
   }
 });

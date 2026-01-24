@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import { FAQSection } from "@/components/faq/FAQSection";
-import { FAQSearch } from "@/components/faq/FAQSearch";
 import { FAQCategories } from "@/components/faq/FAQCategories";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import Link from "next/link";
@@ -28,13 +27,10 @@ export default function FAQPage() {
           </p>
         </div>
 
-        {/* Search */}
-        <FAQSearch />
-
         {/* Categories */}
         <FAQCategories />
 
-        {/* FAQ Sections */}
+        {/* FAQ Sections with Search */}
         <FAQSection />
 
         {/* Contact CTA */}

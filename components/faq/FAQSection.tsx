@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 interface FAQItem {
@@ -78,7 +79,7 @@ const faqData: FAQItem[] = [
   {
     category: "Payments & Billing",
     question: "Can I purchase courses as a gift?",
-    answer: "Gift purchases are coming soon! In the meantime, you can purchase a course and share the access with someone by adding them as a user on your account.",
+    answer: "Gift purchases are not currently available. Each course purchase is tied to the purchasing account and cannot be transferred to another user.",
   },
   {
     category: "Payments & Billing",
@@ -140,6 +141,7 @@ const categories = Array.from(new Set(faqData.map((item) => item.category)));
 
 export function FAQSection() {
   const [openItems, setOpenItems] = useState<Set<number>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
 
   const toggleItem = (index: number) => {
     const newOpenItems = new Set(openItems);
@@ -151,10 +153,59 @@ export function FAQSection() {
     setOpenItems(newOpenItems);
   };
 
+  // Filter FAQ items based on search query
+  const filteredData = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return faqData;
+    }
+
+    const query = searchQuery.toLowerCase();
+    return faqData.filter(
+      (item) =>
+        item.question.toLowerCase().includes(query) ||
+        item.answer.toLowerCase().includes(query) ||
+        item.category.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
+
+  // Get categories from filtered data
+  const filteredCategories = useMemo(() => {
+    return Array.from(new Set(filteredData.map((item) => item.category)));
+  }, [filteredData]);
+
   return (
-    <div className="grid gap-12">
-      {categories.map((category) => {
-        const categoryItems = faqData.filter((item) => item.category === category);
+    <div className="grid gap-8">
+      {/* Search Input */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder="Search for answers..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      {/* Show message if no results */}
+      {filteredData.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">
+            No results found for "{searchQuery}". Try different keywords or{" "}
+            <button
+              onClick={() => setSearchQuery("")}
+              className="text-primary hover:underline"
+            >
+              clear search
+            </button>
+            .
+          </p>
+        </div>
+      )}
+
+      {/* FAQ Categories and Items */}
+      {filteredCategories.map((category) => {
+        const categoryItems = filteredData.filter((item) => item.category === category);
         
         return (
           <div key={category} className="grid gap-4">
