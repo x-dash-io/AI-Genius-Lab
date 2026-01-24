@@ -146,12 +146,20 @@ export function SortableCourseList({
     const oldIndex = items.findIndex((item) => item.id === active.id);
     const newIndex = items.findIndex((item) => item.id === over.id);
 
+    // Optimistic update
     const newItems = arrayMove(items, oldIndex, newIndex);
+    const previousItems = [...items];
     setItems(newItems);
 
-    // Update sort order in database
-    const courseIds = newItems.map((item) => item.courseId);
-    await onReorder(courseIds);
+    try {
+      // Update sort order in database
+      const courseIds = newItems.map((item) => item.courseId);
+      await onReorder(courseIds);
+    } catch (error) {
+      // Revert on error
+      setItems(previousItems);
+      throw error;
+    }
   };
 
   return (

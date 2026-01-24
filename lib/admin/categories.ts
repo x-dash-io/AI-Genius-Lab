@@ -96,7 +96,20 @@ export async function createCategory(data: CategoryInput) {
   // Revalidate cache
   revalidateTag("categories");
 
-  return category;
+  // Return in same format as getAllCategories
+  return {
+    id: category.id,
+    name: category.name,
+    slug: category.slug,
+    description: category.description,
+    icon: category.icon,
+    color: category.color,
+    sortOrder: category.sortOrder,
+    isActive: category.isActive,
+    createdAt: category.createdAt,
+    updatedAt: category.updatedAt,
+    courseCount: 0,
+  };
 }
 
 /**
@@ -130,13 +143,31 @@ export async function updateCategory(id: string, data: Partial<CategoryInput>) {
         color: data.color,
         isActive: data.isActive,
       },
+      include: {
+        _count: {
+          select: { Course: true },
+        },
+      },
     });
   });
 
   // Revalidate cache
   revalidateTag("categories");
 
-  return category;
+  // Return in same format as getAllCategories
+  return {
+    id: category.id,
+    name: category.name,
+    slug: category.slug,
+    description: category.description,
+    icon: category.icon,
+    color: category.color,
+    sortOrder: category.sortOrder,
+    isActive: category.isActive,
+    createdAt: category.createdAt,
+    updatedAt: category.updatedAt,
+    courseCount: category._count.Course,
+  };
 }
 
 /**
@@ -211,6 +242,11 @@ export async function toggleCategoryStatus(id: string) {
 
   const category = await prisma.category.findUnique({
     where: { id },
+    include: {
+      _count: {
+        select: { Course: true },
+      },
+    },
   });
 
   if (!category) {
@@ -221,11 +257,29 @@ export async function toggleCategoryStatus(id: string) {
     return prisma.category.update({
       where: { id },
       data: { isActive: !category.isActive },
+      include: {
+        _count: {
+          select: { Course: true },
+        },
+      },
     });
   });
 
   // Revalidate cache
   revalidateTag("categories");
 
-  return updated;
+  // Return in same format as getAllCategories
+  return {
+    id: updated.id,
+    name: updated.name,
+    slug: updated.slug,
+    description: updated.description,
+    icon: updated.icon,
+    color: updated.color,
+    sortOrder: updated.sortOrder,
+    isActive: updated.isActive,
+    createdAt: updated.createdAt,
+    updatedAt: updated.updatedAt,
+    courseCount: updated._count.Course,
+  };
 }

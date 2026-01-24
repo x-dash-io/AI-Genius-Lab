@@ -37,6 +37,8 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [isReordering, setIsReordering] = useState(false);
 
   const handleDelete = async (category: Category) => {
     const confirmed = await confirm({
@@ -63,6 +65,15 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
 
       const result = await response.json();
 
+      // Optimistic update
+      if (result.deleted) {
+        setCategories(prev => prev.filter(c => c.id !== category.id));
+      } else {
+        setCategories(prev => prev.map(c => 
+          c.id === category.id ? { ...c, isActive: false } : c
+        ));
+      }
+
       toast({
         title: result.deleted ? "Category deleted" : "Category deactivated",
         description: result.deleted
@@ -85,20 +96,39 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
 
   const handleToggleStatus = async (category: Category) => {
     setTogglingId(category.id);
+    
+    // Optimistic update
+    const newStatus = !category.isActive;
+    setCategories(prev => prev.map(c => 
+      c.id === category.id ? { ...c, isActive: newStatus } : c
+    ));
+
     try {
       const response = await fetch(`/api/admin/categories/${category.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isActive: !category.isActive }),
+        body: JSON.stringify({ isActive: newStatus }),
       });
 
       if (!response.ok) {
+        // Revert on error
+        setCategories(prev => prev.map(c => 
+          c.id === category.id ? { ...c, isActive: category.isActive } : c
+        ));
         throw new Error("Failed to toggle category status");
       }
 
+      const data = await response.json();
+      const updatedCategory = data.category || data;
+      
+      // Update with server response
+      setCategories(prev => prev.map(c => 
+        c.id === category.id ? { ...c, ...updatedCategory, courseCount: c.courseCount } : c
+      ));
+
       toast({
         title: "Status updated",
-        description: `Category ${!category.isActive ? "activated" : "deactivated"} successfully.`,
+        description: `Category ${newStatus ? "activated" : "deactivated"} successfully.`,
         variant: "success",
       });
 
@@ -120,6 +150,70 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
     return Icon ? <Icon className="h-5 w-5" /> : null;
   };
 
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const newCategories = [...categories];
+    const draggedItem = newCategories[draggedIndex];
+    
+    // Remove from old position
+    newCategories.splice(draggedIndex, 1);
+    // Insert at new position
+    newCategories.splice(index, 0, draggedItem);
+    
+    setCategories(newCategories);
+    setDraggedIndex(index);
+  };
+
+  const handleDragEnd = async () => {
+    if (draggedIndex === null) return;
+    
+    setDraggedIndex(null);
+    setIsReordering(true);
+
+    // Update sortOrder for all categories
+    const reorderedCategories = categories.map((cat, index) => ({
+      id: cat.id,
+      sortOrder: index,
+    }));
+
+    try {
+      const response = await fetch("/api/admin/categories/reorder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categories: reorderedCategories }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to reorder categories");
+      }
+
+      toast({
+        title: "Order updated",
+        description: "Categories have been reordered successfully.",
+        variant: "success",
+      });
+
+      router.refresh();
+    } catch (error) {
+      // Revert to original order on error
+      setCategories(initialCategories);
+      toast({
+        title: "Failed to reorder",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsReordering(false);
+    }
+  };
+
   return (
     <>
       <Card>
@@ -135,22 +229,30 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
         <CardContent>
           {categories.length === 0 ? (
             <div className="py-12 text-center">
-              <p className="text-muted-foreground mb-4">
-                No categories yet. Create your first category to get started.
+              <p className="text-muted-foreground">
+                No categories yet. Use the button above to create your first category.
               </p>
-              <Button onClick={() => setShowCreateDialog(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Category
-              </Button>
             </div>
           ) : (
             <div className="space-y-3">
-              {categories.map((category) => (
-                <Card key={category.id} className="overflow-hidden">
+              {categories.map((category, index) => (
+                <Card 
+                  key={category.id} 
+                  className={`overflow-hidden transition-all ${
+                    draggedIndex === index ? "opacity-50" : ""
+                  } ${isReordering ? "pointer-events-none" : ""}`}
+                  draggable
+                  onDragStart={() => handleDragStart(index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDragEnd={handleDragEnd}
+                >
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
                       {/* Drag Handle */}
-                      <div className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground">
+                      <div 
+                        className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
+                        onMouseDown={(e) => e.stopPropagation()}
+                      >
                         <GripVertical className="h-5 w-5" />
                       </div>
 
@@ -234,7 +336,23 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
       <CategoryFormDialog
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
-        onSuccess={() => {
+        onSuccess={(newCategory: any) => {
+          if (newCategory) {
+            // Optimistic update - add to list immediately
+            setCategories(prev => [...prev, {
+              id: newCategory.id,
+              name: newCategory.name,
+              slug: newCategory.slug,
+              description: newCategory.description,
+              icon: newCategory.icon,
+              color: newCategory.color,
+              sortOrder: newCategory.sortOrder || prev.length,
+              isActive: newCategory.isActive ?? true,
+              courseCount: newCategory.courseCount || 0,
+              createdAt: newCategory.createdAt ? new Date(newCategory.createdAt) : new Date(),
+              updatedAt: newCategory.updatedAt ? new Date(newCategory.updatedAt) : new Date(),
+            }]);
+          }
           setShowCreateDialog(false);
           router.refresh();
         }}
@@ -246,7 +364,25 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
           open={!!editingCategory}
           onOpenChange={(open) => !open && setEditingCategory(null)}
           category={editingCategory}
-          onSuccess={() => {
+          onSuccess={(updatedCategory: any) => {
+            if (updatedCategory) {
+              // Optimistic update - update in list immediately
+              setCategories(prev => prev.map(c => 
+                c.id === updatedCategory.id 
+                  ? { 
+                      ...c, 
+                      name: updatedCategory.name,
+                      slug: updatedCategory.slug,
+                      description: updatedCategory.description,
+                      icon: updatedCategory.icon,
+                      color: updatedCategory.color,
+                      isActive: updatedCategory.isActive ?? c.isActive,
+                      courseCount: updatedCategory.courseCount ?? c.courseCount,
+                      updatedAt: updatedCategory.updatedAt ? new Date(updatedCategory.updatedAt) : new Date(),
+                    }
+                  : c
+              ));
+            }
             setEditingCategory(null);
             router.refresh();
           }}

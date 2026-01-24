@@ -39,7 +39,7 @@ type CourseEditFormProps = {
 };
 
 export function CourseEditForm({
-  course,
+  course: initialCourse,
   updateCourseAction,
   addSectionAction,
   deleteSectionAction,
@@ -49,6 +49,7 @@ export function CourseEditForm({
 }: CourseEditFormProps) {
   const router = useRouter();
   const { confirm } = useConfirmDialog();
+  const [course, setCourse] = useState(initialCourse);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [showAddSection, setShowAddSection] = useState(false);
   const [showAddLesson, setShowAddLesson] = useState<string | null>(null);
@@ -89,7 +90,7 @@ export function CourseEditForm({
     fetchCategories();
   }, []);
 
-  // Load existing lesson content on mount
+  // Load existing lesson content on mount and when course changes
   useEffect(() => {
     const initialContents: Record<string, Array<{
       id?: string;
@@ -153,9 +154,36 @@ export function CourseEditForm({
   const handleAddSection = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsAddingSection(true);
+    
+    const formData = new FormData(e.currentTarget);
+    const title = formData.get("title") as string;
+    
+    // Optimistic update - add temporary section
+    const tempId = `temp_${Date.now()}`;
+    const tempSection = {
+      id: tempId,
+      courseId: course.id,
+      title,
+      sortOrder: course.Section.length,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      Lesson: [],
+    };
+    
+    setCourse(prev => ({
+      ...prev,
+      Section: [...prev.Section, tempSection],
+    }));
+    
     try {
-      const formData = new FormData(e.currentTarget);
-      await addSectionAction(formData);
+      const newSection = await addSectionAction(formData);
+      
+      // Replace temp section with real one
+      setCourse(prev => ({
+        ...prev,
+        Section: prev.Section.map(s => s.id === tempId ? newSection : s),
+      }));
+      
       toast({
         title: "Section added",
         description: "New section has been added successfully.",
@@ -164,6 +192,12 @@ export function CourseEditForm({
       setShowAddSection(false);
       router.refresh();
     } catch (error) {
+      // Remove temp section on error
+      setCourse(prev => ({
+        ...prev,
+        Section: prev.Section.filter(s => s.id !== tempId),
+      }));
+      
       toast({
         title: "Failed to add section",
         description: error instanceof Error ? error.message : "Failed to add section",
@@ -186,7 +220,16 @@ export function CourseEditForm({
     if (!confirmed) {
       return;
     }
+    
     setIsDeletingSection((prev) => ({ ...prev, [sectionId]: true }));
+    
+    // Optimistic update - remove section
+    const previousCourse = course;
+    setCourse(prev => ({
+      ...prev,
+      Section: prev.Section.filter(s => s.id !== sectionId),
+    }));
+    
     try {
       await deleteSectionAction(sectionId, course.id);
       toast({
@@ -196,6 +239,9 @@ export function CourseEditForm({
       });
       router.refresh();
     } catch (error) {
+      // Revert on error
+      setCourse(previousCourse);
+      
       toast({
         title: "Failed to delete section",
         description: error instanceof Error ? error.message : "Failed to delete section",
@@ -213,9 +259,48 @@ export function CourseEditForm({
   const handleAddLesson = async (sectionId: string, e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsAddingLesson((prev) => ({ ...prev, [sectionId]: true }));
+    
+    const formData = new FormData(e.currentTarget);
+    const title = formData.get("title") as string;
+    
+    // Optimistic update - add temporary lesson
+    const tempId = `temp_${Date.now()}`;
+    const section = course.Section.find(s => s.id === sectionId);
+    const tempLesson = {
+      id: tempId,
+      sectionId,
+      title,
+      durationSeconds: null,
+      isLocked: true,
+      allowDownload: false,
+      sortOrder: section?.Lesson.length || 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      LessonContent: [],
+    };
+    
+    setCourse(prev => ({
+      ...prev,
+      Section: prev.Section.map(s => 
+        s.id === sectionId 
+          ? { ...s, Lesson: [...s.Lesson, tempLesson] }
+          : s
+      ),
+    }));
+    
     try {
-      const formData = new FormData(e.currentTarget);
-      await addLessonAction(sectionId, formData);
+      const newLesson = await addLessonAction(sectionId, formData);
+      
+      // Replace temp lesson with real one
+      setCourse(prev => ({
+        ...prev,
+        Section: prev.Section.map(s => 
+          s.id === sectionId 
+            ? { ...s, Lesson: s.Lesson.map(l => l.id === tempId ? { ...newLesson, LessonContent: [] } : l) }
+            : s
+        ),
+      }));
+      
       toast({
         title: "Lesson added",
         description: "New lesson has been added successfully.",
@@ -229,6 +314,16 @@ export function CourseEditForm({
       });
       router.refresh();
     } catch (error) {
+      // Remove temp lesson on error
+      setCourse(prev => ({
+        ...prev,
+        Section: prev.Section.map(s => 
+          s.id === sectionId 
+            ? { ...s, Lesson: s.Lesson.filter(l => l.id !== tempId) }
+            : s
+        ),
+      }));
+      
       toast({
         title: "Failed to add lesson",
         description: error instanceof Error ? error.message : "Failed to add lesson",
@@ -255,7 +350,19 @@ export function CourseEditForm({
     if (!confirmed) {
       return;
     }
+    
     setIsDeletingLesson((prev) => ({ ...prev, [lessonId]: true }));
+    
+    // Optimistic update - remove lesson
+    const previousCourse = course;
+    setCourse(prev => ({
+      ...prev,
+      Section: prev.Section.map(s => ({
+        ...s,
+        Lesson: s.Lesson.filter(l => l.id !== lessonId),
+      })),
+    }));
+    
     try {
       await deleteLessonAction(lessonId, course.id);
       toast({
@@ -265,6 +372,9 @@ export function CourseEditForm({
       });
       router.refresh();
     } catch (error) {
+      // Revert on error
+      setCourse(previousCourse);
+      
       toast({
         title: "Failed to delete lesson",
         description: error instanceof Error ? error.message : "Failed to delete lesson",

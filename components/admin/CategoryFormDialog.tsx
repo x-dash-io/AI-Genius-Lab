@@ -30,7 +30,7 @@ type CategoryFormDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   category?: Category;
-  onSuccess: () => void;
+  onSuccess: (newCategory?: Category) => void;
 };
 
 // Popular icons for categories
@@ -125,13 +125,16 @@ export function CategoryFormDialog({
         throw new Error(error.error || "Failed to save category");
       }
 
+      const data = await response.json();
+      const savedCategory = data.category || data;
+
       toast({
         title: category ? "Category updated" : "Category created",
         description: `Category "${name}" has been ${category ? "updated" : "created"} successfully.`,
         variant: "success",
       });
 
-      onSuccess();
+      onSuccess(savedCategory);
     } catch (error) {
       toast({
         title: "Failed to save category",
