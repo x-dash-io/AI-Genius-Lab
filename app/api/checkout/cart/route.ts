@@ -63,8 +63,10 @@ export async function POST(request: NextRequest) {
 
     // Create purchases
     const purchases = await Promise.all(
-      coursesToPurchase.map((course) =>
-        prisma.purchase.upsert({
+      coursesToPurchase.map((course) => {
+        const purchaseId = `purchase_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        
+        return prisma.purchase.upsert({
           where: {
             userId_courseId: {
               userId: session.user.id,
@@ -77,6 +79,7 @@ export async function POST(request: NextRequest) {
             amountCents: course.priceCents,
           },
           create: {
+            id: purchaseId,
             userId: session.user.id,
             courseId: course.id,
             amountCents: course.priceCents,
@@ -84,8 +87,8 @@ export async function POST(request: NextRequest) {
             status: "pending",
             provider: "paypal",
           },
-        })
-      )
+        });
+      })
     );
 
     const totalAmountCents = purchases.reduce((sum, p) => sum + p.amountCents, 0);

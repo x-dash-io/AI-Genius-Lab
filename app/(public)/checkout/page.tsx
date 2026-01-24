@@ -49,6 +49,7 @@ async function createCheckoutSession(formData: FormData) {
     existingPurchase ??
     (await prisma.purchase.create({
       data: {
+        id: `purchase_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         userId: session.user.id,
         courseId: course.id,
         amountCents: course.priceCents,

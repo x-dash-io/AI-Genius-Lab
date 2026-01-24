@@ -189,7 +189,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Sidebar Footer - Fixed at bottom */}
-          <div className="flex-shrink-0 border-t p-4">
+          <div className="flex-shrink-0 border-t p-4 mt-auto">
             {session?.user && (
               <div className="space-y-3">
                 <Link href={getHref("/profile")}>
@@ -197,9 +197,9 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                     whileHover={{ scale: 1.02 }}
                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer"
                   >
-                    <Avatar className="h-9 w-9 ring-2 ring-primary/20">
+                    <Avatar className="h-10 w-10 ring-2 ring-primary/20">
                       <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "User"} />
-                      <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
                         {(() => {
                           const name = session.user.name;
                           const email = session.user.email || "";

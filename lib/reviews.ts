@@ -8,7 +8,7 @@ export async function getCourseReviews(courseId: string) {
   return prisma.review.findMany({
     where: { courseId },
     include: {
-      user: {
+      User: {
         select: {
           id: true,
           name: true,
@@ -62,7 +62,7 @@ export async function getUserReview(courseId: string, userId: string) {
       },
     },
     include: {
-      user: {
+      User: {
         select: {
           id: true,
           name: true,
