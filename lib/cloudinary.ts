@@ -50,11 +50,12 @@ export function getSignedCloudinaryUrl(
 
   // Validate and clean publicId
   if (!publicId || typeof publicId !== 'string' || publicId.trim() === '') {
-    console.error('Invalid Cloudinary publicId:', publicId);
+    console.error('[Cloudinary] Invalid publicId:', publicId);
     return null;
   }
 
   let cleanPublicId = publicId.trim();
+  console.log('[Cloudinary] Original publicId:', publicId);
 
   // If it's a full Cloudinary URL, extract the public ID
   if (cleanPublicId.includes('cloudinary.com')) {
@@ -63,8 +64,9 @@ export function getSignedCloudinaryUrl(
       // Extract path after /v1/ or similar version
       const pathParts = url.pathname.split('/').filter(p => p && p !== 'v1');
       cleanPublicId = pathParts.join('/');
+      console.log('[Cloudinary] Extracted from URL:', cleanPublicId);
     } catch (error) {
-      console.error('Error parsing Cloudinary URL:', cleanPublicId, error);
+      console.error('[Cloudinary] Error parsing URL:', cleanPublicId, error);
       return null;
     }
   }
@@ -74,14 +76,14 @@ export function getSignedCloudinaryUrl(
 
   // Basic validation - should contain folder structure
   if (!cleanPublicId.includes('/') || cleanPublicId.length < 10) {
-    console.error('Invalid Cloudinary publicId format:', cleanPublicId, 'from original:', publicId);
+    console.error('[Cloudinary] Invalid format:', cleanPublicId, 'from original:', publicId);
     return null;
   }
 
   const expiresAt = Math.floor(Date.now() / 1000) + 60 * 10; // 10 minutes
 
   try {
-    return cloudinary.url(cleanPublicId, {
+    const signedUrl = cloudinary.url(cleanPublicId, {
       secure: true,
       sign_url: true,
       type: "authenticated",
@@ -89,8 +91,10 @@ export function getSignedCloudinaryUrl(
       expires_at: expiresAt,
       attachment: options.download ? cleanPublicId.split('/').pop() : undefined,
     });
+    console.log('[Cloudinary] Generated signed URL successfully for:', cleanPublicId);
+    return signedUrl;
   } catch (error) {
-    console.error('Error generating Cloudinary URL for publicId:', cleanPublicId, error);
+    console.error('[Cloudinary] Error generating URL for:', cleanPublicId, error);
     return null;
   }
 }

@@ -119,6 +119,28 @@ export async function getAuthorizedLessonContent(lessonId: string) {
   const contentType = firstContent?.contentType || oldContentType || 'video';
   let contentUrl = firstContent?.contentUrl || oldContentUrl || null;
 
+  console.log('[Lesson Content] Lesson:', lesson.id, lesson.title);
+  console.log('[Lesson Content] First content record:', firstContent ? 'EXISTS' : 'NONE');
+  console.log('[Lesson Content] Content type:', contentType);
+  console.log('[Lesson Content] Content URL:', contentUrl);
+
+  // If no content URL is found, return null to show "content not available" message
+  if (!contentUrl) {
+    console.log('[Lesson Content] No content URL found - returning null');
+    return {
+      lesson: {
+        id: lesson.id,
+        title: lesson.title,
+        contentType,
+        durationSeconds: lesson.durationSeconds,
+        allowDownload: lesson.allowDownload,
+      },
+      courseSlug: lesson.section.course.slug,
+      publicId: null,
+      signedUrl: null,
+    };
+  }
+
   // Clean up contentUrl if it's a full Cloudinary URL - extract just the public ID
   if (contentUrl && contentUrl.includes('cloudinary.com')) {
     try {

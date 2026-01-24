@@ -122,8 +122,23 @@ export function LessonViewer({
 
   if (!contentUrl) {
     return (
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 text-sm text-zinc-300 text-center">
-        <p>No content available for this lesson yet.</p>
+      <div className="rounded-2xl border border-amber-800 bg-amber-900/20 p-8 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-16 w-16 rounded-full bg-amber-500/10 flex items-center justify-center">
+            <svg className="h-8 w-8 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-amber-100 mb-2">Content Not Yet Uploaded</h3>
+            <p className="text-sm text-amber-200/80 mb-4">
+              The instructor hasn't uploaded content for this lesson yet.
+            </p>
+            <p className="text-xs text-amber-300/60">
+              Please check back later or contact support if you believe this is an error.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
