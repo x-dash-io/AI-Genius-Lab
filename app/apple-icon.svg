@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <defs>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background with rounded corners for iOS -->
+  <rect width="180" height="180" rx="40" fill="url(#grad2)"/>
+  
+  <!-- Graduation cap (scaled up) -->
+  <g transform="translate(90, 90)">
+    <!-- Cap top -->
+    <path d="M -45 -22 L 0 -39 L 45 -22 L 45 -11 L 0 -28 L -45 -11 Z" fill="#ffffff"/>
+    
+    <!-- Cap base -->
+    <path d="M -34 -11 L -34 11 Q -34 22 0 28 Q 34 22 34 11 L 34 -11" fill="#ffffff" opacity="0.9"/>
+    
+    <!-- Tassel -->
+    <circle cx="45" cy="-22" r="6" fill="#fbbf24"/>
+    <line x1="45" y1="-16" x2="45" y2="0" stroke="#fbbf24" stroke-width="3"/>
+  </g>
+</svg>
