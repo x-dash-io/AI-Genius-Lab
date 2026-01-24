@@ -143,11 +143,11 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
                       <span>{formatCurrency(course.priceCents)}</span>
                       <span>•</span>
-                      <span>{course._count.sections} sections</span>
+                      <span>{course._count.Section} sections</span>
                       <span>•</span>
-                      <span>{course._count.purchases} purchases</span>
+                      <span>{course._count.Purchase} purchases</span>
                       <span>•</span>
-                      <span>{course._count.enrollments} enrollments</span>
+                      <span>{course._count.Enrollment} enrollments</span>
                       {course.inventory !== null && (
                         <>
                           <span>•</span>

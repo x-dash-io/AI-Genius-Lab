@@ -208,7 +208,7 @@ describeMaybeSkip("Learning Path Enrollment Flow", () => {
       where: { id: learningPath.id },
       include: {
         courses: {
-          include: { course: true },
+          include: { Course: true },
           orderBy: { sortOrder: "asc" },
         },
       },
@@ -216,8 +216,8 @@ describeMaybeSkip("Learning Path Enrollment Flow", () => {
 
     expect(pathWithCourses).toBeDefined();
     expect(pathWithCourses!.courses).toHaveLength(2);
-    expect(pathWithCourses!.courses[0].course.title).toBe("Course 1");
-    expect(pathWithCourses!.courses[1].course.title).toBe("Course 2");
+    expect(pathWithCourses!.courses[0].Course.title).toBe("Course 1");
+    expect(pathWithCourses!.courses[1].Course.title).toBe("Course 2");
   });
 
   it("should enroll user in all path courses", async () => {

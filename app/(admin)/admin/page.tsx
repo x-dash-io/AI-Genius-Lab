@@ -141,9 +141,9 @@ export default async function AdminDashboardPage() {
                   className="flex items-center justify-between rounded-lg border p-4"
                 >
                   <div className="space-y-1">
-                    <p className="font-medium">{purchase.course.title}</p>
+                    <p className="font-medium">{purchase.Course.title}</p>
                     <p className="text-sm text-muted-foreground">
-                      {purchase.user.name || purchase.user.email}
+                      {purchase.User.name || purchase.User.email}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(purchase.createdAt).toLocaleDateString()}

@@ -42,9 +42,9 @@ export default async function AdminPurchasesPage({ searchParams }: AdminPurchase
     const searchLower = params.search.toLowerCase();
     purchases = purchases.filter(
       (p) =>
-        p.user.email.toLowerCase().includes(searchLower) ||
-        p.course.title.toLowerCase().includes(searchLower) ||
-        p.user.name?.toLowerCase().includes(searchLower)
+        p.User.email.toLowerCase().includes(searchLower) ||
+        p.Course.title.toLowerCase().includes(searchLower) ||
+        p.User.name?.toLowerCase().includes(searchLower)
     );
   }
 
@@ -162,7 +162,7 @@ export default async function AdminPurchasesPage({ searchParams }: AdminPurchase
                 <div className="flex items-start justify-between">
                   <div className="space-y-1 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <CardTitle className="text-xl">{purchase.course.title}</CardTitle>
+                      <CardTitle className="text-xl">{purchase.Course.title}</CardTitle>
                       <Badge
                         variant={
                           purchase.status === "paid"
@@ -178,10 +178,10 @@ export default async function AdminPurchasesPage({ searchParams }: AdminPurchase
                     </div>
                     <CardDescription>
                       <Link
-                        href={`/admin/users/${purchase.user.id}`}
+                        href={`/admin/users/${purchase.User.id}`}
                         className="hover:underline"
                       >
-                        {purchase.user.name || purchase.user.email}
+                        {purchase.User.name || purchase.User.email}
                       </Link>
                     </CardDescription>
                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
@@ -197,7 +197,7 @@ export default async function AdminPurchasesPage({ searchParams }: AdminPurchase
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Link href={`/admin/courses/${purchase.course.id}/edit`}>
+                    <Link href={`/admin/courses/${purchase.Course.id}/edit`}>
                       <Button variant="outline" size="sm">
                         View Course
                       </Button>

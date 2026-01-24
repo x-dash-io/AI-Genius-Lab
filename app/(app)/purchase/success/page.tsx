@@ -464,7 +464,7 @@ export default async function CheckoutSuccessPage({
       userId: session.user.id,
     },
     include: {
-      course: {
+      Course: {
         select: {
           id: true,
           title: true,
@@ -472,7 +472,7 @@ export default async function CheckoutSuccessPage({
           description: true,
         },
       },
-      payments: {
+      Payment: {
         orderBy: { createdAt: "desc" },
         take: 1,
       },
@@ -483,14 +483,14 @@ export default async function CheckoutSuccessPage({
     redirect("/library");
   }
 
-  const payment = purchase.payments[0];
+  const payment = purchase.Payment[0];
   const purchaseDate = payment?.createdAt || purchase.createdAt;
   const invoiceNumber = generateInvoiceNumber(purchase.id);
 
   return (
     <section className="grid gap-8 max-w-4xl mx-auto px-4 py-8 print:max-w-full print:mx-0 print:px-0 print:py-0">
       {/* Clear purchased item from cart */}
-      <CartClearer courseIds={[purchase.course.id]} />
+      <CartClearer courseIds={[purchase.Course.id]} />
       <ProfessionalInvoice
         invoiceNumber={invoiceNumber}
         purchaseDate={purchaseDate}
@@ -499,16 +499,16 @@ export default async function CheckoutSuccessPage({
         paymentMethod={formatPaymentMethod(payment?.provider)}
         transactionId={payment?.providerRef || undefined}
         items={[{
-          id: purchase.course.id,
-          title: purchase.course.title,
-          description: purchase.course.description,
+          id: purchase.Course.id,
+          title: purchase.Course.title,
+          description: purchase.Course.description,
           amountCents: purchase.amountCents,
           currency: purchase.currency,
         }]}
         totalAmount={purchase.amountCents}
         currency={purchase.currency}
         isSinglePurchase={true}
-        courseSlug={purchase.course.slug}
+        courseSlug={purchase.Course.slug}
       />
     </section>
   );

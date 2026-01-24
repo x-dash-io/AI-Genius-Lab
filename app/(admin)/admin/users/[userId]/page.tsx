@@ -53,7 +53,7 @@ export default async function UserDetailPage({
     notFound();
   }
 
-  const totalSpent = user.purchases
+  const totalSpent = user.Purchase
     .filter((p) => p.status === "paid")
     .reduce((sum, p) => sum + p.amountCents, 0);
 
@@ -144,25 +144,25 @@ export default async function UserDetailPage({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
-            Purchases ({user.purchases.length})
+            Purchases ({user.Purchase.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {user.purchases.length === 0 ? (
+          {user.Purchase.length === 0 ? (
             <p className="text-sm text-muted-foreground">No purchases yet.</p>
           ) : (
             <div className="space-y-4">
-              {user.purchases.map((purchase) => (
+              {user.Purchase.map((purchase) => (
                 <div
                   key={purchase.id}
                   className="flex items-center justify-between rounded-lg border p-4"
                 >
                   <div>
                     <Link
-                      href={`/admin/courses/${purchase.course.id}/edit`}
+                      href={`/admin/courses/${purchase.Course.id}/edit`}
                       className="font-medium hover:underline"
                     >
-                      {purchase.course.title}
+                      {purchase.Course.title}
                     </Link>
                     <p className="text-sm text-muted-foreground mt-1">
                       {new Date(purchase.createdAt).toLocaleDateString()} • {purchase.provider}
@@ -186,25 +186,25 @@ export default async function UserDetailPage({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <GraduationCap className="h-5 w-5" />
-            Enrollments ({user.enrollments.length})
+            Enrollments ({user.Enrollment.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {user.enrollments.length === 0 ? (
+          {user.Enrollment.length === 0 ? (
             <p className="text-sm text-muted-foreground">No enrollments yet.</p>
           ) : (
             <div className="space-y-4">
-              {user.enrollments.map((enrollment) => (
+              {user.Enrollment.map((enrollment) => (
                 <div
                   key={enrollment.id}
                   className="flex items-center justify-between rounded-lg border p-4"
                 >
                   <div>
                     <Link
-                      href={`/admin/courses/${enrollment.course.id}/edit`}
+                      href={`/admin/courses/${enrollment.Course.id}/edit`}
                       className="font-medium hover:underline"
                     >
-                      {enrollment.course.title}
+                      {enrollment.Course.title}
                     </Link>
                     <p className="text-sm text-muted-foreground mt-1">
                       Enrolled {new Date(enrollment.grantedAt).toLocaleDateString()}
@@ -226,11 +226,11 @@ export default async function UserDetailPage({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {user.activityLogs.length === 0 ? (
+          {user.ActivityLog.length === 0 ? (
             <p className="text-sm text-muted-foreground">No recent activity.</p>
           ) : (
             <div className="space-y-2">
-              {user.activityLogs.map((log) => (
+              {user.ActivityLog.map((log) => (
                 <div
                   key={log.id}
                   className="flex items-center justify-between rounded-lg border p-3"

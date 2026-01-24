@@ -6,9 +6,9 @@ export async function getAllCourses() {
       include: {
         _count: {
           select: {
-            sections: true,
-            purchases: true,
-            enrollments: true,
+            Section: true,
+            Purchase: true,
+            Enrollment: true,
           },
         },
       },
@@ -22,13 +22,13 @@ export async function getCourseForEdit(courseId: string) {
     return prisma.course.findUnique({
       where: { id: courseId },
       include: {
-        sections: {
+        Section: {
           orderBy: { sortOrder: "asc" },
           include: {
-            lessons: {
+            Lesson: {
               orderBy: { sortOrder: "asc" },
               include: {
-                contents: {
+                LessonContent: {
                   orderBy: { sortOrder: "asc" },
                 },
               },
@@ -212,7 +212,7 @@ export async function deleteLesson(lessonId: string) {
     return prisma.lesson.findUnique({
       where: { id: lessonId },
       select: {
-        section: {
+        Section: {
           select: { courseId: true },
         },
       },
@@ -226,7 +226,7 @@ export async function deleteLesson(lessonId: string) {
   // Check if course has any purchases
   const purchaseCount = await withRetry(async () => {
     return prisma.purchase.count({
-      where: { courseId: lesson.section.courseId, status: "paid" },
+      where: { courseId: lesson.Section.courseId, status: "paid" },
     });
   });
 

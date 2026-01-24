@@ -34,10 +34,10 @@ export async function getAdminStats() {
       orderBy: { createdAt: "desc" },
       take: 5,
       include: {
-        user: {
+        User: {
           select: { email: true, name: true },
         },
-        course: {
+        Course: {
           select: { title: true, slug: true },
         },
       },

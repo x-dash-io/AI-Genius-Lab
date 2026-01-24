@@ -91,7 +91,7 @@ export async function getCategorySales(): Promise<CategorySalesData[]> {
       status: "paid",
     },
     include: {
-      course: {
+      Course: {
         select: {
           category: true,
         },
@@ -102,7 +102,7 @@ export async function getCategorySales(): Promise<CategorySalesData[]> {
   const categoryMap = new Map<string, { sales: number; revenue: number }>();
 
   purchases.forEach((purchase) => {
-    const category = purchase.course.category || "Uncategorized";
+    const category = purchase.Course.category || "Uncategorized";
     const existing = categoryMap.get(category) || { sales: 0, revenue: 0 };
     categoryMap.set(category, {
       sales: existing.sales + 1,
@@ -226,7 +226,7 @@ export async function getTopCoursesByRevenue(limit: number = 10): Promise<TopCou
       status: "paid",
     },
     include: {
-      course: {
+      Course: {
         select: {
           id: true,
           title: true,
@@ -240,12 +240,12 @@ export async function getTopCoursesByRevenue(limit: number = 10): Promise<TopCou
   purchases.forEach((purchase) => {
     const courseId = purchase.courseId;
     const existing = courseMap.get(courseId) || {
-      title: purchase.course.title,
+      title: purchase.Course.title,
       sales: 0,
       revenue: 0,
     };
     courseMap.set(courseId, {
-      title: purchase.course.title,
+      title: purchase.Course.title,
       sales: existing.sales + 1,
       revenue: existing.revenue + purchase.amountCents,
     });

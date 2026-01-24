@@ -19,9 +19,9 @@ export async function getUserById(userId: string) {
   return prisma.user.findUnique({
     where: { id: userId },
     include: {
-      purchases: {
+      Purchase: {
         include: {
-          course: {
+          Course: {
             select: {
               id: true,
               title: true,
@@ -31,9 +31,9 @@ export async function getUserById(userId: string) {
         },
         orderBy: { createdAt: "desc" },
       },
-      enrollments: {
+      Enrollment: {
         include: {
-          course: {
+          Course: {
             select: {
               id: true,
               title: true,
@@ -43,13 +43,13 @@ export async function getUserById(userId: string) {
         },
         orderBy: { grantedAt: "desc" },
       },
-      progress: {
+      Progress: {
         include: {
-          lesson: {
+          Lesson: {
             include: {
-              section: {
+              Section: {
                 include: {
-                  course: {
+                  Course: {
                     select: {
                       title: true,
                       slug: true,
@@ -63,7 +63,7 @@ export async function getUserById(userId: string) {
         orderBy: { updatedAt: "desc" },
         take: 10,
       },
-      activityLogs: {
+      ActivityLog: {
         orderBy: { createdAt: "desc" },
         take: 10,
       },

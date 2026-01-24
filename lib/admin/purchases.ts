@@ -3,14 +3,14 @@ import { prisma } from "@/lib/prisma";
 export async function getAllPurchases() {
   return prisma.purchase.findMany({
     include: {
-      user: {
+      User: {
         select: {
           id: true,
           email: true,
           name: true,
         },
       },
-      course: {
+      Course: {
         select: {
           id: true,
           title: true,
@@ -26,10 +26,10 @@ export async function getPurchaseById(purchaseId: string) {
   return prisma.purchase.findUnique({
     where: { id: purchaseId },
     include: {
-      user: true,
-      course: true,
-      enrollment: true,
-      payments: true,
+      User: true,
+      Course: true,
+      Enrollment: true,
+      Payment: true,
     },
   });
 }

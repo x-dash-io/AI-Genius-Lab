@@ -55,23 +55,44 @@ model Certificate {
   @@index([userId])
 }
 
+model Category {
+  id          String   @id
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  color       String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+  Course      Course[]
+
+  @@index([slug])
+  @@index([isActive])
+}
+
 model Course {
   id                 String               @id
   slug               String               @unique
   title              String
   description        String?
   category           String?
+  categoryId         String?
   priceCents         Int
   inventory          Int?
   isPublished        Boolean              @default(false)
   createdAt          DateTime             @default(now())
   updatedAt          DateTime
+  Category           Category?            @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   Certificate        Certificate[]
   Enrollment         Enrollment[]
   LearningPathCourse LearningPathCourse[]
   Purchase           Purchase[]
   Review             Review[]
   Section            Section[]
+
+  @@index([categoryId])
 }
 
 model Enrollment {

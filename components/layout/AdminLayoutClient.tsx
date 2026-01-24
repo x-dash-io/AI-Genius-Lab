@@ -32,6 +32,7 @@ const adminNavigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Courses", href: "/admin/courses", icon: BookOpen },
   { name: "Learning Paths", href: "/admin/learning-paths", icon: Route },
+  { name: "Categories", href: "/admin/categories", icon: ShoppingCart },
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Purchases", href: "/admin/purchases", icon: Receipt },
   { name: "Profile", href: "/admin/profile", icon: User },
