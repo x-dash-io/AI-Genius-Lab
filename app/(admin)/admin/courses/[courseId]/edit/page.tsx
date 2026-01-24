@@ -236,6 +236,18 @@ export default async function EditCoursePage({
     notFound();
   }
 
+  // Transform the course data to match the expected type
+  const courseWithSections = {
+    ...course,
+    sections: (course.Section || []).map(section => ({
+      ...section,
+      lessons: (section.Lesson || []).map(lesson => ({
+        ...lesson,
+        contents: lesson.LessonContent || [],
+      })),
+    })),
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -255,7 +267,7 @@ export default async function EditCoursePage({
       </div>
 
       <CourseEditForm
-        course={course}
+        course={courseWithSections}
         updateCourseAction={updateCourseAction.bind(null, courseId)}
         addSectionAction={addSectionAction.bind(null, courseId)}
         deleteSectionAction={deleteSectionAction}
