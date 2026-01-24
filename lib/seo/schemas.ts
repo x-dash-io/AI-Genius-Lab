@@ -73,7 +73,7 @@ export function generateOrganizationSchema(): OrganizationSchema {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "AI Genius Club",
+    name: "AI Genius Lab",
     url: siteUrl,
     description:
       "Premium AI learning platform with structured courses and secure commerce.",
@@ -99,7 +99,7 @@ export function generateCourseSchema(config: {
     description,
     provider: {
       "@type": "Organization",
-      name: "AI Genius Club",
+      name: "AI Genius Lab",
       url: siteUrl,
     },
     inLanguage: "en-US",
@@ -141,7 +141,7 @@ export function generateLearningPathSchema(config: {
     description,
     provider: {
       "@type": "Organization",
-      name: "AI Genius Club",
+      name: "AI Genius Lab",
       url: siteUrl,
     },
   };

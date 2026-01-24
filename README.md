@@ -1,4 +1,4 @@
-# AI Genius Club
+# AI Genius Lab
 
 A comprehensive online learning management system built for modern education. Deliver courses, track progress, issue certificates, and manage payments through a single, powerful platform.
 
@@ -9,7 +9,7 @@ A comprehensive online learning management system built for modern education. De
 
 ## Overview
 
-AI Genius Club is a production-ready learning management system designed for educational institutions, training organizations, and content creators. The platform handles everything from course creation to payment processing, with built-in analytics and certificate generation.
+AI Genius Lab is a production-ready learning management system designed for educational institutions, training organizations, and content creators. The platform handles everything from course creation to payment processing, with built-in analytics and certificate generation.
 
 ## Core Capabilities
 
@@ -87,7 +87,7 @@ AI Genius Club is a production-ready learning management system designed for edu
 1. Clone the repository and install dependencies:
 ```bash
 git clone <repository-url>
-cd ai-genius-club
+cd ai-genius-lab
 npm install
 ```
 
@@ -146,11 +146,11 @@ npm run dev
 After seeding, use these credentials to access the platform:
 
 **Administrator Account:**
-- Email: admin@aigeniusclub.com
+- Email: admin@aigeniuslab.com
 - Password: password123
 
 **Customer Account:**
-- Email: customer@aigeniusclub.com
+- Email: customer@aigeniuslab.com
 - Password: password123
 
 ## Database Management
@@ -243,7 +243,7 @@ npx prisma migrate deploy
 ## Project Structure
 
 ```
-ai-genius-club/
+ai-genius-lab/
 ├── app/                    # Next.js application
 │   ├── (admin)/           # Admin dashboard routes
 │   ├── (app)/             # Student portal routes
@@ -333,4 +333,4 @@ Built with industry-leading open source technologies:
 
 ---
 
-Built by the AI Genius Club Team
+Built by the AI Genius Lab Team
