@@ -89,7 +89,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
             <p className="text-muted-foreground">
               {hasFilters
                 ? "No courses match your search criteria. Try adjusting your filters."
-                : "No published courses yet. Seed data to preview the catalog."}
+                : "No courses available at the moment. Check back soon for new courses!"}
             </p>
           </CardContent>
         </Card>

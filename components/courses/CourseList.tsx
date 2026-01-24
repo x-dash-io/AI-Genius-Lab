@@ -68,7 +68,7 @@ export function CourseList({ courses }: CourseListProps) {
         <Card className="col-span-full">
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground">
-              No published courses yet. Seed data to preview the catalog.
+              No courses available at the moment. Check back soon for new courses!
             </p>
           </CardContent>
         </Card>
