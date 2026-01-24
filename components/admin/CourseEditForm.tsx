@@ -283,7 +283,7 @@ export function CourseEditForm({
       ...prev,
       Section: prev.Section.map(s => 
         s.id === sectionId 
-          ? { ...s, Lesson: [...s.Lesson, tempLesson] }
+          ? { ...s, Lesson: [...(s.Lesson || []), tempLesson] }
           : s
       ),
     }));
