@@ -68,24 +68,6 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
     }
   };
 
-  const handleIncreaseQuantity = async (item: CartItem) => {
-    const newQuantity = (item.quantity || 1) + 1;
-    // Check inventory limits
-    if (item.availableInventory !== null && newQuantity > item.availableInventory) {
-      toast({
-        title: "Inventory Limit",
-        description: `Only ${item.availableInventory} available`,
-        variant: "destructive",
-      });
-      return;
-    }
-    await handleQuantityChange(item.courseId, newQuantity);
-  };
-
-  const handleDecreaseQuantity = async (item: CartItem) => {
-    const newQuantity = Math.max(1, (item.quantity || 1) - 1);
-    await handleQuantityChange(item.courseId, newQuantity);
-  };
 
   const handleCheckout = async () => {
     // Prevent admin checkout in preview mode
@@ -289,45 +271,11 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          {/* Quantity Controls */}
-                          <div className={`flex items-center gap-1 border rounded-md ${!isCartItemValid(item) ? "opacity-50" : ""}`}>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleDecreaseQuantity(item)}
-                              disabled={
-                                isUpdating === item.courseId || 
-                                (item.quantity || 1) <= 1 ||
-                                !isCartItemValid(item)
-                              }
-                            >
-                              {isUpdating === item.courseId ? (
-                                <Loader2 className="h-3 w-3 animate-spin" />
-                              ) : (
-                                <Minus className="h-3 w-3" />
-                              )}
-                            </Button>
-                            <span className="px-3 py-1 text-sm font-medium min-w-[2rem] text-center">
-                              {item.quantity || 1}
+                          {/* Quantity Display - No controls for courses */}
+                          <div className="flex items-center gap-1 border rounded-md px-3 py-1">
+                            <span className="text-sm font-medium">
+                              Qty: 1
                             </span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleIncreaseQuantity(item)}
-                              disabled={
-                                isUpdating === item.courseId ||
-                                !isCartItemValid(item) ||
-                                !canIncreaseQuantity(item)
-                              }
-                            >
-                              {isUpdating === item.courseId ? (
-                                <Loader2 className="h-3 w-3 animate-spin" />
-                              ) : (
-                                <Plus className="h-3 w-3" />
-                              )}
-                            </Button>
                           </div>
                           <Button
                             variant="ghost"

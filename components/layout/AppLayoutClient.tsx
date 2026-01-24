@@ -351,7 +351,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="border-t px-4 py-4 space-y-3 sticky bottom-0 bg-card/95 backdrop-blur-md"
+                    className="border-t px-4 py-4 space-y-3 sticky bottom-0 bg-background/95 backdrop-blur-md"
                   >
                     <Link href={getHref("/profile")} onClick={() => setMobileMenuOpen(false)}>
                       <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors active:scale-[0.98]">

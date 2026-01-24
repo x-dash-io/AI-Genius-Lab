@@ -74,7 +74,7 @@ export function PublicLayoutClient({
       <BackgroundBlobs />
       <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-3 sm:px-4 md:px-6 lg:px-8 pt-3 pb-3 sm:pt-4 sm:pb-4">
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 z-50">
             <Link
               href="/"
               className="font-display text-lg sm:text-xl font-bold tracking-tight"
@@ -84,56 +84,56 @@ export function PublicLayoutClient({
           </div>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-4 lg:gap-6">
-            {!isAuthPage && (
-              <>
-                <Link
-                  href="/courses"
-                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground whitespace-nowrap"
-                >
-                  Courses
-                </Link>
-                <Link
-                  href="/learning-paths"
-                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground whitespace-nowrap"
-                >
-                  Learning Paths
-                </Link>
-              </>
-            )}
-            {!isAuthPage && <CartIcon />}
-            <ThemeToggle />
-            {!isAuthPage && session?.user ? (
-              <>
-                <Link href="/dashboard">
-                  <Button variant="ghost" size="sm" className="whitespace-nowrap">
-                    Go to Dashboard
-                  </Button>
-                </Link>
-              </>
-            ) : !isAuthPage ? (
-              <>
-                <Link href="/sign-in">
-                  <Button variant="ghost" size="sm" className="whitespace-nowrap">
-                    Sign in
-                  </Button>
-                </Link>
-                <Link href="/sign-up">
-                  <Button size="sm" className="whitespace-nowrap">Sign up</Button>
-                </Link>
-              </>
-            ) : null}
-          </nav>
+                <nav className="hidden md:flex items-center gap-4 lg:gap-6">
+                  {!isAuthPage && (
+                    <>
+                      <Link
+                        href="/courses"
+                        className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground whitespace-nowrap bg-background/50 rounded-md px-3 py-2 hover:bg-background/80"
+                      >
+                        Courses
+                      </Link>
+                      <Link
+                        href="/learning-paths"
+                        className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground whitespace-nowrap bg-background/50 rounded-md px-3 py-2 hover:bg-background/80"
+                      >
+                        Learning Paths
+                      </Link>
+                    </>
+                  )}
+                  {!isAuthPage && <CartIcon />}
+                  <ThemeToggle />
+                  {!isAuthPage && session?.user ? (
+                    <>
+                      <Link href="/dashboard">
+                        <Button variant="ghost" size="sm" className="whitespace-nowrap">
+                          Go to Dashboard
+                        </Button>
+                      </Link>
+                    </>
+                  ) : !isAuthPage ? (
+                    <>
+                      <Link href="/sign-in">
+                        <Button variant="ghost" size="sm" className="whitespace-nowrap">
+                          Sign in
+                        </Button>
+                      </Link>
+                      <Link href="/sign-up">
+                        <Button size="sm" className="whitespace-nowrap">Sign up</Button>
+                      </Link>
+                    </>
+                  ) : null}
+                </nav>
 
           {/* Mobile Menu Button */}
-          <div className="flex items-center gap-2 md:hidden">
+          <div className="flex items-center gap-2 md:hidden z-50">
             {!isAuthPage && <CartIcon />}
             <ThemeToggle />
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden"
+              className="md:hidden z-50"
             >
               {mobileMenuOpen ? (
                 <X className="h-5 w-5" />
@@ -181,7 +181,7 @@ export function PublicLayoutClient({
                         <Link
                           href="/courses"
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-all hover:bg-accent hover:text-accent-foreground active:scale-[0.98]"
+                          className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-all hover:bg-accent hover:text-accent-foreground active:scale-[0.98] bg-background/50 hover:bg-background/80"
                         >
                           Courses
                         </Link>
@@ -194,7 +194,7 @@ export function PublicLayoutClient({
                         <Link
                           href="/learning-paths"
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-all hover:bg-accent hover:text-accent-foreground active:scale-[0.98]"
+                          className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-all hover:bg-accent hover:text-accent-foreground active:scale-[0.98] bg-background/50 hover:bg-background/80"
                         >
                           Learning Paths
                         </Link>

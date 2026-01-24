@@ -125,13 +125,13 @@ function ProfessionalInvoice({
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm print:bg-white/10">
-                      <Sparkles className="h-7 w-7 text-white" />
+                      <Sparkles className="h-7 w-7 text-primary-foreground dark:text-white" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white font-display tracking-tight">
+                      <h2 className="text-2xl font-bold text-primary-foreground dark:text-white font-display tracking-tight">
                         AI Genius Lab
                       </h2>
-                      <p className="text-sm text-white/70">Premium Learning Platform</p>
+                      <p className="text-sm text-primary-foreground/70 dark:text-white/70">Premium Learning Platform</p>
                     </div>
                   </div>
                 </div>
@@ -139,13 +139,13 @@ function ProfessionalInvoice({
                 {/* Invoice Badge & Number */}
                 <div className="text-left md:text-right space-y-2">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 rounded-full backdrop-blur-sm">
-                    <Receipt className="h-4 w-4 text-white" />
-                    <span className="text-sm font-semibold text-white uppercase tracking-wider">Invoice</span>
+                    <Receipt className="h-4 w-4 text-primary-foreground dark:text-white" />
+                    <span className="text-sm font-semibold text-primary-foreground dark:text-white uppercase tracking-wider">Invoice</span>
                   </div>
-                  <p className="text-2xl font-bold font-mono text-white tracking-wide">
+                  <p className="text-2xl font-bold font-mono text-primary-foreground dark:text-white tracking-wide">
                     {invoiceNumber}
                   </p>
-                  <p className="text-sm text-white/70">
+                  <p className="text-sm text-primary-foreground/70 dark:text-white/70">
                     {format(purchaseDate, "MMMM dd, yyyy")}
                   </p>
                 </div>
@@ -157,7 +157,7 @@ function ProfessionalInvoice({
           <div className="p-6 md:p-10 space-y-8 bg-gradient-to-b from-muted/30 to-background print:bg-white print:p-6">
             {/* Status Badge */}
             <div className="flex justify-center print:justify-start">
-              <Badge className="px-4 py-2 text-sm bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-0 print:bg-green-100 print:text-green-800">
+              <Badge className="px-4 py-2 text-sm bg-white-100 text-black-800 dark:bg-green-900/30 dark:text-green-400 border-0 print:bg-green-100 print:text-green-800">
                 <CheckCircle2 className="h-4 w-4 mr-2" />
                 Payment Confirmed
               </Badge>
@@ -167,10 +167,10 @@ function ProfessionalInvoice({
             <div className="grid md:grid-cols-2 gap-8">
               {/* Bill To */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <User className="h-4 w-4" />
-                  <span>Billed To</span>
-                </div>
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-foreground">
+                <User className="h-4 w-4" />
+                <span>Billed To</span>
+              </div>
                 <div className="p-4 rounded-xl bg-card border print:border-gray-200 print:bg-gray-50">
                   <p className="font-semibold text-lg">{customerName}</p>
                   <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
@@ -182,10 +182,10 @@ function ProfessionalInvoice({
 
               {/* Payment Info */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  <CreditCard className="h-4 w-4" />
-                  <span>Payment Information</span>
-                </div>
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-foreground">
+                <CreditCard className="h-4 w-4" />
+                <span>Payment Information</span>
+              </div>
                 <div className="p-4 rounded-xl bg-card border print:border-gray-200 print:bg-gray-50 space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Method</span>
@@ -213,7 +213,7 @@ function ProfessionalInvoice({
 
             {/* Items Section */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-foreground">
                 <FileText className="h-4 w-4" />
                 <span>Purchased Items</span>
               </div>
@@ -222,10 +222,10 @@ function ProfessionalInvoice({
                 <table className="w-full">
                   <thead>
                     <tr className="bg-muted/50 print:bg-gray-100">
-                      <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-foreground">
                         Course
                       </th>
-                      <th className="text-right p-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground w-32">
+                      <th className="text-right p-4 text-xs font-semibold uppercase tracking-wider text-foreground w-32">
                         Amount
                       </th>
                     </tr>

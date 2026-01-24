@@ -101,7 +101,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.3 }}
-          className="w-64 flex-col border-r bg-card/80 backdrop-blur-md flex fixed left-0 top-0 bottom-0 z-20"
+          className="w-64 flex-col border-r bg-background/90 backdrop-blur-md flex fixed left-0 top-0 bottom-0 z-20"
         >
           {/* Sidebar Header - Fixed at top */}
           <div className="flex-shrink-0 border-b p-6">
@@ -309,7 +309,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                   damping: 30,
                   stiffness: 300
                 }}
-                className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-card/95 backdrop-blur-md border-r shadow-2xl overflow-y-auto md:hidden"
+                className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-background/95 backdrop-blur-md border-r shadow-2xl overflow-y-auto md:hidden"
               >
                 {/* Menu Header */}
                 <div className="border-b p-4 flex items-center justify-between sticky top-0 bg-card/95 backdrop-blur-md z-10 h-16">

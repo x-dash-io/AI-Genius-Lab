@@ -1160,7 +1160,21 @@ export function CourseEditForm({
                                   </Badge>
                                   {lesson.durationSeconds && (
                                     <span className="text-xs text-muted-foreground">
-                                      {Math.floor(lesson.durationSeconds / 60)}m {lesson.durationSeconds % 60}s
+                                      {(() => {
+                                        const firstContent = lesson.contents?.[0];
+                                        const contentType = firstContent?.contentType || 'video';
+                                        
+                                        switch (contentType) {
+                                          case 'pdf':
+                                            return `${lesson.durationSeconds} pages`;
+                                          case 'file':
+                                            return `${lesson.durationSeconds.toFixed(1)} MB`;
+                                          case 'video':
+                                          case 'audio':
+                                          default:
+                                            return `${Math.floor(lesson.durationSeconds / 60)}m ${lesson.durationSeconds % 60}s`;
+                                        }
+                                      })()}
                                     </span>
                                   )}
                                   {lesson.isLocked && (

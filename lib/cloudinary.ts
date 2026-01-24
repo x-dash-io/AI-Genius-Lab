@@ -101,6 +101,11 @@ export function getSignedCloudinaryUrl(
 
 /**
  * Upload file to Cloudinary (server-side only)
+ * 
+ * IMPORTANT: Files are uploaded with type: "authenticated" which means:
+ * - Files can only be accessed via signed URLs with valid signatures
+ * - The signed URL must include proper authentication parameters
+ * - This matches the getSignedCloudinaryUrl function which generates authenticated URLs
  */
 export async function uploadToCloudinary(
   file: Buffer | string,
@@ -124,6 +129,9 @@ export async function uploadToCloudinary(
     const uploadOptions: any = {
       folder,
       resource_type: resourceType,
+      // CRITICAL: Use "authenticated" type so files can only be accessed via signed URLs
+      // This MUST match the type used in getSignedCloudinaryUrl()
+      type: "authenticated",
       use_filename: true,
       unique_filename: true,
       overwrite: false,
@@ -137,12 +145,25 @@ export async function uploadToCloudinary(
       uploadOptions.allowed_formats = allowedFormats;
     }
 
+    console.log('[Cloudinary Upload] Options:', {
+      folder,
+      resourceType,
+      type: 'authenticated',
+      publicId: publicId || '(auto)',
+    });
+
     const uploadStream = cloudinary.uploader.upload_stream(
       uploadOptions,
       (error, result) => {
         if (error) {
+          console.error('[Cloudinary Upload] Error:', error);
           reject(error);
         } else if (result) {
+          console.log('[Cloudinary Upload] Success:', {
+            publicId: result.public_id,
+            type: result.type,
+            resourceType: result.resource_type,
+          });
           resolve({
             publicId: result.public_id,
             secureUrl: result.secure_url,
