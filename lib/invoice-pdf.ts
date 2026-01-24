@@ -501,7 +501,7 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
     color: darkGray,
   });
 
-  const termsText = "This invoice confirms your purchase of the listed digital course(s). All sales are final and non-refundable. You have been granted immediate and lifetime access to the purchased content in your library. No physical items will be shipped. For support, contact support@aigeniuslab.com.";
+  const termsText = "This invoice confirms your purchase of the listed digital course(s). All sales are final and non-refundable. You have been granted immediate and lifetime access to the purchased content in your library. No physical items will be shipped. For support, contact support@aigeniusclub.com.";
   const termsLines = wrapText(termsText, width - 140, helveticaFont, 7);
 
   termsLines.forEach((line, index) => {
