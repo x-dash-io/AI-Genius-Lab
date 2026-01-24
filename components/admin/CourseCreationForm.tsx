@@ -246,18 +246,18 @@ export function CourseCreationForm({
       {/* Created Course Display */}
       {createdCourse && (
         <>
-          <Card className="border-green-600 bg-green-900/20">
+          <Card className="border-green-600 dark:border-green-600 bg-green-50 dark:bg-green-900/20">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-400" />
-                <CardTitle className="text-green-200">Course Created Successfully</CardTitle>
+                <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                <CardTitle className="text-green-800 dark:text-green-200">Course Created Successfully</CardTitle>
               </div>
               <div className="flex items-center gap-2 mt-2">
-                <span className="text-green-300">
+                <span className="text-green-700 dark:text-green-300">
                   {createdCourse.title} - ${(createdCourse.priceCents / 100).toFixed(2)}
                 </span>
                 {createdCourse.isPublished && (
-                  <Badge variant="secondary" className="bg-green-800 text-green-200 border-green-600">Published</Badge>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-300 dark:bg-green-800 dark:text-green-200 dark:border-green-600">Published</Badge>
                 )}
               </div>
             </CardHeader>

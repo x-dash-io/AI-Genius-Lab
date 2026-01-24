@@ -101,7 +101,7 @@ export function CourseEditForm({
     }>> = {};
 
     course.Section.forEach(section => {
-      section.Lesson.forEach(lesson => {
+      (section.Lesson || []).forEach(lesson => {
         if (lesson.LessonContent && lesson.LessonContent.length > 0) {
           initialContents[lesson.id] = lesson.LessonContent.map(content => ({
             id: content.id,
@@ -701,7 +701,7 @@ export function CourseEditForm({
                         )}
                       </button>
                       <CardTitle className="text-lg">{section.title}</CardTitle>
-                      <Badge variant="secondary">{section.Lesson.length} lessons</Badge>
+                      <Badge variant="secondary">{(section.Lesson || []).length} lessons</Badge>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
@@ -1008,7 +1008,7 @@ export function CourseEditForm({
                     )}
 
                     <div className="space-y-2">
-                      {section.Lesson.map((lesson) => (
+                      {(section.Lesson || []).map((lesson) => (
                         <div key={lesson.id}>
                           {editingLesson === lesson.id ? (
                             <Card className="mb-4">
@@ -1344,7 +1344,7 @@ export function CourseEditForm({
                           )}
                         </div>
                       ))}
-                      {section.Lesson.length === 0 && (
+                      {(section.Lesson || []).length === 0 && (
                         <p className="text-sm text-muted-foreground text-center py-4">
                           No lessons yet. Add your first lesson above.
                         </p>
