@@ -140,12 +140,21 @@ export function ProfileAvatar({
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <Avatar className="h-24 w-24 border-2 border-border/50">
-        <AvatarImage src={isAdminPreview ? undefined : (imageUrl || undefined)} alt={displayName || displayEmail} />
-        <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-          {initials}
-        </AvatarFallback>
-      </Avatar>
+      <div className="relative">
+        <Avatar className={`h-24 w-24 border-2 transition-all ${
+          isUploading 
+            ? 'border-primary animate-pulse' 
+            : 'border-border/50'
+        }`}>
+          <AvatarImage src={isAdminPreview ? undefined : (imageUrl || undefined)} alt={displayName || displayEmail} />
+          <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
+        {isUploading && (
+          <div className="absolute inset-0 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        )}
+      </div>
       <div className="relative">
         <input
           type="file"
