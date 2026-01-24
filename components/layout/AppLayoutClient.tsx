@@ -23,6 +23,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { BackgroundBlobs } from "@/components/ui/background-blobs";
 import { useCart } from "@/components/cart/CartProvider";
+import { ConfirmDialogProvider } from "@/components/ui/confirm-dialog";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 import { PreviewBanner } from "@/components/admin/PreviewBanner";
@@ -118,8 +119,9 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
-      <BackgroundBlobs />
+    <ConfirmDialogProvider>
+      <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
+        <BackgroundBlobs />
       
       {/* Desktop Layout */}
       <div className="hidden md:flex h-screen overflow-hidden">
@@ -425,6 +427,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
           </motion.div>
         </main>
       </div>
-    </div>
+      </div>
+    </ConfirmDialogProvider>
   );
 }

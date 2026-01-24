@@ -20,11 +20,11 @@ import {
   Mail,
   Hash,
   FileText,
-  Zap
+  Zap,
+  Download
 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { PrintInvoiceButton } from "@/components/checkout/PrintInvoiceButton";
 import { CartClearer } from "@/components/cart/CartClearer";
 
 type CheckoutSuccessPageProps = {
@@ -88,8 +88,8 @@ function ProfessionalInvoice({
 }: InvoiceProps) {
   return (
     <>
-      {/* Success Animation Header - Hidden when printing */}
-      <div className="text-center print:hidden">
+      {/* Success Animation Header */}
+      <div className="text-center">
         <div className="relative inline-flex">
           <div className="absolute inset-0 animate-ping rounded-full bg-green-400/30" />
           <div className="relative rounded-full bg-gradient-to-br from-green-400 to-emerald-600 p-4 shadow-lg shadow-green-500/25">
@@ -108,7 +108,7 @@ function ProfessionalInvoice({
       </div>
 
       {/* Professional Invoice Card */}
-      <Card className="overflow-hidden border-2 border-primary/20 shadow-2xl dark:shadow-primary/5 print:shadow-none print:border print:border-gray-200" id="invoice">
+      <Card className="overflow-hidden border-2 border-primary/20 shadow-2xl dark:shadow-primary/5" id="invoice">
         <CardContent className="p-0">
           {/* Invoice Header - Gradient Banner */}
           <div className="relative overflow-hidden">
@@ -119,19 +119,19 @@ function ProfessionalInvoice({
               <div className="absolute bottom-0 right-0 w-60 h-60 bg-white rounded-full translate-x-20 translate-y-20" />
             </div>
             
-            <div className="relative px-6 py-8 md:px-10 md:py-10 print:bg-primary print:py-6">
+            <div className="relative px-6 py-8 md:px-10 md:py-10">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
                 {/* Company Branding */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm print:bg-white/10">
-                      <Sparkles className="h-7 w-7 text-primary-foreground dark:text-white" />
+                    <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                      <Sparkles className="h-7 w-7 text-primary-foreground" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-primary-foreground dark:text-white font-display tracking-tight">
+                      <h2 className="text-2xl font-bold text-primary-foreground font-display tracking-tight">
                         AI Genius Lab
                       </h2>
-                      <p className="text-sm text-primary-foreground/70 dark:text-white/70">Premium Learning Platform</p>
+                      <p className="text-sm text-primary-foreground/70">Premium Learning Platform</p>
                     </div>
                   </div>
                 </div>
@@ -139,13 +139,13 @@ function ProfessionalInvoice({
                 {/* Invoice Badge & Number */}
                 <div className="text-left md:text-right space-y-2">
                   <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 rounded-full backdrop-blur-sm">
-                    <Receipt className="h-4 w-4 text-primary-foreground dark:text-white" />
-                    <span className="text-sm font-semibold text-primary-foreground dark:text-white uppercase tracking-wider">Invoice</span>
+                    <Receipt className="h-4 w-4 text-primary-foreground" />
+                    <span className="text-sm font-semibold text-primary-foreground uppercase tracking-wider">Invoice</span>
                   </div>
-                  <p className="text-2xl font-bold font-mono text-primary-foreground dark:text-white tracking-wide">
+                  <p className="text-2xl font-bold font-mono text-primary-foreground tracking-wide">
                     {invoiceNumber}
                   </p>
-                  <p className="text-sm text-primary-foreground/70 dark:text-white/70">
+                  <p className="text-sm text-primary-foreground/70">
                     {format(purchaseDate, "MMMM dd, yyyy")}
                   </p>
                 </div>
@@ -154,10 +154,10 @@ function ProfessionalInvoice({
           </div>
 
           {/* Invoice Body */}
-          <div className="p-6 md:p-10 space-y-8 bg-gradient-to-b from-muted/30 to-background print:bg-white print:p-6">
+          <div className="p-6 md:p-10 space-y-8 bg-gradient-to-b from-muted/30 to-background">
             {/* Status Badge */}
-            <div className="flex justify-center print:justify-start">
-              <Badge className="px-4 py-2 text-sm bg-white-100 text-black-800 dark:bg-green-900/30 dark:text-green-400 border-0 print:bg-green-100 print:text-green-800">
+            <div className="flex justify-center">
+              <Badge className="px-4 py-2 text-sm bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-0">
                 <CheckCircle2 className="h-4 w-4 mr-2" />
                 Payment Confirmed
               </Badge>
@@ -171,7 +171,7 @@ function ProfessionalInvoice({
                 <User className="h-4 w-4" />
                 <span>Billed To</span>
               </div>
-                <div className="p-4 rounded-xl bg-card border print:border-gray-200 print:bg-gray-50">
+                <div className="p-4 rounded-xl bg-card border">
                   <p className="font-semibold text-lg">{customerName}</p>
                   <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
                     <Mail className="h-4 w-4" />
@@ -186,7 +186,7 @@ function ProfessionalInvoice({
                 <CreditCard className="h-4 w-4" />
                 <span>Payment Information</span>
               </div>
-                <div className="p-4 rounded-xl bg-card border print:border-gray-200 print:bg-gray-50 space-y-3">
+                <div className="p-4 rounded-xl bg-card border space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Method</span>
                     <span className="font-semibold">{paymentMethod}</span>
@@ -209,7 +209,7 @@ function ProfessionalInvoice({
               </div>
             </div>
 
-            <Separator className="print:border-gray-300" />
+            <Separator className="border-gray-300" />
 
             {/* Items Section */}
             <div className="space-y-4">
@@ -218,10 +218,10 @@ function ProfessionalInvoice({
                 <span>Purchased Items</span>
               </div>
               
-              <div className="rounded-xl border overflow-hidden print:border-gray-300">
+              <div className="rounded-xl border overflow-hidden">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-muted/50 print:bg-gray-100">
+                    <tr className="bg-muted/50">
                       <th className="text-left p-4 text-xs font-semibold uppercase tracking-wider text-foreground">
                         Course
                       </th>
@@ -230,13 +230,13 @@ function ProfessionalInvoice({
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y print:divide-gray-200">
+                  <tbody className="divide-y">
                     {items.map((item, index) => (
-                      <tr key={item.id} className="bg-card print:bg-white">
+                      <tr key={item.id} className="bg-card">
                         <td className="p-4">
                           <div className="flex items-start gap-3">
-                            <div className="p-2 rounded-lg bg-primary/10 print:bg-gray-100 shrink-0">
-                              <BookOpen className="h-5 w-5 text-primary print:text-gray-600" />
+                            <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+                              <BookOpen className="h-5 w-5 text-primary" />
                             </div>
                             <div className="min-w-0">
                               <p className="font-semibold text-base">{item.title}</p>
@@ -269,7 +269,7 @@ function ProfessionalInvoice({
             {/* Totals Section */}
             <div className="flex justify-end">
               <div className="w-full md:w-96 space-y-3">
-                <div className="p-4 rounded-xl bg-muted/50 print:bg-gray-50 print:border print:border-gray-200 space-y-3">
+                <div className="p-4 rounded-xl bg-muted/50 space-y-3">
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
                     <span className="font-semibold">{formatCurrency(totalAmount, currency)}</span>
@@ -278,10 +278,10 @@ function ProfessionalInvoice({
                     <span className="text-muted-foreground">Tax</span>
                     <span className="font-semibold">{formatCurrency(0, currency)}</span>
                   </div>
-                  <Separator className="print:border-gray-300" />
+                  <Separator className="border-gray-300" />
                   <div className="flex justify-between items-center pt-2">
                     <span className="text-lg font-bold">Total Paid</span>
-                    <span className="text-2xl font-bold text-primary print:text-black">
+                    <span className="text-2xl font-bold text-primary">
                       {formatCurrency(totalAmount, currency)}
                     </span>
                   </div>
@@ -290,7 +290,7 @@ function ProfessionalInvoice({
             </div>
 
             {/* Trust Indicators - Hidden when printing */}
-            <div className="grid grid-cols-3 gap-4 pt-6 print:hidden">
+            <div className="grid grid-cols-3 gap-4 pt-6">
               <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/50 text-center">
                 <Shield className="h-6 w-6 text-green-600 dark:text-green-400" />
                 <span className="text-xs font-medium text-muted-foreground">Secure Payment</span>
@@ -306,9 +306,9 @@ function ProfessionalInvoice({
             </div>
 
             {/* Terms & Conditions */}
-            <div className="p-4 rounded-xl bg-muted/30 border border-dashed print:border-gray-300 print:bg-gray-50">
+            <div className="p-4 rounded-xl bg-muted/30 border border-dashed">
               <p className="text-xs text-muted-foreground leading-relaxed">
-                <strong className="text-foreground print:text-black">Terms & Conditions:</strong>{" "}
+                <strong className="text-foreground">Terms & Conditions:</strong>{" "}
                 This invoice confirms your purchase of the listed digital course(s). 
                 All sales are final and non-refundable. You have been granted immediate 
                 and lifetime access to the purchased content in your library. 
@@ -317,7 +317,7 @@ function ProfessionalInvoice({
             </div>
 
             {/* Action Buttons - Hidden when printing */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4 print:hidden">
+            <div className="flex flex-col sm:flex-row gap-3 pt-4">
               {isSinglePurchase && courseSlug ? (
                 <Link href={`/library/${courseSlug}`} className="flex-1">
                   <Button size="lg" className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70">
@@ -333,36 +333,53 @@ function ProfessionalInvoice({
                   </Button>
                 </Link>
               )}
-              <PrintInvoiceButton
-                invoiceData={{
-                  invoiceNumber,
-                  purchaseDate,
-                  customerName,
-                  customerEmail,
-                  paymentMethod,
-                  transactionId,
-                  items,
-                  totalAmount,
-                  currency,
-                }}
-              />
-            </div>
-          </div>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => {
+                  const invoiceText = `
+AI GENIUS LAB - INVOICE
+${invoiceNumber}
+Date: ${format(purchaseDate, "MMMM dd, yyyy")}
 
-          {/* Footer - Print only */}
-          <div className="hidden print:block p-6 border-t border-gray-200 bg-gray-50 text-center" data-print-show="true">
-            <p className="text-xs text-gray-500">
-              AI Genius Lab • Premium Online Learning Platform • support@aigeniuslab.com
-            </p>
-            <p className="text-xs text-gray-400 mt-1">
-              Thank you for your purchase!
-            </p>
+BILL TO:
+${customerName}
+${customerEmail}
+
+PAYMENT METHOD: ${paymentMethod}
+${transactionId ? `TRANSACTION ID: ${transactionId}` : ''}
+
+ITEMS:
+${items.map(item => `- ${item.title}: ${formatCurrency(item.amountCents, item.currency)}`).join('\n')}
+
+TOTAL: ${formatCurrency(totalAmount, currency)}
+
+Thank you for your purchase!
+AI Genius Lab • Premium Online Learning Platform
+support@aigeniuslab.com
+                  `.trim();
+                  
+                  const blob = new Blob([invoiceText], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `${invoiceNumber}.txt`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                }}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download Invoice
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Browse More - Hidden when printing */}
-      <div className="text-center print:hidden">
+      {/* Browse More */}
+      <div className="text-center">
         <Link href="/courses">
           <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -399,7 +416,7 @@ export default async function CheckoutSuccessPage({
         userId: session.user.id,
       },
       include: {
-        course: {
+        Course: {
           select: {
             id: true,
             title: true,
@@ -407,7 +424,7 @@ export default async function CheckoutSuccessPage({
             description: true,
           },
         },
-        payments: {
+        Payment: {
           orderBy: { createdAt: "desc" },
           take: 1,
         },
@@ -420,15 +437,15 @@ export default async function CheckoutSuccessPage({
     }
 
     const totalAmount = purchases.reduce((sum, p) => sum + p.amountCents, 0);
-    const payment = purchases[0].payments[0];
+    const payment = purchases[0].Payment?.[0];
     const purchaseDate = payment?.createdAt || purchases[0].createdAt;
     const invoiceNumber = generateInvoiceNumber(purchases[0].id);
 
     // Get course IDs for cart clearing
-    const purchasedCourseIds = purchases.map(p => p.course.id);
+    const purchasedCourseIds = purchases.map(p => p.Course.id);
 
     return (
-      <section className="grid gap-8 max-w-4xl mx-auto px-4 py-8 print:max-w-full print:mx-0 print:px-0 print:py-0">
+      <section className="grid gap-8 max-w-4xl mx-auto px-4 py-8">
         {/* Clear purchased items from cart */}
         <CartClearer courseIds={purchasedCourseIds} />
         <ProfessionalInvoice
@@ -439,9 +456,9 @@ export default async function CheckoutSuccessPage({
           paymentMethod={formatPaymentMethod(payment?.provider)}
           transactionId={payment?.providerRef || undefined}
           items={purchases.map(p => ({
-            id: p.course.id,
-            title: p.course.title,
-            description: p.course.description,
+            id: p.Course.id,
+            title: p.Course.title,
+            description: p.Course.description,
             amountCents: p.amountCents,
             currency: p.currency,
           }))}
@@ -488,7 +505,7 @@ export default async function CheckoutSuccessPage({
   const invoiceNumber = generateInvoiceNumber(purchase.id);
 
   return (
-    <section className="grid gap-8 max-w-4xl mx-auto px-4 py-8 print:max-w-full print:mx-0 print:px-0 print:py-0">
+    <section className="grid gap-8 max-w-4xl mx-auto px-4 py-8">
       {/* Clear purchased item from cart */}
       <CartClearer courseIds={[purchase.Course.id]} />
       <ProfessionalInvoice
@@ -513,3 +530,4 @@ export default async function CheckoutSuccessPage({
     </section>
   );
 }
+
