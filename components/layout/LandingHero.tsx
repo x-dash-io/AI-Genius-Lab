@@ -83,7 +83,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
               <p className="text-xs text-muted-foreground">Courses Available</p>
             </div>
           </div>
-          {stats.totalStudents > 0 && (
+          {stats.totalStudents >= 50 && (
             <div className="flex items-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
                 <Users className="h-5 w-5 text-primary" />

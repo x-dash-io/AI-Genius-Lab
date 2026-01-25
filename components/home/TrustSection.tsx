@@ -33,9 +33,7 @@ export function TrustSection({ stats }: TrustSectionProps) {
     {
       icon: TrendingUp,
       title: "Progress You Can See",
-      description: stats.totalStudents > 0
-        ? `Join ${stats.totalStudents.toLocaleString()} learners tracking lessons, progress %, and activity history.`
-        : "Track lessons completed, progress %, and activity history.",
+      description: "Track lessons completed, progress %, and activity history with detailed analytics.",
     },
   ];
 

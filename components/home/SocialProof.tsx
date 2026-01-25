@@ -20,7 +20,7 @@ export function SocialProof({ stats }: SocialProofProps) {
       icon: Users,
       value: stats.totalStudents,
       label: "Active Learners",
-      show: stats.totalStudents > 0,
+      show: stats.totalStudents >= 50,
     },
     {
       icon: Star,
@@ -88,7 +88,7 @@ export function SocialProof({ stats }: SocialProofProps) {
           Trusted by Learners Worldwide
         </h2>
         <p className="mt-2 text-muted-foreground">
-          Join thousands mastering AI through structured learning
+          Join learners mastering AI through structured learning
         </p>
       </motion.div>
 
