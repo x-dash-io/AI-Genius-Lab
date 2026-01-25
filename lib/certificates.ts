@@ -2,7 +2,6 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/access";
-import { getCourseProgress } from "./progress";
 import { hasEnrolledInLearningPath } from "./learning-paths";
 import { generateCertificatePDF } from "./certificate-pdf";
 import { sendCertificateEmail } from "./email";
@@ -24,9 +23,9 @@ export async function hasCompletedCourse(userId: string, courseId: string): Prom
   const course = await prisma.course.findUnique({
     where: { id: courseId },
     include: {
-      sections: {
+      Section: {
         include: {
-          lessons: {
+          Lesson: {
             select: { id: true },
           },
         },
@@ -36,7 +35,7 @@ export async function hasCompletedCourse(userId: string, courseId: string): Prom
 
   if (!course) return false;
 
-  const lessonIds = course.sections.flatMap((s) => s.lessons.map((l) => l.id));
+  const lessonIds = course.Section.flatMap((s) => s.Lesson.map((l) => l.id));
   if (lessonIds.length === 0) return false;
 
   // Get progress for all lessons
@@ -59,9 +58,9 @@ export async function hasCompletedLearningPath(userId: string, pathId: string): 
   const path = await prisma.learningPath.findUnique({
     where: { id: pathId },
     include: {
-      courses: {
+      LearningPathCourse: {
         include: {
-          course: {
+          Course: {
             select: { id: true },
           },
         },
@@ -69,12 +68,12 @@ export async function hasCompletedLearningPath(userId: string, pathId: string): 
     },
   });
 
-  if (!path || path.courses.length === 0) {
+  if (!path || path.LearningPathCourse.length === 0) {
     return false;
   }
 
   // Check if all courses are completed
-  for (const pathCourse of path.courses) {
+  for (const pathCourse of path.LearningPathCourse) {
     const completed = await hasCompletedCourse(userId, pathCourse.courseId);
     if (!completed) {
       return false;
@@ -126,19 +125,20 @@ export async function generateCourseCertificate(courseId: string) {
   const certificateId = generateCertificateId();
   const certificate = await prisma.certificate.create({
     data: {
+      id: `cert_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       userId: user.id,
       courseId,
       type: "course",
       certificateId,
     },
     include: {
-      course: {
+      Course: {
         select: {
           title: true,
           description: true,
         },
       },
-      user: {
+      User: {
         select: {
           name: true,
           email: true,
@@ -150,13 +150,14 @@ export async function generateCourseCertificate(courseId: string) {
   // Log certificate issuance
   await prisma.activityLog.create({
     data: {
+      id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       userId: user.id,
       type: "certificate_earned",
       metadata: {
         certificateId: certificate.certificateId,
         type: "course",
         courseId,
-        courseTitle: certificate.course?.title,
+        courseTitle: certificate.Course?.title,
       },
     },
   });
@@ -165,8 +166,8 @@ export async function generateCourseCertificate(courseId: string) {
   try {
     const pdfUrl = await generateCertificatePDF({
       certificateId: certificate.certificateId,
-      recipientName: certificate.user.name || "Student",
-      courseName: certificate.course?.title,
+      recipientName: certificate.User.name || "Student",
+      courseName: certificate.Course?.title,
       issuedAt: certificate.issuedAt,
       type: "course",
     });
@@ -178,11 +179,11 @@ export async function generateCourseCertificate(courseId: string) {
     });
 
     // Send certificate email
-    if (certificate.user.email) {
+    if (certificate.User.email) {
       await sendCertificateEmail(
-        certificate.user.email,
-        certificate.user.name || "Student",
-        certificate.course?.title || "Course",
+        certificate.User.email,
+        certificate.User.name || "Student",
+        certificate.Course?.title || "Course",
         certificate.certificateId,
         pdfUrl
       );
@@ -230,9 +231,9 @@ export async function generatePathCertificate(pathId: string) {
   const path = await prisma.learningPath.findUnique({
     where: { id: pathId },
     include: {
-      courses: {
+      LearningPathCourse: {
         include: {
-          course: {
+          Course: {
             select: {
               id: true,
               title: true,
@@ -248,26 +249,27 @@ export async function generatePathCertificate(pathId: string) {
   const certificateId = generateCertificateId();
   const certificate = await prisma.certificate.create({
     data: {
+      id: `cert_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       userId: user.id,
       pathId,
       type: "learning_path",
       certificateId,
       metadata: path ? {
-        courseCount: path.courses.length,
-        courses: path.courses.map((pc) => ({
-          courseId: pc.course.id,
-          title: pc.course.title,
+        courseCount: path.LearningPathCourse.length,
+        courses: path.LearningPathCourse.map((pc) => ({
+          courseId: pc.Course.id,
+          title: pc.Course.title,
         })),
       } : undefined,
     },
     include: {
-      path: {
+      LearningPath: {
         select: {
           title: true,
           description: true,
         },
       },
-      user: {
+      User: {
         select: {
           name: true,
           email: true,
@@ -279,13 +281,14 @@ export async function generatePathCertificate(pathId: string) {
   // Log certificate issuance
   await prisma.activityLog.create({
     data: {
+      id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       userId: user.id,
       type: "certificate_earned",
       metadata: {
         certificateId: certificate.certificateId,
         type: "learning_path",
         pathId,
-        pathTitle: certificate.path?.title,
+        pathTitle: certificate.LearningPath?.title,
       },
     },
   });
@@ -294,8 +297,8 @@ export async function generatePathCertificate(pathId: string) {
   try {
     const pdfUrl = await generateCertificatePDF({
       certificateId: certificate.certificateId,
-      recipientName: certificate.user.name || "Student",
-      pathName: certificate.path?.title,
+      recipientName: certificate.User.name || "Student",
+      pathName: certificate.LearningPath?.title,
       issuedAt: certificate.issuedAt,
       type: "learning_path",
     });
@@ -307,11 +310,11 @@ export async function generatePathCertificate(pathId: string) {
     });
 
     // Send certificate email
-    if (certificate.user.email) {
+    if (certificate.User.email) {
       await sendCertificateEmail(
-        certificate.user.email,
-        certificate.user.name || "Student",
-        certificate.path?.title || "Learning Path",
+        certificate.User.email,
+        certificate.User.name || "Student",
+        certificate.LearningPath?.title || "Learning Path",
         certificate.certificateId,
         pdfUrl
       );
@@ -337,14 +340,14 @@ export async function getUserCertificates(userId: string) {
   return prisma.certificate.findMany({
     where: { userId },
     include: {
-      course: {
+      Course: {
         select: {
           id: true,
           title: true,
           slug: true,
         },
       },
-      path: {
+      LearningPath: {
         select: {
           id: true,
           title: true,
@@ -362,19 +365,19 @@ export async function verifyCertificate(certificateId: string) {
   const certificate = await prisma.certificate.findUnique({
     where: { certificateId },
     include: {
-      user: {
+      User: {
         select: {
           name: true,
           email: true,
         },
       },
-      course: {
+      Course: {
         select: {
           title: true,
           description: true,
         },
       },
-      path: {
+      LearningPath: {
         select: {
           title: true,
           description: true,
@@ -401,9 +404,9 @@ export async function verifyCertificate(certificateId: string) {
     valid: true,
     certificate: {
       type: certificate.type,
-      studentName: certificate.user.name,
-      courseName: certificate.course?.title,
-      pathName: certificate.path?.title,
+      studentName: certificate.User.name,
+      courseName: certificate.Course?.title,
+      pathName: certificate.LearningPath?.title,
       issuedAt: certificate.issuedAt,
       expiresAt: certificate.expiresAt,
       certificateId: certificate.certificateId,
