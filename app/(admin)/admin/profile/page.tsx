@@ -57,7 +57,7 @@ export default async function AdminProfilePage() {
     redirect("/sign-in");
   }
 
-  const [profile, adminStats] = await Promise.all([
+  const [profile, adminStats, userWithPassword] = await Promise.all([
     getUserProfile(session.user.id),
     // Get admin-specific stats
     prisma.$transaction([
@@ -69,6 +69,11 @@ export default async function AdminProfilePage() {
         orderBy: { createdAt: "desc" },
       }),
     ]),
+    // Check if user has a password
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { passwordHash: true },
+    }),
   ]);
 
   if (!profile) {
@@ -76,7 +81,7 @@ export default async function AdminProfilePage() {
   }
 
   const [totalUsers, totalCourses, totalPurchases, lastActivity] = adminStats;
-  const hasPassword = session.user.hasPassword || false;
+  const hasPassword = !!userWithPassword?.passwordHash;
 
   return (
     <div className="space-y-8">

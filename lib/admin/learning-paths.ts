@@ -6,9 +6,9 @@ import { requireRole } from "@/lib/access";
 export async function getAllLearningPaths() {
   return prisma.learningPath.findMany({
     include: {
-      courses: {
+      LearningPathCourse: {
         include: {
-          course: {
+          Course: {
             select: {
               id: true,
               title: true,
@@ -23,7 +23,7 @@ export async function getAllLearningPaths() {
       },
       _count: {
         select: {
-          courses: true,
+          LearningPathCourse: true,
         },
       },
     },
@@ -35,9 +35,9 @@ export async function getLearningPathById(pathId: string) {
   return prisma.learningPath.findUnique({
     where: { id: pathId },
     include: {
-      courses: {
+      LearningPathCourse: {
         include: {
-          course: {
+          Course: {
             select: {
               id: true,
               title: true,

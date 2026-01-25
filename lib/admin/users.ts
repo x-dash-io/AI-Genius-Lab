@@ -6,8 +6,8 @@ export async function getAllUsers() {
     include: {
       _count: {
         select: {
-          purchases: true,
-          enrollments: true,
+          Purchase: true,
+          Enrollment: true,
         },
       },
     },

@@ -100,10 +100,10 @@ export function CourseEditForm({
       description?: string;
     }>> = {};
 
-    course.Section.forEach(section => {
-      (section.Lesson || []).forEach(lesson => {
-        if (lesson.LessonContent && lesson.LessonContent.length > 0) {
-          initialContents[lesson.id] = lesson.LessonContent.map(content => ({
+    course.sections.forEach(section => {
+      (section.lessons || []).forEach(lesson => {
+        if (lesson.contents && lesson.contents.length > 0) {
+          initialContents[lesson.id] = lesson.contents.map(content => ({
             id: content.id,
             contentType: content.contentType,
             contentUrl: content.contentUrl || undefined,
@@ -164,24 +164,33 @@ export function CourseEditForm({
       id: tempId,
       courseId: course.id,
       title,
-      sortOrder: course.Section.length,
+      sortOrder: course.sections.length,
       createdAt: new Date(),
       updatedAt: new Date(),
-      Lesson: [],
+      lessons: [],
     };
     
     setCourse(prev => ({
       ...prev,
-      Section: [...prev.Section, tempSection],
+      sections: [...prev.sections, tempSection],
     }));
     
     try {
       const newSection = await addSectionAction(formData);
       
+      // Transform newSection to match expected format
+      const transformedSection = {
+        ...newSection,
+        lessons: (newSection.lessons || []).map(lesson => ({
+          ...lesson,
+          contents: [],
+        })),
+      };
+      
       // Replace temp section with real one
       setCourse(prev => ({
         ...prev,
-        Section: prev.Section.map(s => s.id === tempId ? newSection : s),
+        sections: prev.sections.map(s => s.id === tempId ? transformedSection : s),
       }));
       
       toast({
@@ -195,7 +204,7 @@ export function CourseEditForm({
       // Remove temp section on error
       setCourse(prev => ({
         ...prev,
-        Section: prev.Section.filter(s => s.id !== tempId),
+        sections: prev.sections.filter(s => s.id !== tempId),
       }));
       
       toast({
@@ -227,7 +236,7 @@ export function CourseEditForm({
     const previousCourse = course;
     setCourse(prev => ({
       ...prev,
-      Section: prev.Section.filter(s => s.id !== sectionId),
+      sections: prev.sections.filter(s => s.id !== sectionId),
     }));
     
     try {
@@ -265,7 +274,7 @@ export function CourseEditForm({
     
     // Optimistic update - add temporary lesson
     const tempId = `temp_${Date.now()}`;
-    const section = course.Section.find(s => s.id === sectionId);
+    const section = course.sections.find(s => s.id === sectionId);
     const tempLesson = {
       id: tempId,
       sectionId,
@@ -273,17 +282,17 @@ export function CourseEditForm({
       durationSeconds: null,
       isLocked: true,
       allowDownload: false,
-      sortOrder: (section?.Lesson || []).length,
+      sortOrder: (section?.lessons || []).length,
       createdAt: new Date(),
       updatedAt: new Date(),
-      LessonContent: [],
+      contents: [],
     };
     
     setCourse(prev => ({
       ...prev,
-      Section: prev.Section.map(s => 
+      sections: prev.sections.map(s => 
         s.id === sectionId 
-          ? { ...s, Lesson: [...(s.Lesson || []), tempLesson] }
+          ? { ...s, lessons: [...(s.lessons || []), tempLesson] }
           : s
       ),
     }));
@@ -294,9 +303,9 @@ export function CourseEditForm({
       // Replace temp lesson with real one
       setCourse(prev => ({
         ...prev,
-        Section: prev.Section.map(s => 
+        sections: prev.sections.map(s => 
           s.id === sectionId 
-            ? { ...s, Lesson: s.Lesson.map(l => l.id === tempId ? { ...newLesson, LessonContent: [] } : l) }
+            ? { ...s, lessons: s.lessons.map(l => l.id === tempId ? { ...newLesson, contents: [] } : l) }
             : s
         ),
       }));
@@ -317,9 +326,9 @@ export function CourseEditForm({
       // Remove temp lesson on error
       setCourse(prev => ({
         ...prev,
-        Section: prev.Section.map(s => 
+        sections: prev.sections.map(s => 
           s.id === sectionId 
-            ? { ...s, Lesson: s.Lesson.filter(l => l.id !== tempId) }
+            ? { ...s, lessons: s.lessons.filter(l => l.id !== tempId) }
             : s
         ),
       }));
@@ -357,9 +366,9 @@ export function CourseEditForm({
     const previousCourse = course;
     setCourse(prev => ({
       ...prev,
-      Section: prev.Section.map(s => ({
+      sections: prev.sections.map(s => ({
         ...s,
-        Lesson: s.Lesson.filter(l => l.id !== lessonId),
+        lessons: s.lessons.filter(l => l.id !== lessonId),
       })),
     }));
     
@@ -684,7 +693,7 @@ export function CourseEditForm({
           )}
 
           <div className="space-y-4">
-            {course.Section.map((section) => (
+            {course.sections.map((section) => (
               <Card key={section.id}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
@@ -701,7 +710,7 @@ export function CourseEditForm({
                         )}
                       </button>
                       <CardTitle className="text-lg">{section.title}</CardTitle>
-                      <Badge variant="secondary">{(section.Lesson || []).length} lessons</Badge>
+                      <Badge variant="secondary">{(section.lessons || []).length} lessons</Badge>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
@@ -1008,7 +1017,7 @@ export function CourseEditForm({
                     )}
 
                     <div className="space-y-2">
-                      {(section.Lesson || []).map((lesson) => (
+                      {(section.lessons || []).map((lesson) => (
                         <div key={lesson.id}>
                           {editingLesson === lesson.id ? (
                             <Card className="mb-4">
@@ -1031,7 +1040,7 @@ export function CourseEditForm({
                                   {/* Duration field - hidden for links since they're external URLs */}
                                   {(() => {
                                     const firstContent = (lessonContents[lesson.id] || [])[0];
-                                    const contentType = firstContent?.contentType || lesson.LessonContent?.[0]?.contentType || 'video';
+                                    const contentType = firstContent?.contentType || lesson.contents?.[0]?.contentType || 'video';
 
                                     // Don't show duration field for links
                                     if (contentType === 'link') {
@@ -1286,12 +1295,12 @@ export function CourseEditForm({
                                 <p className="font-medium">{lesson.title}</p>
                                 <div className="flex items-center gap-2 mt-1">
                                   <Badge variant="outline">
-                                    {lesson.LessonContent?.length || 0} content item{(lesson.LessonContent?.length || 0) !== 1 ? 's' : ''}
+                                    {lesson.contents?.length || 0} content item{(lesson.contents?.length || 0) !== 1 ? 's' : ''}
                                   </Badge>
                                   {lesson.durationSeconds && (
                                     <span className="text-xs text-muted-foreground">
                                       {(() => {
-                                        const firstContent = lesson.LessonContent?.[0];
+                                        const firstContent = lesson.contents?.[0];
                                         const contentType = firstContent?.contentType || 'video';
                                         
                                         switch (contentType) {
@@ -1310,7 +1319,7 @@ export function CourseEditForm({
                                   {lesson.isLocked && (
                                     <Badge variant="secondary">Locked</Badge>
                                   )}
-                                  {!lesson.LessonContent || lesson.LessonContent.length === 0 || !lesson.LessonContent[0]?.contentUrl ? (
+                                  {!lesson.contents || lesson.contents.length === 0 || !lesson.contents[0]?.contentUrl ? (
                                     <Badge variant="destructive">No Content</Badge>
                                   ) : null}
                                 </div>
@@ -1344,7 +1353,7 @@ export function CourseEditForm({
                           )}
                         </div>
                       ))}
-                      {(section.Lesson || []).length === 0 && (
+                      {(section.lessons || []).length === 0 && (
                         <p className="text-sm text-muted-foreground text-center py-4">
                           No lessons yet. Add your first lesson above.
                         </p>
@@ -1355,7 +1364,7 @@ export function CourseEditForm({
               </Card>
             ))}
 
-            {course.Section.length === 0 && (
+            {course.sections.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-8">
                 No sections yet. Create your first section to get started.
               </p>

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { FloatingInput } from "@/components/ui/floating-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Send, CheckCircle2 } from "lucide-react";
 import { toast } from "@/lib/toast";
 
@@ -123,18 +123,20 @@ export function ContactForm() {
             <div className="grid gap-2">
               <Label htmlFor="subject">Subject</Label>
               <Select
-                id="subject"
-                name="subject"
                 value={formData.subject}
-                onChange={handleChange}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, subject: value }))}
                 disabled={isSubmitting}
-                required
               >
-                {subjects.map((subject) => (
-                  <option key={subject.value} value={subject.value}>
-                    {subject.label}
-                  </option>
-                ))}
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a subject" />
+                </SelectTrigger>
+                <SelectContent>
+                  {subjects.map((subject) => (
+                    <SelectItem key={subject.value} value={subject.value}>
+                      {subject.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
 

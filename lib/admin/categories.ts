@@ -1,7 +1,6 @@
 "use server";
 
 import { prisma, withRetry } from "@/lib/prisma";
-import { revalidateTag } from "next/cache";
 import { requireRole } from "@/lib/access";
 
 export type CategoryInput = {
@@ -94,7 +93,7 @@ export async function createCategory(data: CategoryInput) {
   });
 
   // Revalidate cache
-  revalidateTag("categories");
+  // revalidateTag removed
 
   // Return in same format as getAllCategories
   return {
@@ -152,7 +151,7 @@ export async function updateCategory(id: string, data: Partial<CategoryInput>) {
   });
 
   // Revalidate cache
-  revalidateTag("categories");
+  // revalidateTag removed
 
   // Return in same format as getAllCategories
   return {
@@ -191,7 +190,7 @@ export async function deleteCategory(id: string) {
     });
 
     // Revalidate cache
-    revalidateTag("categories");
+    // revalidateTag removed
 
     return { deleted: false, deactivated: true, courseCount };
   }
@@ -204,7 +203,7 @@ export async function deleteCategory(id: string) {
   });
 
   // Revalidate cache
-  revalidateTag("categories");
+  // revalidateTag removed
 
   return { deleted: true, deactivated: false, courseCount: 0 };
 }
@@ -229,7 +228,7 @@ export async function reorderCategories(
   });
 
   // Revalidate cache
-  revalidateTag("categories");
+  // revalidateTag removed
 
   return { success: true };
 }
@@ -266,7 +265,7 @@ export async function toggleCategoryStatus(id: string) {
   });
 
   // Revalidate cache
-  revalidateTag("categories");
+  // revalidateTag removed
 
   // Return in same format as getAllCategories
   return {

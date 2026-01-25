@@ -13,7 +13,7 @@ import { CheckoutCartForm } from "@/components/checkout/CheckoutCartForm";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type CheckoutPageProps = {
-  searchParams: Promise<{ course?: string; items?: string }>;
+  searchParams: Promise<{ course?: string; items?: string; checkout?: string }>;
 };
 
 async function createCheckoutSession(formData: FormData) {

@@ -67,7 +67,13 @@ async function reorderCoursesAction(pathId: string, courseIds: string[]) {
   "use server";
   await requireRole("admin");
 
-  await updateCourseOrder(pathId, courseIds);
+  // Transform courseIds array to the expected format with sortOrder
+  const courseOrders = courseIds.map((courseId, index) => ({
+    courseId,
+    sortOrder: index,
+  }));
+
+  await updateCourseOrder(pathId, courseOrders);
   redirect(`/admin/learning-paths/${pathId}/edit`);
 }
 
@@ -79,12 +85,22 @@ export default async function EditLearningPathPage({
   await requireRole("admin");
 
   const { pathId } = await params;
-  const path = await getLearningPathById(pathId);
+  const pathData = await getLearningPathById(pathId);
   const allCourses = await getAllCourses();
 
-  if (!path) {
+  if (!pathData) {
     notFound();
   }
+
+  // Transform the data to match expected format
+  const path = {
+    ...pathData,
+    courses: (pathData.LearningPathCourse || []).map(lpc => ({
+      ...lpc,
+      courseId: lpc.Course.id,
+      course: lpc.Course,
+    })),
+  };
 
   // Get courses not already in the path
   const pathCourseIds = new Set(path.courses.map((pc) => pc.courseId));

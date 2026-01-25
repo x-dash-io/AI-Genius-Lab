@@ -44,11 +44,20 @@ export default async function LearningPathDetailPage({
   params,
 }: LearningPathDetailPageProps) {
   const { pathId } = await params;
-  const path = await getLearningPathBySlug(pathId);
+  const pathData = await getLearningPathBySlug(pathId);
 
-  if (!path) {
+  if (!pathData) {
     notFound();
   }
+
+  // Transform the data to match expected format
+  const path = {
+    ...pathData,
+    courses: (pathData.LearningPathCourse || []).map(lpc => ({
+      ...lpc,
+      course: lpc.Course,
+    })),
+  };
 
   const session = await getServerSession(authOptions);
   const isEnrolled = session?.user

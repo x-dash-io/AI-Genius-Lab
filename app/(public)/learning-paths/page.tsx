@@ -22,7 +22,19 @@ interface LearningPathsPageProps {
 
 export default async function LearningPathsPage({ searchParams }: LearningPathsPageProps) {
   const params = await searchParams;
-  const allPaths = await getAllPublishedLearningPaths();
+  const allPathsData = await getAllPublishedLearningPaths();
+  
+  // Transform the data to match expected format
+  const allPaths = allPathsData.map(pathData => ({
+    ...pathData,
+    courses: pathData.LearningPathCourse.map(lpc => ({
+      ...lpc,
+      course: lpc.Course,
+    })),
+    _count: {
+      courses: pathData._count.LearningPathCourse,
+    },
+  }));
   
   let paths = [...allPaths];
 

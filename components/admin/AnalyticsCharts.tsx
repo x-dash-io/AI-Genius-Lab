@@ -45,7 +45,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
               tickFormatter={(value) => `$${value.toLocaleString()}`}
             />
             <Tooltip
-              formatter={(value: number) => [`$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, "Revenue"]}
+              formatter={(value: number | undefined) => value !== undefined ? [`$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, "Revenue"] : ["$0.00", "Revenue"]}
               labelFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
             />
             <Legend />
@@ -89,7 +89,7 @@ export function CategorySalesChart({ data }: CategorySalesChartProps) {
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+              label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
@@ -99,7 +99,7 @@ export function CategorySalesChart({ data }: CategorySalesChartProps) {
               ))}
             </Pie>
             <Tooltip
-              formatter={(value: number) => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              formatter={(value: number | undefined) => value !== undefined ? `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "$0.00"}
             />
             <Legend />
           </PieChart>
@@ -130,8 +130,8 @@ export function UserGrowthChart({ data }: UserGrowthChartProps) {
             />
             <YAxis />
             <Tooltip
-              formatter={(value: number, name: string) => [
-                name === "cumulative" ? value.toLocaleString() : value,
+              formatter={(value: number | undefined, name: string | undefined) => [
+                name === "cumulative" ? (value ?? 0).toLocaleString() : (value ?? 0),
                 name === "cumulative" ? "Total Users" : "New Users",
               ]}
               labelFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
@@ -183,7 +183,7 @@ export function EnrollmentTrendsChart({ data }: EnrollmentTrendsChartProps) {
             />
             <YAxis />
             <Tooltip
-              formatter={(value: number) => [value, "Enrollments"]}
+              formatter={(value: number | undefined) => [value ?? 0, "Enrollments"]}
               labelFormatter={(value) => new Date(value).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
             />
             <Legend />
@@ -230,8 +230,8 @@ export function TopCoursesChart({ data }: TopCoursesChartProps) {
               tick={{ fontSize: 12 }}
             />
             <Tooltip
-              formatter={(value: number, name: string) => [
-                name === "revenue" ? `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : value,
+              formatter={(value: number | undefined, name: string | undefined) => [
+                name === "revenue" ? `$${(value ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : (value ?? 0),
                 name === "revenue" ? "Revenue" : "Sales",
               ]}
             />

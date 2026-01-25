@@ -10,7 +10,19 @@ import { BookOpen, Plus, Edit, Trash2 } from "lucide-react";
 export default async function AdminLearningPathsPage() {
   await requireRole("admin");
 
-  const paths = await getAllLearningPaths();
+  const pathsData = await getAllLearningPaths();
+
+  // Transform the data to match expected format
+  const paths = pathsData.map(pathData => ({
+    ...pathData,
+    courses: (pathData.LearningPathCourse || []).map(lpc => ({
+      ...lpc,
+      course: lpc.Course,
+    })),
+    _count: {
+      courses: pathData._count.LearningPathCourse,
+    },
+  }));
 
   return (
     <div className="space-y-8">

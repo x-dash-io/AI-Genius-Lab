@@ -325,6 +325,7 @@ export async function GET(request: Request) {
 
     await prisma.payment.create({
       data: {
+        id: `payment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         userId: purchase.userId,
         purchaseId: purchase.id,
         provider: "paypal",

@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       console.log(`[DEBUG CONTENT] Checking content for lesson ${lessonId}`);
       const lesson = await prisma.lesson.findUnique({
         where: { id: lessonId },
-        include: { contents: true },
+        include: { LessonContent: true },
       });
 
       if (!lesson) {
@@ -55,8 +55,8 @@ export async function POST(request: NextRequest) {
     } else {
       console.log(`[DEBUG CONTENT] Checking content for all lessons in course ${courseId}`);
       lessons = await prisma.lesson.findMany({
-        where: { section: { courseId } },
-        include: { contents: true },
+        where: { Section: { courseId } },
+        include: { LessonContent: true },
       });
 
       if (lessons.length === 0) {
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     const result = await Promise.all(
       lessons.map(async (lesson) => {
         const contentChecks = await Promise.all(
-          lesson.contents.map(async (content) => {
+          lesson.LessonContent.map(async (content) => {
             let exists = false;
             let error = null;
 
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
         return {
           lessonId: lesson.id,
           lessonTitle: lesson.title,
-          contentCount: lesson.contents.length,
+          contentCount: lesson.LessonContent.length,
           allContentExists: contentChecks.every(c => !c.contentUrl || c.existsInCloudinary),
           missingContent: contentChecks.filter(c => c.contentUrl && !c.existsInCloudinary),
           contents: contentChecks,

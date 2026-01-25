@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getUserProfile, getUserStats, updateUserProfile, updateUserAvatar, changePassword } from "@/lib/profile";
+import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
@@ -50,16 +51,21 @@ export default async function ProfilePage() {
     redirect("/sign-in");
   }
 
-  const [profile, stats] = await Promise.all([
+  const [profile, stats, userWithPassword] = await Promise.all([
     getUserProfile(session.user.id),
     getUserStats(session.user.id),
+    // Check if user has a password
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { passwordHash: true },
+    }),
   ]);
 
   if (!profile) {
     redirect("/sign-in");
   }
 
-  const hasPassword = session.user.hasPassword || false;
+  const hasPassword = !!userWithPassword?.passwordHash;
 
   return (
     <div className="space-y-8">
