@@ -61,7 +61,7 @@ export function LaunchCurriculum({ stats }: LaunchCurriculumProps) {
           Courses organized by outcomes, not creators
         </p>
       </div>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className={`grid gap-6 ${categoriesWithCourses.length === 1 ? 'md:grid-cols-1 max-w-md mx-auto' : categoriesWithCourses.length === 2 ? 'md:grid-cols-2 max-w-3xl mx-auto' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
         {categoriesWithCourses.map((category) => {
           const Icon = getCategoryIcon(category.name);
           const categoryHref = `/courses/category/${category.slug}`;

@@ -215,7 +215,7 @@ export default async function DashboardPage({
   const learningMinutes = estimatedMinutes % 60;
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8 pb-8">
       {/* Welcome Section */}
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">

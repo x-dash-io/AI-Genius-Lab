@@ -92,7 +92,7 @@ export function SocialProof({ stats }: SocialProofProps) {
         </p>
       </motion.div>
 
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <div className={`grid gap-8 sm:grid-cols-2 ${metrics.length >= 3 ? 'lg:grid-cols-4' : 'lg:grid-cols-2 max-w-2xl mx-auto'}`}>
         {metrics.map((metric, index) => {
           const Icon = metric.icon;
           return (

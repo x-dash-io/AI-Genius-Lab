@@ -68,7 +68,7 @@ export default async function ProfilePage() {
   const hasPassword = !!userWithPassword?.passwordHash;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-8">
       <ProfilePreviewBanner />
       
       <div>

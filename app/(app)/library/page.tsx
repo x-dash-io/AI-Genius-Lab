@@ -25,7 +25,7 @@ export default async function LibraryPage() {
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-8">
       <div>
         <h1 className="font-display text-4xl font-bold tracking-tight">
           My Courses

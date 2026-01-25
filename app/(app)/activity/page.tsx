@@ -117,7 +117,7 @@ const getSampleActivityData = (): ActivityEntry[] => {
 
 function ActivitySkeleton() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-8">
       {[1, 2].map((group) => (
         <div key={group} className="space-y-4">
           <div className="flex items-center gap-2">
@@ -325,7 +325,7 @@ export default function ActivityPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-8">
       {isAdminPreview && (
         <div className="flex items-center gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
           <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
