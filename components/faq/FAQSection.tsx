@@ -22,7 +22,7 @@ const faqData: FAQItem[] = [
   {
     category: "Courses & Learning",
     question: "Can I download course videos?",
-    answer: "Video downloads are only available for courses where the instructor has explicitly enabled this feature. You can check if downloads are available on the course details page. All courses can be streamed online anytime.",
+    answer: "Video downloads may be available for some courses where this feature has been enabled. You can check if downloads are available on the course details page. All courses can be streamed online anytime.",
   },
   {
     category: "Courses & Learning",
@@ -47,12 +47,12 @@ const faqData: FAQItem[] = [
   {
     category: "Courses & Learning",
     question: "Are courses updated regularly?",
-    answer: "Yes, instructors regularly update course content to reflect the latest AI tools, techniques, and best practices. You'll automatically have access to all updates for courses you've purchased.",
+    answer: "Course content is maintained to ensure quality and relevance. Updates depend on the specific course and subject matter. You'll have access to any updates made to courses you've purchased.",
   },
   {
     category: "Courses & Learning",
     question: "Can I preview a course before buying?",
-    answer: "Yes! Most courses offer preview lessons that you can watch for free. Look for the 'Preview' badge on lesson titles in the course curriculum section.",
+    answer: "Some courses may offer preview lessons. Check the course details page to see if preview content is available before purchasing.",
   },
 
   // Payments & Billing
@@ -69,12 +69,12 @@ const faqData: FAQItem[] = [
   {
     category: "Payments & Billing",
     question: "Can I get a refund?",
-    answer: "We offer a 30-day money-back guarantee on all courses. If you're not satisfied with a course, contact our support team within 30 days of purchase for a full refund. No questions asked.",
+    answer: "Due to the digital nature of our products, all sales are final. Refunds are only provided as required by law or at our sole discretion in exceptional circumstances. Please review course details carefully before purchasing.",
   },
   {
     category: "Payments & Billing",
     question: "Do you offer discounts or promotions?",
-    answer: "Yes! We regularly run promotions and offer discounts on courses and learning paths. Sign up for our newsletter to be notified of special offers. We also offer bundle discounts when purchasing multiple courses together.",
+    answer: "Pricing may vary by course. Check individual course pages for current pricing. Follow us on social media or check back regularly for any special offers.",
   },
   {
     category: "Payments & Billing",

@@ -140,7 +140,7 @@ export function ContactInfo() {
               <span className="font-medium">Closed</span>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Email support is available 24/7. We'll respond during business hours.
+              You can email us anytime. We respond during business hours.
             </p>
           </CardContent>
         </Card>

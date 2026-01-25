@@ -134,7 +134,7 @@ export function LessonViewer({
           <div className="space-y-2">
             <h3 className="text-xl font-semibold">Content Coming Soon</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              The instructor is preparing content for this lesson. Check back soon!
+              Content for this lesson is being prepared. Check back soon!
             </p>
           </div>
         </div>

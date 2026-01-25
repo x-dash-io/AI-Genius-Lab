@@ -86,7 +86,7 @@ export function ContactForm() {
         <CardHeader>
           <CardTitle>Send us a message</CardTitle>
           <CardDescription>
-            Fill out the form below and we'll respond within 24-48 hours.
+            Fill out the form below and we'll get back to you as soon as possible.
           </CardDescription>
         </CardHeader>
         <CardContent>
