@@ -111,15 +111,15 @@ export async function addCourseToPath(
     const path = await prisma.learningPath.findUnique({
       where: { id: pathId },
       include: {
-        courses: {
+        LearningPathCourse: {
           orderBy: { sortOrder: "desc" },
           take: 1,
         },
       },
     });
 
-    sortOrder = path?.courses[0]?.sortOrder
-      ? path.courses[0].sortOrder + 1
+    sortOrder = path?.LearningPathCourse[0]?.sortOrder
+      ? path.LearningPathCourse[0].sortOrder + 1
       : 0;
   }
 
@@ -131,7 +131,7 @@ export async function addCourseToPath(
       sortOrder,
     },
     include: {
-      course: {
+      Course: {
         select: {
           id: true,
           title: true,
