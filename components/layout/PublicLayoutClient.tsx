@@ -370,7 +370,7 @@ export function PublicLayoutClient({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="border-t px-4 py-4 space-y-2 sticky bottom-0 bg-background/95 backdrop-blur-md"
+                    className="border-t px-4 py-4 space-y-3 sticky bottom-0 bg-background/95 backdrop-blur-md"
                   >
                     <Link href="/sign-in" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="outline" className="w-full justify-start gap-2">
