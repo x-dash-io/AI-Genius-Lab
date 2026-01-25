@@ -115,7 +115,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
         <BackgroundBlobs />
       
       {/* Desktop Layout */}
-      <div className="hidden md:flex h-screen overflow-hidden">
+      <div className="hidden md:flex min-h-screen">
         {/* Desktop Sidebar - Fixed */}
         <motion.aside
           initial={{ x: -100, opacity: 0 }}
