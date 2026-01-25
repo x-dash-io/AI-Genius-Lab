@@ -26,7 +26,7 @@ export function FinalCTA() {
           </Link>
         </div>
         <p className="text-sm text-muted-foreground mt-4">
-          No subscriptions. No upsells. Just learning.
+          Pay once per course. Lifetime access. No recurring fees.
         </p>
       </motion.div>
     </section>
