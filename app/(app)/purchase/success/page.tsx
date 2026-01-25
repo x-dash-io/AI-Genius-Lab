@@ -27,6 +27,8 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { CartClearer } from "@/components/cart/CartClearer";
 
+import { InvoiceDownloadButton } from "@/components/purchase/InvoiceDownloadButton";
+
 type CheckoutSuccessPageProps = {
   searchParams: Promise<{ purchase?: string; purchases?: string }>;
 };
@@ -333,46 +335,17 @@ function ProfessionalInvoice({
                   </Button>
                 </Link>
               )}
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => {
-                  const invoiceText = `
-AI GENIUS LAB - INVOICE
-${invoiceNumber}
-Date: ${format(purchaseDate, "MMMM dd, yyyy")}
-
-BILL TO:
-${customerName}
-${customerEmail}
-
-PAYMENT METHOD: ${paymentMethod}
-${transactionId ? `TRANSACTION ID: ${transactionId}` : ''}
-
-ITEMS:
-${items.map(item => `- ${item.title}: ${formatCurrency(item.amountCents, item.currency)}`).join('\n')}
-
-TOTAL: ${formatCurrency(totalAmount, currency)}
-
-Thank you for your purchase!
-AI Genius Lab • Premium Online Learning Platform
-support@aigeniuslab.com
-                  `.trim();
-                  
-                  const blob = new Blob([invoiceText], { type: 'text/plain' });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = `${invoiceNumber}.txt`;
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-                }}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download Invoice
-              </Button>
+              <InvoiceDownloadButton
+                invoiceNumber={invoiceNumber}
+                purchaseDate={purchaseDate}
+                customerName={customerName}
+                customerEmail={customerEmail}
+                paymentMethod={paymentMethod}
+                transactionId={transactionId}
+                items={items}
+                totalAmount={totalAmount}
+                currency={currency}
+              />
             </div>
           </div>
         </CardContent>
