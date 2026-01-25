@@ -38,10 +38,10 @@ export function Toast({
   if (!isVisible) return null;
 
   const variantStyles = {
-    default: "bg-blue-900 dark:bg-blue-950 text-white border-blue-700 dark:border-blue-800",
-    destructive: "bg-red-900 dark:bg-red-950 text-white border-red-700 dark:border-red-800",
-    success: "bg-green-900 dark:bg-green-950 text-white border-green-700 dark:border-green-800",
-    warning: "bg-yellow-900 dark:bg-yellow-950 text-white border-yellow-700 dark:border-yellow-800",
+    default: "bg-blue-600 dark:bg-blue-950 text-white border-blue-500 dark:border-blue-800",
+    destructive: "bg-red-600 dark:bg-red-950 text-white border-red-500 dark:border-red-800",
+    success: "bg-green-600 dark:bg-green-950 text-white border-green-500 dark:border-green-800",
+    warning: "bg-yellow-600 dark:bg-yellow-950 text-white border-yellow-500 dark:border-yellow-800",
   };
 
   return (

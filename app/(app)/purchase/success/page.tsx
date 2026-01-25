@@ -159,7 +159,7 @@ function ProfessionalInvoice({
           <div className="p-6 md:p-10 space-y-8 bg-gradient-to-b from-muted/30 to-background">
             {/* Status Badge */}
             <div className="flex justify-center">
-              <Badge className="px-4 py-2 text-sm bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-0">
+              <Badge className="px-4 py-2 text-sm bg-green-600 text-white dark:bg-green-900/30 dark:text-green-400 border-0">
                 <CheckCircle2 className="h-4 w-4 mr-2" />
                 Payment Confirmed
               </Badge>

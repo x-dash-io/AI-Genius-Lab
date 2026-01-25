@@ -250,7 +250,7 @@ export function CourseCreationForm({
             <CardHeader>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-700 dark:text-green-400" />
-                <CardTitle className="text-green-900 dark:text-green-200">Course Created Successfully</CardTitle>
+                <CardTitle className="text-green-800 dark:text-green-200">Course Created Successfully</CardTitle>
               </div>
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-green-900 dark:text-green-300">
