@@ -403,7 +403,7 @@ export default async function CheckoutSuccessPage({
   const purchaseId = resolvedSearchParams?.purchase;
   const purchaseIdsParam = resolvedSearchParams?.purchases;
 
-  // Handle multiple purchases (learning path)
+  // Handle multiple purchases (learning path) OR single purchase passed as "purchases"
   if (purchaseIdsParam) {
     const purchaseIds = purchaseIdsParam.split(",").filter(Boolean);
     if (purchaseIds.length === 0) {
@@ -436,6 +436,40 @@ export default async function CheckoutSuccessPage({
       redirect("/library");
     }
 
+    // If it's actually a single purchase, handle it as such
+    if (purchases.length === 1) {
+      const purchase = purchases[0];
+      const payment = purchase.Payment[0];
+      const purchaseDate = payment?.createdAt || purchase.createdAt;
+      const invoiceNumber = generateInvoiceNumber(purchase.id);
+
+      return (
+        <section className="grid gap-8 max-w-4xl mx-auto px-4 py-8">
+          <CartClearer courseIds={[purchase.Course.id]} />
+          <ProfessionalInvoice
+            invoiceNumber={invoiceNumber}
+            purchaseDate={purchaseDate}
+            customerName={session.user.name || "Customer"}
+            customerEmail={session.user.email!}
+            paymentMethod={formatPaymentMethod(payment?.provider)}
+            transactionId={payment?.providerRef || undefined}
+            items={[{
+              id: purchase.Course.id,
+              title: purchase.Course.title,
+              description: purchase.Course.description,
+              amountCents: purchase.amountCents,
+              currency: purchase.currency,
+            }]}
+            totalAmount={purchase.amountCents}
+            currency={purchase.currency}
+            isSinglePurchase={true}
+            courseSlug={purchase.Course.slug}
+          />
+        </section>
+      );
+    }
+
+    // Multiple purchases
     const totalAmount = purchases.reduce((sum, p) => sum + p.amountCents, 0);
     const payment = purchases[0].Payment?.[0];
     const purchaseDate = payment?.createdAt || purchases[0].createdAt;
