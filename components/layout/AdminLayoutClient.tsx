@@ -24,6 +24,7 @@ import { SignOutButton } from "@/components/auth/SignOutButton";
 import { BackgroundBlobs } from "@/components/ui/background-blobs";
 import { CartIcon } from "@/components/cart/CartIcon";
 import { ConfirmDialogProvider } from "@/components/ui/confirm-dialog";
+import { Footer } from "@/components/layout/Footer";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 
@@ -254,9 +255,9 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
         </motion.aside>
 
         {/* Desktop Main Content Area */}
-        <div className="flex-1 flex flex-col ml-64 overflow-hidden">
+        <div className="flex-1 flex flex-col ml-64">
           {/* Scrollable Main Content */}
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1">
             <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 py-4 sm:py-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -267,6 +268,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
               </motion.div>
             </div>
           </main>
+          <Footer />
         </div>
       </div>
 
@@ -463,7 +465,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
         
         {/* Main Content */}
-        <main className="flex-1 px-3 sm:px-4 py-4 pt-20 pb-6 overflow-y-auto">
+        <main className="flex-1 px-3 sm:px-4 py-4 pt-20 pb-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -472,6 +474,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
             {children}
           </motion.div>
         </main>
+        <Footer />
       </div>
       </div>
     </ConfirmDialogProvider>
