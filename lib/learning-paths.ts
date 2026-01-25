@@ -225,6 +225,7 @@ export async function createLearningPathPurchases(userId: string, pathId: string
           provider: "paypal",
         },
         create: {
+          id: `purchase_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
           userId,
           courseId: pc.Course.id,
           amountCents: pc.Course.priceCents,

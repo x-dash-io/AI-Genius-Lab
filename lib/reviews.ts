@@ -107,13 +107,14 @@ export async function createReview(
 
   return prisma.review.create({
     data: {
+      id: `review_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       userId: user.id,
       courseId,
       rating: data.rating,
       text: data.text?.trim() || null,
     },
     include: {
-      user: {
+      User: {
         select: {
           id: true,
           name: true,
@@ -156,7 +157,7 @@ export async function updateReview(
       text: data.text?.trim() || null,
     },
     include: {
-      user: {
+      User: {
         select: {
           id: true,
           name: true,

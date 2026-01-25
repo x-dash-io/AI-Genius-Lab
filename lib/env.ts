@@ -44,7 +44,7 @@ export function validateEnv(): Env {
     console.error("Environment validation failed:");
     console.error(parsed.error.format());
     throw new Error(
-      `Invalid environment variables: ${parsed.error.errors.map((e) => e.path.join(".")).join(", ")}`
+      `Invalid environment variables: ${parsed.error.issues.map((e) => e.path.join(".")).join(", ")}`
     );
   }
 
