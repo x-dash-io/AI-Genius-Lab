@@ -296,6 +296,7 @@ model User {
   Review        Review[]
   Session       Session[]
   Subscription  Subscription[]
+  BlogReview    BlogReview[]
 }
 
 model VerificationToken {
@@ -355,6 +356,7 @@ model BlogPost {
   excerpt      String?
   content      String
   coverImage   String?
+  images       BlogImage[]
   published    Boolean   @default(false)
   publishedAt  DateTime?
   updatedAt    DateTime  @updatedAt
@@ -365,6 +367,37 @@ model BlogPost {
   featured     Boolean   @default(false)
   views        Int       @default(0)
   readingTime  Int?      // in minutes
+  ratingAvg    Float     @default(0)
+  ratingCount  Int       @default(0)
+  reviews      BlogReview[]
+}
+
+model BlogImage {
+  id        String   @id @default(cuid())
+  postId    String
+  url       String
+  alt       String?
+  caption   String?
+  sortOrder Int      @default(0)
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  @@index([postId])
+}
+
+model BlogReview {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  rating    Int      // 1-5 stars
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
 }
 
 enum Role {
