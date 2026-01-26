@@ -14,8 +14,8 @@ import { toast } from "@/lib/toast";
 interface BlogImage {
   id?: string;
   url: string;
-  alt?: string;
-  caption?: string;
+  alt: string | null | undefined;
+  caption: string | null | undefined;
   sortOrder: number;
 }
 

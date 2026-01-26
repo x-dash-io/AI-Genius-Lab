@@ -47,6 +47,7 @@ export async function PUT(
       excerpt,
       content,
       coverImage,
+      images,
       author,
       category,
       tags,
@@ -81,6 +82,11 @@ export async function PUT(
     const wordCount = content.split(/\s+/).length;
     const readingTime = Math.ceil(wordCount / 200);
 
+    // First, delete existing images
+    await prisma.blogImage.deleteMany({
+      where: { postId: id },
+    });
+
     const updatedPost = await prisma.blogPost.update({
       where: { id },
       data: {
@@ -96,6 +102,14 @@ export async function PUT(
         published,
         publishedAt: published ? new Date() : undefined,
         readingTime,
+        images: images && images.length > 0 ? {
+          create: images.map((img: any, index: number) => ({
+            url: img.url,
+            alt: img.alt,
+            caption: img.caption,
+            sortOrder: index,
+          })),
+        } : undefined,
       },
     });
 

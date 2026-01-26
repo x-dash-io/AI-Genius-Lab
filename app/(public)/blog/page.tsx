@@ -5,7 +5,7 @@ import { getAllPublishedPosts } from "@/lib/blog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, ArrowRight, PenTool } from "lucide-react";
+import { Calendar, Clock, ArrowRight, PenTool, Star } from "lucide-react";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { BlogFilters } from "@/components/blog/BlogFilters";
 import { BlogPageClient } from "@/components/blog/BlogPageClient";
@@ -113,6 +113,13 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                       <Clock className="h-4 w-4" />
                       {posts[0].readingTime || "5"} min read
                     </div>
+                    {posts[0].ratingCount > 0 && (
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span>{posts[0].ratingAvg.toFixed(1)}</span>
+                        <span>({posts[0].ratingCount})</span>
+                      </div>
+                    )}
                   </div>
                   <Link href={`/blog/${posts[0].slug}`}>
                     <Button>
@@ -167,6 +174,13 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                         <Clock className="h-3 w-3" />
                         {post.readingTime || "5"} min
                       </div>
+                      {post.ratingCount > 0 && (
+                        <div className="flex items-center gap-1">
+                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          <span>{post.ratingAvg.toFixed(1)}</span>
+                          <span className="text-xs">({post.ratingCount})</span>
+                        </div>
+                      )}
                     </div>
                     <Link href={`/blog/${post.slug}`}>
                       <Button variant="ghost" size="sm">

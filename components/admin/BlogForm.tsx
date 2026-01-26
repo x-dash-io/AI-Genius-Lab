@@ -12,7 +12,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Plus, X } from "lucide-react";
 import { toast } from "@/lib/toast";
-import { BlogPost } from "@/lib/blog";
+import { BlogPost, BlogImage } from "@/lib/blog";
+import { BlogImageUpload } from "@/components/admin/BlogImageUpload";
 
 const categories = [
   "AI & Machine Learning",
@@ -37,6 +38,7 @@ export function BlogForm({ post }: BlogFormProps) {
     excerpt: post?.excerpt || "",
     content: post?.content || "",
     coverImage: post?.coverImage || "",
+    images: post?.images || [],
     author: post?.author || "",
     category: post?.category || "",
     tags: post?.tags || [],
@@ -167,6 +169,11 @@ export function BlogForm({ post }: BlogFormProps) {
               placeholder="https://example.com/image.jpg"
             />
           </div>
+
+          <BlogImageUpload
+            images={formData.images}
+            onChange={(images) => setFormData((prev) => ({ ...prev, images }))}
+          />
 
           <div className="grid gap-2">
             <Label htmlFor="author">Author</Label>

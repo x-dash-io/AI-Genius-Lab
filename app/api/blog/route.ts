@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
       excerpt,
       content,
       coverImage,
+      images,
       author,
       category,
       tags,
@@ -100,6 +101,14 @@ export async function POST(request: NextRequest) {
         published,
         publishedAt: published ? new Date() : null,
         readingTime,
+        images: images && images.length > 0 ? {
+          create: images.map((img: any, index: number) => ({
+            url: img.url,
+            alt: img.alt,
+            caption: img.caption,
+            sortOrder: index,
+          })),
+        } : undefined,
       },
     });
 

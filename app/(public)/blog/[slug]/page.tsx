@@ -1,15 +1,17 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPostBySlug, getAllPublishedPosts } from "@/lib/blog";
+import { getPostBySlug, getAllPublishedPosts, incrementPostViews } from "@/lib/blog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Calendar, Clock, PenTool, Share2, Bookmark } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, PenTool, Share2, Bookmark, Star, Image as ImageIcon } from "lucide-react";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+import { generateLearningPathSchema } from "@/lib/seo/schemas";
 import { BlogPageClient } from "@/components/blog/BlogPageClient";
 import { BlogContent } from "@/components/blog/BlogContent";
+import { BlogReviewClient } from "@/components/blog/BlogReviewClient";
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -51,6 +53,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   if (!post) {
     notFound();
   }
+
+  // Increment view count
+  await incrementPostViews(slug);
 
   // Get related posts
   const relatedPosts = await getAllPublishedPosts();
@@ -103,6 +108,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             {post.author && (
               <div>By {post.author}</div>
             )}
+            {post.ratingCount > 0 && (
+              <div className="flex items-center gap-1">
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <span>{post.ratingAvg.toFixed(1)}</span>
+                <span>({post.ratingCount})</span>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -128,6 +140,39 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
         )}
 
+        {/* Images Gallery */}
+        {post.images && post.images.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <ImageIcon className="h-5 w-5" />
+              Gallery
+            </h3>
+            <div className="grid gap-4 md:grid-cols-2">
+              {post.images.map((image) => (
+                <Card key={image.id} className="overflow-hidden">
+                  <div className="aspect-video bg-muted">
+                    <img
+                      src={image.url}
+                      alt={image.alt || "Blog image"}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  {(image.caption || image.alt) && (
+                    <CardContent className="p-4">
+                      {image.caption && (
+                        <p className="text-sm text-muted-foreground">{image.caption}</p>
+                      )}
+                      {image.alt && !image.caption && (
+                        <p className="text-xs text-muted-foreground italic">{image.alt}</p>
+                      )}
+                    </CardContent>
+                  )}
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Article Content */}
         <Card>
           <CardContent className="p-8">
@@ -148,6 +193,15 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             </div>
           </div>
         )}
+
+        {/* Reviews Section */}
+        <Separator />
+        <BlogReviewClient
+          postId={post.id}
+          initialReviews={post.reviews || []}
+          averageRating={post.ratingAvg}
+          totalReviews={post.ratingCount}
+        />
 
         {/* Related Posts */}
         {filteredRelated.length > 0 && (

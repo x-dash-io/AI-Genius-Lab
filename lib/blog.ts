@@ -17,6 +17,31 @@ export interface BlogPost {
   featured: boolean;
   views: number | null;
   readingTime: number | null;
+  ratingAvg: number;
+  ratingCount: number;
+  images?: BlogImage[];
+  reviews?: BlogReview[];
+}
+
+export interface BlogImage {
+  id: string;
+  url: string;
+  alt: string | null;
+  caption: string | null;
+  sortOrder: number;
+}
+
+export interface BlogReview {
+  id: string;
+  rating: number;
+  comment: string | null;
+  createdAt: Date;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+    image: string | null;
+  };
 }
 
 export async function getAllPublishedPosts(): Promise<BlogPost[]> {
@@ -30,23 +55,17 @@ export async function getAllPublishedPosts(): Promise<BlogPost[]> {
     orderBy: {
       publishedAt: "desc",
     },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      excerpt: true,
-      content: true,
-      coverImage: true,
-      published: true,
-      publishedAt: true,
-      updatedAt: true,
-      createdAt: true,
-      author: true,
-      category: true,
-      tags: true,
-      featured: true,
-      views: true,
-      readingTime: true,
+    include: {
+      images: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+      },
+      _count: {
+        select: {
+          reviews: true,
+        },
+      },
     },
   });
 
@@ -62,23 +81,27 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
         lte: new Date(),
       },
     },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      excerpt: true,
-      content: true,
-      coverImage: true,
-      published: true,
-      publishedAt: true,
-      updatedAt: true,
-      createdAt: true,
-      author: true,
-      category: true,
-      tags: true,
-      featured: true,
-      views: true,
-      readingTime: true,
+    include: {
+      images: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+      },
+      reviews: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      },
     },
   });
 
@@ -204,28 +227,158 @@ export async function incrementPostViews(slug: string): Promise<void> {
   });
 }
 
+export async function createBlogReview(
+  postId: string,
+  userId: string,
+  rating: number,
+  comment?: string
+) {
+  // Create or update the review
+  const review = await prisma.blogReview.upsert({
+    where: {
+      postId_userId: {
+        postId,
+        userId,
+      },
+    },
+    update: {
+      rating,
+      comment,
+    },
+    create: {
+      postId,
+      userId,
+      rating,
+      comment,
+    },
+  });
+
+  // Update the post's rating average and count
+  const ratingStats = await prisma.blogReview.groupBy({
+    by: ["postId"],
+    where: { postId },
+    _avg: {
+      rating: true,
+    },
+    _count: {
+      rating: true,
+    },
+  });
+
+  const stats = ratingStats[0];
+  if (stats) {
+    await prisma.blogPost.update({
+      where: { id: postId },
+      data: {
+        ratingAvg: stats._avg.rating || 0,
+        ratingCount: stats._count.rating,
+      },
+    });
+  }
+
+  return review;
+}
+
+export async function getBlogReviews(postId: string) {
+  return await prisma.blogReview.findMany({
+    where: { postId },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+}
+
+export async function getUserBlogReview(postId: string, userId: string) {
+  return await prisma.blogReview.findUnique({
+    where: {
+      postId_userId: {
+        postId,
+        userId,
+      },
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+    },
+  });
+}
+
+export async function deleteBlogReview(postId: string, userId: string) {
+  const deleted = await prisma.blogReview.delete({
+    where: {
+      postId_userId: {
+        postId,
+        userId,
+      },
+    },
+  });
+
+  // Update the post's rating average and count
+  const ratingStats = await prisma.blogReview.groupBy({
+    by: ["postId"],
+    where: { postId },
+    _avg: {
+      rating: true,
+    },
+    _count: {
+      rating: true,
+    },
+  });
+
+  const stats = ratingStats[0];
+  if (stats && stats._count.rating > 0) {
+    await prisma.blogPost.update({
+      where: { id: postId },
+      data: {
+        ratingAvg: stats._avg.rating || 0,
+        ratingCount: stats._count.rating,
+      },
+    });
+  } else {
+    await prisma.blogPost.update({
+      where: { id: postId },
+      data: {
+        ratingAvg: 0,
+        ratingCount: 0,
+      },
+    });
+  }
+
+  return deleted;
+}
+
 export async function getAllBlogPosts(): Promise<BlogPost[]> {
   const posts = await prisma.blogPost.findMany({
     orderBy: {
       createdAt: "desc",
     },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      excerpt: true,
-      content: true,
-      coverImage: true,
-      publishedAt: true,
-      updatedAt: true,
-      createdAt: true,
-      author: true,
-      category: true,
-      tags: true,
-      featured: true,
-      views: true,
-      readingTime: true,
-      published: true,
+    include: {
+      images: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+      },
+      _count: {
+        select: {
+          reviews: true,
+        },
+      },
     },
   });
 
