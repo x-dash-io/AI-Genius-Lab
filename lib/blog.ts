@@ -120,23 +120,17 @@ export async function getPostsByCategory(category: string): Promise<BlogPost[]> 
     orderBy: {
       publishedAt: "desc",
     },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      excerpt: true,
-      content: true,
-      coverImage: true,
-      published: true,
-      publishedAt: true,
-      updatedAt: true,
-      createdAt: true,
-      author: true,
-      category: true,
-      tags: true,
-      featured: true,
-      views: true,
-      readingTime: true,
+    include: {
+      images: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+      },
+      _count: {
+        select: {
+          reviews: true,
+        },
+      },
     },
   });
 
@@ -157,23 +151,17 @@ export async function getPostsByTag(tag: string): Promise<BlogPost[]> {
     orderBy: {
       publishedAt: "desc",
     },
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      excerpt: true,
-      content: true,
-      coverImage: true,
-      published: true,
-      publishedAt: true,
-      updatedAt: true,
-      createdAt: true,
-      author: true,
-      category: true,
-      tags: true,
-      featured: true,
-      views: true,
-      readingTime: true,
+    include: {
+      images: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+      },
+      _count: {
+        select: {
+          reviews: true,
+        },
+      },
     },
   });
 
@@ -193,23 +181,17 @@ export async function getFeaturedPosts(limit: number = 3): Promise<BlogPost[]> {
       publishedAt: "desc",
     },
     take: limit,
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      excerpt: true,
-      content: true,
-      coverImage: true,
-      published: true,
-      publishedAt: true,
-      updatedAt: true,
-      createdAt: true,
-      author: true,
-      category: true,
-      tags: true,
-      featured: true,
-      views: true,
-      readingTime: true,
+    include: {
+      images: {
+        orderBy: {
+          sortOrder: "asc",
+        },
+      },
+      _count: {
+        select: {
+          reviews: true,
+        },
+      },
     },
   });
 
