@@ -61,18 +61,42 @@ export const authOptions = {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
   callbacks: {
-    async signIn({ user, account }: { user: User; account: Account | null }) {
-      // For OAuth providers, ensure new users get customer role
+    async signIn({ user, account, profile }: { user: User; account: Account | null; profile?: any }) {
+      // For OAuth providers, handle account linking and role assignment
       if (account?.provider !== "credentials" && user.email) {
         try {
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email },
+            include: { accounts: true },
           });
 
           if (existingUser) {
+            // Check if this OAuth account is already linked
+            const existingAccount = existingUser.accounts?.find(
+              (acc: any) => acc.provider === account.provider && acc.providerAccountId === account.providerAccountId
+            );
+
+            if (!existingAccount) {
+              // Link the OAuth account to existing user
+              await prisma.account.create({
+                data: {
+                  userId: existingUser.id,
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  access_token: account.access_token,
+                  expires_at: account.expires_at,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: account.id_token,
+                },
+              });
+            }
+
             // If user exists but has no role, set it to customer
             if (!existingUser.role) {
               await prisma.user.update({
@@ -80,10 +104,18 @@ export const authOptions = {
                 data: { role: "customer" },
               });
             }
+
+            // Update user info from OAuth profile if missing
+            if (!existingUser.image && profile?.picture) {
+              await prisma.user.update({
+                where: { id: existingUser.id },
+                data: { image: profile.picture },
+              });
+            }
           }
         } catch (error) {
           console.error("SignIn callback error:", error);
-          // Don't block sign-in if role update fails
+          // Don't block sign-in if linking fails - adapter will handle it
         }
       }
       return true;
