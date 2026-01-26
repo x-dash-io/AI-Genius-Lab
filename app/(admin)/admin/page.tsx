@@ -189,10 +189,10 @@ export default async function AdminDashboardPage() {
                 Create New Course
               </Button>
             </Link>
-            <Link href="/admin/users">
+            <Link href="/admin/learning-paths/new">
               <Button variant="outline" className="w-full" size="lg">
-                <Users className="mr-2 h-4 w-4" />
-                Manage Users
+                <GraduationCap className="mr-2 h-4 w-4" />
+                Create Learning Path
               </Button>
             </Link>
           </div>

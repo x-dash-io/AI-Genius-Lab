@@ -51,12 +51,6 @@ export default async function AdminLearningPathsPage() {
           <CardContent className="py-12 text-center">
             <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-muted-foreground mb-4">No learning paths yet.</p>
-            <Link href="/admin/learning-paths/new">
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Your First Learning Path
-              </Button>
-            </Link>
           </CardContent>
         </Card>
       ) : (

@@ -270,10 +270,10 @@ export function PublicLayoutClient({
                   damping: 30,
                   stiffness: 300
                 }}
-                className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-card/95 backdrop-blur-md border-r shadow-2xl overflow-y-auto md:hidden"
+                className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-card/95 backdrop-blur-md border-r shadow-2xl flex flex-col md:hidden"
               >
                 {/* Menu Header */}
-                <div className="border-b p-4 flex items-center justify-between sticky top-0 bg-card/95 backdrop-blur-md z-10 h-16">
+                <div className="border-b p-4 flex items-center justify-between bg-card/95 backdrop-blur-md z-10 h-16 flex-shrink-0">
                   <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
                     <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
                       <GraduationCap className="h-5 w-5 text-primary-foreground" />
@@ -285,7 +285,7 @@ export function PublicLayoutClient({
                 </div>
 
                 {/* Navigation Items */}
-                <div className="px-3 py-4 pb-32 space-y-1">
+                <div className="px-3 py-4 space-y-1 flex-1 overflow-y-auto">
                   {publicNavigation.map((item, index) => {
                     const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/"));
                     const Icon = item.icon;
@@ -331,7 +331,7 @@ export function PublicLayoutClient({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="border-t px-4 py-4 space-y-3 sticky bottom-0 bg-background/95 backdrop-blur-md"
+                    className="border-t px-4 py-4 space-y-3 flex-shrink-0 bg-background/95 backdrop-blur-md"
                   >
                     <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                       <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors active:scale-[0.98]">
@@ -370,20 +370,22 @@ export function PublicLayoutClient({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="border-t px-4 py-4 space-y-4 sticky bottom-0 bg-background/95 backdrop-blur-md"
+                    className="border-t px-4 py-5 flex-shrink-0 bg-background/95 backdrop-blur-md"
                   >
-                    <Link href="/sign-in" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="outline" className="w-full justify-start gap-2">
-                        <LogIn className="h-4 w-4" />
-                        Sign In
-                      </Button>
-                    </Link>
-                    <Link href="/sign-up" onClick={() => setMobileMenuOpen(false)}>
-                      <Button className="w-full justify-start gap-2">
-                        <UserPlus className="h-4 w-4" />
-                        Sign Up
-                      </Button>
-                    </Link>
+                    <div className="flex flex-col gap-3">
+                      <Link href="/sign-in" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="outline" className="w-full justify-start gap-2">
+                          <LogIn className="h-4 w-4" />
+                          Sign In
+                        </Button>
+                      </Link>
+                      <Link href="/sign-up" onClick={() => setMobileMenuOpen(false)}>
+                        <Button className="w-full justify-start gap-2">
+                          <UserPlus className="h-4 w-4" />
+                          Sign Up
+                        </Button>
+                      </Link>
+                    </div>
                   </motion.div>
                 )}
               </motion.nav>

@@ -105,16 +105,9 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
                 ? "No courses match your search criteria."
                 : "No courses yet. Create your first course to get started."}
             </p>
-            {hasFilters ? (
+            {hasFilters && (
               <Link href="/admin/courses">
                 <Button variant="outline">Clear Filters</Button>
-              </Link>
-            ) : (
-              <Link href="/admin/courses/new">
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Course
-                </Button>
               </Link>
             )}
           </CardContent>
