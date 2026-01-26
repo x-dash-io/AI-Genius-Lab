@@ -67,16 +67,16 @@ export const authOptions = {
   callbacks: {
     async signIn({ user, account, profile }: { user: User; account: Account | null; profile?: any }) {
       // For OAuth providers, handle account linking and role assignment
-      if (account?.provider !== "credentials" && user.email) {
+      if (account && account.provider !== "credentials" && user.email) {
         try {
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email },
-            include: { accounts: true },
+            include: { Account: true },
           });
 
           if (existingUser) {
             // Check if this OAuth account is already linked
-            const existingAccount = existingUser.accounts?.find(
+            const existingAccount = existingUser.Account?.find(
               (acc: any) => acc.provider === account.provider && acc.providerAccountId === account.providerAccountId
             );
 
@@ -84,6 +84,7 @@ export const authOptions = {
               // Link the OAuth account to existing user
               await prisma.account.create({
                 data: {
+                  id: crypto.randomUUID(),
                   userId: existingUser.id,
                   type: account.type,
                   provider: account.provider,
