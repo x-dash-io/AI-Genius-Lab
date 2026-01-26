@@ -12,8 +12,16 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Plus, X } from "lucide-react";
 import { toast } from "@/lib/toast";
-import { BlogPost, BlogImage } from "@/lib/blog";
+import { BlogPost } from "@/lib/blog";
 import { BlogImageUpload } from "@/components/admin/BlogImageUpload";
+
+interface LocalBlogImage {
+  id?: string;
+  url: string;
+  alt: string | null | undefined;
+  caption: string | null | undefined;
+  sortOrder: number;
+}
 
 const categories = [
   "AI & Machine Learning",
@@ -38,7 +46,7 @@ export function BlogForm({ post }: BlogFormProps) {
     excerpt: post?.excerpt || "",
     content: post?.content || "",
     coverImage: post?.coverImage || "",
-    images: post?.images || [],
+    images: (post?.images || []) as LocalBlogImage[],
     author: post?.author || "",
     category: post?.category || "",
     tags: post?.tags || [],
