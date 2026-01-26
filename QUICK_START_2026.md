@@ -52,8 +52,8 @@ PAYPAL_MODE="sandbox"
 # Push schema to database
 npm run db:push
 
-# Seed with 2026 data
-npm run db:seed:2026
+# Seed with sample data
+npm run db:seed:simple
 ```
 
 ### 4. Start Development
@@ -71,19 +71,15 @@ Visit `http://localhost:3000`
 
 ## 📚 What's Included
 
-### Courses (2026 Content)
+### Courses (Sample Content)
 - AI Agents & Autonomous Systems 2026
-- Quantum Computing Fundamentals 2026
 - Web3 & DeFi Development Masterclass 2026
-- Next.js 15 & React 19 Full Stack 2026
-- MLOps: Production Machine Learning 2026
+- Each with sections, lessons, and content
 
 ### Blog Posts
-- Latest 2026 tech trends
-- AI breakthroughs
-- Web3 adoption
-- Quantum computing news
-- Developer tools updates
+- The Rise of AI Agents in 2026
+- Web3 Adoption in 2026
+- With images, ratings, and reviews
 
 ### Features
 - ✅ Course management
