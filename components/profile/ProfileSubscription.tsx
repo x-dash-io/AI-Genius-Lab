@@ -239,7 +239,7 @@ export function ProfileSubscription({ userId }: ProfileSubscriptionProps) {
           {isExpired && (
             <div className="flex items-center justify-between text-red-600">
               <AlertCircle className="h-4 w-4" />
-              <span className="text-sm">Expired on {new Date(subscription.endDate || subscription.cancelledAt).toLocaleDateString()}</span>
+              <span className="text-sm">Expired on {new Date(subscription.endDate || subscription.cancelledAt || new Date()).toLocaleDateString()}</span>
             </div>
           )}
         </div>
