@@ -15,7 +15,10 @@
     "test:coverage": "jest --coverage",
     "clean": "rmdir /s /q .next 2>nul || echo Clean complete",
     "db:push": "prisma db push",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "db:seed:2026": "npx tsx prisma/seed-all-2026.ts",
+    "db:seed:courses": "npx tsx prisma/seed-2026.ts",
+    "db:seed:blog": "npx tsx prisma/blog-seed-2026.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",

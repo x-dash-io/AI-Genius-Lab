@@ -17,6 +17,7 @@ export function SignOutButton({ className }: SignOutButtonProps) {
     setIsLoading(true);
     try {
       await signOut({ callbackUrl: "/" });
+      // Note: setLoading is not needed here as signOut causes a redirect
     } catch (error) {
       console.error("Sign out error:", error);
       setIsLoading(false);

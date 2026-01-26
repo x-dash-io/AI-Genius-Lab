@@ -9,6 +9,7 @@ import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { PasswordChangeForm } from "@/components/profile/PasswordChangeForm";
 import { EmailChangeForm } from "@/components/profile/EmailChangeForm";
 import { ProfilePreviewBanner } from "@/components/profile/ProfilePreviewBanner";
+import { ProfileSubscription } from "@/components/profile/ProfileSubscription";
 import { Separator } from "@/components/ui/separator";
 import { BookOpen, DollarSign, GraduationCap, Calendar } from "lucide-react";
 import Link from "next/link";
@@ -105,58 +106,61 @@ export default async function ProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Stats Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Account Statistics</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Courses Purchased</span>
-              </div>
-              <span className="text-lg font-semibold">{stats.coursesPurchased}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Total Spent</span>
-              </div>
-              <span className="text-lg font-semibold">{formatCurrency(stats.totalSpent)}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Lessons Completed</span>
-              </div>
-              <span className="text-lg font-semibold">{stats.lessonsCompleted}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Member Since</span>
-              </div>
-              <span className="text-sm font-medium">
-                {new Date(stats.memberSince).toLocaleDateString()}
-              </span>
-            </div>
-            <Separator />
-            <div className="flex flex-col gap-3">
-              <Link href="/library">
-                <Button variant="outline" className="w-full" size="sm">
-                  View My Courses
-                </Button>
-              </Link>
-              <Link href="/activity">
-                <Button variant="outline" className="w-full" size="sm">
-                  View Activity
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Subscription Card */}
+        <ProfileSubscription userId={session.user.id} />
       </div>
+
+      {/* Stats Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Account Statistics</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Courses Purchased</span>
+            </div>
+            <span className="text-lg font-semibold">{stats.coursesPurchased}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Total Spent</span>
+            </div>
+            <span className="text-lg font-semibold">{formatCurrency(stats.totalSpent)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Lessons Completed</span>
+            </div>
+            <span className="text-lg font-semibold">{stats.lessonsCompleted}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Member Since</span>
+            </div>
+            <span className="text-sm font-medium">
+              {new Date(stats.memberSince).toLocaleDateString()}
+            </span>
+          </div>
+          <Separator />
+          <div className="flex flex-col gap-3">
+            <Link href="/library">
+              <Button variant="outline" className="w-full" size="sm">
+                View My Courses
+              </Button>
+            </Link>
+            <Link href="/activity">
+              <Button variant="outline" className="w-full" size="sm">
+                View Activity
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Email Change Card */}
       <Card>

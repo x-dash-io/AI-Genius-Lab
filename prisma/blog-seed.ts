@@ -46,6 +46,8 @@ Starting your AI journey is exciting but requires dedication. Take it one step a
     tags: ["artificial-intelligence", "beginners", "machine-learning", "python"],
     featured: true,
     readingTime: 5,
+    ratingAvg: 0,
+    ratingCount: 0,
   },
   {
     title: "Building Modern Web Apps with Next.js 15",
@@ -94,6 +96,8 @@ Next.js 15 provides powerful tools for building modern web applications. Start e
     tags: ["nextjs", "react", "web-development", "javascript"],
     featured: false,
     readingTime: 7,
+    ratingAvg: 0,
+    ratingCount: 0,
   },
   {
     title: "The Future of Educational Technology",
@@ -142,8 +146,10 @@ As technology advances, education will become more accessible, personalized, and
     author: "Education Team",
     category: "Industry Insights",
     tags: ["edtech", "ai-in-education", "future-tech", "learning"],
-    featured: true,
+    featured: false,
     readingTime: 6,
+    ratingAvg: 0,
+    ratingCount: 0,
   },
   {
     title: "Mobile Development Trends in 2024",
@@ -196,6 +202,8 @@ Mobile development continues to evolve rapidly. Stay updated with these trends t
     tags: ["mobile-development", "react-native", "flutter", "5g"],
     featured: false,
     readingTime: 5,
+    ratingAvg: 0,
+    ratingCount: 0,
   },
   {
     title: "Data Science Fundamentals: From Zero to Hero",
@@ -268,6 +276,8 @@ Data science offers exciting career opportunities. Start with the fundamentals a
     tags: ["data-science", "python", "machine-learning", "statistics"],
     featured: false,
     readingTime: 8,
+    ratingAvg: 0,
+    ratingCount: 0,
   },
 ];
 
