@@ -110,12 +110,15 @@ model Enrollment {
 
 model LearningPath {
   id                 String               @id
+  slug               String               @unique
   title              String
   description        String?
   createdAt          DateTime             @default(now())
   updatedAt          DateTime
   Certificate        Certificate[]
   LearningPathCourse LearningPathCourse[]
+
+  @@index([slug])
 }
 
 model LearningPathCourse {

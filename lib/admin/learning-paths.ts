@@ -54,18 +54,29 @@ export async function getLearningPathById(pathId: string) {
   });
 }
 
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .substring(0, 50) + "-" + Date.now().toString(36);
+}
+
 export async function createLearningPath(data: {
   title: string;
   description?: string;
+  slug?: string;
 }) {
   await requireRole("admin");
   
   const pathId = `path_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const slug = data.slug || generateSlug(data.title);
   const now = new Date();
 
   return prisma.learningPath.create({
     data: {
       id: pathId,
+      slug,
       title: data.title,
       description: data.description,
       updatedAt: now,

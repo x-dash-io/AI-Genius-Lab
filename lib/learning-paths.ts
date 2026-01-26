@@ -36,10 +36,8 @@ export async function getAllPublishedLearningPaths() {
 }
 
 export async function getLearningPathBySlug(slug: string) {
-  // Note: We'll need to add a slug field to LearningPath model
-  // For now, using ID lookup
   return prisma.learningPath.findUnique({
-    where: { id: slug },
+    where: { slug },
     include: {
       LearningPathCourse: {
         where: {

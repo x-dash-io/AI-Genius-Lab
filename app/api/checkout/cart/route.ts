@@ -3,12 +3,21 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createPayPalOrder } from "@/lib/paypal";
+import { isAdmin } from "@/lib/access";
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Block admins from purchasing courses
+    if (isAdmin(session.user.role)) {
+      return NextResponse.json(
+        { error: "Admins cannot purchase courses" },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();

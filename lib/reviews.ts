@@ -1,8 +1,9 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/access";
-import { hasPurchasedCourse } from "@/lib/access";
+import { requireCustomer, hasPurchasedCourse } from "@/lib/access";
+
+const MIN_COMPLETION_FOR_REVIEW = 50; // Minimum 50% completion required to review
 
 export async function getCourseReviews(courseId: string) {
   return prisma.review.findMany({
@@ -78,12 +79,52 @@ export async function createReview(
   courseId: string,
   data: { rating: number; text?: string }
 ) {
-  const user = await requireUser();
+  const user = await requireCustomer();
 
   // Verify user has purchased the course
   const hasPurchased = await hasPurchasedCourse(user.id, courseId);
   if (!hasPurchased) {
     throw new Error("FORBIDDEN: You must purchase the course before reviewing");
+  }
+
+  // Verify user has completed minimum percentage of the course
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    include: {
+      Section: {
+        include: {
+          Lesson: {
+            select: { id: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!course) {
+    throw new Error("Course not found");
+  }
+
+  const lessonIds = course.Section.flatMap((s) => s.Lesson.map((l) => l.id));
+  const totalLessons = lessonIds.length;
+
+  if (totalLessons > 0) {
+    const progressRecords = await prisma.progress.findMany({
+      where: {
+        userId: user.id,
+        lessonId: { in: lessonIds },
+        completedAt: { not: null },
+      },
+    });
+
+    const completedLessons = progressRecords.length;
+    const completionPercent = Math.round((completedLessons / totalLessons) * 100);
+
+    if (completionPercent < MIN_COMPLETION_FOR_REVIEW) {
+      throw new Error(
+        `You must complete at least ${MIN_COMPLETION_FOR_REVIEW}% of the course before reviewing. Current progress: ${completionPercent}%`
+      );
+    }
   }
 
   // Check if review already exists
@@ -130,7 +171,7 @@ export async function updateReview(
   reviewId: string,
   data: { rating?: number; text?: string }
 ) {
-  const user = await requireUser();
+  const user = await requireCustomer();
 
   // Verify review belongs to user
   const review = await prisma.review.findUnique({
@@ -170,7 +211,7 @@ export async function updateReview(
 }
 
 export async function deleteReview(reviewId: string) {
-  const user = await requireUser();
+  const user = await requireCustomer();
 
   // Verify review belongs to user
   const review = await prisma.review.findUnique({

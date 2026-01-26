@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireUser } from "@/lib/access";
+import { requireCustomer } from "@/lib/access";
 import { hasEnrolledInLearningPath } from "./learning-paths";
 import { generateCertificatePDF } from "./certificate-pdf";
 import { sendCertificateEmail } from "./email";
@@ -85,9 +85,10 @@ export async function hasCompletedLearningPath(userId: string, pathId: string): 
 
 /**
  * Generate certificate for course completion
+ * Uses transaction to prevent race conditions
  */
 export async function generateCourseCertificate(courseId: string) {
-  const user = await requireUser();
+  const user = await requireCustomer();
 
   // Verify user has purchased the course
   const purchase = await prisma.purchase.findFirst({
@@ -108,58 +109,77 @@ export async function generateCourseCertificate(courseId: string) {
     throw new Error("Course not completed");
   }
 
-  // Check if certificate already exists
-  const existing = await prisma.certificate.findFirst({
-    where: {
-      userId: user.id,
-      courseId,
-      type: "course",
-    },
-  });
-
-  if (existing) {
-    return existing;
-  }
-
-  // Generate certificate
-  const certificateId = generateCertificateId();
-  const certificate = await prisma.certificate.create({
-    data: {
-      id: `cert_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-      userId: user.id,
-      courseId,
-      type: "course",
-      certificateId,
-    },
-    include: {
-      Course: {
-        select: {
-          title: true,
-          description: true,
-        },
-      },
-      User: {
-        select: {
-          name: true,
-          email: true,
-        },
-      },
-    },
-  });
-
-  // Log certificate issuance
-  await prisma.activityLog.create({
-    data: {
-      id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-      userId: user.id,
-      type: "certificate_earned",
-      metadata: {
-        certificateId: certificate.certificateId,
-        type: "course",
+  // Use transaction to prevent race condition (check-then-create)
+  const certificate = await prisma.$transaction(async (tx) => {
+    // Check if certificate already exists within transaction
+    const existing = await tx.certificate.findFirst({
+      where: {
+        userId: user.id,
         courseId,
-        courseTitle: certificate.Course?.title,
+        type: "course",
       },
-    },
+      include: {
+        Course: {
+          select: {
+            title: true,
+            description: true,
+          },
+        },
+        User: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (existing) {
+      return existing;
+    }
+
+    // Generate certificate within same transaction
+    const certificateId = generateCertificateId();
+    const newCert = await tx.certificate.create({
+      data: {
+        id: `cert_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+        userId: user.id,
+        courseId,
+        type: "course",
+        certificateId,
+      },
+      include: {
+        Course: {
+          select: {
+            title: true,
+            description: true,
+          },
+        },
+        User: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    // Log certificate issuance within transaction
+    await tx.activityLog.create({
+      data: {
+        id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+        userId: user.id,
+        type: "certificate_earned",
+        metadata: {
+          certificateId: newCert.certificateId,
+          type: "course",
+          courseId,
+          courseTitle: newCert.Course?.title,
+        },
+      },
+    });
+
+    return newCert;
   });
 
   // Generate PDF and upload to Cloudinary
@@ -198,9 +218,10 @@ export async function generateCourseCertificate(courseId: string) {
 
 /**
  * Generate certificate for learning path completion
+ * Uses transaction to prevent race conditions
  */
 export async function generatePathCertificate(pathId: string) {
-  const user = await requireUser();
+  const user = await requireCustomer();
 
   // Verify user has enrolled in the path (all courses purchased)
   const enrolled = await hasEnrolledInLearningPath(user.id, pathId);
@@ -214,83 +235,102 @@ export async function generatePathCertificate(pathId: string) {
     throw new Error("Learning path not completed");
   }
 
-  // Check if certificate already exists
-  const existing = await prisma.certificate.findFirst({
-    where: {
-      userId: user.id,
-      pathId,
-      type: "learning_path",
-    },
-  });
-
-  if (existing) {
-    return existing;
-  }
-
-  // Get path details for metadata
-  const path = await prisma.learningPath.findUnique({
-    where: { id: pathId },
-    include: {
-      LearningPathCourse: {
-        include: {
-          Course: {
-            select: {
-              id: true,
-              title: true,
-            },
+  // Use transaction to prevent race condition (check-then-create)
+  const certificate = await prisma.$transaction(async (tx) => {
+    // Check if certificate already exists within transaction
+    const existing = await tx.certificate.findFirst({
+      where: {
+        userId: user.id,
+        pathId,
+        type: "learning_path",
+      },
+      include: {
+        LearningPath: {
+          select: {
+            title: true,
+            description: true,
           },
         },
-        orderBy: { sortOrder: "asc" },
-      },
-    },
-  });
-
-  // Generate certificate
-  const certificateId = generateCertificateId();
-  const certificate = await prisma.certificate.create({
-    data: {
-      id: `cert_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-      userId: user.id,
-      pathId,
-      type: "learning_path",
-      certificateId,
-      metadata: path ? {
-        courseCount: path.LearningPathCourse.length,
-        courses: path.LearningPathCourse.map((pc) => ({
-          courseId: pc.Course.id,
-          title: pc.Course.title,
-        })),
-      } : undefined,
-    },
-    include: {
-      LearningPath: {
-        select: {
-          title: true,
-          description: true,
+        User: {
+          select: {
+            name: true,
+            email: true,
+          },
         },
       },
-      User: {
-        select: {
-          name: true,
-          email: true,
+    });
+
+    if (existing) {
+      return existing;
+    }
+
+    // Get path details for metadata
+    const path = await tx.learningPath.findUnique({
+      where: { id: pathId },
+      include: {
+        LearningPathCourse: {
+          include: {
+            Course: {
+              select: {
+                id: true,
+                title: true,
+              },
+            },
+          },
+          orderBy: { sortOrder: "asc" },
         },
       },
-    },
-  });
+    });
 
-  // Log certificate issuance
-  await prisma.activityLog.create({
-    data: {
-      id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-      userId: user.id,
-      type: "certificate_earned",
-      metadata: {
-        certificateId: certificate.certificateId,
-        type: "learning_path",
+    // Generate certificate within same transaction
+    const certificateId = generateCertificateId();
+    const newCert = await tx.certificate.create({
+      data: {
+        id: `cert_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+        userId: user.id,
         pathId,
-        pathTitle: certificate.LearningPath?.title,
+        type: "learning_path",
+        certificateId,
+        metadata: path ? {
+          courseCount: path.LearningPathCourse.length,
+          courses: path.LearningPathCourse.map((pc) => ({
+            courseId: pc.Course.id,
+            title: pc.Course.title,
+          })),
+        } : undefined,
       },
-    },
+      include: {
+        LearningPath: {
+          select: {
+            title: true,
+            description: true,
+          },
+        },
+        User: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    // Log certificate issuance within transaction
+    await tx.activityLog.create({
+      data: {
+        id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+        userId: user.id,
+        type: "certificate_earned",
+        metadata: {
+          certificateId: newCert.certificateId,
+          type: "learning_path",
+          pathId,
+          pathTitle: newCert.LearningPath?.title,
+        },
+      },
+    });
+
+    return newCert;
   });
 
   // Generate PDF and upload to Cloudinary
@@ -331,7 +371,7 @@ export async function generatePathCertificate(pathId: string) {
  * Get user's certificates
  */
 export async function getUserCertificates(userId: string) {
-  const user = await requireUser();
+  const user = await requireCustomer();
   
   if (user.id !== userId) {
     throw new Error("FORBIDDEN: You can only view your own certificates");

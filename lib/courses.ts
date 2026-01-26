@@ -44,8 +44,8 @@ export async function getCoursePreviewBySlug(slug: string) {
     cacheKey,
     async () => {
       const course = await withRetry(async () => {
-        return prisma.course.findUnique({
-          where: { slug },
+        return prisma.course.findFirst({
+          where: { slug, isPublished: true },
           select: {
             id: true,
             slug: true,

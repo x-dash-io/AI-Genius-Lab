@@ -68,65 +68,93 @@ export const authOptions = {
       // For OAuth providers, ensure new users get customer role
       if (account?.provider !== "credentials" && user.email) {
         try {
-          console.log("OAuth sign-in for:", user.email);
           const existingUser = await prisma.user.findUnique({
             where: { email: user.email },
           });
 
           if (existingUser) {
-            console.log("Existing user found:", existingUser.id, "Role:", existingUser.role);
             // If user exists but has no role, set it to customer
             if (!existingUser.role) {
               await prisma.user.update({
                 where: { id: existingUser.id },
                 data: { role: "customer" },
               });
-              console.log("Updated user role to customer");
             }
-          } else {
-            console.log("New OAuth user - PrismaAdapter will create it");
           }
         } catch (error) {
           console.error("SignIn callback error:", error);
           // Don't block sign-in if role update fails
         }
       }
-      // For credentials provider, user is already authenticated by authorize function
       return true;
     },
-    async jwt({ token, user }: { token: JWT; user?: User }) {
+    async jwt({ token, user, account, trigger }: { token: JWT; user?: User; account?: Account | null; trigger?: string }) {
       // Initial sign in - user object is available
       if (user) {
         token.id = user.id;
-        // For credentials provider, role comes from authorize function
-        // For OAuth, PrismaAdapter will create user with default role from schema
         token.role = (user as User & { role?: Role }).role || "customer";
+        token.name = user.name;
+        token.email = user.email;
+        token.picture = user.image;
+        token.lastRefresh = Date.now();
       }
+      
+      // For OAuth sign-in, the user.id from adapter might be different or missing
+      // Fetch from DB using email to ensure we have the correct database user ID
+      if (account && account.provider !== "credentials" && token.email && !token.id) {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: token.email as string },
+            select: { id: true, name: true, email: true, image: true, role: true },
+          });
+          
+          if (dbUser) {
+            token.id = dbUser.id;
+            token.role = dbUser.role || "customer";
+            token.name = dbUser.name;
+            token.picture = dbUser.image;
+            token.lastRefresh = Date.now();
+          }
+        } catch (error) {
+          console.error("Error fetching OAuth user:", error);
+        }
+      }
+      
+      // Refresh user data from DB periodically (every 5 minutes) or on update trigger
+      const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+      const shouldRefresh = trigger === "update" || 
+        !token.lastRefresh || 
+        (Date.now() - (token.lastRefresh as number)) > REFRESH_INTERVAL;
+      
+      if (shouldRefresh && token.id) {
+        try {
+          const freshUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { name: true, email: true, image: true, role: true },
+          });
+          
+          if (freshUser) {
+            token.name = freshUser.name;
+            token.email = freshUser.email;
+            token.picture = freshUser.image;
+            token.role = freshUser.role;
+            token.lastRefresh = Date.now();
+          }
+        } catch (error) {
+          console.error("Error refreshing user in JWT callback:", error);
+        }
+      }
+      
       return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
+      // Use cached data from JWT token instead of querying DB every time
       if (session.user && token && token.id) {
         session.user.id = token.id as string;
         session.user.role = (token.role as Role) || "customer";
-        
-        // Fetch user data from database to get latest image and name
-        try {
-          const user = await withRetry(async () => {
-            return await prisma.user.findUnique({
-              where: { id: token.id as string },
-              select: { name: true, email: true, image: true },
-            });
-          });
-          
-          if (user) {
-            session.user.name = user.name;
-            session.user.email = user.email;
-            session.user.image = user.image;
-          }
-        } catch (error) {
-          console.error("Error fetching user in session callback:", error);
-          // Continue with existing session data if fetch fails
-        }
+        session.user.name = token.name as string | null;
+        session.user.email = token.email as string;
+        session.user.image = token.picture as string | null;
       }
       return session;
     },

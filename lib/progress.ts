@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma, withRetry } from "@/lib/prisma";
-import { requireUser, hasCourseAccess } from "@/lib/access";
+import { requireCustomer, hasCourseAccess } from "@/lib/access";
 
 export async function updateLessonProgress(
   lessonId: string,
@@ -12,7 +12,7 @@ export async function updateLessonProgress(
     completionPercent?: number;
   }
 ) {
-  const user = await requireUser();
+  const user = await requireCustomer();
 
   // Verify lesson access
   const lesson = await withRetry(async () => {
@@ -74,7 +74,7 @@ export async function updateLessonProgress(
 }
 
 export async function getLessonProgress(lessonId: string) {
-  const user = await requireUser();
+  const user = await requireCustomer();
 
   return withRetry(async () => {
     return prisma.progress.findUnique({
@@ -89,7 +89,7 @@ export async function getLessonProgress(lessonId: string) {
 }
 
 export async function getCourseProgress(courseId: string) {
-  const user = await requireUser();
+  const user = await requireCustomer();
 
   // Get all lessons in the course
   const course = await withRetry(async () => {

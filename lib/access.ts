@@ -23,6 +23,18 @@ export function isAdmin(role: Role) {
   return role === "admin";
 }
 
+/**
+ * Require that the user is a customer (not an admin)
+ * Admins should not perform customer operations like purchasing, reviewing, etc.
+ */
+export async function requireCustomer() {
+  const user = await requireUser();
+  if (isAdmin(user.role)) {
+    throw new Error("FORBIDDEN: This operation is for customers only");
+  }
+  return user;
+}
+
 export async function hasPurchasedCourse(userId: string, courseId: string) {
   const purchase = await withRetry(async () => {
     return prisma.purchase.findFirst({
