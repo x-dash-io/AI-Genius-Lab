@@ -16,6 +16,7 @@ import {
   Route,
   User,
   Eye,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -33,6 +34,7 @@ const adminNavigation = [
   { name: "Courses", href: "/admin/courses", icon: BookOpen },
   { name: "Learning Paths", href: "/admin/learning-paths", icon: Route },
   { name: "Categories", href: "/admin/categories", icon: ShoppingCart },
+  { name: "Blog", href: "/admin/blog", icon: FileText },
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Purchases", href: "/admin/purchases", icon: Receipt },
   { name: "Profile", href: "/admin/profile", icon: User },
@@ -42,6 +44,7 @@ const customerPreviewLinks = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Course Catalog", href: "/courses", icon: BookOpen },
   { name: "Learning Paths", href: "/learning-paths", icon: Route },
+  { name: "Blog", href: "/blog", icon: FileText },
 ];
 
 export function AdminLayoutClient({ children }: { children: React.ReactNode }) {

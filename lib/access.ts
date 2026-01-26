@@ -2,6 +2,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma, withRetry } from "@/lib/prisma";
 import { hasRole, type Role } from "@/lib/rbac";
+import { hasCourseAccess as checkSubscriptionAccess, hasActiveSubscription } from "./subscription";
+import { redirect } from "next/navigation";
 
 export async function requireUser() {
   const session = await getServerSession(authOptions);
@@ -59,5 +61,54 @@ export async function hasCourseAccess(
     return true;
   }
 
-  return hasPurchasedCourse(userId, courseId);
+  // Check both purchased and subscription access
+  const access = await checkSubscriptionAccess(userId, courseId);
+  return access.hasAccess;
+}
+
+export async function requireCourseAccess(courseId: string) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    redirect("/sign-in");
+  }
+
+  const access = await checkSubscriptionAccess(session.user.id, courseId);
+  
+  if (!access.hasAccess) {
+    redirect(`/courses/${courseId}?checkout=required`);
+  }
+
+  return access;
+}
+
+export async function requireSubscription() {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    redirect("/sign-in");
+  }
+
+  const hasActive = await hasActiveSubscription(session.user.id);
+  
+  if (!hasActive) {
+    redirect("/subscription?upgrade=required");
+  }
+
+  return true;
+}
+
+export async function checkSubscription(userId?: string) {
+  if (!userId) {
+    const session = await getServerSession(authOptions);
+    userId = session?.user?.id;
+  }
+
+  if (!userId) {
+    return { hasSubscription: false, reason: "not_authenticated" };
+  }
+
+  const hasActive = await hasActiveSubscription(userId);
+  
+  return { hasSubscription: hasActive };
 }

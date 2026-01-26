@@ -77,6 +77,35 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Protect premium/subscription routes
+  const premiumRoutes = [
+    "/premium",
+  ];
+
+  const isPremiumRoute = premiumRoutes.some((route) => pathname.startsWith(route));
+
+  if (isPremiumRoute) {
+    const token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+    });
+
+    if (!token) {
+      const signInUrl = new URL("/sign-in", request.url);
+      signInUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(signInUrl);
+    }
+
+    // Check if user has active subscription
+    // Note: In a real implementation, you'd want to verify this in the backend
+    // This is just a basic check - the actual verification should happen in the API/routes
+    if (!token.hasActiveSubscription) {
+      const upgradeUrl = new URL("/subscription", request.url);
+      upgradeUrl.searchParams.set("upgrade", "required");
+      return NextResponse.redirect(upgradeUrl);
+    }
+  }
+
   return response;
 }
 

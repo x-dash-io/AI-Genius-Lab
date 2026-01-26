@@ -444,3 +444,230 @@ export async function sendCertificateEmail(
     text: `Congratulations ${recipientName}!\n\nYou have successfully completed ${itemName} and earned a certificate!\n\nCertificate ID: ${certificateId}\n\nDownload your certificate: ${pdfUrl}\n\nVerify your certificate: ${verifyUrl}\n\nShare your achievement on LinkedIn or add it to your resume to showcase your new skills!\n\nCongratulations on your achievement!\n\nAI Genius Lab`,
   });
 }
+
+export async function sendSubscriptionWelcomeEmail(
+  email: string,
+  userName: string,
+  planType: "monthly" | "annual",
+  planPrice: string,
+  nextBillingDate: Date
+) {
+  const planName = planType === "monthly" ? "Monthly Premium" : "Annual Premium";
+  const formattedBillingDate = nextBillingDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  await sendEmail({
+    to: email,
+    subject: `Welcome to ${planName}! 🎉`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background: linear-gradient(to right, #3b82f6, #2563eb); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">Welcome to Premium!</h1>
+          <p style="color: rgba(255, 255, 255, 0.9); margin: 8px 0 0 0;">Your subscription is now active</p>
+        </div>
+        <div style="padding: 30px; background-color: #ffffff;">
+          <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+            Dear ${userName},
+          </p>
+          <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+            Welcome to <strong>${planName}</strong>! Thank you for choosing AI Genius Lab. Your subscription is now active and you have access to all our premium features.
+          </p>
+          
+          <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 2px solid #3b82f6; border-radius: 12px; padding: 24px; margin: 30px 0;">
+            <h3 style="margin: 0 0 16px 0; color: #1e40af; font-size: 18px;">Your Subscription Details</h3>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: #374151;">Plan:</span>
+              <span style="font-weight: 600; color: #1e40af;">${planName}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: #374151;">Price:</span>
+              <span style="font-weight: 600; color: #1e40af;">$${planPrice}/${planType === "monthly" ? "month" : "year"}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: #374151;">Next billing:</span>
+              <span style="font-weight: 600; color: #1e40af;">${formattedBillingDate}</span>
+            </div>
+          </div>
+
+          <h3 style="margin: 30px 0 16px 0; color: #111827; font-size: 18px;">What's Included in Your Premium Subscription:</h3>
+          <ul style="color: #374151; line-height: 1.8; margin-bottom: 30px;">
+            <li>✅ Unlimited access to all courses (100+ and counting)</li>
+            <li>✅ Certificate of completion for each course</li>
+            <li>✅ Priority customer support</li>
+            <li>✅ Early access to new courses and content</li>
+            <li>✅ Exclusive workshops and events</li>
+          </ul>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.NEXTAUTH_URL || "http://localhost:3000"}/courses" style="display: inline-block; padding: 14px 28px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+              Start Learning Now
+            </a>
+          </div>
+
+          <div style="margin-top: 30px; padding: 20px; background-color: #f9fafb; border-radius: 8px;">
+            <h3 style="margin: 0 0 12px 0; font-size: 14px; color: #111827;">Manage Your Subscription</h3>
+            <p style="margin: 4px 0; color: #6b7280; font-size: 14px;">
+              You can manage or cancel your subscription anytime from your account settings.
+            </p>
+            <a href="${process.env.NEXTAUTH_URL || "http://localhost:3000"}/subscription" style="color: #2563eb; text-decoration: none; font-size: 14px;">
+              View Subscription Settings →
+            </a>
+          </div>
+
+          <p style="margin-top: 30px; font-size: 12px; color: #9ca3af; text-align: center; line-height: 1.6;">
+            If you have any questions, reply to this email or contact our support team.
+          </p>
+        </div>
+        <div style="background-color: #f3f4f6; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+          <p style="margin: 0; font-size: 12px; color: #6b7280;">
+            AI Genius Lab - Empowering Your AI Journey
+          </p>
+        </div>
+      </div>
+    `,
+    text: `Welcome to ${planName}!\n\nDear ${userName},\n\nThank you for choosing AI Genius Lab! Your ${planName} subscription is now active.\n\nPlan Details:\n- Plan: ${planName}\n- Price: $${planPrice}/${planType === "monthly" ? "month" : "year"}\n- Next billing: ${formattedBillingDate}\n\nYour Premium Benefits:\n- Unlimited access to all courses\n- Certificate of completion\n- Priority support\n- Early access to new content\n- Exclusive workshops\n\nStart learning: ${process.env.NEXTAUTH_URL || "http://localhost:3000"}/courses\n\nManage subscription: ${process.env.NEXTAUTH_URL || "http://localhost:3000"}/subscription\n\nQuestions? Just reply to this email!\n\nAI Genius Lab`,
+  });
+}
+
+export async function sendSubscriptionCancelledEmail(
+  email: string,
+  userName: string,
+  planType: "monthly" | "annual",
+  endDate: Date
+) {
+  const planName = planType === "monthly" ? "Monthly Premium" : "Annual Premium";
+  const formattedEndDate = endDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  await sendEmail({
+    to: email,
+    subject: `Subscription Cancelled - ${planName}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background: linear-gradient(to right, #ef4444, #dc2626); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">Subscription Cancelled</h1>
+          <p style="color: rgba(255, 255, 255, 0.9); margin: 8px 0 0 0;">We're sorry to see you go</p>
+        </div>
+        <div style="padding: 30px; background-color: #ffffff;">
+          <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+            Dear ${userName},
+          </p>
+          <p style="font-size: 16px; color: #374151; margin-bottom: 20px;">
+            Your <strong>${planName}</strong> subscription has been cancelled. We're sorry to see you go, but we understand.
+          </p>
+          
+          <div style="background-color: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 24px; margin: 30px 0;">
+            <h3 style="margin: 0 0 16px 0; color: #991b1b; font-size: 18px;">Important Information</h3>
+            <p style="margin: 0 0 12px 0; color: #7f1d1d;">
+              Your access will continue until <strong>${formattedEndDate}</strong>
+            </p>
+            <p style="margin: 0; color: #7f1d1d;">
+              You can reactivate your subscription anytime before this date.
+            </p>
+          </div>
+
+          <div style="margin: 30px 0;">
+            <h3 style="margin: 0 0 16px 0; color: #111827; font-size: 18px;">What happens next?</h3>
+            <ul style="color: #374151; line-height: 1.8;">
+              <li>• You keep access to all courses until ${formattedEndDate}</li>
+              <li>• Any certificates you've earned remain yours forever</li>
+              <li>• Courses you purchased individually remain accessible</li>
+              <li>• No further charges will be made to your account</li>
+            </ul>
+          </div>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${process.env.NEXTAUTH_URL || "http://localhost:3000"}/subscription?reactivate=true" style="display: inline-block; padding: 14px 28px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+              Reactivate Subscription
+            </a>
+          </div>
+
+          <div style="margin-top: 30px; padding: 20px; background-color: #f9fafb; border-radius: 8px;">
+            <h3 style="margin: 0 0 12px 0; font-size: 14px; color: #111827;">Feedback?</h3>
+            <p style="margin: 4px 0; color: #6b7280; font-size: 14px;">
+              We'd love to know why you cancelled. Your feedback helps us improve.
+            </p>
+            <a href="${process.env.NEXTAUTH_URL || "http://localhost:3000"}/contact" style="color: #2563eb; text-decoration: none; font-size: 14px;">
+              Share Feedback →
+            </a>
+          </div>
+
+          <p style="margin-top: 30px; font-size: 12px; color: #9ca3af; text-align: center; line-height: 1.6;">
+            Thank you for being part of AI Genius Lab. We hope to see you again soon!
+          </p>
+        </div>
+        <div style="background-color: #f3f4f6; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;">
+          <p style="margin: 0; font-size: 12px; color: #6b7280;">
+            AI Genius Lab - Empowering Your AI Journey
+          </p>
+        </div>
+      </div>
+    `,
+    text: `Subscription Cancelled - ${planName}\n\nDear ${userName},\n\nYour ${planName} subscription has been cancelled.\n\nImportant: Your access continues until ${formattedEndDate}\n\nWhat happens next:\n- Keep access to all courses until ${formattedEndDate}\n- Certificates remain yours forever\n- Individually purchased courses remain accessible\n- No further charges\n\nReactivate anytime: ${process.env.NEXTAUTH_URL || "http://localhost:3000"}/subscription\n\nWe'd love your feedback: ${process.env.NEXTAUTH_URL || "http://localhost:3000"}/contact\n\nThank you for choosing AI Genius Lab!`,
+  });
+}
+
+export async function sendAdminSubscriptionNotification(
+  adminEmail: string,
+  userEmail: string,
+  userName: string,
+  planType: "monthly" | "annual",
+  planPrice: string
+) {
+  const planName = planType === "monthly" ? "Monthly Premium" : "Annual Premium";
+  const subscriptionUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/admin/subscriptions`;
+
+  await sendEmail({
+    to: adminEmail,
+    subject: `🎉 New Premium Subscription: ${planName}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background: linear-gradient(to right, #10b981, #059669); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+          <h1 style="color: white; margin: 0; font-size: 24px;">New Subscription!</h1>
+          <p style="color: rgba(255, 255, 255, 0.9); margin: 8px 0 0 0;">A user has subscribed to Premium</p>
+        </div>
+        <div style="padding: 30px; background-color: #ffffff;">
+          <h2 style="margin: 0 0 20px 0; color: #111827; font-size: 20px;">Subscription Details</h2>
+          
+          <div style="background-color: #f0fdf4; border: 2px solid #10b981; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: #374151;">Customer:</span>
+              <span style="font-weight: 600; color: #059669;">${userName} (${userEmail})</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="color: #374151;">Plan:</span>
+              <span style="font-weight: 600; color: #059669;">${planName}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: #374151;">Price:</span>
+              <span style="font-weight: 600; color: #059669;">$${planPrice}/${planType === "monthly" ? "month" : "year"}</span>
+            </div>
+          </div>
+
+          <p style="color: #374151; margin-bottom: 20px;">
+            Time to celebrate! Another user has joined our Premium community and now has access to all courses.
+          </p>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${subscriptionUrl}" style="display: inline-block; padding: 14px 28px; background-color: #059669; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+              View All Subscriptions
+            </a>
+          </div>
+
+          <div style="margin-top: 30px; padding: 15px; background-color: #f9fafb; border-radius: 8px;">
+            <p style="margin: 0; font-size: 12px; color: #6b7280; text-align: center;">
+              This is an automated notification from AI Genius Lab Admin Dashboard
+            </p>
+          </div>
+        </div>
+      </div>
+    `,
+    text: `New Premium Subscription!\n\nCustomer: ${userName} (${userEmail})\nPlan: ${planName}\nPrice: $${planPrice}/${planType === "monthly" ? "month" : "year"}\n\nView all subscriptions: ${subscriptionUrl}\n\nAI Genius Lab Admin`,
+  });
+}
