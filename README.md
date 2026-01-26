@@ -9,39 +9,50 @@ A comprehensive online learning management system built for modern education. De
 
 ## Overview
 
-AI Genius Lab is a production-ready learning management system designed for educational institutions, training organizations, and content creators. The platform handles everything from course creation to payment processing, with built-in analytics and certificate generation.
+AI Genius Lab is a production-ready learning management system designed for educational institutions, training organizations, and content creators. The platform handles everything from course creation to payment processing, with built-in analytics and certificate generation. Built with a focus on scalability, security, and maintainability.
 
 ## Core Capabilities
 
 ### Course Management
 - Structured course creation with sections and lessons
-- Support for video, PDF, and document content
-- Drag-and-drop content organization
-- Category-based course organization
+- Support for video, audio, PDF, and document content
+- Drag-and-drop content organization with DnD Kit
+- Category-based course organization with dynamic categories
 - Learning path creation for guided curricula
+- Course inventory management with stock tracking
+- Bulk course operations and management
+- Course preview and draft modes
 
 ### Student Experience
 - Real-time progress tracking across all courses
 - Automatic certificate generation upon completion
-- Certificate verification system
-- Course reviews and ratings
-- Shopping cart and checkout flow
-- Purchase history and invoices
+- Certificate verification system with QR codes
+- Course reviews and ratings system
+- Shopping cart and checkout flow with PayPal
+- Purchase history and downloadable invoices
+- Activity logging and monitoring
+- Mobile-responsive learning interface
 
 ### Administration
-- Comprehensive analytics dashboard
-- User management and role assignment
-- Content upload and management
-- Purchase tracking and reporting
-- Revenue analytics with visual charts
+- Comprehensive analytics dashboard with Recharts visualizations
+- User management and role assignment (RBAC)
+- Content upload and management via Cloudinary
+- Purchase tracking and revenue reporting
+- Date-filtered analytics with custom date ranges
+- Debug endpoints for troubleshooting (admin-only)
+- Bulk operations for courses and categories
+- Duplicate prevention and data validation
 
 ### Security & Authentication
-- Email and password authentication
-- Google OAuth integration
+- Email and password authentication with bcrypt
+- Google OAuth integration with proper account linking
 - Two-factor authentication via OTP
-- Secure password reset workflow
-- Role-based access control
-- Rate limiting on API endpoints
+- Secure password reset workflow with tokens
+- Role-based access control (RBAC) with middleware
+- Rate limiting on API endpoints with Upstash Redis
+- Environment variable validation with Zod
+- CSRF protection and XSS prevention
+- SQL injection prevention via Prisma ORM
 
 ### Payment Processing
 - PayPal integration for course purchases
@@ -118,7 +129,23 @@ CLOUDINARY_API_SECRET="<from-cloudinary-dashboard>"
 
 # Email Service
 RESEND_API_KEY="<from-resend-dashboard>"
-EMAIL_FROM="noreply@yourdomain.com"
+FROM_EMAIL="noreply@yourdomain.com"
+SUPPORT_EMAIL="support@yourdomain.com"  # Override default support email
+SUPPORT_PHONE="+1 (555) 123-4567"  # Optional: Support phone number
+
+# Address Configuration (Optional)
+ADDRESS_LINE_1="123 Learning Street"
+ADDRESS_LINE_2="Education District"
+ADDRESS_CITY="San Francisco"
+ADDRESS_STATE="CA"
+ADDRESS_ZIP="94102"
+ADDRESS_COUNTRY="United States"
+
+# Default User Credentials (for development)
+DEFAULT_ADMIN_EMAIL="admin@aigeniuslab.com"
+DEFAULT_ADMIN_PASSWORD="password123"
+DEFAULT_CUSTOMER_EMAIL="customer@aigeniuslab.com"
+DEFAULT_CUSTOMER_PASSWORD="password123"
 
 # Redis Cache (Optional)
 UPSTASH_REDIS_REST_URL="<from-upstash-console>"
@@ -246,22 +273,49 @@ npx prisma migrate deploy
 ai-genius-lab/
 ├── app/                    # Next.js application
 │   ├── (admin)/           # Admin dashboard routes
+│   │   ├── admin/         # Admin pages
+│   │   └── api/           # Admin API endpoints
 │   ├── (app)/             # Student portal routes
+│   │   ├── dashboard/     # User dashboard
+│   │   ├── library/       # Course library
+│   │   └── purchase/      # Purchase history
 │   ├── (public)/          # Public pages
-│   └── api/               # API endpoints
+│   │   ├── courses/       # Course catalog
+│   │   ├── sign-in/       # Authentication
+│   │   └── api/           # Public API endpoints
+│   └── api/               # Shared API endpoints
 ├── components/            # React components
 │   ├── admin/            # Admin-specific components
 │   ├── auth/             # Authentication components
-│   ├── cart/             # Shopping cart
+│   ├── cart/             # Shopping cart components
+│   ├── contact/          # Contact form components
 │   ├── layout/           # Layout components
-│   └── ui/               # Reusable UI components
+│   ├── lessons/          # Lesson viewer components
+│   ├── reviews/          # Review system components
+│   └── ui/               # Reusable UI primitives
 ├── lib/                   # Utility functions
 │   ├── admin/            # Admin utilities
+│   ├── auth/             # Authentication logic
 │   ├── cart/             # Cart logic
-│   └── seo/              # SEO helpers
+│   ├── config.ts         # Centralized configuration
+│   ├── courses/          # Course utilities
+│   ├── email/            # Email templates
+│   ├── payments/         # Payment processing
+│   ├── progress/         # Progress tracking
+│   └── seo/              # SEO utilities
 ├── prisma/               # Database schema
+│   ├── schema.prisma     # Database schema
+│   ├── migrations/       # Migration files
+│   └── seed.ts           # Seed data script
+├── public/               # Static assets
+├── scripts/              # Build and deployment scripts
 ├── __tests__/            # Test suites
+│   ├── integration/      # Integration tests
+│   └── unit/             # Unit tests
 └── docs/                 # Documentation
+    ├── api/              # API documentation
+    ├── deployment/       # Deployment guides
+    └── security/         # Security best practices
 ```
 
 ## Security Features
@@ -291,12 +345,71 @@ ai-genius-lab/
 # Lint codebase
 npm run lint
 
-# Format code
+# Format code with Prettier
 npm run format
 
 # Type checking
 npm run type-check
+
+# Run all quality checks
+npm run check
 ```
+
+### Code Standards
+- TypeScript strict mode enabled
+- ESLint with Next.js configuration
+- Prettier for code formatting
+- Husky git hooks for pre-commit checks
+- Conventional commits for commit messages
+
+## Configuration Management
+
+The application uses a centralized configuration system located in `lib/config.ts`. This includes:
+
+- Site information and metadata
+- Contact details and business hours
+- Default categories and sample data
+- Invoice and certificate settings
+- Payment and analytics configuration
+- Rate limiting and cache settings
+
+### Environment-Based Configuration
+
+All sensitive data is loaded from environment variables with fallback defaults:
+
+```typescript
+// Example from lib/config.ts
+export const siteConfig = {
+  name: "AI Genius Lab",
+  url: process.env.NEXTAUTH_URL || "https://aigeniuslab.com",
+  links: {
+    email: process.env.SUPPORT_EMAIL || "support@aigeniuslab.com",
+  },
+};
+```
+
+## Known Issues & Recent Fixes
+
+### Recently Resolved Issues
+1. **OAuth Authentication**: Fixed Prisma schema relation naming from `User` to `user` for NextAuth compatibility
+2. **Database IDs**: Added `@default(cuid())` to User, Account, and Session models for auto-generation
+3. **UI Consistency**: Removed duplicate buttons in admin dashboard (Create Course, Create Learning Path)
+4. **Mobile Menu**: Fixed bottom positioning of Sign In/Sign Up buttons with proper flexbox layout
+5. **Hardcoded Data**: Centralized all hardcoded data in `lib/config.ts` for better maintainability
+
+### Debug Endpoints
+The application includes debug endpoints for troubleshooting:
+- `POST /api/debug/access-check` - Verify user access to courses
+- `POST /api/debug/content-check` - Verify content exists in Cloudinary
+
+⚠️ **Note**: These endpoints are admin-only and should be removed in production environments.
+
+### Performance Considerations
+- Database queries are optimized with proper indexing
+- Images are served via Cloudinary CDN
+- Redis caching is implemented for frequently accessed data
+- API routes are rate-limited to prevent abuse
+- Components use React.memo and dynamic imports for optimization
 
 ## Documentation
 
@@ -315,22 +428,39 @@ For technical support or questions:
 - Open an issue on GitHub
 - Contact: support@aigeniuslab.com
 
+## Contributing
+
+We welcome contributions! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes and follow the code standards
+4. Run tests: `npm test`
+5. Commit your changes: `git commit -m 'feat: add amazing feature'`
+6. Push to the branch: `git push origin feature/amazing-feature`
+7. Open a Pull Request
+
+### Development Guidelines
+- Follow the existing code style and patterns
+- Add tests for new features
+- Update documentation as needed
+- Use TypeScript strictly - no `any` types
+- Follow accessibility best practices
+- Ensure mobile responsiveness
+
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
+## Changelog
 
-Built with industry-leading open source technologies:
-- Next.js - React framework
-- Prisma - Database toolkit
-- NextAuth.js - Authentication
-- Tailwind CSS - Utility-first CSS
-- Radix UI - Accessible components
-- Cloudinary - Media management
-- Resend - Email infrastructure
-- PayPal - Payment processing
+### v0.1.0 (Latest)
+- ✨ Initial release with core LMS features
+- 🐛 Fixed OAuth authentication issues
+- 🔧 Centralized configuration management
+- 📱 Improved mobile UI consistency
+- 🔒 Enhanced security measures
 
 ---
 
-Built by the AI Genius Lab Team
+Built with ❤️ by the AI Genius Lab Team

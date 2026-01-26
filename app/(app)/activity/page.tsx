@@ -63,53 +63,55 @@ const activityLabels: Record<string, string> = {
 // Sample activity data for admin preview
 const getSampleActivityData = (): ActivityEntry[] => {
   const now = new Date();
+  const { sampleCourses, sampleLessons } = require("@/lib/config");
+  
   return [
     {
       id: "sample-1",
       type: "purchase_completed",
-      metadata: { courseTitle: "AI Fundamentals for Business", courseSlug: "ai-fundamentals" },
+      metadata: { courseTitle: sampleCourses[0].title, courseSlug: sampleCourses[0].slug },
       createdAt: subHours(now, 2),
     },
     {
       id: "sample-2",
       type: "course_started",
-      metadata: { courseTitle: "AI Fundamentals for Business", courseSlug: "ai-fundamentals" },
+      metadata: { courseTitle: sampleCourses[0].title, courseSlug: sampleCourses[0].slug },
       createdAt: subHours(now, 2),
     },
     {
       id: "sample-3",
       type: "lesson_completed",
-      metadata: { lessonTitle: "Introduction to AI", courseSlug: "ai-fundamentals", lessonId: "lesson-1" },
+      metadata: { lessonTitle: sampleLessons[0].title, courseSlug: sampleCourses[0].slug, lessonId: "lesson-1" },
       createdAt: subHours(now, 1),
     },
     {
       id: "sample-4",
       type: "lesson_completed",
-      metadata: { lessonTitle: "Machine Learning Basics", courseSlug: "ai-fundamentals", lessonId: "lesson-2" },
+      metadata: { lessonTitle: sampleLessons[1].title, courseSlug: sampleCourses[0].slug, lessonId: "lesson-2" },
       createdAt: subHours(now, 1),
     },
     {
       id: "sample-5",
       type: "purchase_completed",
-      metadata: { courseTitle: "Prompt Engineering Masterclass", courseSlug: "prompt-engineering" },
+      metadata: { courseTitle: sampleCourses[1].title, courseSlug: sampleCourses[1].slug },
       createdAt: subDays(now, 1),
     },
     {
       id: "sample-6",
       type: "course_started",
-      metadata: { courseTitle: "Prompt Engineering Masterclass", courseSlug: "prompt-engineering" },
+      metadata: { courseTitle: sampleCourses[1].title, courseSlug: sampleCourses[1].slug },
       createdAt: subDays(now, 1),
     },
     {
       id: "sample-7",
       type: "review_created",
-      metadata: { courseTitle: "AI Fundamentals for Business", courseSlug: "ai-fundamentals" },
+      metadata: { courseTitle: sampleCourses[0].title, courseSlug: sampleCourses[0].slug },
       createdAt: subDays(now, 2),
     },
     {
       id: "sample-8",
       type: "certificate_earned",
-      metadata: { courseTitle: "AI Fundamentals for Business" },
+      metadata: { courseTitle: sampleCourses[0].title },
       createdAt: subDays(now, 3),
     },
   ];

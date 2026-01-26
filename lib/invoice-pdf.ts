@@ -501,7 +501,8 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
     color: darkGray,
   });
 
-  const termsText = "This invoice confirms your purchase of the listed digital course(s). All sales are final and non-refundable. You have been granted immediate and lifetime access to the purchased content in your library. No physical items will be shipped. For support, contact support@aigeniuslab.com.";
+  const { invoiceConfig } = await import("./config");
+  const termsText = invoiceConfig.terms;
   const termsLines = wrapText(termsText, width - 140, helveticaFont, 7);
 
   termsLines.forEach((line, index) => {
@@ -517,7 +518,7 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<string> {
   // ===== FOOTER =====
   const footerY = 50;
   
-  page.drawText("AI Genius Lab - Premium Online Learning Platform - support@aigeniuslab.com", {
+  page.drawText(invoiceConfig.footer, {
     x: width / 2 - 180,
     y: footerY + 15,
     size: 7,

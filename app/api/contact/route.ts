@@ -42,7 +42,8 @@ export async function POST(request: NextRequest) {
     const subjectLabel = subjectLabels[subject] || "Contact Form";
 
     // Send email to support team
-    const supportEmail = process.env.SUPPORT_EMAIL || "support@aigeniuslab.com";
+    const { siteConfig } = await import("@/lib/config");
+    const supportEmail = process.env.SUPPORT_EMAIL || siteConfig.links.email;
     
     await sendEmail({
       to: supportEmail,

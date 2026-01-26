@@ -2,29 +2,39 @@
 
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, MessageCircle, Clock, HelpCircle } from "lucide-react";
+import { Mail, Phone, MapPin, Clock, HelpCircle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { contactInfo, businessHours } from "@/lib/config";
 
 const contactMethods = [
   {
     icon: Mail,
     title: "Email Support",
     description: "Get help via email",
-    detail: "support@aigeniuslab.com",
-    action: "mailto:support@aigeniuslab.com",
+    detail: contactInfo.email,
+    action: `mailto:${contactInfo.email}`,
   },
   {
     icon: Clock,
-    title: "Response Time",
-    description: "We typically respond within",
-    detail: "24-48 hours",
+    title: "Business Hours",
+    description: "When we're available",
+    detail: `Mon-Fri: ${businessHours.weekdays}, Sat: ${businessHours.saturday}`,
+    action: "",
   },
   {
-    icon: MessageCircle,
-    title: "Live Chat",
-    description: "Coming soon",
-    detail: "Real-time support",
+    icon: Phone,
+    title: "Phone Support",
+    description: "Call for urgent issues",
+    detail: contactInfo.phone,
+    action: `tel:${contactInfo.phone.replace(/[^\d]/g, '')}`,
+  },
+  {
+    icon: MapPin,
+    title: "Office Location",
+    description: "Visit our headquarters",
+    detail: `${contactInfo.address.line1}, ${contactInfo.address.line2}, ${contactInfo.address.city}, ${contactInfo.address.state} ${contactInfo.address.zip}`,
+    action: "",
   },
 ];
 

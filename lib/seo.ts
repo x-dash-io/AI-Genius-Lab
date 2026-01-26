@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { siteConfig } from "./config";
 
 export interface SEOConfig {
   title?: string;
@@ -11,11 +12,10 @@ export interface SEOConfig {
   nofollow?: boolean;
 }
 
-const defaultTitle = "AI Genius Lab - Master AI With Curated Learning Paths";
-const defaultDescription =
-  "Learn AI for business, content, apps, and productivity through structured courses, tracked progress, and instant access after purchase.";
-const defaultImage = "/og-image.jpg";
-const siteUrl = process.env.NEXTAUTH_URL || "https://aigeniuslab.com";
+const defaultTitle = `${siteConfig.name} - Master AI With Curated Learning Paths`;
+const defaultDescription = siteConfig.description;
+const defaultImage = siteConfig.ogImage;
+const siteUrl = siteConfig.url;
 
 /**
  * Generate metadata for a page
