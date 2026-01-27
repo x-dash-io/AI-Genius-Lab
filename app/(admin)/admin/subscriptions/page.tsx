@@ -89,6 +89,9 @@ export default async function AdminSubscriptionsPage() {
           email: true,
         },
       },
+      _count: {
+        select: { Enrollment: true },
+      }
     },
     orderBy: {
       createdAt: "desc",

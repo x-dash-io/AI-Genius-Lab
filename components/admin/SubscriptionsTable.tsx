@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,33 +20,33 @@ import {
 import { MoreHorizontal, Eye, Ban, CheckCircle } from "lucide-react";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
+import { Prisma, SubscriptionStatus } from "@prisma/client";
 
-interface Subscription {
-  id: string;
-  planType: "monthly" | "annual";
-  status: "active" | "cancelled" | "expired" | "paused" | "pending";
-  startDate: string;
-  endDate?: string;
-  cancelledAt?: string;
-  createdAt: string;
-  User: {
-    id: string;
-    email: string;
-    name?: string;
+type SubscriptionWithDetails = Prisma.SubscriptionGetPayload<{
+  include: {
+    User: {
+      select: {
+        name: true,
+        email: true,
+      };
+    };
+    _count: {
+      select: { Enrollment: true };
+    };
   };
-  _count: {
-    Enrollment: number;
-  };
+}>;
+
+interface SubscriptionsTableProps {
+  subscriptions: SubscriptionWithDetails[];
 }
 
-export function SubscriptionsTable() {
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-  const [loading, setLoading] = useState(true);
+export function SubscriptionsTable({
+  subscriptions: initialSubscriptions,
+}: SubscriptionsTableProps) {
+  const [subscriptions, setSubscriptions] = useState<SubscriptionWithDetails[]>(
+    initialSubscriptions
+  );
   const router = useRouter();
-
-  useEffect(() => {
-    fetchSubscriptions();
-  }, []);
 
   const fetchSubscriptions = async () => {
     try {
@@ -57,14 +57,12 @@ export function SubscriptionsTable() {
       }
     } catch (error) {
       console.error("Failed to fetch subscriptions:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
   const updateSubscriptionStatus = async (
     subscriptionId: string,
-    status: "active" | "cancelled" | "expired" | "paused" | "pending"
+    status: SubscriptionStatus
   ) => {
     try {
       const response = await fetch(`/api/admin/subscriptions/${subscriptionId}/status`, {
@@ -83,9 +81,7 @@ export function SubscriptionsTable() {
     }
   };
 
-  if (loading) {
-    return <div>Loading subscriptions...</div>;
-  }
+
 
   return (
     <div className="rounded-md border">
