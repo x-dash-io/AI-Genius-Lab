@@ -8,8 +8,8 @@
  * before running. Run with: npm test -- --testPathPattern=integration
  */
 
-import { prisma } from "@/lib/prisma";
-import { verifyPassword } from "@/lib/password";
+import { prisma } from "../../lib/prisma";
+import { hashPassword } from "../../lib/password";
 import type { User, Course, Section, Lesson, LearningPath } from "@prisma/client";
 import {
   createTestUser,
@@ -57,7 +57,7 @@ describeMaybeSkip("User Authentication Flow", () => {
     expect(user).toBeDefined();
     expect(user?.passwordHash).toBeDefined();
 
-    const isValid = await verifyPassword(TEST_USER.password, user!.passwordHash!);
+    const isValid = await hashPassword(TEST_USER.password, user!.passwordHash!);
     expect(isValid).toBe(true);
   });
 
@@ -66,7 +66,7 @@ describeMaybeSkip("User Authentication Flow", () => {
       where: { email: "auth-test@example.com" },
     });
 
-    const isValid = await verifyPassword("WrongPassword123!", user!.passwordHash!);
+    const isValid = await hashPassword("WrongPassword123!", user!.passwordHash!);
     expect(isValid).toBe(false);
   });
 
@@ -351,7 +351,7 @@ describeMaybeSkip("Lesson Progress Flow", () => {
       },
     });
 
-    const lessonIds = course!.Section.flatMap((s) => s.Lesson.map((l) => l.id));
+    const lessonIds = course!.Section.flatMap((s: any) => s.Lesson.map((l: any) => l.id));
     expect(lessonIds).toHaveLength(2);
 
     // Get completed lessons
@@ -458,8 +458,7 @@ describeMaybeSkip("Review System Flow", () => {
       where: { courseId: testCourse.id },
     });
 
-    const avgRating =
-      reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+    const avgRating = reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length;
     expect(avgRating).toBe(4.5); // (4 + 5) / 2
   });
 });

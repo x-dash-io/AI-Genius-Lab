@@ -2,8 +2,8 @@
  * Test utilities and helpers for integration testing
  */
 
-import { prisma } from "@/lib/prisma";
-import { hashPassword } from "@/lib/password";
+import { prisma } from "../../lib/prisma";
+import { hashPassword } from "../../lib/password";
 
 // Test data constants
 export const TEST_USER = {
