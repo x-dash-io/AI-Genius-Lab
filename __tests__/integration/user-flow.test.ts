@@ -162,7 +162,7 @@ describeMaybeSkip("Course Purchase Flow", () => {
     await expect(
       prisma.purchase.create({
         data: {
-          id: `duplicate_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          id: `duplicate_test_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
           userId: testUser.id,
           courseId: testCourse.id,
           amountCents: testCourse.priceCents,
@@ -189,7 +189,7 @@ describeMaybeSkip("Learning Path Enrollment Flow", () => {
 
     learningPath = await prisma.learningPath.create({
       data: {
-        id: `path_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `path_test_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
         slug: `test-learning-path-${Date.now()}`,
         title: "Test Learning Path",
         description: "A test path with multiple courses",
@@ -200,13 +200,13 @@ describeMaybeSkip("Learning Path Enrollment Flow", () => {
     await prisma.learningPathCourse.createMany({
       data: [
         { 
-          id: `lpc_test_${Date.now()}_1_${Math.random().toString(36).substr(2, 9)}`,
+          id: `lpc_test_${Date.now()}_1_${Math.random().toString(36).substring(2, 11)}`,
           learningPathId: learningPath.id, 
           courseId: course1.id, 
           sortOrder: 0 
         },
         { 
-          id: `lpc_test_${Date.now()}_2_${Math.random().toString(36).substr(2, 9)}`,
+          id: `lpc_test_${Date.now()}_2_${Math.random().toString(36).substring(2, 11)}`,
           learningPathId: learningPath.id, 
           courseId: course2.id, 
           sortOrder: 1 
@@ -279,7 +279,7 @@ describeMaybeSkip("Lesson Progress Flow", () => {
   it("should track lesson start", async () => {
     const progress = await prisma.progress.create({
       data: {
-        id: `progress_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `progress_test_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
         userId: testUser.id,
         lessonId: testLesson.id,
         startedAt: new Date(),
@@ -387,7 +387,7 @@ describeMaybeSkip("Review System Flow", () => {
   it("should create a review", async () => {
     const review = await prisma.review.create({
       data: {
-        id: `review_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `review_test_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
         userId: testUser.id,
         courseId: testCourse.id,
         rating: 5,
@@ -404,7 +404,7 @@ describeMaybeSkip("Review System Flow", () => {
     await expect(
       prisma.review.create({
         data: {
-          id: `review_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          id: `review_test_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
           userId: testUser.id,
           courseId: testCourse.id,
           rating: 4,
@@ -440,7 +440,7 @@ describeMaybeSkip("Review System Flow", () => {
 
     await prisma.review.create({
       data: {
-        id: `review_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `review_test_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
         userId: user2.id,
         courseId: testCourse.id,
         rating: 5,
@@ -477,7 +477,7 @@ describeMaybeSkip("Certificate Generation Flow", () => {
     // Complete the lesson
     await prisma.progress.create({
       data: {
-        id: `progress_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `progress_test_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
         userId: testUser.id,
         lessonId: testLesson.id,
         startedAt: new Date(),
@@ -495,7 +495,7 @@ describeMaybeSkip("Certificate Generation Flow", () => {
   it("should generate certificate for completed course", async () => {
     const certificate = await prisma.certificate.create({
       data: {
-        id: `cert_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: `cert_test_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
         userId: testUser.id,
         courseId: testCourse.id,
         type: "course",
