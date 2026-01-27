@@ -23,6 +23,20 @@ export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const authError = searchParams.get("error");
+
+  // Check for OAuth errors in URL
+  useEffect(() => {
+    if (authError) {
+      if (authError === "OAuthAccountNotLinked") {
+        setError("This email is already registered. Please sign in with your email and password.");
+      } else if (authError === "OAuthCallback") {
+        setError("Authentication failed. Please try again.");
+      } else {
+        setError("An error occurred during sign in. Please try again.");
+      }
+    }
+  }, [authError]);
 
   // Show form after short delay if still loading (prevents infinite loading)
   useEffect(() => {
@@ -123,8 +137,21 @@ export default function SignInPage() {
     setError(null);
     setIsGoogleLoading(true);
     try {
-      await signIn("google", { callbackUrl });
+      // signIn with redirect: true will handle the redirect automatically
+      // No need to set loading to false as the page will redirect
+      const result = await signIn("google", { 
+        callbackUrl,
+        redirect: true 
+      });
+      
+      // This code won't execute if redirect is successful
+      // Only runs if there's an error
+      if (result?.error) {
+        setError("Failed to sign in with Google. Please try again.");
+        setIsGoogleLoading(false);
+      }
     } catch (err) {
+      console.error("Google sign-in error:", err);
       setError("Failed to sign in with Google. Please try again.");
       setIsGoogleLoading(false);
     }
