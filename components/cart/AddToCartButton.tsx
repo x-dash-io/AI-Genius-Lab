@@ -28,19 +28,21 @@ export function AddToCartButton({
   className,
   checkOwnership = false,
 }: AddToCartButtonProps) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const { cart, addToCart, isLoading } = useCart();
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [isOwned, setIsOwned] = useState(false);
-  const [isCheckingOwnership, setIsCheckingOwnership] = useState(checkOwnership);
+  const [isCheckingOwnership, setIsCheckingOwnership] = useState(false);
 
-  // Check ownership if enabled
+  // Check ownership if enabled and user is authenticated
   useEffect(() => {
-    if (!checkOwnership || !session?.user) {
+    if (!checkOwnership || status !== "authenticated" || !session?.user) {
       setIsCheckingOwnership(false);
       return;
     }
+
+    setIsCheckingOwnership(true);
 
     async function checkCourseOwnership() {
       try {
@@ -57,7 +59,7 @@ export function AddToCartButton({
     }
 
     checkCourseOwnership();
-  }, [courseId, session, checkOwnership]);
+  }, [courseId, session, status, checkOwnership]);
 
   const cartItem = cart.items.find((item) => item.courseId === courseId);
   const isInCart = !!cartItem;

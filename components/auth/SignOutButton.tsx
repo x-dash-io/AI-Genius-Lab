@@ -1,10 +1,11 @@
 "use client";
 
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface SignOutButtonProps {
   className?: string;
@@ -18,15 +19,35 @@ export function SignOutButton({
   size = "sm"
 }: SignOutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { data: session } = useSession();
 
   async function handleSignOut() {
     setIsLoading(true);
     try {
-      await signOut({ callbackUrl: "/" });
-      // Note: setLoading is not needed here as signOut causes a redirect
+      // Clear any local storage or session storage
+      if (typeof window !== "undefined") {
+        // Clear cart and other local data
+        localStorage.removeItem("cart");
+        sessionStorage.clear();
+      }
+
+      // Sign out with redirect to home page
+      await signOut({ 
+        callbackUrl: "/",
+        redirect: true 
+      });
+      
+      // Force a hard refresh to clear all state
+      if (typeof window !== "undefined") {
+        window.location.href = "/";
+      }
     } catch (error) {
       console.error("Sign out error:", error);
       setIsLoading(false);
+      // Fallback: force navigation to home
+      router.push("/");
+      router.refresh();
     }
   }
 

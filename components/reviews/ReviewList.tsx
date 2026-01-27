@@ -54,7 +54,7 @@ export function ReviewList({ courseId, currentUserId }: ReviewListProps) {
       const data = await response.json();
       setReviews(data.reviews || []);
     } catch (error) {
-      if (error.name === 'AbortError') {
+      if (error instanceof Error && error.name === 'AbortError') {
         console.warn("Reviews fetch timeout");
       } else {
         console.error("Error fetching reviews:", error);

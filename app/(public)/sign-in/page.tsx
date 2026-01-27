@@ -19,19 +19,32 @@ export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const authError = searchParams.get("error");
 
-  // Add timeout for auth initialization
+  // Check for OAuth errors in URL
+  useEffect(() => {
+    if (authError) {
+      if (authError === "OAuthAccountNotLinked") {
+        setError("This email is already registered. Please sign in with your email and password.");
+      } else if (authError === "OAuthCallback") {
+        setError("Authentication failed. Please try again.");
+      } else {
+        setError("An error occurred during sign in. Please try again.");
+      }
+    }
+  }, [authError]);
+
+  // Show form after short delay if still loading (prevents infinite loading)
   useEffect(() => {
     const timer = setTimeout(() => {
       if (status === "loading") {
-        console.warn("Auth initialization timeout - showing form anyway");
-        setAuthError("Authentication service is slow. You can still sign in.");
+        setShowForm(true);
       }
-    }, 5000); // Reduced to 5 seconds
+    }, 1000); // Show form after 1 second if still loading
 
     return () => clearTimeout(timer);
   }, [status]);
@@ -39,14 +52,22 @@ export default function SignInPage() {
   // Redirect authenticated users away from sign-in page
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
+      setIsRedirecting(true);
+      
+      // Clear any stale data
+      if (typeof window !== "undefined") {
+        sessionStorage.clear();
+      }
+      
       const redirectUrl = session.user.role === "admin" ? "/admin" : callbackUrl;
-      // Use replace to avoid adding to history
+      
+      // Use replace to prevent back button issues
       router.replace(redirectUrl);
     }
   }, [status, session, router, callbackUrl]);
 
-  // Show loading while checking auth status (but with timeout fallback)
-  if (status === "loading" && !authError) {
+  // Show loading only briefly, then show form
+  if (status === "loading" && !showForm) {
     return (
       <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
         <div className="text-center">
@@ -56,8 +77,8 @@ export default function SignInPage() {
     );
   }
 
-  // Don't render the form if already authenticated (will redirect)
-  if (status === "authenticated") {
+  // Show redirecting state
+  if (isRedirecting || status === "authenticated") {
     return (
       <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
         <Loader size="lg" text="Redirecting..." />
@@ -102,6 +123,12 @@ export default function SignInPage() {
       if (result?.ok) {
         setIsLoading(false);
         setIsRedirecting(true);
+        
+        // Clear any stale session data
+        if (typeof window !== "undefined") {
+          sessionStorage.clear();
+        }
+        
         // Force session refresh and let useEffect handle redirect
         router.refresh();
         // The useEffect hook will handle the redirect when session updates
@@ -123,9 +150,18 @@ export default function SignInPage() {
   async function handleGoogleSignIn() {
     setError(null);
     setIsGoogleLoading(true);
+    
+    console.log("Starting Google sign-in...");
+    
     try {
-      await signIn("google", { callbackUrl });
+      // Call signIn without await to allow redirect
+      signIn("google", { 
+        callbackUrl,
+      });
+      
+      // Don't set loading to false - the page will redirect
     } catch (err) {
+      console.error("Google sign-in error:", err);
       setError("Failed to sign in with Google. Please try again.");
       setIsGoogleLoading(false);
     }
@@ -147,12 +183,6 @@ export default function SignInPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {authError && (
-              <Alert variant="default" className="border-yellow-200 bg-yellow-50">
-                <AlertCircle className="h-4 w-4 text-yellow-600" />
-                <AlertDescription className="text-yellow-800">{authError}</AlertDescription>
-              </Alert>
-            )}
             <AnimatePresence mode="wait">
               {isRedirecting ? (
                 <motion.div

@@ -5,10 +5,10 @@ import { createBlogReview, getBlogReviews, getUserBlogReview } from "@/lib/blog"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ postId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { postId } = await params;
+    const { id: postId } = await params;
     const session = await getServerSession(authOptions);
     
     const reviews = await getBlogReviews(postId);
@@ -34,10 +34,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ postId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { postId } = await params;
+    const { id: postId } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user) {

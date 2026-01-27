@@ -245,7 +245,6 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
             )}
-          </div>
         </motion.aside>
 
         {/* Desktop Main Content Area */}

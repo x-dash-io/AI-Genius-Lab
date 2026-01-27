@@ -7,6 +7,7 @@ import { ToastProvider } from "@/components/providers/ToastProvider";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { ConfirmDialogProvider } from "@/components/ui/confirm-dialog";
 import { DevIndicatorRemover } from "@/components/DevIndicatorRemover";
+import { SessionMonitor } from "@/components/auth/SessionMonitor";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateOrganizationSchema } from "@/lib/seo/schemas";
 import "./globals.css";
@@ -67,6 +68,7 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <SessionProvider>
+            <SessionMonitor />
             <CartProvider>
               <ConfirmDialogProvider>
                 <ToastProvider>

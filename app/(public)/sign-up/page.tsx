@@ -20,7 +20,7 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
   const [step, setStep] = useState<"form" | "otp">("form");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -31,15 +31,28 @@ export default function SignUpPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const authError = searchParams.get("error");
 
-  // Add timeout for auth initialization
+  // Check for OAuth errors in URL
+  useEffect(() => {
+    if (authError) {
+      if (authError === "OAuthAccountNotLinked") {
+        setError("This email is already registered. Please sign in with your email and password.");
+      } else if (authError === "OAuthCallback") {
+        setError("Authentication failed. Please try again.");
+      } else {
+        setError("An error occurred during sign up. Please try again.");
+      }
+    }
+  }, [authError]);
+
+  // Show form after short delay if still loading (prevents infinite loading)
   useEffect(() => {
     const timer = setTimeout(() => {
       if (status === "loading") {
-        console.warn("Auth initialization timeout - showing form anyway");
-        setAuthError("Authentication service is slow. You can still sign up.");
+        setShowForm(true);
       }
-    }, 5000); // Reduced to 5 seconds
+    }, 1000); // Show form after 1 second if still loading
 
     return () => clearTimeout(timer);
   }, [status]);
@@ -47,14 +60,14 @@ export default function SignUpPage() {
   // Redirect authenticated users away from sign-up page
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
+      setIsRedirecting(true);
       const redirectUrl = session.user.role === "admin" ? "/admin" : callbackUrl;
-      // Use replace to avoid adding to history
       router.replace(redirectUrl);
     }
   }, [status, session, router, callbackUrl]);
 
-  // Show loading while checking auth status (but with timeout fallback)
-  if (status === "loading" && !authError) {
+  // Show loading only briefly, then show form
+  if (status === "loading" && !showForm) {
     return (
       <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
         <div className="text-center">
@@ -64,8 +77,8 @@ export default function SignUpPage() {
     );
   }
 
-  // Don't render the form if already authenticated (will redirect)
-  if (status === "authenticated") {
+  // Show redirecting state
+  if (isRedirecting || status === "authenticated") {
     return (
       <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
         <Loader size="lg" text="Redirecting..." />
@@ -233,8 +246,21 @@ export default function SignUpPage() {
     setError(null);
     setIsGoogleLoading(true);
     try {
-      await signIn("google", { callbackUrl });
+      // signIn with redirect: true will handle the redirect automatically
+      // No need to set loading to false as the page will redirect
+      const result = await signIn("google", { 
+        callbackUrl,
+        redirect: true 
+      });
+      
+      // This code won't execute if redirect is successful
+      // Only runs if there's an error
+      if (result?.error) {
+        setError("Failed to sign up with Google. Please try again.");
+        setIsGoogleLoading(false);
+      }
     } catch (err) {
+      console.error("Google sign-up error:", err);
       setError("Failed to sign up with Google. Please try again.");
       setIsGoogleLoading(false);
     }
@@ -256,12 +282,6 @@ export default function SignUpPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {authError && (
-              <Alert variant="default" className="border-yellow-200 bg-yellow-50">
-                <AlertCircle className="h-4 w-4 text-yellow-600" />
-                <AlertDescription className="text-yellow-800">{authError}</AlertDescription>
-              </Alert>
-            )}
             <AnimatePresence mode="wait">
               {isRedirecting ? (
                 <motion.div

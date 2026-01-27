@@ -143,7 +143,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
           </div>
           
           {/* Scrollable Navigation */}
-          <div className="flex-1 overflow-y-auto px-4 py-6">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6">
             <div className="space-y-6">
               <div>
                 <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-3">

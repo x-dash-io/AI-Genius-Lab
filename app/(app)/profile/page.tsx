@@ -52,6 +52,17 @@ export default async function ProfilePage() {
     redirect("/sign-in");
   }
 
+  // Verify user still exists in database
+  const userExists = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { id: true },
+  });
+
+  if (!userExists) {
+    // User was deleted, redirect to sign in
+    redirect("/sign-in");
+  }
+
   const [profile, stats, userWithPassword] = await Promise.all([
     getUserProfile(session.user.id),
     getUserStats(session.user.id),

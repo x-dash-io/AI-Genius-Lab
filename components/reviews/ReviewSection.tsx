@@ -74,7 +74,7 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
       const data = await response.json();
       setStats(data);
     } catch (error) {
-      if (error.name === 'AbortError') {
+      if (error instanceof Error && error.name === 'AbortError') {
         console.warn("Stats fetch timeout");
       } else {
         console.error("Error fetching review stats:", error);
@@ -101,7 +101,7 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
         setUserReview(data.review);
       }
     } catch (error) {
-      if (error.name === 'AbortError') {
+      if (error instanceof Error && error.name === 'AbortError') {
         console.warn("User review fetch timeout");
       } else {
         console.error("Error fetching user review:", error);
