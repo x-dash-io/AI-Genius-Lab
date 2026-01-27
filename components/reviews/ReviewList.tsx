@@ -42,16 +42,28 @@ export function ReviewList({ courseId, currentUserId }: ReviewListProps) {
 
   const fetchReviews = async () => {
     try {
-      const response = await fetch(`/api/reviews?courseId=${courseId}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+      const response = await fetch(`/api/reviews?courseId=${courseId}`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) throw new Error("Failed to fetch reviews");
       const data = await response.json();
       setReviews(data.reviews || []);
     } catch (error) {
-      console.error("Error fetching reviews:", error);
-      toast({
-        title: "Failed to load reviews",
-        description: "Please refresh the page to try again.",
-        variant: "destructive",
-      });
+      if (error.name === 'AbortError') {
+        console.warn("Reviews fetch timeout");
+      } else {
+        console.error("Error fetching reviews:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load reviews",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }

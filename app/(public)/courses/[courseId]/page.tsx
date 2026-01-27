@@ -39,13 +39,28 @@ export default async function CourseDetailPage({
   params,
 }: CourseDetailPageProps) {
   const { courseId } = await params;
-  const course = await getCoursePreviewBySlug(courseId);
-
-  if (!course) {
+  
+  let course;
+  let reviewStats = null;
+  
+  try {
+    course = await getCoursePreviewBySlug(courseId);
+    
+    if (!course) {
+      notFound();
+    }
+    
+    // Fetch review stats with timeout
+    const statsPromise = getCourseReviewStats(course.id);
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout')), 3000)
+    );
+    
+    reviewStats = await Promise.race([statsPromise, timeoutPromise]).catch(() => null);
+  } catch (error) {
+    console.error("Error loading course:", error);
     notFound();
   }
-
-  const reviewStats = await getCourseReviewStats(course.id);
   const lessons = course.Section.flatMap((section) => 
     section.Lesson.map(lesson => ({
       ...lesson,

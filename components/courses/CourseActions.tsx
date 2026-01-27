@@ -23,10 +23,24 @@ export function CourseActions({
   const { data: session, status } = useSession();
   const [isOwned, setIsOwned] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
+  const [authTimeout, setAuthTimeout] = useState(false);
+
+  useEffect(() => {
+    // Set timeout for auth initialization
+    const timer = setTimeout(() => {
+      if (status === "loading") {
+        console.warn("Auth timeout in CourseActions - proceeding without auth");
+        setAuthTimeout(true);
+        setIsChecking(false);
+      }
+    }, 5000); // 5 seconds
+
+    return () => clearTimeout(timer);
+  }, [status]);
 
   useEffect(() => {
     async function checkOwnership() {
-      if (status === "loading") return;
+      if (status === "loading" && !authTimeout) return;
       
       if (!session?.user) {
         setIsChecking(false);
@@ -48,7 +62,7 @@ export function CourseActions({
     }
 
     checkOwnership();
-  }, [courseId, session, status]);
+  }, [courseId, session, status, authTimeout]);
 
   // Show loading state while checking
   if (isChecking && status !== "unauthenticated") {

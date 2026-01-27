@@ -27,27 +27,58 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
   const [loadingUserReview, setLoadingUserReview] = useState(false);
 
   useEffect(() => {
+    // Set timeout for session fetch
+    const sessionTimeout = setTimeout(() => {
+      console.warn("Session fetch timeout in ReviewSection");
+      setLoadingStats(false);
+      setLoadingUserReview(false);
+    }, 5000); // 5 seconds
+
     // Fetch current user session
     fetch("/api/auth/session")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Session fetch failed");
+        return res.json();
+      })
       .then((session) => {
+        clearTimeout(sessionTimeout);
         if (session?.user?.id) {
           setCurrentUserId(session.user.id);
           fetchUserReview(session.user.id);
         }
+      })
+      .catch((error) => {
+        console.error("Error fetching session:", error);
+        clearTimeout(sessionTimeout);
+        setLoadingStats(false);
+        setLoadingUserReview(false);
       });
 
     fetchStats();
+    
+    return () => clearTimeout(sessionTimeout);
   }, [courseId]);
 
   const fetchStats = async () => {
     setLoadingStats(true);
     try {
-      const response = await fetch(`/api/reviews/stats?courseId=${courseId}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
+      const response = await fetch(`/api/reviews/stats?courseId=${courseId}`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) throw new Error("Failed to fetch stats");
       const data = await response.json();
       setStats(data);
     } catch (error) {
-      console.error("Error fetching review stats:", error);
+      if (error.name === 'AbortError') {
+        console.warn("Stats fetch timeout");
+      } else {
+        console.error("Error fetching review stats:", error);
+      }
     } finally {
       setLoadingStats(false);
     }
@@ -56,15 +87,25 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
   const fetchUserReview = async (userId: string) => {
     setLoadingUserReview(true);
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
       const response = await fetch(
-        `/api/reviews/user?courseId=${courseId}&userId=${userId}`
+        `/api/reviews/user?courseId=${courseId}&userId=${userId}`,
+        { signal: controller.signal }
       );
+      clearTimeout(timeoutId);
+      
       if (response.ok) {
         const data = await response.json();
         setUserReview(data.review);
       }
     } catch (error) {
-      console.error("Error fetching user review:", error);
+      if (error.name === 'AbortError') {
+        console.warn("User review fetch timeout");
+      } else {
+        console.error("Error fetching user review:", error);
+      }
     } finally {
       setLoadingUserReview(false);
     }
