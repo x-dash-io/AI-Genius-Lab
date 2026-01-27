@@ -19,11 +19,6 @@ interface BlogPostPageProps {
 
 export const dynamic = 'force-dynamic';
 
-// Skip static generation to avoid database dependency during build
-export async function generateStaticParams() {
-  return [];
-}
-
 export async function generateMetadata({
   params,
 }: BlogPostPageProps): Promise<Metadata> {
