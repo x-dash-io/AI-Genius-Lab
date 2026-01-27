@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { sendEmail } from "@/lib/email";
 import { createCustomRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { enrollUserInAllCourses } from "@/lib/subscription";
 import { sendSubscriptionWelcomeEmail, sendAdminSubscriptionNotification } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -70,17 +71,20 @@ export async function GET(request: NextRequest) {
     try {
       // Get admin email from config, fail if not set in production
       const adminEmail = process.env.ADMIN_EMAIL;
-      if (!adminEmail && process.env.NODE_ENV === "production") {
-        logger.warn("ADMIN_EMAIL not set, skipping admin notification");
+      if (!adminEmail) {
+        if (process.env.NODE_ENV === "production") {
+          logger.warn("ADMIN_EMAIL not set, skipping admin notification");
+        }
+      } else {
+        const planPrice = subscription.planType === "monthly" ? "29.99" : "299.99";
+        await sendAdminSubscriptionNotification(
+          adminEmail,
+          subscription.User.email,
+          subscription.User.name || "Valued Customer",
+          subscription.planType,
+          planPrice
+        );
       }
-      const planPrice = subscription.planType === "monthly" ? "29.99" : "299.99";
-      await sendAdminSubscriptionNotification(
-        adminEmail,
-        subscription.User.email,
-        subscription.User.name || "Valued Customer",
-        subscription.planType,
-        planPrice
-      );
     } catch (emailError) {
       console.error("Failed to send admin notification:", emailError);
       // Continue even if email fails
