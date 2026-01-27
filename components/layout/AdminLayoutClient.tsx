@@ -17,6 +17,7 @@ import {
   User,
   Eye,
   FileText,
+  Crown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -37,6 +38,7 @@ const adminNavigation = [
   { name: "Blog", href: "/admin/blog", icon: FileText },
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Purchases", href: "/admin/purchases", icon: Receipt },
+  { name: "Subscriptions", href: "/admin/subscriptions", icon: Crown },
   { name: "Profile", href: "/admin/profile", icon: User },
 ];
 

@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 interface Subscription {
   id: string;
   planType: "monthly" | "annual";
-  status: "active" | "cancelled" | "expired" | "paused";
+  status: "active" | "cancelled" | "expired" | "paused" | "pending";
   startDate: Date;
   endDate?: Date | null;
   nextBillingAt?: Date | null;
@@ -190,6 +190,7 @@ export function ProfileSubscription({ userId }: ProfileSubscriptionProps) {
   const isCancelled = subscription.status === "cancelled";
   const isPaused = subscription.status === "paused";
   const isExpired = subscription.status === "expired";
+  const isPending = subscription.status === "pending";
 
   const planName = subscription.planType === "monthly" ? "Monthly Premium" : "Annual Premium";
   const planPrice = subscription.planType === "monthly" ? "$29.99/month" : "$299.99/year";
@@ -210,14 +211,15 @@ export function ProfileSubscription({ userId }: ProfileSubscriptionProps) {
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">Status</span>
           <Badge
-            variant={isActive ? "default" : isCancelled ? "secondary" : "destructive"}
+            variant={isActive ? "default" : isCancelled ? "secondary" : isPending ? "outline" : "destructive"}
             className={cn(
               isActive && "bg-green-100 text-green-800 hover:bg-green-100",
               isCancelled && "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
-              (isPaused || isExpired) && "bg-red-100 text-red-800 hover:bg-red-100"
+              (isPaused || isExpired) && "bg-red-100 text-red-800 hover:bg-red-100",
+              isPending && "bg-blue-100 text-blue-800 hover:bg-blue-100"
             )}
           >
-            {isActive ? "Active" : isCancelled ? "Cancelled" : isPaused ? "Paused" : "Expired"}
+            {isActive ? "Active" : isCancelled ? "Cancelled" : isPaused ? "Paused" : isPending ? "Pending Payment" : "Expired"}
           </Badge>
         </div>
 
@@ -302,11 +304,11 @@ export function ProfileSubscription({ userId }: ProfileSubscriptionProps) {
             </Button>
           )}
 
-          {(isExpired || isPaused) && (
+          {(isExpired || isPaused || isPending) && (
             <Link href="/subscription">
               <Button className="w-full">
                 <Crown className="h-4 w-4 mr-2" />
-                Subscribe Again
+                {isPending ? "Complete Payment" : "Subscribe Again"}
               </Button>
             </Link>
           )}

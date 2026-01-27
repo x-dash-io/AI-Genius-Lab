@@ -108,7 +108,7 @@ export async function getSubscriptionStats() {
 
 export async function updateSubscriptionStatus(
   subscriptionId: string,
-  status: "active" | "cancelled" | "expired" | "paused"
+  status: "active" | "cancelled" | "expired" | "paused" | "pending"
 ) {
   return prisma.subscription.update({
     where: { id: subscriptionId },

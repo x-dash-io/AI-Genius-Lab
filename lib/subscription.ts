@@ -1,9 +1,10 @@
 import { prisma, withRetry } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
+import { SubscriptionStatus } from "@prisma/client";
 
 export type SubscriptionPlan = "monthly" | "annual";
-export type SubscriptionStatus = "active" | "cancelled" | "expired" | "paused" | "trial";
+export { SubscriptionStatus };
 
 export interface SubscriptionPlanDetails {
   id: SubscriptionPlan;
@@ -156,7 +157,7 @@ export async function createSubscription(
       id: `sub_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
       userId,
       planType,
-      status: "active", // Will be updated to pending until PayPal confirmation
+      status: "pending" as SubscriptionStatus,
       startDate,
       endDate,
       lastBillingAt: startDate,

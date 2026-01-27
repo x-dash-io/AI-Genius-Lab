@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth";
 import { enrollUserInAllCourses } from "@/lib/subscription";
 import { sendSubscriptionWelcomeEmail, sendAdminSubscriptionNotification } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
 
 export async function GET(request: NextRequest) {
   try {
@@ -42,6 +41,12 @@ export async function GET(request: NextRequest) {
     if (!subscription) {
       return NextResponse.json({ error: "Subscription not found" }, { status: 404 });
     }
+
+    // Activate subscription
+    await prisma.subscription.update({
+      where: { id: subscription.id },
+      data: { status: "active" },
+    });
 
     // Enroll user in all courses
     await enrollUserInAllCourses(session.user.id, subscription.id);

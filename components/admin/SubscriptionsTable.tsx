@@ -24,7 +24,7 @@ import { useRouter } from "next/navigation";
 interface Subscription {
   id: string;
   planType: "monthly" | "annual";
-  status: "active" | "cancelled" | "expired" | "paused";
+  status: "active" | "cancelled" | "expired" | "paused" | "pending";
   startDate: string;
   endDate?: string;
   cancelledAt?: string;
@@ -64,7 +64,7 @@ export function SubscriptionsTable() {
 
   const updateSubscriptionStatus = async (
     subscriptionId: string,
-    status: "active" | "cancelled" | "expired" | "paused"
+    status: "active" | "cancelled" | "expired" | "paused" | "pending"
   ) => {
     try {
       const response = await fetch(`/api/admin/subscriptions/${subscriptionId}/status`, {
@@ -126,6 +126,8 @@ export function SubscriptionsTable() {
                       ? "default"
                       : subscription.status === "cancelled"
                       ? "secondary"
+                      : subscription.status === "pending"
+                      ? "outline"
                       : "destructive"
                   }
                 >
