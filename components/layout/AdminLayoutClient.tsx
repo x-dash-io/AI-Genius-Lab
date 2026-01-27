@@ -247,10 +247,12 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                     </div>
                   </motion.div>
                 </Link>
-                <div className="flex items-center gap-2 px-1">
-                  <CartIcon />
-                  <ThemeToggle />
-                  <SignOutButton />
+                <div className="flex flex-col gap-2">
+                  <SignOutButton className="w-full" />
+                  <div className="flex items-center justify-center gap-2">
+                    <CartIcon />
+                    <ThemeToggle />
+                  </div>
                 </div>
               </div>
             )}
@@ -288,6 +290,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
               </span>
             </Link>
             <div className="flex items-center gap-2 flex-shrink-0">
+              <SignOutButton size="icon" variant="ghost" />
               <CartIcon />
               <ThemeToggle />
               <Button
