@@ -9,7 +9,7 @@
  */
 
 import { prisma } from "../../lib/prisma";
-import { hashPassword } from "../../lib/password";
+import { hashPassword, verifyPassword } from "../../lib/password";
 import type { User, Course, Section, Lesson, LearningPath } from "@prisma/client";
 import {
   createTestUser,
@@ -28,13 +28,11 @@ const describeMaybeSkip = process.env.DATABASE_URL ? describe : describe.skip;
 
 describeMaybeSkip("User Authentication Flow", () => {
   beforeAll(async () => {
-    await prisma.$connect();
     await cleanupAllTestData();
   });
 
   afterAll(async () => {
     await cleanupAllTestData();
-    await prisma.$disconnect();
   });
 
   it("should create a user with hashed password", async () => {
@@ -57,7 +55,7 @@ describeMaybeSkip("User Authentication Flow", () => {
     expect(user).toBeDefined();
     expect(user?.passwordHash).toBeDefined();
 
-    const isValid = await hashPassword(TEST_USER.password, user!.passwordHash!);
+    const isValid = await verifyPassword(TEST_USER.password, user!.passwordHash!);
     expect(isValid).toBe(true);
   });
 
@@ -66,7 +64,7 @@ describeMaybeSkip("User Authentication Flow", () => {
       where: { email: "auth-test@example.com" },
     });
 
-    const isValid = await hashPassword("WrongPassword123!", user!.passwordHash!);
+    const isValid = await verifyPassword("WrongPassword123!", user!.passwordHash!);
     expect(isValid).toBe(false);
   });
 
@@ -81,12 +79,16 @@ describeMaybeSkip("User Authentication Flow", () => {
   });
 
   it("should not allow duplicate emails", async () => {
-    // First create a user (with cleanup)
-    await createTestUser({ email: "auth-test@example.com" });
-    
-    // Then try to create another with the same email (skip cleanup to test duplicate)
+    // Try to create another user with the same email (already exists from previous test)
     await expect(
-      createTestUser({ email: "auth-test@example.com" }, true)
+      prisma.user.create({
+        data: {
+          email: "auth-test@example.com",
+          passwordHash: await hashPassword("test123"),
+          name: "Duplicate User",
+          role: "customer",
+        },
+      })
     ).rejects.toThrow();
   });
 });
@@ -96,7 +98,6 @@ describeMaybeSkip("Course Purchase Flow", () => {
   let testCourse: Course;
 
   beforeAll(async () => {
-    await prisma.$connect();
     await cleanupAllTestData();
     testUser = await createTestUser({ email: "purchase-test@example.com" });
     testCourse = await createTestCourse({ slug: "test-purchase-course" });
@@ -104,7 +105,6 @@ describeMaybeSkip("Course Purchase Flow", () => {
 
   afterAll(async () => {
     await cleanupAllTestData();
-    await prisma.$disconnect();
   });
 
   it("should create a pending purchase", async () => {
@@ -182,7 +182,6 @@ describeMaybeSkip("Learning Path Enrollment Flow", () => {
   let learningPath: LearningPath;
 
   beforeAll(async () => {
-    await prisma.$connect();
     await cleanupAllTestData();
     testUser = await createTestUser({ email: "path-test@example.com" });
     course1 = await createTestCourse({ slug: "test-path-course-1", title: "Course 1" });
@@ -218,7 +217,6 @@ describeMaybeSkip("Learning Path Enrollment Flow", () => {
 
   afterAll(async () => {
     await cleanupAllTestData();
-    await prisma.$disconnect();
   });
 
   it("should create learning path with courses", async () => {
@@ -263,7 +261,6 @@ describeMaybeSkip("Lesson Progress Flow", () => {
   let testLesson: Lesson;
 
   beforeAll(async () => {
-    await prisma.$connect();
     await cleanupAllTestData();
     testUser = await createTestUser({ email: "progress-test@example.com" });
     testCourse = await createTestCourse({ slug: "test-progress-course" });
@@ -277,7 +274,6 @@ describeMaybeSkip("Lesson Progress Flow", () => {
 
   afterAll(async () => {
     await cleanupAllTestData();
-    await prisma.$disconnect();
   });
 
   it("should track lesson start", async () => {
@@ -375,7 +371,6 @@ describeMaybeSkip("Review System Flow", () => {
   let testCourse: Course;
 
   beforeAll(async () => {
-    await prisma.$connect();
     await cleanupAllTestData();
     testUser = await createTestUser({ email: "review-test@example.com" });
     testCourse = await createTestCourse({ slug: "test-review-course" });
@@ -387,7 +382,6 @@ describeMaybeSkip("Review System Flow", () => {
 
   afterAll(async () => {
     await cleanupAllTestData();
-    await prisma.$disconnect();
   });
 
   it("should create a review", async () => {
@@ -470,7 +464,6 @@ describeMaybeSkip("Certificate Generation Flow", () => {
   let testLesson: Lesson;
 
   beforeAll(async () => {
-    await prisma.$connect();
     await cleanupAllTestData();
     testUser = await createTestUser({ email: "cert-test@example.com" });
     testCourse = await createTestCourse({ slug: "test-cert-course" });
@@ -497,7 +490,6 @@ describeMaybeSkip("Certificate Generation Flow", () => {
 
   afterAll(async () => {
     await cleanupAllTestData();
-    await prisma.$disconnect();
   });
 
   it("should generate certificate for completed course", async () => {
