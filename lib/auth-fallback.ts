@@ -1,21 +1,14 @@
 import NextAuth from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import type { Session, User, Account } from "next-auth";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { prisma, withRetry } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 import { type Role } from "@/lib/rbac";
 
-// Create a prisma instance with error handling for auth
-const authPrisma = prisma;
-
-// Use adapter only in non-production environments for resilience
-const useAdapter = process.env.NODE_ENV !== "production" || process.env.USE_PRISMA_ADAPTER === "true";
-
+// Fallback auth options without Prisma adapter for production resilience
 export const authOptions = {
-  ...(useAdapter && { adapter: PrismaAdapter(prisma) }),
   session: { 
     strategy: "jwt" as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -38,8 +31,11 @@ export const authOptions = {
             return null;
           }
 
-          const user = await prisma.user.findUnique({
-            where: { email },
+          // Use withRetry for database operations
+          const user = await withRetry(async () => {
+            return await prisma.user.findUnique({
+              where: { email },
+            });
           });
 
           if (!user || !user.passwordHash) {
@@ -75,9 +71,11 @@ export const authOptions = {
       // For OAuth providers, handle account linking and role assignment
       if (account && account.provider !== "credentials" && user.email) {
         try {
-          const existingUser = await prisma.user.findUnique({
-            where: { email: user.email },
-            include: { Account: true },
+          const existingUser = await withRetry(async () => {
+            return await prisma.user.findUnique({
+              where: { email: user.email },
+              include: { Account: true },
+            });
           });
 
           if (existingUser) {
@@ -88,41 +86,47 @@ export const authOptions = {
 
             if (!existingAccount) {
               // Link the OAuth account to existing user
-              await prisma.account.create({
-                data: {
-                  id: crypto.randomUUID(),
-                  userId: existingUser.id,
-                  type: account.type,
-                  provider: account.provider,
-                  providerAccountId: account.providerAccountId,
-                  access_token: account.access_token,
-                  expires_at: account.expires_at,
-                  token_type: account.token_type,
-                  scope: account.scope,
-                  id_token: account.id_token,
-                },
+              await withRetry(async () => {
+                return await prisma.account.create({
+                  data: {
+                    id: crypto.randomUUID(),
+                    userId: existingUser.id,
+                    type: account.type,
+                    provider: account.provider,
+                    providerAccountId: account.providerAccountId,
+                    access_token: account.access_token,
+                    expires_at: account.expires_at,
+                    token_type: account.token_type,
+                    scope: account.scope,
+                    id_token: account.id_token,
+                  },
+                });
               });
             }
 
             // If user exists but has no role, set it to customer
             if (!existingUser.role) {
-              await prisma.user.update({
-                where: { id: existingUser.id },
-                data: { role: "customer" },
+              await withRetry(async () => {
+                return await prisma.user.update({
+                  where: { id: existingUser.id },
+                  data: { role: "customer" },
+                });
               });
             }
 
             // Update user info from OAuth profile if missing
             if (!existingUser.image && profile?.picture) {
-              await prisma.user.update({
-                where: { id: existingUser.id },
-                data: { image: profile.picture },
+              await withRetry(async () => {
+                return await prisma.user.update({
+                  where: { id: existingUser.id },
+                  data: { image: profile.picture },
+                });
               });
             }
           }
         } catch (error) {
           console.error("SignIn callback error:", error);
-          // Don't block sign-in if linking fails - adapter will handle it
+          // Don't block sign-in if linking fails
         }
       }
       return true;
@@ -138,13 +142,14 @@ export const authOptions = {
         token.lastRefresh = Date.now();
       }
       
-      // For OAuth sign-in, the user.id from adapter might be different or missing
-      // Fetch from DB using email to ensure we have the correct database user ID
+      // For OAuth sign-in, fetch from DB using email
       if (account && account.provider !== "credentials" && token.email && !token.id) {
         try {
-          const dbUser = await prisma.user.findUnique({
-            where: { email: token.email as string },
-            select: { id: true, name: true, email: true, image: true, role: true },
+          const dbUser = await withRetry(async () => {
+            return await prisma.user.findUnique({
+              where: { email: token.email as string },
+              select: { id: true, name: true, email: true, image: true, role: true },
+            });
           });
           
           if (dbUser) {
@@ -159,7 +164,7 @@ export const authOptions = {
         }
       }
       
-      // Refresh user data from DB periodically (every 5 minutes) or on update trigger
+      // Refresh user data from DB periodically
       const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
       const shouldRefresh = trigger === "update" || 
         !token.lastRefresh || 
@@ -167,9 +172,11 @@ export const authOptions = {
       
       if (shouldRefresh && token.id) {
         try {
-          const freshUser = await prisma.user.findUnique({
-            where: { id: token.id as string },
-            select: { name: true, email: true, image: true, role: true },
+          const freshUser = await withRetry(async () => {
+            return await prisma.user.findUnique({
+              where: { id: token.id as string },
+              select: { name: true, email: true, image: true, role: true },
+            });
           });
           
           if (freshUser) {
@@ -187,7 +194,7 @@ export const authOptions = {
       return token;
     },
     async session({ session, token }: { session: Session; token: JWT }) {
-      // Use cached data from JWT token instead of querying DB every time
+      // Use cached data from JWT token
       if (session.user && token && token.id) {
         session.user.id = token.id as string;
         session.user.role = (token.role as Role) || "customer";
@@ -198,9 +205,7 @@ export const authOptions = {
       return session;
     },
     async redirect({ url, baseUrl }: { url: string; baseUrl: string }) {
-      // Redirect admins to admin dashboard after sign-in
       if (url.startsWith("/dashboard") || url === baseUrl || url === `${baseUrl}/`) {
-        // We'll handle admin redirect in the dashboard page itself
         return url;
       }
       return url.startsWith(baseUrl) ? url : baseUrl;

@@ -158,6 +158,7 @@ describeMaybeSkip("Course Purchase Flow", () => {
     await expect(
       prisma.purchase.create({
         data: {
+          id: `duplicate_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           userId: testUser.id,
           courseId: testCourse.id,
           amountCents: testCourse.priceCents,
@@ -185,15 +186,28 @@ describeMaybeSkip("Learning Path Enrollment Flow", () => {
 
     learningPath = await prisma.learningPath.create({
       data: {
+        id: `path_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        slug: `test-learning-path-${Date.now()}`,
         title: "Test Learning Path",
         description: "A test path with multiple courses",
+        updatedAt: new Date(),
       },
     });
 
     await prisma.learningPathCourse.createMany({
       data: [
-        { learningPathId: learningPath.id, courseId: course1.id, sortOrder: 0 },
-        { learningPathId: learningPath.id, courseId: course2.id, sortOrder: 1 },
+        { 
+          id: `lpc_test_${Date.now()}_1_${Math.random().toString(36).substr(2, 9)}`,
+          learningPathId: learningPath.id, 
+          courseId: course1.id, 
+          sortOrder: 0 
+        },
+        { 
+          id: `lpc_test_${Date.now()}_2_${Math.random().toString(36).substr(2, 9)}`,
+          learningPathId: learningPath.id, 
+          courseId: course2.id, 
+          sortOrder: 1 
+        },
       ],
     });
   });
@@ -265,11 +279,13 @@ describeMaybeSkip("Lesson Progress Flow", () => {
   it("should track lesson start", async () => {
     const progress = await prisma.progress.create({
       data: {
+        id: `progress_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         userId: testUser.id,
         lessonId: testLesson.id,
         startedAt: new Date(),
         lastPosition: 0,
         completionPercent: 0,
+        updatedAt: new Date(),
       },
     });
 
@@ -462,11 +478,13 @@ describeMaybeSkip("Certificate Generation Flow", () => {
     // Complete the lesson
     await prisma.progress.create({
       data: {
+        id: `progress_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         userId: testUser.id,
         lessonId: testLesson.id,
         startedAt: new Date(),
         completedAt: new Date(),
         completionPercent: 100,
+        updatedAt: new Date(),
       },
     });
   });

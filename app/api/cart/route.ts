@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getCartFromCookies, setCartInCookies, addItemToCart, removeItemFromCart, updateItemQuantity, clearCart } from "@/lib/cart/utils";
 import { CartItem } from "@/lib/cart/types";
-import { prisma } from "@/lib/prisma";
+import { prisma, withRetry } from "@/lib/prisma";
 
 export async function GET() {
   try {
@@ -15,14 +15,14 @@ export async function GET() {
       const courseIds = cart.items.map((item) => item.courseId);
       
       // Get purchased courses
-      const purchases = await prisma.purchase.findMany({
+      const purchases = await withRetry(() => prisma.purchase.findMany({
         where: {
           userId: session.user.id,
           courseId: { in: courseIds },
           status: "paid",
         },
         select: { courseId: true },
-      });
+      }));
       
       const purchasedIds = new Set(purchases.map((p) => p.courseId));
       
@@ -80,13 +80,13 @@ export async function POST(request: NextRequest) {
       // Check if user already owns this course
       const session = await getServerSession(authOptions);
       if (session?.user) {
-        const existingPurchase = await prisma.purchase.findFirst({
+        const existingPurchase = await withRetry(() => prisma.purchase.findFirst({
           where: {
             userId: session.user.id,
             courseId,
             status: "paid",
           },
-        });
+        }));
         
         if (existingPurchase) {
           return NextResponse.json(
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Fetch course details with inventory
-      const course = await prisma.course.findUnique({
+      const course = await withRetry(() => prisma.course.findUnique({
         where: { id: courseId },
         select: {
           id: true,
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
           priceCents: true,
           inventory: true,
         },
-      });
+      }));
 
       if (!course) {
         return NextResponse.json({ error: "Course not found" }, { status: 404 });
@@ -151,10 +151,10 @@ export async function POST(request: NextRequest) {
       }
 
       // Fetch course inventory
-      const course = await prisma.course.findUnique({
+      const course = await withRetry(() => prisma.course.findUnique({
         where: { id: courseId },
         select: { inventory: true },
-      });
+      }));
 
       if (!course) {
         return NextResponse.json({ error: "Course not found" }, { status: 404 });

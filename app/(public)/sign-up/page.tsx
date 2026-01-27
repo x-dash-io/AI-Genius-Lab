@@ -20,6 +20,7 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [step, setStep] = useState<"form" | "otp">("form");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -31,6 +32,18 @@ export default function SignUpPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
+  // Add timeout for auth initialization
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (status === "loading") {
+        console.warn("Auth initialization timeout - showing form anyway");
+        setAuthError("Authentication service is slow. You can still sign up.");
+      }
+    }, 5000); // Reduced to 5 seconds
+
+    return () => clearTimeout(timer);
+  }, [status]);
+
   // Redirect authenticated users away from sign-up page
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
@@ -40,11 +53,13 @@ export default function SignUpPage() {
     }
   }, [status, session, router, callbackUrl]);
 
-  // Show loading while checking auth status
-  if (status === "loading") {
+  // Show loading while checking auth status (but with timeout fallback)
+  if (status === "loading" && !authError) {
     return (
       <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
-        <Loader size="lg" text="Loading..." />
+        <div className="text-center">
+          <Loader size="lg" text="Loading..." />
+        </div>
       </div>
     );
   }
@@ -241,6 +256,12 @@ export default function SignUpPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {authError && (
+              <Alert variant="default" className="border-yellow-200 bg-yellow-50">
+                <AlertCircle className="h-4 w-4 text-yellow-600" />
+                <AlertDescription className="text-yellow-800">{authError}</AlertDescription>
+              </Alert>
+            )}
             <AnimatePresence mode="wait">
               {isRedirecting ? (
                 <motion.div
