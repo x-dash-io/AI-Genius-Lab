@@ -53,7 +53,15 @@ export default function SignInPage() {
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
       setIsRedirecting(true);
+      
+      // Clear any stale data
+      if (typeof window !== "undefined") {
+        sessionStorage.clear();
+      }
+      
       const redirectUrl = session.user.role === "admin" ? "/admin" : callbackUrl;
+      
+      // Use replace to prevent back button issues
       router.replace(redirectUrl);
     }
   }, [status, session, router, callbackUrl]);
@@ -115,6 +123,12 @@ export default function SignInPage() {
       if (result?.ok) {
         setIsLoading(false);
         setIsRedirecting(true);
+        
+        // Clear any stale session data
+        if (typeof window !== "undefined") {
+          sessionStorage.clear();
+        }
+        
         // Force session refresh and let useEffect handle redirect
         router.refresh();
         // The useEffect hook will handle the redirect when session updates

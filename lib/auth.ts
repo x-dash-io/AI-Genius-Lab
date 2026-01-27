@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import type { Session, User, Account } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
@@ -14,11 +14,12 @@ const authPrisma = prisma;
 // Use adapter only in non-production environments for resilience
 const useAdapter = process.env.NODE_ENV !== "production" || process.env.USE_PRISMA_ADAPTER === "true";
 
-export const authOptions = {
-  ...(useAdapter && { adapter: PrismaAdapter(prisma) }),
+export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   session: { 
     strategy: "jwt" as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // Update session every 24 hours
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
@@ -119,6 +120,16 @@ export const authOptions = {
                 data: { image: profile.picture },
               });
             }
+          } else {
+            // New user - ensure they have a role
+            if (user.id) {
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { role: "customer" },
+              }).catch(() => {
+                // User might not exist yet, adapter will create it
+              });
+            }
           }
         } catch (error) {
           console.error("SignIn callback error:", error);
@@ -136,11 +147,12 @@ export const authOptions = {
         token.email = user.email;
         token.picture = user.image;
         token.lastRefresh = Date.now();
+        return token;
       }
       
       // For OAuth sign-in, the user.id from adapter might be different or missing
       // Fetch from DB using email to ensure we have the correct database user ID
-      if (account && account.provider !== "credentials" && token.email && !token.id) {
+      if (account && account.provider !== "credentials" && token.email) {
         try {
           const dbUser = await prisma.user.findUnique({
             where: { email: token.email as string },
@@ -151,16 +163,18 @@ export const authOptions = {
             token.id = dbUser.id;
             token.role = dbUser.role || "customer";
             token.name = dbUser.name;
+            token.email = dbUser.email;
             token.picture = dbUser.image;
             token.lastRefresh = Date.now();
+            return token;
           }
         } catch (error) {
           console.error("Error fetching OAuth user:", error);
         }
       }
       
-      // Refresh user data from DB periodically (every 5 minutes) or on update trigger
-      const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+      // Refresh user data from DB periodically (every 1 minute) or on update trigger
+      const REFRESH_INTERVAL = 1 * 60 * 1000; // 1 minute - more frequent to catch account switches
       const shouldRefresh = trigger === "update" || 
         !token.lastRefresh || 
         (Date.now() - (token.lastRefresh as number)) > REFRESH_INTERVAL;
@@ -169,15 +183,26 @@ export const authOptions = {
         try {
           const freshUser = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { name: true, email: true, image: true, role: true },
+            select: { id: true, name: true, email: true, image: true, role: true },
           });
           
           if (freshUser) {
+            // Check if email has changed - this indicates account switch
+            if (token.email && freshUser.email !== token.email) {
+              console.warn("Email mismatch detected - possible account switch, invalidating token");
+              return {};
+            }
+            
+            token.id = freshUser.id;
             token.name = freshUser.name;
             token.email = freshUser.email;
             token.picture = freshUser.image;
             token.role = freshUser.role;
             token.lastRefresh = Date.now();
+          } else {
+            // User was deleted from database - invalidate token
+            console.warn("User not found in database, invalidating token");
+            return {};
           }
         } catch (error) {
           console.error("Error refreshing user in JWT callback:", error);
@@ -210,5 +235,3 @@ export const authOptions = {
     signIn: "/sign-in",
   },
 };
-
-export const { handlers, auth, signIn, signOut } = NextAuth(authOptions);
