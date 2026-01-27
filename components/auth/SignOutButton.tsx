@@ -37,8 +37,8 @@ export function SignOutButton({
       variant={variant}
       size={size}
       className={cn(
-        "gap-2 transition-all hover:scale-105 active:scale-95",
-        variant === "outline" && "hover:bg-destructive hover:text-destructive-foreground hover:border-destructive",
+        "gap-2 transition-all hover:scale-105 active:scale-95 font-medium",
+        variant === "outline" && "hover:bg-destructive hover:text-destructive-foreground hover:border-destructive shadow-sm hover:shadow-md",
         className
       )}
     >

@@ -237,9 +237,11 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                     </div>
                   </motion.div>
                 </Link>
-                <div className="flex items-center gap-2">
-                  <ThemeToggle />
-                  <SignOutButton className="flex-1" />
+                <div className="flex flex-col gap-2">
+                  <SignOutButton className="w-full" />
+                  <div className="flex items-center justify-center">
+                    <ThemeToggle />
+                  </div>
                 </div>
               </div>
             )}
@@ -420,9 +422,11 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                         </div>
                       </div>
                     </Link>
-                    <div className="flex items-center gap-2">
-                      <ThemeToggle />
-                      <SignOutButton className="flex-1" />
+                    <div className="flex flex-col gap-2">
+                      <SignOutButton className="w-full" />
+                      <div className="flex items-center justify-center">
+                        <ThemeToggle />
+                      </div>
                     </div>
                   </motion.div>
                 )}
