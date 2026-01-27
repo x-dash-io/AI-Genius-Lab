@@ -40,6 +40,9 @@ export default async function CourseDetailPage({
 }: CourseDetailPageProps) {
   const { courseId } = await params;
   
+  // DECLARATION: Fixes "Cannot find name 'course'"
+  let course;
+  
   let reviewStats: {
     averageRating: number;
     totalReviews: number;
@@ -47,6 +50,7 @@ export default async function CourseDetailPage({
   } | undefined = undefined;
   
   try {
+    // ASSIGNMENT: We assign the result to the let variable declared above
     course = await getCoursePreviewBySlug(courseId);
     
     if (!course) {
@@ -59,15 +63,21 @@ export default async function CourseDetailPage({
       setTimeout(() => reject(new Error('Timeout')), 3000)
     );
     
-    reviewStats = await Promise.race([statsPromise, timeoutPromise]).catch(() => undefined) as {
+    reviewStats = await (Promise.race([statsPromise, timeoutPromise]).catch(() => undefined) as Promise<{
       averageRating: number;
       totalReviews: number;
       ratingDistribution: { 5: number; 4: number; 3: number; 2: number; 1: number };
-    } | undefined;
+    } | undefined>);
   } catch (error) {
     console.error("Error loading course:", error);
     notFound();
   }
+
+  // Safety check for TypeScript narrowness
+  if (!course) {
+    notFound();
+  }
+
   const lessons = course.Section.flatMap((section) => 
     section.Lesson.map(lesson => ({
       ...lesson,
@@ -127,6 +137,7 @@ export default async function CourseDetailPage({
           )}
         </CardContent>
       </Card>
+      
       <CourseActions
         courseId={course.id}
         courseSlug={course.slug}
