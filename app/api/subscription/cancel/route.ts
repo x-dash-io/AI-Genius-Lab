@@ -1,89 +1,53 @@
+// app/api/subscription/cancel/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { cancelSubscription, removeSubscriptionAccess } from "@/lib/subscription";
-import { sendSubscriptionCancelledEmail } from "@/lib/email";
+import { cancelSubscription, getUserSubscription } from "@/lib/subscription";
 import { cancelPayPalSubscription } from "@/lib/paypal";
-import { prisma } from "@/lib/prisma";
+import { sendSubscriptionCancelledEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { subscriptionId } = body;
-
-    if (!subscriptionId) {
-      return NextResponse.json(
-        { error: "Subscription ID is required" },
-        { status: 400 }
-      );
-    }
-
-    // Verify subscription belongs to user
-    const subscription = await prisma.subscription.findFirst({
-      where: {
-        id: subscriptionId,
-        userId: session.user.id,
-        status: "active",
-      },
-      include: {
-        User: {
-          select: {
-            email: true,
-            name: true,
-          },
-        },
-      },
-    });
-
+    const subscription = await getUserSubscription(session.user.id);
     if (!subscription) {
-      return NextResponse.json(
-        { error: "Active subscription not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "No active subscription found" }, { status: 404 });
     }
 
-    // Cancel in PayPal if we have a reference
-    if (subscription.providerRef && subscription.provider === "paypal") {
+    // Cancel in PayPal
+    if (subscription.provider === "paypal" && subscription.providerRef) {
       try {
         await cancelPayPalSubscription(subscription.providerRef);
       } catch (paypalError) {
         console.error("PayPal cancellation error:", paypalError);
-        // Continue with local cancellation even if PayPal fails
+        // Continue to cancel locally even if PayPal fails (might already be cancelled or network issue)
       }
     }
 
-    // Cancel subscription in our database
-    await cancelSubscription(subscriptionId, session.user.id);
+    // Cancel in DB
+    const updatedSub = await cancelSubscription(subscription.id, session.user.id);
 
-    // Send cancellation email to user
-    try {
-      await sendSubscriptionCancelledEmail(
-        subscription.User.email,
-        subscription.User.name || "Valued Customer",
-        subscription.planType,
-        subscription.endDate || new Date()
-      );
-    } catch (emailError) {
-      console.error("Failed to send cancellation email:", emailError);
-      // Continue even if email fails
+    // Send email notification
+    if (session.user.email) {
+      try {
+        await sendSubscriptionCancelledEmail(
+          session.user.email,
+          session.user.name || "Customer",
+          updatedSub.planType as "monthly" | "annual",
+          updatedSub.endDate || new Date()
+        );
+      } catch (emailError) {
+        console.error("Failed to send cancellation email:", emailError);
+      }
     }
 
-    return NextResponse.json({
-      success: true,
-      message: "Subscription cancelled successfully. Access will continue until the end of your billing period.",
-      endDate: subscription.endDate,
-    });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error cancelling subscription:", error);
-    return NextResponse.json(
-      { error: "Failed to cancel subscription" },
-      { status: 500 }
-    );
+    console.error("Subscription cancellation error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
