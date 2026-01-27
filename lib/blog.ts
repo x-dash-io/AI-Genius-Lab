@@ -45,37 +45,34 @@ export interface BlogReview {
 }
 
 export async function getAllPublishedPosts(): Promise<BlogPost[]> {
-  try {
-    const posts = await prisma.blogPost.findMany({
-      where: {
-        published: true,
-        publishedAt: {
-          lte: new Date(),
+  const posts = await prisma.blogPost.findMany({
+    where: {
+      published: true,
+      publishedAt: {
+        lte: new Date(),
+      },
+    },
+    orderBy: {
+      publishedAt: "desc",
+    },
+    include: {
+      images: {
+        orderBy: {
+          sortOrder: "asc",
         },
       },
-      orderBy: {
-        publishedAt: "desc",
-      },
-      include: {
-        images: {
-          orderBy: {
-            sortOrder: "asc",
-          },
-        },
-        _count: {
-          select: {
-            reviews: true,
-          },
+      _count: {
+        select: {
+          reviews: true,
         },
       },
-    });
+    },
+  });
 
-    return posts;
-  } catch (error) {
-    console.error("Error fetching blog posts:", error);
-    return [];
-  }
+  return posts;
 }
+
+export async function getPostBySlug(slug: string): Promise<BlogPost | null> {
   const post = await prisma.blogPost.findUnique({
     where: {
       slug,
@@ -137,10 +134,6 @@ export async function getPostsByCategory(category: string): Promise<BlogPost[]> 
     },
   });
 
-  } catch (error) {
-    console.error("Error fetching blog posts:", error);
-    return [];
-
   return posts;
 }
 
@@ -172,10 +165,6 @@ export async function getPostsByTag(tag: string): Promise<BlogPost[]> {
     },
   });
 
-  } catch (error) {
-    console.error("Error fetching blog posts:", error);
-    return [];
-
   return posts;
 }
 
@@ -205,10 +194,6 @@ export async function getFeaturedPosts(limit: number = 3): Promise<BlogPost[]> {
       },
     },
   });
-
-  } catch (error) {
-    console.error("Error fetching blog posts:", error);
-    return [];
 
   return posts;
 }
@@ -378,10 +363,6 @@ export async function getAllBlogPosts(): Promise<BlogPost[]> {
       },
     },
   });
-
-  } catch (error) {
-    console.error("Error fetching blog posts:", error);
-    return [];
 
   return posts;
 }
