@@ -30,10 +30,10 @@ export function SignOutButton({ className }: SignOutButtonProps) {
       disabled={isLoading}
       variant="outline"
       size="sm"
-      className={cn("w-full", className)}
+      className={cn("gap-2", className)}
     >
       <LogOut className="h-4 w-4" />
-      {isLoading ? "Signing out..." : "Sign out"}
+      <span>{isLoading ? "Signing out..." : "Sign Out"}</span>
     </Button>
   );
 }
