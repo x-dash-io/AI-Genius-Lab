@@ -33,7 +33,7 @@ export async function PATCH(
           error: {
             message: "Invalid request data",
             code: "VALIDATION_ERROR",
-            details: validationResult.error.errors,
+            details: validationResult.error.issues,
           },
         },
         { status: 400 }
@@ -81,6 +81,18 @@ export async function DELETE(
     // Get review first to check ownership
     const { getReviewById } = await import("@/lib/reviews");
     const review = await getReviewById(reviewId);
+
+    if (!review) {
+      return NextResponse.json(
+        {
+          error: {
+            message: "Review not found",
+            code: "NOT_FOUND",
+          },
+        },
+        { status: 404 }
+      );
+    }
     
     // Verify user owns this review (authorization check)
     if (review.userId !== user.id) {

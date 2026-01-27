@@ -67,18 +67,7 @@ export async function POST(request: NextRequest) {
       // Create PayPal subscription
       const appUrl = process.env.NEXTAUTH_URL;
       if (!appUrl) {
-        if (process.env.NODE_ENV === "production") {
-          throw new Error("NEXTAUTH_URL environment variable is required");
-        }
-        return NextResponse.json(
-          {
-            error: {
-              message: "Server configuration error: NEXTAUTH_URL not set",
-              code: "CONFIGURATION_ERROR",
-            },
-          },
-          { status: 500 }
-        );
+        throw new Error("Server configuration error: NEXTAUTH_URL not set");
       }
       const { subscriptionId: paypalSubscriptionId, approvalUrl } = await createPayPalSubscription({
         planType: sanitizedPlanType,

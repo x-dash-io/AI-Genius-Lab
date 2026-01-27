@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
           error: {
             message: "courseId is required",
             code: "VALIDATION_ERROR",
-            details: validationResult.error.errors,
+            details: validationResult.error.issues,
           },
         },
         { status: 400 }
