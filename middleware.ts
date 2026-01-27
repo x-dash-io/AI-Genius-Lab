@@ -67,12 +67,13 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(signInUrl);
     }
 
-    // Prevent admin users from accessing customer-only pages
-    // Admins should use /admin routes, not customer dashboard/library/profile/activity
-    const customerOnlyRoutes = ["/dashboard", "/library", "/activity", "/profile"];
+    // Prevent admin users from accessing customer-only pages (but allow /profile)
+    // Admins should use /admin routes for dashboard/library/activity
+    const customerOnlyRoutes = ["/dashboard", "/library", "/activity"];
     const isCustomerOnlyRoute = customerOnlyRoutes.some((route) => pathname.startsWith(route));
 
-    if (isCustomerOnlyRoute && token.role === "admin") {
+    // Only redirect if it's a customer-only route AND user is admin AND not accessing profile
+    if (isCustomerOnlyRoute && token.role === "admin" && !pathname.startsWith("/profile")) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
   }

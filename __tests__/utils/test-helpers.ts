@@ -116,8 +116,10 @@ export async function createTestLesson(
   title: string = "Test Lesson",
   contentType: "video" | "audio" | "pdf" | "link" | "file" = "video"
 ) {
+  const lessonId = `lesson_test_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
   const lesson = await prisma.lesson.create({
     data: {
+      id: lessonId,
       sectionId,
       title,
       sortOrder: 0,
