@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Crown, Calendar, CreditCard, ExternalLink, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,7 @@ export function ProfileSubscription({ userId }: ProfileSubscriptionProps) {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSubscription();
@@ -35,13 +37,17 @@ export function ProfileSubscription({ userId }: ProfileSubscriptionProps) {
 
   const fetchSubscription = async () => {
     try {
+      setError(null);
       const response = await fetch("/api/subscription");
       if (response.ok) {
         const data = await response.json();
         setSubscription(data.subscription);
+      } else {
+        throw new Error("Failed to fetch subscription");
       }
     } catch (error) {
       console.error("Failed to fetch subscription:", error);
+      setError("Unable to load subscription data. Please refresh the page.");
     } finally {
       setLoading(false);
     }
@@ -123,7 +129,7 @@ export function ProfileSubscription({ userId }: ProfileSubscriptionProps) {
     );
   }
 
-  if (!subscription) {
+  if (!subscription && !error) {
     return (
       <Card>
         <CardHeader>
@@ -151,6 +157,33 @@ export function ProfileSubscription({ userId }: ProfileSubscriptionProps) {
         </CardContent>
       </Card>
     );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Crown className="h-5 w-5" />
+            Premium Subscription
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+          <Button onClick={fetchSubscription} variant="outline" className="w-full">
+            Try Again
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!subscription) {
+    // This should never happen because we handle error case above
+    return null;
   }
 
   const isActive = subscription.status === "active";

@@ -29,14 +29,16 @@ export const TEST_COURSE = {
 /**
  * Create a test user in the database
  */
-export async function createTestUser(overrides: Partial<typeof TEST_USER> = {}) {
+export async function createTestUser(overrides: Partial<typeof TEST_USER> = {}, skipCleanup: boolean = false) {
   const userData = { ...TEST_USER, ...overrides };
   const passwordHash = await hashPassword(userData.password);
 
-  // Clean up existing test user if exists
-  await prisma.user.deleteMany({
-    where: { email: userData.email.toLowerCase() },
-  });
+  // Clean up existing test user if exists (unless skipCleanup is true)
+  if (!skipCleanup) {
+    await prisma.user.deleteMany({
+      where: { email: userData.email.toLowerCase() },
+    });
+  }
 
   return prisma.user.create({
     data: {

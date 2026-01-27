@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { prisma, withRetry } from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 
@@ -47,7 +47,7 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlan, SubscriptionPlanDetail
 };
 
 export async function getUserSubscription(userId: string) {
-  return await prisma.subscription.findFirst({
+  return await withRetry(() => prisma.subscription.findFirst({
     where: {
       userId,
       status: "active",
@@ -61,11 +61,11 @@ export async function getUserSubscription(userId: string) {
         },
       },
     },
-  });
+  }));
 }
 
 export async function hasActiveSubscription(userId: string): Promise<boolean> {
-  const subscription = await prisma.subscription.findFirst({
+  const subscription = await withRetry(() => prisma.subscription.findFirst({
     where: {
       userId,
       status: "active",
@@ -74,7 +74,7 @@ export async function hasActiveSubscription(userId: string): Promise<boolean> {
         { endDate: { gte: new Date() } },
       ],
     },
-  });
+  }));
 
   return !!subscription;
 }

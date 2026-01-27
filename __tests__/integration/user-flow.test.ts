@@ -81,12 +81,12 @@ describeMaybeSkip("User Authentication Flow", () => {
   });
 
   it("should not allow duplicate emails", async () => {
-    // First create a user
+    // First create a user (with cleanup)
     await createTestUser({ email: "auth-test@example.com" });
     
-    // Then try to create another with the same email
+    // Then try to create another with the same email (skip cleanup to test duplicate)
     await expect(
-      createTestUser({ email: "auth-test@example.com" })
+      createTestUser({ email: "auth-test@example.com" }, true)
     ).rejects.toThrow();
   });
 });
