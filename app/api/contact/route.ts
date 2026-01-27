@@ -43,7 +43,11 @@ export async function POST(request: NextRequest) {
 
     // Send email to support team
     const { siteConfig } = await import("@/lib/config");
+    // Get support email from environment or config
     const supportEmail = process.env.SUPPORT_EMAIL || siteConfig.links.email;
+    if (!supportEmail && process.env.NODE_ENV === "production") {
+      logger.warn("SUPPORT_EMAIL not set, using default from config");
+    }
     
     await sendEmail({
       to: supportEmail,
@@ -101,7 +105,7 @@ export async function POST(request: NextRequest) {
           
           <p style="color: #333; line-height: 1.6;">
             In the meantime, you might find answers to common questions in our 
-            <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/faq" style="color: #f59e0b; text-decoration: none;">FAQ page</a>.
+            <a href="${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000"}/faq" style="color: #f59e0b; text-decoration: none;">FAQ page</a>.
           </p>
           
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">

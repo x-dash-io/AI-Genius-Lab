@@ -1,20 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPayPalWebhook } from "@/lib/paypal";
+import { checkRateLimit } from "@/lib/api-helpers";
+import type { PayPalWebhookEvent } from "@/lib/paypal-types";
+import { logger } from "@/lib/logger";
 
-type PayPalEvent = {
-  event_type?: string;
-  resource?: {
-    id?: string;
-    supplementary_data?: {
-      related_ids?: {
-        order_id?: string;
-      };
-    };
-  };
-};
-
-function getOrderId(event: PayPalEvent) {
+function getOrderId(event: PayPalWebhookEvent): string | null {
   return (
     event.resource?.supplementary_data?.related_ids?.order_id ??
     event.resource?.id ??
@@ -23,11 +14,17 @@ function getOrderId(event: PayPalEvent) {
 }
 
 export async function POST(request: Request) {
+  // Rate limiting for webhook endpoint (more lenient for webhooks)
+  const rateLimitResponse = await checkRateLimit(request as any, "api");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const bodyText = await request.text();
-    const event = JSON.parse(bodyText) as PayPalEvent;
+    const event = JSON.parse(bodyText) as PayPalWebhookEvent;
 
-    console.log(`[WEBHOOK] PayPal event received: ${event.event_type}`);
+    logger.info("PayPal webhook event received", { eventType: event.event_type });
 
     const transmissionId = request.headers.get("paypal-transmission-id");
     const transmissionTime = request.headers.get("paypal-transmission-time");
@@ -42,11 +39,11 @@ export async function POST(request: Request) {
       !certUrl ||
       !authAlgo
     ) {
-      console.error("[WEBHOOK] Missing PayPal headers");
+      logger.error("Missing PayPal webhook headers", { transmissionId });
       return NextResponse.json({ error: "Missing PayPal headers" }, { status: 400 });
     }
 
-    console.log(`[WEBHOOK] Verifying webhook signature...`);
+    logger.debug("Verifying PayPal webhook signature", { transmissionId });
     const verified = await verifyPayPalWebhook({
       transmissionId,
       transmissionTime,
@@ -57,89 +54,141 @@ export async function POST(request: Request) {
     });
 
     if (!verified) {
-      console.error("[WEBHOOK] Invalid signature verification failed");
+      logger.error("PayPal webhook signature verification failed", { transmissionId });
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
-    console.log(`[WEBHOOK] Signature verified successfully`);
+    logger.info("PayPal webhook signature verified", { transmissionId });
 
     if (
       event.event_type !== "PAYMENT.CAPTURE.COMPLETED" &&
       event.event_type !== "CHECKOUT.ORDER.APPROVED"
     ) {
-      console.log(`[WEBHOOK] Ignoring event type: ${event.event_type}`);
+      logger.debug("Ignoring PayPal webhook event type", { eventType: event.event_type });
       return NextResponse.json({ received: true });
     }
 
     const orderId = getOrderId(event);
     if (!orderId) {
-      console.error("[WEBHOOK] Missing order id in event");
+      logger.error("Missing order ID in PayPal webhook event", { eventType: event.event_type });
       return NextResponse.json({ error: "Missing order id" }, { status: 400 });
     }
 
-    console.log(`[WEBHOOK] Looking up purchase for order: ${orderId}`);
+    logger.info("Processing PayPal webhook", { orderId, eventType: event.event_type });
 
-    const purchase = await prisma.purchase.findFirst({
-      where: { providerRef: orderId },
-    });
+    // Use transaction to prevent race condition with capture endpoint
+    const result = await prisma.$transaction(async (tx) => {
+      // Find purchase within transaction
+      const purchase = await tx.purchase.findFirst({
+        where: { providerRef: orderId },
+        include: { Course: true },
+      });
 
-    if (!purchase) {
-      console.error(`[WEBHOOK] Purchase not found for orderId: ${orderId}`);
-      return NextResponse.json({ received: true });
-    }
+      if (!purchase) {
+        logger.error("Purchase not found for PayPal order", { orderId });
+        return { success: false, alreadyProcessed: false };
+      }
 
-    if (purchase.status === "paid") {
-      console.warn(`[WEBHOOK] Purchase ${purchase.id} already marked as paid`);
-      return NextResponse.json({ received: true });
-    }
+      // Check if already processed (idempotency check within transaction)
+      if (purchase.status === "paid") {
+        logger.warn("Purchase already processed", { purchaseId: purchase.id, orderId });
+        return { success: true, alreadyProcessed: true, purchase };
+      }
 
-    console.log(`[WEBHOOK] Updating purchase ${purchase.id} status to paid`);
-    await prisma.purchase.update({
-      where: { id: purchase.id },
-      data: { status: "paid" },
-    });
-    console.log(`[WEBHOOK] Purchase ${purchase.id} status updated successfully`);
+      logger.info("Updating purchase status", { purchaseId: purchase.id, orderId });
+      
+      // Update purchase status atomically
+      await tx.purchase.update({
+        where: { id: purchase.id },
+        data: { status: "paid" },
+      });
+      logger.info("Purchase status updated", { purchaseId: purchase.id });
 
-    // Fetch course to check inventory
-    console.log(`[WEBHOOK] Fetching course ${purchase.courseId} for inventory check`);
-    const courseForInventory = await prisma.course.findUnique({
-      where: { id: purchase.courseId },
-      select: { inventory: true },
-    });
+      // Decrement inventory atomically with validation
+      if (purchase.Course.inventory !== null) {
+        logger.debug("Decrementing course inventory", { courseId: purchase.courseId });
+        const updatedCourse = await tx.course.updateMany({
+          where: {
+            id: purchase.courseId,
+            inventory: { gt: 0 }, // Only update if inventory > 0
+          },
+          data: {
+            inventory: { decrement: 1 },
+          },
+        });
 
-    // Decrement inventory if course has limited inventory
-    if (courseForInventory && courseForInventory.inventory !== null) {
-      console.log(`[WEBHOOK] Decrementing inventory for course ${purchase.courseId} from ${courseForInventory.inventory}`);
-      await prisma.course.update({
-        where: { id: purchase.courseId },
+        if (updatedCourse.count === 0) {
+          logger.warn("Course out of stock during webhook processing", { courseId: purchase.courseId });
+          // Don't throw - allow enrollment but log warning
+        }
+      }
+
+      // Create/update enrollment
+      logger.debug("Creating/updating enrollment", { userId: purchase.userId, courseId: purchase.courseId });
+      await tx.enrollment.upsert({
+        where: {
+          userId_courseId: {
+            userId: purchase.userId,
+            courseId: purchase.courseId,
+          },
+        },
+        update: { purchaseId: purchase.id },
+        create: {
+          id: `enrollment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+          userId: purchase.userId,
+          courseId: purchase.courseId,
+          purchaseId: purchase.id,
+        },
+      });
+      logger.debug("Enrollment created/updated", { userId: purchase.userId, courseId: purchase.courseId });
+
+      // Create payment record
+      logger.debug("Creating payment record", { purchaseId: purchase.id });
+      await tx.payment.create({
         data: {
-          inventory: {
-            decrement: 1,
+          id: `payment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+          userId: purchase.userId,
+          purchaseId: purchase.id,
+          provider: "paypal",
+          providerRef: orderId,
+          amountCents: purchase.amountCents,
+          currency: purchase.currency,
+          status: "paid",
+        },
+      });
+
+      // Create activity log
+      logger.debug("Creating activity log", { userId: purchase.userId });
+      await tx.activityLog.create({
+        data: {
+          id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+          userId: purchase.userId,
+          type: "purchase_completed",
+          metadata: {
+            purchaseId: purchase.id,
+            courseId: purchase.courseId,
           },
         },
       });
+
+      return { success: true, alreadyProcessed: false, purchase };
+    });
+
+    // If already processed, return success
+    if (result.alreadyProcessed) {
+      return NextResponse.json({ received: true });
     }
 
-    console.log(`[WEBHOOK] Creating/updating enrollment for user ${purchase.userId} in course ${purchase.courseId}`);
-    const enrollment = await prisma.enrollment.upsert({
-      where: {
-        userId_courseId: {
-          userId: purchase.userId,
-          courseId: purchase.courseId,
-        },
-      },
-      update: { purchaseId: purchase.id },
-      create: {
-        id: `enrollment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        userId: purchase.userId,
-        courseId: purchase.courseId,
-        purchaseId: purchase.id,
-      },
-    });
-    console.log(`[WEBHOOK] Enrollment ${enrollment.id} created/updated successfully`);
+    // If processing failed, return success to avoid redelivery (but log error)
+    if (!result.success || !result.purchase) {
+      logger.error("Failed to process purchase in webhook", { orderId });
+      return NextResponse.json({ received: true });
+    }
 
-    // Send email notifications
-    console.log(`[WEBHOOK] Fetching user and course details for email`);
+    const purchase = result.purchase;
+
+    // Send email notifications (outside transaction - non-critical)
+    logger.debug("Fetching user and course details for email", { purchaseId: purchase.id });
     const user = await prisma.user.findUnique({
       where: { id: purchase.userId },
       select: { email: true },
@@ -152,58 +201,50 @@ export async function POST(request: Request) {
 
     if (user && course) {
       try {
-        console.log(`[WEBHOOK] Sending confirmation emails to ${user.email}`);
+        logger.info("Sending purchase confirmation emails", { userId: purchase.userId, email: user.email });
         const { sendPurchaseConfirmationEmail, sendEnrollmentEmail } = await import("@/lib/email");
         await Promise.all([
           sendPurchaseConfirmationEmail(user.email, course.title, purchase.amountCents),
           sendEnrollmentEmail(user.email, course.title),
         ]);
-        console.log(`[WEBHOOK] Emails sent successfully`);
+        logger.info("Purchase confirmation emails sent", { userId: purchase.userId });
       } catch (error) {
-        console.error("[WEBHOOK] Failed to send email notifications:", error);
+        logger.error("Failed to send email notifications", { userId: purchase.userId }, error instanceof Error ? error : undefined);
         // Don't fail the webhook if email fails
       }
     } else {
-      console.warn(`[WEBHOOK] Could not send emails - user or course not found`);
+      logger.warn("Could not send emails - user or course not found", { userId: purchase.userId, courseId: purchase.courseId });
     }
 
-    console.log(`[WEBHOOK] Creating payment record`);
-    await prisma.payment.create({
-      data: {
-        id: `payment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        userId: purchase.userId,
-        purchaseId: purchase.id,
-        provider: "paypal",
-        providerRef: orderId,
-        amountCents: purchase.amountCents,
-        currency: purchase.currency,
-        status: "paid",
-      },
-    });
-
-    console.log(`[WEBHOOK] Creating activity log`);
-    await prisma.activityLog.create({
-      data: {
-        id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        userId: purchase.userId,
-        type: "purchase_completed",
-        metadata: {
-          purchaseId: purchase.id,
-          courseId: purchase.courseId,
-        },
-      },
-    });
-
-    console.log(`[WEBHOOK] Purchase ${purchase.id} processing completed successfully`);
+    logger.info("PayPal webhook processing completed", { purchaseId: purchase.id, orderId });
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("[WEBHOOK] Critical error processing webhook:", error);
+    logger.error("Critical error processing PayPal webhook", {}, error instanceof Error ? error : undefined);
     if (error instanceof Error) {
-      console.error("[WEBHOOK] Error message:", error.message);
-      console.error("[WEBHOOK] Error stack:", error.stack);
+      
+      // Return 500 for transient errors to trigger PayPal retry
+      // Return 200 for business logic errors to avoid infinite retries
+      const isTransientError = 
+        error.message.includes("connection") ||
+        error.message.includes("timeout") ||
+        error.message.includes("ECONNREFUSED") ||
+        error.message.includes("ETIMEDOUT");
+      
+      if (isTransientError) {
+        logger.warn("Transient error in PayPal webhook, will retry", {}, error);
+        return NextResponse.json(
+          { error: "Transient error, will retry" },
+          { status: 500 }
+        );
+      }
     }
-    // Still return success to PayPal to avoid redelivery
-    // The error is logged and can be investigated
-    return NextResponse.json({ received: true, error: "Processing error logged" }, { status: 200 });
+    
+    // For non-transient errors, return 200 to avoid infinite retries
+    // But log the error for investigation
+    logger.error("Non-transient error in PayPal webhook", {}, error instanceof Error ? error : undefined);
+    return NextResponse.json(
+      { received: true, error: "Processing error logged" },
+      { status: 200 }
+    );
   }
 }

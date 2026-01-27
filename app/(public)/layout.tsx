@@ -1,5 +1,4 @@
-import { PublicLayoutClient } from "@/components/layout/PublicLayoutClient";
-import { AppLayoutClient } from "@/components/layout/AppLayoutClient";
+import { UnifiedLayout } from "@/components/layout/UnifiedLayout";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -10,11 +9,8 @@ export default async function PublicLayout({
 }) {
   const session = await getServerSession(authOptions);
   
-  // For logged-in users, show app layout with sidebar
-  if (session?.user) {
-    return <AppLayoutClient>{children}</AppLayoutClient>;
-  }
-  
-  // For guests, show public layout with top bar
-  return <PublicLayoutClient>{children}</PublicLayoutClient>;
+  // UnifiedLayout will automatically determine the correct layout type based on session
+  // For logged-in users, it will show customer/admin layout
+  // For guests, it will show public layout
+  return <UnifiedLayout layoutType="public">{children}</UnifiedLayout>;
 }

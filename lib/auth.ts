@@ -174,7 +174,7 @@ export const authOptions: NextAuthOptions = {
       }
       
       // Refresh user data from DB periodically (every 1 minute) or on update trigger
-      const REFRESH_INTERVAL = 1 * 60 * 1000; // 1 minute - more frequent to catch account switches
+      const REFRESH_INTERVAL = 1 * 60 * 1000; // 1 minute - more frequent to catch account switches and role changes
       const shouldRefresh = trigger === "update" || 
         !token.lastRefresh || 
         (Date.now() - (token.lastRefresh as number)) > REFRESH_INTERVAL;
@@ -193,6 +193,17 @@ export const authOptions: NextAuthOptions = {
               return {};
             }
             
+            // Check if role has changed - critical for multi-device sync
+            // If role changed, invalidate token to force re-authentication (security best practice)
+            const roleChanged = token.role !== freshUser.role;
+            if (roleChanged) {
+              console.warn(`Role change detected in JWT callback: ${token.role} -> ${freshUser.role}. Invalidating token for security.`);
+              // Return empty token to force re-authentication when role changes
+              // This prevents privilege escalation attacks
+              return {};
+            }
+            
+            // Always update token with fresh data from database
             token.id = freshUser.id;
             token.name = freshUser.name;
             token.email = freshUser.email;
@@ -206,6 +217,7 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error("Error refreshing user in JWT callback:", error);
+          // Don't invalidate token on error, just log it
         }
       }
       

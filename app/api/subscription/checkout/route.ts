@@ -20,7 +20,21 @@ export async function POST(request: NextRequest) {
     }
 
     const planType = planId as SubscriptionPlan;
-    const appUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+    const appUrl = process.env.NEXTAUTH_URL;
+    if (!appUrl) {
+      if (process.env.NODE_ENV === "production") {
+        throw new Error("NEXTAUTH_URL environment variable is required");
+      }
+      return NextResponse.json(
+        {
+          error: {
+            message: "Server configuration error: NEXTAUTH_URL not set",
+            code: "CONFIGURATION_ERROR",
+          },
+        },
+        { status: 500 }
+      );
+    }
     
     // Create PayPal subscription
     // We pass the subscription ID as the custom_id to track it back in webhooks if needed

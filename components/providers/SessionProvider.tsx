@@ -8,8 +8,9 @@ export function SessionProvider({ children, session }: { children: ReactNode, se
   return (
     <NextAuthSessionProvider
       session={session}
-      refetchInterval={5 * 60}
+      refetchInterval={1 * 60} // Reduced from 5 minutes to 1 minute for better session sync
       refetchOnWindowFocus={true}
+      refetchOnMount={true} // Always refetch on mount to ensure fresh session
     >
       {children}
     </NextAuthSessionProvider>

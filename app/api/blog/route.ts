@@ -3,6 +3,27 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { isAdmin } from "@/lib/access";
 import { prisma } from "@/lib/prisma";
+import { sanitizeBlogContent, sanitizeText } from "@/lib/sanitize";
+import { checkRateLimit, createStandardErrorResponse } from "@/lib/api-helpers";
+import { z } from "zod";
+
+const blogPostSchema = z.object({
+  title: z.string().min(1).max(200),
+  slug: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/),
+  excerpt: z.string().max(500).optional(),
+  content: z.string().min(1),
+  coverImage: z.string().url().optional(),
+  images: z.array(z.object({
+    url: z.string().url(),
+    alt: z.string().optional(),
+    caption: z.string().optional(),
+  })).optional(),
+  author: z.string().max(100).optional(),
+  category: z.string().max(50).optional(),
+  tags: z.array(z.string()).optional(),
+  featured: z.boolean().optional(),
+  published: z.boolean().optional(),
+});
 
 export async function GET() {
   try {
@@ -30,25 +51,57 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(posts);
+    // Sanitize content before returning
+    const sanitizedPosts = posts.map(post => ({
+      ...post,
+      content: sanitizeBlogContent(post.content || ""),
+      excerpt: post.excerpt ? sanitizeText(post.excerpt) : post.excerpt,
+    }));
+
+    return NextResponse.json(sanitizedPosts);
   } catch (error) {
-    console.error("Error fetching blog posts:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch blog posts" },
-      { status: 500 }
-    );
+    return createStandardErrorResponse(error, "Failed to fetch blog posts");
   }
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const rateLimitResponse = await checkRateLimit(request, "api");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const session = await getServerSession(authOptions);
     
     if (!session?.user || !isAdmin(session.user.role)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        {
+          error: {
+            message: "Unauthorized",
+            code: "UNAUTHORIZED",
+          },
+        },
+        { status: 401 }
+      );
     }
 
     const body = await request.json();
+    const validationResult = blogPostSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      return NextResponse.json(
+        {
+          error: {
+            message: "Invalid request data",
+            code: "VALIDATION_ERROR",
+            details: validationResult.error.errors,
+          },
+        },
+        { status: 400 }
+      );
+    }
+
     const {
       title,
       slug,
@@ -61,15 +114,7 @@ export async function POST(request: NextRequest) {
       tags,
       featured,
       published,
-    } = body;
-
-    // Validate required fields
-    if (!title || !slug || !content) {
-      return NextResponse.json(
-        { error: "Title, slug, and content are required" },
-        { status: 400 }
-      );
-    }
+    } = validationResult.data;
 
     // Check if slug is unique
     const existingPost = await prisma.blogPost.findUnique({
@@ -78,21 +123,30 @@ export async function POST(request: NextRequest) {
 
     if (existingPost) {
       return NextResponse.json(
-        { error: "A post with this slug already exists" },
+        {
+          error: {
+            message: "A post with this slug already exists",
+            code: "CONFLICT",
+          },
+        },
         { status: 409 }
       );
     }
 
+    // Sanitize content before storing
+    const sanitizedContent = sanitizeBlogContent(content);
+    const sanitizedExcerpt = excerpt ? sanitizeText(excerpt) : excerpt;
+
     // Calculate reading time (simple estimation: 200 words per minute)
-    const wordCount = content.split(/\s+/).length;
+    const wordCount = sanitizedContent.split(/\s+/).length;
     const readingTime = Math.ceil(wordCount / 200);
 
     const post = await prisma.blogPost.create({
       data: {
         title,
         slug,
-        excerpt,
-        content,
+        excerpt: sanitizedExcerpt,
+        content: sanitizedContent,
         coverImage,
         author,
         category,
@@ -102,10 +156,10 @@ export async function POST(request: NextRequest) {
         publishedAt: published ? new Date() : null,
         readingTime,
         images: images && images.length > 0 ? {
-          create: images.map((img: any, index: number) => ({
+          create: images.map((img, index: number) => ({
             url: img.url,
-            alt: img.alt,
-            caption: img.caption,
+            alt: img.alt ? sanitizeText(img.alt) : img.alt,
+            caption: img.caption ? sanitizeText(img.caption) : img.caption,
             sortOrder: index,
           })),
         } : undefined,
@@ -114,10 +168,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(post, { status: 201 });
   } catch (error) {
-    console.error("Error creating blog post:", error);
-    return NextResponse.json(
-      { error: "Failed to create blog post" },
-      { status: 500 }
-    );
+    return createStandardErrorResponse(error, "Failed to create blog post");
   }
 }

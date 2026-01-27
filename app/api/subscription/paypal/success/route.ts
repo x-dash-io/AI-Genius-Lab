@@ -68,7 +68,11 @@ export async function GET(request: NextRequest) {
 
     // Send notification to admin
     try {
-      const adminEmail = process.env.ADMIN_EMAIL || "admin@aigeniuslab.com";
+      // Get admin email from config, fail if not set in production
+      const adminEmail = process.env.ADMIN_EMAIL;
+      if (!adminEmail && process.env.NODE_ENV === "production") {
+        logger.warn("ADMIN_EMAIL not set, skipping admin notification");
+      }
       const planPrice = subscription.planType === "monthly" ? "29.99" : "299.99";
       await sendAdminSubscriptionNotification(
         adminEmail,

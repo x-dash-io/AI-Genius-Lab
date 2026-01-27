@@ -48,6 +48,8 @@ export const SUBSCRIPTION_PLANS: Record<SubscriptionPlan, SubscriptionPlanDetail
 };
 
 export async function getUserSubscription(userId: string) {
+  // Note: Using findFirst because user can have multiple subscriptions (different statuses)
+  // but we want the active one. If schema had unique constraint on userId+status, we'd use findUnique
   return await withRetry(() => prisma.subscription.findFirst({
     where: {
       userId,
@@ -66,6 +68,8 @@ export async function getUserSubscription(userId: string) {
 }
 
 export async function hasActiveSubscription(userId: string): Promise<boolean> {
+  // Note: Using findFirst because we're checking for existence, not uniqueness
+  // The OR condition makes this a complex query that doesn't match a unique constraint
   const subscription = await withRetry(() => prisma.subscription.findFirst({
     where: {
       userId,
@@ -131,6 +135,8 @@ export async function createSubscription(
   providerRef?: string
 ) {
   // Check if user already has an active subscription
+  // Note: Using findFirst because schema has unique constraint on userId+status,
+  // but we're only checking for "active" status, so findFirst is appropriate
   const existingSubscription = await prisma.subscription.findFirst({
     where: {
       userId,
@@ -214,20 +220,22 @@ export async function reactivateSubscription(subscriptionId: string, userId: str
 }
 
 export async function enrollUserInAllCourses(userId: string, subscriptionId: string) {
-  // Get all published courses
-  const courses = await prisma.course.findMany({
-    where: {
-      isPublished: true,
-    },
-    select: {
-      id: true,
-    },
-  });
+  // Use transaction to ensure atomic enrollment
+  return await prisma.$transaction(async (tx) => {
+    // Get all published courses within transaction
+    const courses = await tx.course.findMany({
+      where: {
+        isPublished: true,
+      },
+      select: {
+        id: true,
+      },
+    });
 
-  // Enroll user in all courses via subscription
-  const enrollments = await Promise.all(
-    courses.map((course) =>
-      prisma.enrollment.upsert({
+    // Enroll user in all courses via subscription (sequential to avoid deadlocks)
+    const enrollments = [];
+    for (const course of courses) {
+      const enrollment = await tx.enrollment.upsert({
         where: {
           userId_courseId: {
             userId,
@@ -246,11 +254,12 @@ export async function enrollUserInAllCourses(userId: string, subscriptionId: str
           accessType: "subscription",
           subscriptionId,
         },
-      })
-    )
-  );
+      });
+      enrollments.push(enrollment);
+    }
 
-  return enrollments;
+    return enrollments;
+  });
 }
 
 export async function removeSubscriptionAccess(userId: string) {

@@ -96,18 +96,18 @@ model Course {
 }
 
 model Enrollment {
-  id             String       @id
+  id             String        @id
   userId         String
   courseId       String
-  purchaseId     String?      @unique
-  subscriptionId String?      @unique
-  accessType     AccessType   @default(purchased)
-  grantedAt      DateTime     @default(now())
+  purchaseId     String?       @unique
+  subscriptionId String?       @unique
+  accessType     AccessType    @default(purchased)
+  grantedAt      DateTime      @default(now())
   expiresAt      DateTime?
-  Course         Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  Purchase       Purchase?    @relation(fields: [purchaseId], references: [id])
+  Course         Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  Purchase       Purchase?     @relation(fields: [purchaseId], references: [id])
   Subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  User           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
 }
@@ -169,19 +169,19 @@ model LessonContent {
 }
 
 model Payment {
-  id          String          @id
-  userId      String
-  purchaseId  String?
+  id             String          @id
+  userId         String
+  purchaseId     String?
   subscriptionId String?
-  provider    PaymentProvider
-  providerRef String?
-  amountCents Int
-  currency    String          @default("usd")
-  status      PurchaseStatus  @default(pending)
-  createdAt   DateTime        @default(now())
-  Purchase    Purchase?       @relation(fields: [purchaseId], references: [id])
-  Subscription Subscription?  @relation(fields: [subscriptionId], references: [id])
-  User        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider       PaymentProvider
+  providerRef    String?
+  amountCents    Int
+  currency       String          @default("usd")
+  status         PurchaseStatus  @default(pending)
+  createdAt      DateTime        @default(now())
+  Purchase       Purchase?       @relation(fields: [purchaseId], references: [id])
+  Subscription   Subscription?   @relation(fields: [subscriptionId], references: [id])
+  User           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Progress {
@@ -276,16 +276,16 @@ model Subscription {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  email         String        @unique
+  id            String         @id @default(cuid())
+  email         String         @unique
   name          String?
   image         String?
   bio           String?
   emailVerified DateTime?
   passwordHash  String?
-  role          Role          @default(customer)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  role          Role           @default(customer)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   Account       Account[]
   ActivityLog   ActivityLog[]
   Certificate   Certificate[]
@@ -305,6 +305,19 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model WebhookLog {
+  id             String   @id @default(cuid())
+  transmissionId String   @unique
+  eventType      String
+  provider       String   @default("paypal")
+  processedAt    DateTime @default(now())
+  payload        Json?
+
+  @@index([transmissionId])
+  @@index([eventType])
+  @@index([processedAt])
 }
 
 enum AccessType {
@@ -351,26 +364,26 @@ enum SubscriptionStatus {
 }
 
 model BlogPost {
-  id           String    @id @default(cuid())
-  title        String
-  slug         String    @unique
-  excerpt      String?
-  content      String
-  coverImage   String?
-  images       BlogImage[]
-  published    Boolean   @default(false)
-  publishedAt  DateTime?
-  updatedAt    DateTime  @updatedAt
-  createdAt    DateTime  @default(now())
-  author       String?
-  category     String?
-  tags         String[]
-  featured     Boolean   @default(false)
-  views        Int       @default(0)
-  readingTime  Int?      // in minutes
-  ratingAvg    Float     @default(0)
-  ratingCount  Int       @default(0)
-  reviews      BlogReview[]
+  id          String       @id @default(cuid())
+  title       String
+  slug        String       @unique
+  excerpt     String?
+  content     String
+  coverImage  String?
+  images      BlogImage[]
+  published   Boolean      @default(false)
+  publishedAt DateTime?
+  updatedAt   DateTime     @updatedAt
+  createdAt   DateTime     @default(now())
+  author      String?
+  category    String?
+  tags        String[]
+  featured    Boolean      @default(false)
+  views       Int          @default(0)
+  readingTime Int? // in minutes
+  ratingAvg   Float        @default(0)
+  ratingCount Int          @default(0)
+  reviews     BlogReview[]
 }
 
 model BlogImage {
@@ -381,7 +394,7 @@ model BlogImage {
   caption   String?
   sortOrder Int      @default(0)
   post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  
+
   @@index([postId])
 }
 
@@ -389,13 +402,13 @@ model BlogReview {
   id        String   @id @default(cuid())
   postId    String
   userId    String
-  rating    Int      // 1-5 stars
+  rating    Int // 1-5 stars
   comment   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@unique([postId, userId])
   @@index([postId])
   @@index([userId])

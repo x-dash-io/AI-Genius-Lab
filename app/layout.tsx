@@ -10,8 +10,10 @@ import { CartProvider } from "@/components/cart/CartProvider";
 import { ConfirmDialogProvider } from "@/components/ui/confirm-dialog";
 import { DevIndicatorRemover } from "@/components/DevIndicatorRemover";
 import { SessionMonitor } from "@/components/auth/SessionMonitor";
+import { SessionHealthCheck } from "@/components/auth/SessionHealthCheck";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateOrganizationSchema } from "@/lib/seo/schemas";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -52,7 +54,7 @@ export default async function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(organizationSchema),
+            __html: JSON.stringify(organizationSchema).replace(/</g, "\\u003c"),
           }}
         />
       </head>
@@ -70,17 +72,20 @@ export default async function RootLayout({
         }}
       >
         <ThemeProvider>
-          <SessionProvider session={session}>
-            <SessionMonitor />
-            <CartProvider>
-              <ConfirmDialogProvider>
-                <ToastProvider>
-                  <DevIndicatorRemover />
-                  {children}
-                </ToastProvider>
-              </ConfirmDialogProvider>
-            </CartProvider>
-          </SessionProvider>
+          <ErrorBoundary>
+            <SessionProvider session={session}>
+              <SessionMonitor />
+              <SessionHealthCheck />
+              <CartProvider>
+                <ConfirmDialogProvider>
+                  <ToastProvider>
+                    <DevIndicatorRemover />
+                    {children}
+                  </ToastProvider>
+                </ConfirmDialogProvider>
+              </CartProvider>
+            </SessionProvider>
+          </ErrorBoundary>
         </ThemeProvider>
         <Analytics />
         {/* Hide Next.js development indicator - works in both dev and production */}

@@ -3,9 +3,6 @@ import { verifyPayPalWebhook } from "@/lib/paypal";
 import { prisma } from "@/lib/prisma";
 import { updateSubscriptionExpiry } from "@/lib/subscription";
 
-// Store processed webhook IDs to prevent duplicates
-const processedWebhooks = new Set<string>();
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text();
@@ -19,8 +16,17 @@ export async function POST(request: NextRequest) {
     const certUrl = headers["paypal-cert-id"];
     const authAlgo = headers["paypal-auth-algo"];
 
-    // Idempotency check - prevent processing duplicate webhooks
-    if (processedWebhooks.has(transmissionId)) {
+    if (!transmissionId) {
+      console.error("Missing transmission ID");
+      return NextResponse.json({ error: "Missing transmission ID" }, { status: 400 });
+    }
+
+    // Database-based idempotency check - prevent processing duplicate webhooks
+    const existingWebhook = await prisma.webhookLog.findUnique({
+      where: { transmissionId },
+    });
+
+    if (existingWebhook) {
       console.log("Webhook already processed:", transmissionId);
       return NextResponse.json({ received: true, status: "duplicate" });
     }
@@ -43,21 +49,30 @@ export async function POST(request: NextRequest) {
     const eventType = webhookEvent.event_type;
     const subscriptionData = webhookEvent.resource;
 
-    // Find our subscription using PayPal's subscription ID
-    const subscription = await prisma.subscription.findFirst({
-      where: {
-        providerRef: subscriptionData.id,
-        provider: "paypal",
-      },
-    });
-
-    if (!subscription) {
-      console.error("Subscription not found for PayPal ID:", subscriptionData.id);
-      return NextResponse.json({ error: "Subscription not found" }, { status: 404 });
-    }
-
-    // Use database transaction for consistency
+    // Use database transaction for consistency and idempotency
     await prisma.$transaction(async (tx) => {
+      // Double-check idempotency within transaction
+      const existingWebhookInTx = await tx.webhookLog.findUnique({
+        where: { transmissionId },
+      });
+
+      if (existingWebhookInTx) {
+        console.log("Webhook already processed (within transaction):", transmissionId);
+        return; // Exit transaction early
+      }
+
+      // Find our subscription using PayPal's subscription ID
+      const subscription = await tx.subscription.findFirst({
+        where: {
+          providerRef: subscriptionData.id,
+          provider: "paypal",
+        },
+      });
+
+      if (!subscription) {
+        console.error("Subscription not found for PayPal ID:", subscriptionData.id);
+        throw new Error("Subscription not found");
+      }
       // Handle different webhook events
       switch (eventType) {
         case "BILLING.SUBSCRIPTION.ACTIVATED":
@@ -116,21 +131,28 @@ export async function POST(request: NextRequest) {
         default:
           console.log("Unhandled PayPal webhook event:", eventType);
       }
-    });
 
-    // Mark webhook as processed
-    processedWebhooks.add(transmissionId);
-    
-    // Clean up old webhook IDs (keep last 1000)
-    if (processedWebhooks.size > 1000) {
-      const entries = Array.from(processedWebhooks);
-      processedWebhooks.clear();
-      entries.slice(-500).forEach(id => processedWebhooks.add(id));
-    }
+      // Mark webhook as processed in database (within transaction)
+      await tx.webhookLog.create({
+        data: {
+          transmissionId,
+          eventType,
+          provider: "paypal",
+          payload: webhookEvent,
+        },
+      });
+    });
 
     return NextResponse.json({ received: true, eventType });
   } catch (error) {
     console.error("PayPal webhook error:", error);
+    // Return 500 to trigger PayPal retry for transient errors
+    // But return 200 for duplicate/not found to avoid infinite retries
+    if (error instanceof Error) {
+      if (error.message === "Subscription not found" || error.message.includes("already processed")) {
+        return NextResponse.json({ received: true, error: error.message }, { status: 200 });
+      }
+    }
     return NextResponse.json(
       { error: "Webhook processing failed" },
       { status: 500 }

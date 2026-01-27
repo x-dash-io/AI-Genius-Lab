@@ -27,13 +27,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Course IDs are required" }, { status: 400 });
     }
 
-    // Fetch courses
+    // Fetch courses with validation
     const courses = await prisma.course.findMany({
-      where: { id: { in: courseIds } },
+      where: { 
+        id: { in: courseIds },
+        isPublished: true, // Only allow purchase of published courses
+      },
     });
 
     if (courses.length !== courseIds.length) {
-      return NextResponse.json({ error: "Some courses not found" }, { status: 404 });
+      const foundIds = new Set(courses.map(c => c.id));
+      const missingIds = courseIds.filter(id => !foundIds.has(id));
+      return NextResponse.json({ 
+        error: "Some courses not found or not published",
+        missingCourseIds: missingIds,
+      }, { status: 404 });
+    }
+
+    // Validate courses are not deleted (check if any have null titles/descriptions)
+    const invalidCourses = courses.filter(c => !c.title || !c.slug);
+    if (invalidCourses.length > 0) {
+      return NextResponse.json({ 
+        error: "Some courses are invalid",
+        invalidCourseIds: invalidCourses.map(c => c.id),
+      }, { status: 400 });
     }
 
     // Check for existing purchases
@@ -102,7 +119,24 @@ export async function POST(request: NextRequest) {
 
     const totalAmountCents = purchases.reduce((sum, p) => sum + p.amountCents, 0);
     const purchaseIds = purchases.map((p) => p.id).join(",");
-    const appUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+    
+    // Get app URL from environment - fail if not set in production
+    const appUrl = process.env.NEXTAUTH_URL;
+    if (!appUrl) {
+      if (process.env.NODE_ENV === "production") {
+        throw new Error("NEXTAUTH_URL environment variable is required");
+      }
+      // Only allow localhost fallback in development
+      return NextResponse.json(
+        {
+          error: {
+            message: "Server configuration error: NEXTAUTH_URL not set",
+            code: "CONFIGURATION_ERROR",
+          },
+        },
+        { status: 500 }
+      );
+    }
 
     const { orderId, approvalUrl } = await createPayPalOrder({
       amountCents: totalAmountCents,

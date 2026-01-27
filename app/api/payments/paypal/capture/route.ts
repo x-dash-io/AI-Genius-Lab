@@ -1,18 +1,27 @@
 import { NextResponse } from "next/server";
 import { capturePayPalOrder } from "@/lib/paypal";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/api-helpers";
+import type { PayPalCaptureResponse } from "@/lib/paypal-types";
+import { logger } from "@/lib/logger";
 
-function getCaptureId(payload: any) {
+function getCaptureId(payload: PayPalCaptureResponse): string | null {
   return payload?.purchase_units?.[0]?.payments?.captures?.[0]?.id ?? null;
 }
 
 function getBaseUrl(requestUrl: URL): string {
   // Use NEXTAUTH_URL if available (preferred)
-  if (process.env.NEXTAUTH_URL) {
-    return process.env.NEXTAUTH_URL;
+  const nextAuthUrl = process.env.NEXTAUTH_URL;
+  if (nextAuthUrl) {
+    return nextAuthUrl;
   }
   
-  // Otherwise, construct from request URL but ensure HTTP for localhost
+  // In production, fail if NEXTAUTH_URL is not set
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("NEXTAUTH_URL environment variable is required in production");
+  }
+  
+  // Development fallback: construct from request URL but ensure HTTP for localhost
   const origin = requestUrl.origin;
   if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
     return origin.replace('https://', 'http://');
@@ -36,6 +45,12 @@ function formatPaymentMethod(provider: string | undefined): string {
 }
 
 export async function GET(request: Request) {
+  // Rate limiting for payment capture endpoint
+  const rateLimitResponse = await checkRateLimit(request as any, "api");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   const url = new URL(request.url);
   const baseUrl = getBaseUrl(url);
   const orderId = url.searchParams.get("token");
@@ -77,7 +92,7 @@ export async function GET(request: Request) {
             "Payment capture failed"
           );
         } catch (error) {
-          console.error("Failed to send failure email:", error);
+          logger.error("Failed to send purchase failure email", { userId: purchases[0].userId }, error instanceof Error ? error : undefined);
         }
       }
 
@@ -86,79 +101,99 @@ export async function GET(request: Request) {
       );
     }
 
-    // Process all purchases
-    await Promise.all(
-      purchases.map(async (purchase) => {
-        if (purchase.status !== "paid") {
-          await prisma.purchase.update({
-            where: { id: purchase.id },
-            data: { status: "paid" },
-          });
+    // Process all purchases in a transaction to prevent race conditions
+    await prisma.$transaction(async (tx) => {
+      for (const purchase of purchases) {
+        // Check if already processed (idempotency check)
+        const existingPurchase = await tx.purchase.findUnique({
+          where: { id: purchase.id },
+          select: { status: true },
+        });
 
-          // Decrement inventory if course has limited inventory
-          if (purchase.Course.inventory !== null) {
-            await prisma.course.update({
-              where: { id: purchase.courseId },
-              data: {
-                inventory: {
-                  decrement: 1,
-                },
-              },
-            });
-          }
+        if (existingPurchase?.status === "paid") {
+          continue; // Already processed, skip
+        }
 
-          await prisma.enrollment.upsert({
+        // Update purchase status atomically
+        await tx.purchase.update({
+          where: { id: purchase.id },
+          data: { status: "paid" },
+        });
+
+        // Decrement inventory atomically with validation
+        if (purchase.Course.inventory !== null) {
+          const updatedCourse = await tx.course.updateMany({
             where: {
-              userId_courseId: {
-                userId: purchase.userId,
-                courseId: purchase.courseId,
-              },
+              id: purchase.courseId,
+              inventory: { gt: 0 }, // Only update if inventory > 0
             },
-            update: { purchaseId: purchase.id },
-            create: {
-              id: `enrollment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-              userId: purchase.userId,
-              courseId: purchase.courseId,
-              purchaseId: purchase.id,
-            },
-          });
-
-          await prisma.payment.create({
             data: {
-              id: `payment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-              userId: purchase.userId,
-              purchaseId: purchase.id,
-              provider: "paypal",
-              providerRef: getCaptureId(capture) ?? orderId,
-              amountCents: purchase.amountCents,
-              currency: purchase.currency,
-              status: "paid",
+              inventory: { decrement: 1 },
             },
           });
 
-          await prisma.activityLog.create({
-            data: {
-              id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-              userId: purchase.userId,
-              type: "purchase_completed",
-              metadata: {
-                purchaseId: purchase.id,
-                courseId: purchase.courseId,
-                courseTitle: purchase.Course.title,
-                courseSlug: purchase.Course.slug,
-              },
-            },
-          });
-
-          try {
-            const { trackPurchase } = await import("@/lib/analytics");
-            trackPurchase(purchase.courseId, purchase.amountCents, purchase.userId);
-          } catch (error) {
-            console.error("Failed to track purchase analytics:", error);
+          if (updatedCourse.count === 0) {
+            throw new Error(`Course ${purchase.courseId} is out of stock`);
           }
         }
-      })
-    );
+
+        // Create/update enrollment
+        await tx.enrollment.upsert({
+          where: {
+            userId_courseId: {
+              userId: purchase.userId,
+              courseId: purchase.courseId,
+            },
+          },
+          update: { purchaseId: purchase.id },
+          create: {
+            id: `enrollment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            userId: purchase.userId,
+            courseId: purchase.courseId,
+            purchaseId: purchase.id,
+          },
+        });
+
+        // Create payment record
+        await tx.payment.create({
+          data: {
+            id: `payment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            userId: purchase.userId,
+            purchaseId: purchase.id,
+            provider: "paypal",
+            providerRef: getCaptureId(capture) ?? orderId,
+            amountCents: purchase.amountCents,
+            currency: purchase.currency,
+            status: "paid",
+          },
+        });
+
+        // Create activity log
+        await tx.activityLog.create({
+          data: {
+            id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            userId: purchase.userId,
+            type: "purchase_completed",
+            metadata: {
+              purchaseId: purchase.id,
+              courseId: purchase.courseId,
+              courseTitle: purchase.Course.title,
+              courseSlug: purchase.Course.slug,
+            },
+          },
+        });
+      }
+    });
+
+    // Track analytics outside transaction (non-critical)
+    for (const purchase of purchases) {
+      try {
+        const { trackPurchase } = await import("@/lib/analytics");
+        trackPurchase(purchase.courseId, purchase.amountCents, purchase.userId);
+      } catch (error) {
+        logger.error("Failed to track purchase analytics", { purchaseId: purchase.id }, error instanceof Error ? error : undefined);
+      }
+    }
 
     // Fetch payment for invoice
     const payment = await prisma.payment.findFirst({
@@ -199,7 +234,7 @@ export async function GET(request: Request) {
           ),
         ]);
       } catch (error) {
-        console.error("Failed to send email notifications:", error);
+        logger.error("Failed to send email notifications", { userId: purchases[0].userId }, error instanceof Error ? error : undefined);
       }
     }
 
@@ -220,52 +255,77 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/courses", baseUrl));
   }
 
-  if (purchase.status !== "paid") {
-    const capture = await capturePayPalOrder(orderId);
+  // Idempotency check - if already paid, redirect to success
+  if (purchase.status === "paid") {
+    return NextResponse.redirect(
+      new URL(`/purchase/success?purchase=${encodeURIComponent(purchase.id)}`, baseUrl)
+    );
+  }
 
-    if (capture?.status !== "COMPLETED") {
-      // Send failure email if user exists
-      const user = await prisma.user.findUnique({
-        where: { id: purchase.userId },
-        select: { email: true },
-      });
+  const capture = await capturePayPalOrder(orderId);
 
-      if (user && purchase.Course) {
-        try {
-          const { sendPurchaseFailedEmail } = await import("@/lib/email");
-          await sendPurchaseFailedEmail(
-            user.email,
-            purchase.Course.title,
-            "Payment capture failed"
-          );
-        } catch (error) {
-          console.error("Failed to send failure email:", error);
-        }
+  if (capture?.status !== "COMPLETED") {
+    // Send failure email if user exists
+    const user = await prisma.user.findUnique({
+      where: { id: purchase.userId },
+      select: { email: true },
+    });
+
+    if (user && purchase.Course) {
+      try {
+        const { sendPurchaseFailedEmail } = await import("@/lib/email");
+        await sendPurchaseFailedEmail(
+          user.email,
+          purchase.Course.title,
+          "Payment capture failed"
+        );
+      } catch (error) {
+        console.error("Failed to send failure email:", error);
       }
-
-      return NextResponse.redirect(
-        new URL(`/courses/${purchase.Course.slug}?checkout=failed`, baseUrl)
-      );
     }
 
-    await prisma.purchase.update({
+    return NextResponse.redirect(
+      new URL(`/courses/${purchase.Course.slug}?checkout=failed`, baseUrl)
+    );
+  }
+
+  // Process purchase in transaction to ensure atomicity
+  await prisma.$transaction(async (tx) => {
+    // Double-check status within transaction (race condition prevention)
+    const currentPurchase = await tx.purchase.findUnique({
+      where: { id: purchase.id },
+      select: { status: true },
+    });
+
+    if (currentPurchase?.status === "paid") {
+      return; // Already processed by another request
+    }
+
+    // Update purchase status
+    await tx.purchase.update({
       where: { id: purchase.id },
       data: { status: "paid" },
     });
 
-    // Decrement inventory if course has limited inventory
+    // Decrement inventory atomically with validation
     if (purchase.Course.inventory !== null) {
-      await prisma.course.update({
-        where: { id: purchase.courseId },
+      const updatedCourse = await tx.course.updateMany({
+        where: {
+          id: purchase.courseId,
+          inventory: { gt: 0 }, // Only update if inventory > 0
+        },
         data: {
-          inventory: {
-            decrement: 1,
-          },
+          inventory: { decrement: 1 },
         },
       });
+
+      if (updatedCourse.count === 0) {
+        throw new Error(`Course ${purchase.courseId} is out of stock`);
+      }
     }
 
-    const enrollment = await prisma.enrollment.upsert({
+    // Create/update enrollment
+    await tx.enrollment.upsert({
       where: {
         userId_courseId: {
           userId: purchase.userId,
@@ -281,49 +341,8 @@ export async function GET(request: Request) {
       },
     });
 
-    // Fetch payment for invoice
-    const payment = await prisma.payment.findFirst({
-      where: { purchaseId: purchase.id },
-      orderBy: { createdAt: "desc" },
-    });
-
-    // Send email notifications
-    const user = await prisma.user.findUnique({
-      where: { id: purchase.userId },
-      select: { email: true, name: true },
-    });
-
-    if (user && purchase.Course) {
-      try {
-        const { sendPurchaseConfirmationEmail, sendEnrollmentEmail, sendInvoiceEmail } = await import("@/lib/email");
-        const invoiceNumber = generateInvoiceNumber(purchase.id);
-        const purchaseDate = payment?.createdAt || purchase.createdAt;
-        
-        await Promise.all([
-          sendPurchaseConfirmationEmail(user.email, purchase.Course.title, purchase.amountCents),
-          sendEnrollmentEmail(user.email, purchase.Course.title),
-          sendInvoiceEmail(
-            user.email,
-            user.name || "Customer",
-            invoiceNumber,
-            purchaseDate,
-            [{
-              title: purchase.Course.title,
-              description: purchase.Course.description || undefined,
-              amountCents: purchase.amountCents,
-              currency: purchase.currency,
-            }],
-            formatPaymentMethod(payment?.provider),
-            payment?.providerRef || undefined
-          ),
-        ]);
-      } catch (error) {
-        console.error("Failed to send email notifications:", error);
-        // Don't fail the capture if email fails
-      }
-    }
-
-    await prisma.payment.create({
+    // Create payment record
+    await tx.payment.create({
       data: {
         id: `payment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         userId: purchase.userId,
@@ -336,7 +355,8 @@ export async function GET(request: Request) {
       },
     });
 
-    await prisma.activityLog.create({
+    // Create activity log
+    await tx.activityLog.create({
       data: {
         id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         userId: purchase.userId,
@@ -349,14 +369,56 @@ export async function GET(request: Request) {
         },
       },
     });
+  });
 
-    // Track analytics
+  // Fetch payment for invoice (after transaction)
+  const payment = await prisma.payment.findFirst({
+    where: { purchaseId: purchase.id },
+    orderBy: { createdAt: "desc" },
+  });
+
+  // Send email notifications (outside transaction - non-critical)
+  const user = await prisma.user.findUnique({
+    where: { id: purchase.userId },
+    select: { email: true, name: true },
+  });
+
+  if (user && purchase.Course) {
     try {
-      const { trackPurchase } = await import("@/lib/analytics");
-      trackPurchase(purchase.courseId, purchase.amountCents, purchase.userId);
+      const { sendPurchaseConfirmationEmail, sendEnrollmentEmail, sendInvoiceEmail } = await import("@/lib/email");
+      const invoiceNumber = generateInvoiceNumber(purchase.id);
+      const purchaseDate = payment?.createdAt || purchase.createdAt;
+      
+      await Promise.all([
+        sendPurchaseConfirmationEmail(user.email, purchase.Course.title, purchase.amountCents),
+        sendEnrollmentEmail(user.email, purchase.Course.title),
+        sendInvoiceEmail(
+          user.email,
+          user.name || "Customer",
+          invoiceNumber,
+          purchaseDate,
+          [{
+            title: purchase.Course.title,
+            description: purchase.Course.description || undefined,
+            amountCents: purchase.amountCents,
+            currency: purchase.currency,
+          }],
+          formatPaymentMethod(payment?.provider),
+          payment?.providerRef || undefined
+        ),
+      ]);
     } catch (error) {
-      console.error("Failed to track purchase analytics:", error);
+      logger.error("Failed to send email notifications", { userId: purchase.userId }, error instanceof Error ? error : undefined);
+      // Don't fail the capture if email fails
     }
+  }
+
+  // Track analytics (outside transaction - non-critical)
+  try {
+    const { trackPurchase } = await import("@/lib/analytics");
+    trackPurchase(purchase.courseId, purchase.amountCents, purchase.userId);
+  } catch (error) {
+    logger.error("Failed to track purchase analytics", { purchaseId: purchase.id }, error instanceof Error ? error : undefined);
   }
 
   // Redirect to success page with invoice

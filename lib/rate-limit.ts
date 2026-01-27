@@ -16,14 +16,25 @@ const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_RE
 
 /**
  * In-memory rate limiter fallback for development
+ * Fixed: Added size limits and LRU eviction to prevent memory leaks
  */
 interface RateLimitEntry {
   count: number;
   resetAt: number;
+  lastAccessed: number;
 }
 
 class InMemoryRateLimiter {
   private limits = new Map<string, RateLimitEntry>();
+  private readonly MAX_SIZE = 10000; // Maximum entries before eviction
+  private readonly CLEANUP_INTERVAL = 60 * 1000; // Cleanup every minute
+
+  constructor() {
+    // Start periodic cleanup
+    if (typeof setInterval !== "undefined") {
+      setInterval(() => this.cleanup(), this.CLEANUP_INTERVAL);
+    }
+  }
 
   check(
     key: string,
@@ -31,6 +42,12 @@ class InMemoryRateLimiter {
     windowMs: number
   ): { allowed: boolean; remaining: number; resetAt: number } {
     const now = Date.now();
+    
+    // Evict oldest entries if we're at capacity
+    if (this.limits.size >= this.MAX_SIZE) {
+      this.evictOldest();
+    }
+
     const entry = this.limits.get(key);
 
     if (!entry || now > entry.resetAt) {
@@ -38,6 +55,7 @@ class InMemoryRateLimiter {
       this.limits.set(key, {
         count: 1,
         resetAt,
+        lastAccessed: now,
       });
 
       return {
@@ -48,6 +66,7 @@ class InMemoryRateLimiter {
     }
 
     if (entry.count >= maxRequests) {
+      entry.lastAccessed = now; // Update access time
       return {
         allowed: false,
         remaining: 0,
@@ -56,6 +75,7 @@ class InMemoryRateLimiter {
     }
 
     entry.count++;
+    entry.lastAccessed = now;
     this.limits.set(key, entry);
 
     return {
@@ -65,24 +85,48 @@ class InMemoryRateLimiter {
     };
   }
 
+  /**
+   * Evict oldest entries (LRU eviction)
+   */
+  private evictOldest(): void {
+    const entries = Array.from(this.limits.entries());
+    // Sort by lastAccessed, oldest first
+    entries.sort((a, b) => a[1].lastAccessed - b[1].lastAccessed);
+    
+    // Remove oldest 10% of entries
+    const toRemove = Math.floor(this.MAX_SIZE * 0.1);
+    for (let i = 0; i < toRemove && i < entries.length; i++) {
+      this.limits.delete(entries[i][0]);
+    }
+  }
+
   cleanup(): void {
     const now = Date.now();
+    let cleaned = 0;
+    
     for (const [key, entry] of this.limits.entries()) {
       if (now > entry.resetAt) {
         this.limits.delete(key);
+        cleaned++;
       }
     }
+    
+    // If still over capacity after cleanup, evict oldest
+    if (this.limits.size >= this.MAX_SIZE) {
+      this.evictOldest();
+    }
+  }
+
+  /**
+   * Get current size (for monitoring)
+   */
+  getSize(): number {
+    return this.limits.size;
   }
 }
 
 const inMemoryLimiter = new InMemoryRateLimiter();
-
-// Cleanup every 5 minutes (only for in-memory)
-if (typeof setInterval !== "undefined" && !redis) {
-  setInterval(() => {
-    inMemoryLimiter.cleanup();
-  }, 5 * 60 * 1000);
-}
+// Cleanup is now handled by the InMemoryRateLimiter constructor
 
 /**
  * Create Upstash rate limiters with different configurations

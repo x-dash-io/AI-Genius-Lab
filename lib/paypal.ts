@@ -265,7 +265,7 @@ export async function createPayPalSubscription({
         name: {
           given_name: "Customer",
         },
-        email_address: "customer@example.com", // Will be updated with actual email
+        email_address: "customer@example.com", // Placeholder - actual email will be set by PayPal during approval
       },
       auto_renewal: true,
       application_context: {

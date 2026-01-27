@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/access";
 import { v2 as cloudinary } from "cloudinary";
 import { rateLimits } from "@/lib/rate-limit";
+import { checkRateLimit, createStandardErrorResponse } from "@/lib/api-helpers";
+import { logger } from "@/lib/logger";
 
 let isCloudinaryConfigured = false;
 
@@ -37,22 +39,16 @@ const ALLOWED_IMAGE_TYPES = [
 ];
 
 export async function POST(request: NextRequest) {
-  try {
-    // Require authenticated user (not just admin)
-    const user = await requireUser();
+  // Rate limiting
+  const rateLimitResponse = await checkRateLimit(request, "upload");
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
 
-    // Rate limiting
-    const ip =
-      request.headers.get("x-forwarded-for")?.split(",")[0] ||
-      request.headers.get("x-real-ip") ||
-      "unknown";
-    const rateLimitResult = await rateLimits.upload(ip);
-    if (!rateLimitResult.allowed) {
-      return NextResponse.json(
-        { error: "Too many upload requests. Please try again later." },
-        { status: 429 }
-      );
-    }
+  // Authorization check - require authenticated user
+  const user = await requireUser();
+
+  try {
     
     // Configure Cloudinary lazily
     configureCloudinary();
@@ -116,7 +112,7 @@ export async function POST(request: NextRequest) {
         },
         (error, result) => {
           if (error) {
-            console.error("Cloudinary upload error:", error);
+            logger.error("Cloudinary upload error", { userId: user.id }, error instanceof Error ? error : undefined);
             reject(
               NextResponse.json(
                 { error: "Failed to upload avatar" },

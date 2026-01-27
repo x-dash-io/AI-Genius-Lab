@@ -103,7 +103,7 @@ export async function PUT(
         publishedAt: published ? new Date() : undefined,
         readingTime,
         images: images && images.length > 0 ? {
-          create: images.map((img: any, index: number) => ({
+          create: images.map((img: { url: string; alt?: string; caption?: string }, index: number) => ({
             url: img.url,
             alt: img.alt,
             caption: img.caption,

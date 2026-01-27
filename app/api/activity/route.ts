@@ -2,19 +2,37 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createStandardErrorResponse } from "@/lib/api-helpers";
+import { Prisma } from "@prisma/client";
+
+interface ActivityMetadata {
+  courseId?: string;
+  purchaseId?: string;
+  courseTitle?: string;
+  courseSlug?: string;
+  [key: string]: unknown;
+}
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        {
+          error: {
+            message: "Unauthorized",
+            code: "UNAUTHORIZED",
+          },
+        },
+        { status: 401 }
+      );
     }
 
     const searchParams = request.nextUrl.searchParams;
     const type = searchParams.get("type");
     const limit = parseInt(searchParams.get("limit") || "50");
 
-    const where: any = { userId: session.user.id };
+    const where: Prisma.ActivityLogWhereInput = { userId: session.user.id };
     if (type && type !== "all") {
       where.type = type;
     }
@@ -29,8 +47,8 @@ export async function GET(request: NextRequest) {
     const enrichedActivity = await Promise.all(
       activity.map(async (entry) => {
         if (entry.type === "purchase_completed" && entry.metadata) {
-          const metadata = entry.metadata as any;
-          if (metadata.courseId) {
+          const metadata = entry.metadata as ActivityMetadata;
+          if (metadata.courseId && typeof metadata.courseId === "string") {
             try {
               const course = await prisma.course.findUnique({
                 where: { id: metadata.courseId },
@@ -43,7 +61,7 @@ export async function GET(request: NextRequest) {
                     ...metadata,
                     courseTitle: course.title,
                     courseSlug: course.slug,
-                  },
+                  } as ActivityMetadata,
                 };
               }
             } catch (error) {
@@ -56,11 +74,7 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json({ activity: enrichedActivity });
-  } catch (error: any) {
-    console.error("Error fetching activity:", error);
-    return NextResponse.json(
-      { error: error?.message || "Failed to fetch activity" },
-      { status: 500 }
-    );
+  } catch (error) {
+    return createStandardErrorResponse(error, "Failed to fetch activity");
   }
 }

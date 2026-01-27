@@ -86,14 +86,48 @@ export async function hasCompletedLearningPath(userId: string, pathId: string): 
 /**
  * Generate certificate for course completion
  * Uses transaction to prevent race conditions
+ * @param userId - User ID (required, no longer uses requireCustomer internally)
+ * @param courseId - Course ID
  */
-export async function generateCourseCertificate(courseId: string) {
-  const user = await requireCustomer();
+export async function generateCourseCertificate(userId: string, courseId: string) {
+  // Validate inputs
+  if (!userId || !courseId) {
+    throw new Error("userId and courseId are required");
+  }
+
+  // Validate format (basic validation)
+  if (typeof userId !== "string" || userId.length < 1) {
+    throw new Error("Invalid userId format");
+  }
+  if (typeof courseId !== "string" || courseId.length < 1) {
+    throw new Error("Invalid courseId format");
+  }
+
+  // Verify user exists
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true },
+  });
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // Verify course exists
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    select: { id: true, title: true, isPublished: true },
+  });
+  if (!course) {
+    throw new Error("Course not found");
+  }
+  if (!course.isPublished) {
+    throw new Error("Cannot generate certificate for unpublished course");
+  }
 
   // Verify user has purchased the course
   const purchase = await prisma.purchase.findFirst({
     where: {
-      userId: user.id,
+      userId,
       courseId,
       status: "paid",
     },
@@ -104,7 +138,7 @@ export async function generateCourseCertificate(courseId: string) {
   }
 
   // Verify course completion
-  const completed = await hasCompletedCourse(user.id, courseId);
+  const completed = await hasCompletedCourse(userId, courseId);
   if (!completed) {
     throw new Error("Course not completed");
   }
@@ -114,7 +148,7 @@ export async function generateCourseCertificate(courseId: string) {
     // Check if certificate already exists within transaction
     const existing = await tx.certificate.findFirst({
       where: {
-        userId: user.id,
+        userId,
         courseId,
         type: "course",
       },
@@ -143,7 +177,7 @@ export async function generateCourseCertificate(courseId: string) {
     const newCert = await tx.certificate.create({
       data: {
         id: `cert_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        userId: user.id,
+        userId,
         courseId,
         type: "course",
         certificateId,
@@ -168,7 +202,7 @@ export async function generateCourseCertificate(courseId: string) {
     await tx.activityLog.create({
       data: {
         id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        userId: user.id,
+        userId,
         type: "certificate_earned",
         metadata: {
           certificateId: newCert.certificateId,
@@ -220,17 +254,46 @@ export async function generateCourseCertificate(courseId: string) {
  * Generate certificate for learning path completion
  * Uses transaction to prevent race conditions
  */
-export async function generatePathCertificate(pathId: string) {
-  const user = await requireCustomer();
+export async function generatePathCertificate(userId: string, pathId: string) {
+  // Validate inputs
+  if (!userId || !pathId) {
+    throw new Error("userId and pathId are required");
+  }
+
+  // Validate format (basic validation)
+  if (typeof userId !== "string" || userId.length < 1) {
+    throw new Error("Invalid userId format");
+  }
+  if (typeof pathId !== "string" || pathId.length < 1) {
+    throw new Error("Invalid pathId format");
+  }
+
+  // Verify user exists
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true },
+  });
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // Verify learning path exists
+  const path = await prisma.learningPath.findUnique({
+    where: { id: pathId },
+    select: { id: true, title: true },
+  });
+  if (!path) {
+    throw new Error("Learning path not found");
+  }
 
   // Verify user has enrolled in the path (all courses purchased)
-  const enrolled = await hasEnrolledInLearningPath(user.id, pathId);
+  const enrolled = await hasEnrolledInLearningPath(userId, pathId);
   if (!enrolled) {
     throw new Error("Learning path not enrolled");
   }
 
   // Verify path completion
-  const completed = await hasCompletedLearningPath(user.id, pathId);
+  const completed = await hasCompletedLearningPath(userId, pathId);
   if (!completed) {
     throw new Error("Learning path not completed");
   }
@@ -240,7 +303,7 @@ export async function generatePathCertificate(pathId: string) {
     // Check if certificate already exists within transaction
     const existing = await tx.certificate.findFirst({
       where: {
-        userId: user.id,
+        userId,
         pathId,
         type: "learning_path",
       },
@@ -287,7 +350,7 @@ export async function generatePathCertificate(pathId: string) {
     const newCert = await tx.certificate.create({
       data: {
         id: `cert_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        userId: user.id,
+        userId,
         pathId,
         type: "learning_path",
         certificateId,
@@ -319,7 +382,7 @@ export async function generatePathCertificate(pathId: string) {
     await tx.activityLog.create({
       data: {
         id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        userId: user.id,
+        userId,
         type: "certificate_earned",
         metadata: {
           certificateId: newCert.certificateId,
@@ -369,12 +432,15 @@ export async function generatePathCertificate(pathId: string) {
 
 /**
  * Get user's certificates
+ * @param userId - User ID to get certificates for
+ * @param requireAuth - If true, verify the requesting user matches userId (default: false)
  */
-export async function getUserCertificates(userId: string) {
-  const user = await requireCustomer();
-  
-  if (user.id !== userId) {
-    throw new Error("FORBIDDEN: You can only view your own certificates");
+export async function getUserCertificates(userId: string, requireAuth: boolean = false) {
+  if (requireAuth) {
+    const user = await requireCustomer();
+    if (user.id !== userId) {
+      throw new Error("FORBIDDEN: You can only view your own certificates");
+    }
   }
 
   return prisma.certificate.findMany({

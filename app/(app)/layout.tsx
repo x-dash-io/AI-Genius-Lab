@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { AppLayoutClient } from "@/components/layout/AppLayoutClient";
+import { UnifiedLayout } from "@/components/layout/UnifiedLayout";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
@@ -11,5 +11,5 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect("/sign-in");
   }
   
-  return <AppLayoutClient>{children}</AppLayoutClient>;
+  return <UnifiedLayout layoutType="customer">{children}</UnifiedLayout>;
 }
