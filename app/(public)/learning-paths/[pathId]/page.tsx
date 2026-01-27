@@ -53,7 +53,7 @@ export default async function LearningPathDetailPage({
   // Transform the data to match expected format
   const path = {
     ...pathData,
-    courses: (pathData.LearningPathCourse || []).map(lpc => ({
+    courses: (pathData.LearningPathCourse || []).map((lpc: any) => ({
       ...lpc,
       course: lpc.Course,
     })),
@@ -65,7 +65,7 @@ export default async function LearningPathDetailPage({
     : false;
 
   const totalPrice = path.courses.reduce(
-    (sum, pc) => sum + pc.course.priceCents,
+    (sum: number, pc: any) => sum + pc.course.priceCents,
     0
   );
 
@@ -87,7 +87,7 @@ export default async function LearningPathDetailPage({
           await prisma.purchase.findMany({
             where: {
               userId: session.user.id,
-              courseId: { in: path.courses.map((pc) => pc.course.id) },
+              courseId: { in: path.courses.map((pc: any) => pc.course.id) },
               status: "paid",
             },
             select: { courseId: true },
@@ -170,7 +170,7 @@ export default async function LearningPathDetailPage({
     name: path.title,
     description: path.description || `Follow this structured learning path to master ${path.title}.`,
     url: `/learning-paths/${pathId}`,
-    courses: path.courses.map((pc) => ({
+    courses: path.courses.map((pc: any) => ({
       name: pc.course.title,
       url: `/courses/${pc.course.slug}`,
     })),
@@ -236,7 +236,7 @@ export default async function LearningPathDetailPage({
           <div className="space-y-4">
             <h2 className="text-2xl font-semibold">Courses in This Path</h2>
             <div className="space-y-4">
-              {path.courses.map((pathCourse, index) => (
+              {path.courses.map((pathCourse: any, index: number) => (
                 <Card key={pathCourse.id}>
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between">

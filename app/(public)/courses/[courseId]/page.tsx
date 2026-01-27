@@ -41,7 +41,11 @@ export default async function CourseDetailPage({
   const { courseId } = await params;
   
   let course;
-  let reviewStats = null;
+  let reviewStats: {
+    averageRating: number;
+    totalReviews: number;
+    ratingDistribution: { 5: number; 4: number; 3: number; 2: number; 1: number };
+  } | undefined = undefined;
   
   try {
     course = await getCoursePreviewBySlug(courseId);
@@ -56,7 +60,7 @@ export default async function CourseDetailPage({
       setTimeout(() => reject(new Error('Timeout')), 3000)
     );
     
-    reviewStats = await Promise.race([statsPromise, timeoutPromise]).catch(() => null);
+    reviewStats = await Promise.race([statsPromise, timeoutPromise]).catch(() => undefined) as any;
   } catch (error) {
     console.error("Error loading course:", error);
     notFound();
