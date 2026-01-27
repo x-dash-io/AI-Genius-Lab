@@ -1,3 +1,5 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
@@ -36,11 +38,12 @@ export const metadata: Metadata = generateSEOMetadata({
 
 export const runtime = "nodejs";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
   const organizationSchema = generateOrganizationSchema();
 
   return (
@@ -67,7 +70,7 @@ export default function RootLayout({
         }}
       >
         <ThemeProvider>
-          <SessionProvider>
+          <SessionProvider session={session}>
             <SessionMonitor />
             <CartProvider>
               <ConfirmDialogProvider>
