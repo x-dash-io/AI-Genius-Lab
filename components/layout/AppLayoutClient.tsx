@@ -155,7 +155,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
           </div>
           
           {/* Scrollable Navigation */}
-          <div className="flex-1 overflow-y-auto px-4 py-6">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border hover:scrollbar-thumb-foreground/20">
             <nav className="space-y-1">
               {navigation.map((item) => {
                 const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
@@ -196,43 +196,50 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Sidebar Footer - Fixed at bottom */}
-          <div className="flex-shrink-0 border-t p-4 mt-auto">
+          <div className="flex-shrink-0 border-t p-4 mt-auto bg-card/80 backdrop-blur-sm">
             {session?.user && (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <Link href={getHref("/profile")}>
                   <motion.div
                     whileHover={{ scale: 1.02 }}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer"
+                    whileTap={{ scale: 0.98 }}
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 transition-all cursor-pointer group"
                   >
-                    <Avatar className="h-10 w-10 ring-2 ring-primary/20">
-                      <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "User"} />
-                      <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                        {(() => {
-                          const name = session.user.name;
-                          const email = session.user.email || "";
-                          if (name && name.trim()) {
-                            const nameParts = name.trim().split(/\s+/);
-                            return nameParts[0][0].toUpperCase();
-                          }
-                          return email.charAt(0).toUpperCase();
-                        })()}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="relative">
+                      <Avatar className="h-12 w-12 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
+                        <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "User"} />
+                        <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-sm font-semibold">
+                          {(() => {
+                            const name = session.user.name;
+                            const email = session.user.email || "";
+                            if (name && name.trim()) {
+                              const nameParts = name.trim().split(/\s+/);
+                              return nameParts[0][0].toUpperCase();
+                            }
+                            return email.charAt(0).toUpperCase();
+                          })()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-card"></div>
+                    </div>
                     <div className="flex-1 overflow-hidden min-w-0">
-                      <p className="truncate text-sm font-medium">
-                        {session.user.name || session.user.email}
+                      <p className="truncate text-sm font-medium group-hover:text-primary transition-colors">
+                        {session.user.name || "Anonymous User"}
                       </p>
-                      {session.user.name && (
-                        <p className="truncate text-xs text-muted-foreground">
-                          {session.user.email}
-                        </p>
+                      <p className="truncate text-xs text-muted-foreground group-hover:text-foreground/70 transition-colors">
+                        {session.user.email}
+                      </p>
+                      {session.user.role === "admin" && (
+                        <Badge variant="secondary" className="mt-1 text-[10px] px-1.5 py-0.5">
+                          Admin
+                        </Badge>
                       )}
                     </div>
                   </motion.div>
                 </Link>
-                <div className="flex items-center gap-2 px-1">
+                <div className="flex items-center gap-2">
                   <ThemeToggle />
-                  <SignOutButton />
+                  <SignOutButton className="flex-1" />
                 </div>
               </div>
             )}
@@ -377,37 +384,44 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="border-t px-4 py-4 space-y-3 sticky bottom-0 bg-background/95 backdrop-blur-md"
+                    className="border-t px-4 py-4 space-y-4 sticky bottom-0 bg-background/95 backdrop-blur-md"
                   >
                     <Link href={getHref("/profile")} onClick={() => setMobileMenuOpen(false)}>
-                      <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors active:scale-[0.98]">
-                        <Avatar className="h-10 w-10 ring-2 ring-primary/20">
-                          <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "User"} />
-                          <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                            {(() => {
-                              const name = session.user.name;
-                              const email = session.user.email || "";
-                              if (name && name.trim()) {
-                                const nameParts = name.trim().split(/\s+/);
-                                return nameParts[0][0].toUpperCase();
-                              }
-                              return email.charAt(0).toUpperCase();
-                            })()}
-                          </AvatarFallback>
-                        </Avatar>
+                      <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 transition-all active:scale-[0.98] group">
+                        <div className="relative">
+                          <Avatar className="h-12 w-12 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
+                            <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "User"} />
+                            <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-sm font-semibold">
+                              {(() => {
+                                const name = session.user.name;
+                                const email = session.user.email || "";
+                                if (name && name.trim()) {
+                                  const nameParts = name.trim().split(/\s+/);
+                                  return nameParts[0][0].toUpperCase();
+                                }
+                                return email.charAt(0).toUpperCase();
+                              })()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background"></div>
+                        </div>
                         <div className="flex-1 overflow-hidden min-w-0">
-                          <p className="truncate text-sm font-semibold">
-                            {session.user.name || session.user.email}
+                          <p className="truncate text-sm font-semibold group-hover:text-primary transition-colors">
+                            {session.user.name || "Anonymous User"}
                           </p>
-                          {session.user.name && (
-                            <p className="truncate text-xs text-muted-foreground">
-                              {session.user.email}
-                            </p>
+                          <p className="truncate text-xs text-muted-foreground group-hover:text-foreground/70 transition-colors">
+                            {session.user.email}
+                          </p>
+                          {session.user.role === "admin" && (
+                            <Badge variant="secondary" className="mt-1 text-[10px] px-1.5 py-0.5">
+                              Admin
+                            </Badge>
                           )}
                         </div>
                       </div>
                     </Link>
-                    <div className="flex items-center gap-2 px-1">
+                    <div className="flex items-center gap-2">
+                      <ThemeToggle />
                       <SignOutButton className="flex-1" />
                     </div>
                   </motion.div>

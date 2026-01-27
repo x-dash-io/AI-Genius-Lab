@@ -8,9 +8,15 @@ import { cn } from "@/lib/utils";
 
 interface SignOutButtonProps {
   className?: string;
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+  size?: "default" | "sm" | "lg" | "icon";
 }
 
-export function SignOutButton({ className }: SignOutButtonProps) {
+export function SignOutButton({ 
+  className, 
+  variant = "outline",
+  size = "sm"
+}: SignOutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSignOut() {
@@ -28,12 +34,18 @@ export function SignOutButton({ className }: SignOutButtonProps) {
     <Button
       onClick={handleSignOut}
       disabled={isLoading}
-      variant="outline"
-      size="sm"
-      className={cn("w-full", className)}
+      variant={variant}
+      size={size}
+      className={cn(
+        "gap-2 transition-all hover:scale-105 active:scale-95",
+        variant === "outline" && "hover:bg-destructive hover:text-destructive-foreground hover:border-destructive",
+        className
+      )}
     >
-      <LogOut className="h-4 w-4" />
-      {isLoading ? "Signing out..." : "Sign out"}
+      <LogOut className={cn("h-4 w-4", isLoading && "animate-pulse")} />
+      {size !== "icon" && (
+        <span>{isLoading ? "Signing out..." : "Sign out"}</span>
+      )}
     </Button>
   );
 }
