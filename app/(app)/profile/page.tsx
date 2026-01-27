@@ -90,7 +90,7 @@ export default async function ProfilePage() {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Profile Info Card */}
         <Card className="md:col-span-2">
           <CardHeader>

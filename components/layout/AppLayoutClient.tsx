@@ -210,6 +210,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                 <span className="font-display text-lg font-bold">AI GENIUS LAB</span>
               </Link>
               <div className="flex items-center gap-2">
+                <SignOutButton size="icon" variant="ghost" />
                 <ThemeToggle />
                 <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                   {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
