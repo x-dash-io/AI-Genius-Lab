@@ -136,20 +136,16 @@ export default function SignInPage() {
   async function handleGoogleSignIn() {
     setError(null);
     setIsGoogleLoading(true);
+    
+    console.log("Starting Google sign-in...");
+    
     try {
-      // signIn with redirect: true will handle the redirect automatically
-      // No need to set loading to false as the page will redirect
-      const result = await signIn("google", { 
+      // Call signIn without await to allow redirect
+      signIn("google", { 
         callbackUrl,
-        redirect: true 
       });
       
-      // This code won't execute if redirect is successful
-      // Only runs if there's an error
-      if (result?.error) {
-        setError("Failed to sign in with Google. Please try again.");
-        setIsGoogleLoading(false);
-      }
+      // Don't set loading to false - the page will redirect
     } catch (err) {
       console.error("Google sign-in error:", err);
       setError("Failed to sign in with Google. Please try again.");
