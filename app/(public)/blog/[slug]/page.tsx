@@ -17,17 +17,11 @@ interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
 }
 
+export const dynamic = 'force-dynamic';
+
+// Skip static generation to avoid database dependency during build
 export async function generateStaticParams() {
-  try {
-    const posts = await getAllPublishedPosts();
-    return posts.map((post) => ({
-      slug: post.slug,
-    }));
-  } catch (error) {
-    console.warn("Could not generate static params for blog posts:", error);
-    // Return empty array to let the page be dynamically generated
-    return [];
-  }
+  return [];
 }
 
 export async function generateMetadata({
