@@ -18,10 +18,16 @@ interface BlogPostPageProps {
 }
 
 export async function generateStaticParams() {
-  const posts = await getAllPublishedPosts();
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
+  try {
+    const posts = await getAllPublishedPosts();
+    return posts.map((post) => ({
+      slug: post.slug,
+    }));
+  } catch (error) {
+    console.warn("Could not generate static params for blog posts:", error);
+    // Return empty array to let the page be dynamically generated
+    return [];
+  }
 }
 
 export async function generateMetadata({
