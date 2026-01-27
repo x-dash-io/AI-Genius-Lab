@@ -127,10 +127,12 @@ export default function SignInPage() {
         // Clear any stale session data
         if (typeof window !== "undefined") {
           sessionStorage.clear();
+          
+          // The server has set the session cookie.
+          // We can now redirect to the callbackUrl, which will have the correct session.
+          window.location.href = callbackUrl;
         }
         
-        // Force session refresh and let useEffect handle redirect
-        router.refresh();
         // The useEffect hook will handle the redirect when session updates
       } else {
         setError("Sign in failed. Please try again.");
