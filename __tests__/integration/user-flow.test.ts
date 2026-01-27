@@ -81,6 +81,10 @@ describeMaybeSkip("User Authentication Flow", () => {
   });
 
   it("should not allow duplicate emails", async () => {
+    // First create a user
+    await createTestUser({ email: "auth-test@example.com" });
+    
+    // Then try to create another with the same email
     await expect(
       createTestUser({ email: "auth-test@example.com" })
     ).rejects.toThrow();
@@ -221,7 +225,7 @@ describeMaybeSkip("Learning Path Enrollment Flow", () => {
     const pathWithCourses = await prisma.learningPath.findUnique({
       where: { id: learningPath.id },
       include: {
-        courses: {
+        LearningPathCourse: {
           include: { Course: true },
           orderBy: { sortOrder: "asc" },
         },
@@ -229,9 +233,9 @@ describeMaybeSkip("Learning Path Enrollment Flow", () => {
     });
 
     expect(pathWithCourses).toBeDefined();
-    expect(pathWithCourses!.courses).toHaveLength(2);
-    expect(pathWithCourses!.courses[0].Course.title).toBe("Course 1");
-    expect(pathWithCourses!.courses[1].Course.title).toBe("Course 2");
+    expect(pathWithCourses!.LearningPathCourse).toHaveLength(2);
+    expect(pathWithCourses!.LearningPathCourse[0].Course.title).toBe("Course 1");
+    expect(pathWithCourses!.LearningPathCourse[1].Course.title).toBe("Course 2");
   });
 
   it("should enroll user in all path courses", async () => {
@@ -339,15 +343,15 @@ describeMaybeSkip("Lesson Progress Flow", () => {
     const course = await prisma.course.findUnique({
       where: { id: testCourse.id },
       include: {
-        sections: {
+        Section: {
           include: {
-            lessons: true,
+            Lesson: true,
           },
         },
       },
     });
 
-    const lessonIds = course!.sections.flatMap((s) => s.lessons.map((l) => l.id));
+    const lessonIds = course!.Section.flatMap((s) => s.Lesson.map((l) => l.id));
     expect(lessonIds).toHaveLength(2);
 
     // Get completed lessons
@@ -389,6 +393,7 @@ describeMaybeSkip("Review System Flow", () => {
   it("should create a review", async () => {
     const review = await prisma.review.create({
       data: {
+        id: `review_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         userId: testUser.id,
         courseId: testCourse.id,
         rating: 5,
@@ -405,6 +410,7 @@ describeMaybeSkip("Review System Flow", () => {
     await expect(
       prisma.review.create({
         data: {
+          id: `review_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           userId: testUser.id,
           courseId: testCourse.id,
           rating: 4,
@@ -440,6 +446,7 @@ describeMaybeSkip("Review System Flow", () => {
 
     await prisma.review.create({
       data: {
+        id: `review_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         userId: user2.id,
         courseId: testCourse.id,
         rating: 5,
@@ -497,6 +504,7 @@ describeMaybeSkip("Certificate Generation Flow", () => {
   it("should generate certificate for completed course", async () => {
     const certificate = await prisma.certificate.create({
       data: {
+        id: `cert_test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         userId: testUser.id,
         courseId: testCourse.id,
         type: "course",

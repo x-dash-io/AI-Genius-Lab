@@ -73,7 +73,7 @@ export const authOptions = {
         try {
           const existingUser = await withRetry(async () => {
             return await prisma.user.findUnique({
-              where: { email: user.email },
+              where: { email: user.email! },
               include: { Account: true },
             });
           });
