@@ -10,6 +10,8 @@ import { format } from "date-fns";
 import { Check, XCircle, CreditCard, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
+import { Suspense } from "react";
+import { SubscriptionSuccessToast } from "@/components/checkout/SubscriptionSuccessToast";
 
 async function cancelAction(formData: FormData) {
   "use server";
@@ -43,6 +45,9 @@ export default async function UserSubscriptionPage() {
 
   return (
     <div className="space-y-8 pb-8">
+      <Suspense fallback={null}>
+        <SubscriptionSuccessToast />
+      </Suspense>
       <div>
         <h1 className="font-display text-4xl font-bold tracking-tight">Subscription</h1>
         <p className="mt-2 text-lg text-muted-foreground">

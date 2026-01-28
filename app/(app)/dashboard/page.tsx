@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -8,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { SubscriptionSuccessToast } from "@/components/checkout/SubscriptionSuccessToast";
 import { 
   BookOpen, 
   Activity, 
@@ -216,6 +218,9 @@ export default async function DashboardPage({
 
   return (
     <div className="space-y-6 sm:space-y-8 pb-8">
+      <Suspense fallback={null}>
+        <SubscriptionSuccessToast />
+      </Suspense>
       {/* Welcome Section */}
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
