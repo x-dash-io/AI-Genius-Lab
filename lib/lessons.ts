@@ -25,7 +25,11 @@ function buildLessonUrl(lesson: {
     return null;
   }
 
-  if (lesson.contentType === "link") {
+  // If it's a link type OR an external URL (YouTube/Vimeo), return as is
+  const isExternal = lesson.contentUrl.startsWith('http') &&
+    !lesson.contentUrl.includes('cloudinary.com');
+
+  if (lesson.contentType === "link" || isExternal) {
     return lesson.contentUrl;
   }
 
@@ -144,21 +148,27 @@ export async function getAuthorizedLessonContent(lessonId: string) {
 
   // Clean up contentUrl if it's a full Cloudinary URL - extract just the public ID
   if (contentUrl && contentUrl.includes('cloudinary.com')) {
-    try {
-      const url = new URL(contentUrl);
-      const pathParts = url.pathname.split('/').filter(p => p && p !== 'v1' && p !== 'upload');
-      // Remove the resource type prefix if present
-      const resourceTypeIndex = pathParts.findIndex(p => ['image', 'video', 'raw'].includes(p));
-      if (resourceTypeIndex >= 0) {
-        pathParts.splice(resourceTypeIndex, 1);
-      }
-      contentUrl = pathParts.join('/');
-    } catch (error) {
-      console.error('Error parsing Cloudinary URL:', contentUrl, error);
-      // If parsing fails, try to extract public ID manually
-      const match = contentUrl.match(/\/(?:image|video|raw)\/upload\/.*?\/(.+)$/);
-      if (match) {
-        contentUrl = match[1].split('?')[0]; // Remove query params
+    // Use a robust regex to extract public ID from Cloudinary URL
+    // It looks for /upload/, skips optional version (v123/), and captures everything until query params
+    const match = contentUrl.match(/\/(?:image|video|raw)\/upload\/(?:v\d+\/)?([^\?#]+)/);
+    if (match) {
+      contentUrl = match[1];
+    } else {
+      // Fallback: try to extract it from the path parts if regex fails
+      try {
+        const url = new URL(contentUrl);
+        const parts = url.pathname.split('/');
+        const uploadIndex = parts.indexOf('upload');
+        if (uploadIndex !== -1 && uploadIndex < parts.length - 1) {
+          let publicIdParts = parts.slice(uploadIndex + 1);
+          // Remove version if present
+          if (publicIdParts[0].startsWith('v') && /^\d+$/.test(publicIdParts[0].substring(1))) {
+            publicIdParts = publicIdParts.slice(1);
+          }
+          contentUrl = publicIdParts.join('/');
+        }
+      } catch (e) {
+        console.error('Failed to parse Cloudinary URL:', contentUrl);
       }
     }
   }
