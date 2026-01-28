@@ -31,6 +31,12 @@ export function Footer() {
               >
                 Learning Paths
               </Link>
+              <Link
+                href="/blog"
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Blog
+              </Link>
               {session?.user && (
                 <Link
                   href="/dashboard"

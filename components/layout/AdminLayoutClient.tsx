@@ -16,6 +16,7 @@ import {
   Route,
   User,
   Eye,
+  Newspaper,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,6 +36,7 @@ const adminNavigation = [
   { name: "Categories", href: "/admin/categories", icon: ShoppingCart },
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Purchases", href: "/admin/purchases", icon: Receipt },
+  { name: "Blog", href: "/admin/blog", icon: Newspaper },
   { name: "Profile", href: "/admin/profile", icon: User },
 ];
 

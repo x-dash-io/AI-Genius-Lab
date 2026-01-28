@@ -25,6 +25,7 @@ import {
   ShoppingCart,
   LogIn,
   UserPlus,
+  Newspaper,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
@@ -32,6 +33,7 @@ const publicNavigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "Courses", href: "/courses", icon: BookOpen },
   { name: "Learning Paths", href: "/learning-paths", icon: Route },
+  { name: "Blog", href: "/blog", icon: Newspaper },
   { name: "Cart", href: "/cart", icon: ShoppingCart },
   { name: "FAQ", href: "/faq", icon: HelpCircle },
   { name: "Contact Us", href: "/contact", icon: Mail },
