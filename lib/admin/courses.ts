@@ -48,11 +48,12 @@ export async function createCourse(data: {
   priceCents: number;
   inventory?: number | null;
   isPublished?: boolean;
+  tier?: "STANDARD" | "PREMIUM";
 }) {
   // Generate a unique ID for the course
   const courseId = `course_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   const now = new Date();
-  
+
   return prisma.course.create({
     data: {
       id: courseId,
@@ -63,6 +64,7 @@ export async function createCourse(data: {
       priceCents: data.priceCents,
       inventory: data.inventory ?? null,
       isPublished: data.isPublished ?? false,
+      tier: data.tier ?? "STANDARD",
       updatedAt: now,
     },
   });
@@ -78,6 +80,7 @@ export async function updateCourse(
     priceCents?: number;
     inventory?: number | null;
     isPublished?: boolean;
+    tier?: "STANDARD" | "PREMIUM";
   }
 ) {
   return prisma.course.update({

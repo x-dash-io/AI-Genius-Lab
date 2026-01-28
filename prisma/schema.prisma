@@ -82,6 +82,7 @@ model Course {
   priceCents         Int
   inventory          Int?
   isPublished        Boolean              @default(false)
+  tier               CourseTier           @default(STANDARD)
   createdAt          DateTime             @default(now())
   updatedAt          DateTime
   Category           Category?            @relation(fields: [categoryId], references: [id], onDelete: SetNull)
@@ -249,16 +250,16 @@ model Session {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  email         String        @unique
+  id            String         @id @default(cuid())
+  email         String         @unique
   name          String?
   image         String?
   bio           String?
   emailVerified DateTime?
   passwordHash  String?
-  role          Role          @default(customer)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  role          Role           @default(customer)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   Account       Account[]
   ActivityLog   ActivityLog[]
   Certificate   Certificate[]
@@ -269,6 +270,7 @@ model User {
   Review        Review[]
   Session       Session[]
   BlogReview    BlogReview[]
+  Subscription  Subscription[]
 }
 
 model VerificationToken {
@@ -351,4 +353,76 @@ model BlogReview {
 enum PostStatus {
   draft
   published
+}
+
+enum CourseTier {
+  STANDARD
+  PREMIUM
+}
+
+enum SubscriptionTier {
+  starter
+  pro
+  elite
+}
+
+enum SubscriptionStatus {
+  active
+  cancelled
+  expired
+  past_due
+  pending
+}
+
+enum SubscriptionInterval {
+  monthly
+  annual
+}
+
+model SubscriptionPlan {
+  id                  String           @id @default(cuid())
+  name                String
+  description         String?
+  tier                SubscriptionTier
+  priceMonthlyCents   Int
+  priceAnnualCents    Int
+  paypalProductId     String?
+  paypalMonthlyPlanId String?
+  paypalAnnualPlanId  String?
+  isActive            Boolean          @default(true)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  subscriptions       Subscription[]
+}
+
+model Subscription {
+  id                   String                @id @default(cuid())
+  userId               String
+  planId               String
+  status               SubscriptionStatus    @default(pending)
+  interval             SubscriptionInterval
+  currentPeriodStart   DateTime              @default(now())
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean               @default(false)
+  paypalSubscriptionId String?               @unique
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan                 SubscriptionPlan      @relation(fields: [planId], references: [id])
+  payments             SubscriptionPayment[]
+
+  @@index([userId])
+}
+
+model SubscriptionPayment {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  amountCents    Int
+  currency       String       @default("usd")
+  status         String
+  paypalSaleId   String?      @unique
+  paidAt         DateTime     @default(now())
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
 }

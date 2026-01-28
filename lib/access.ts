@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma, withRetry } from "@/lib/prisma";
 import { hasRole, type Role } from "@/lib/rbac";
+import { getUserSubscription } from "@/lib/subscriptions";
 
 export async function requireUser() {
   const session = await getServerSession(authOptions);
@@ -59,5 +60,34 @@ export async function hasCourseAccess(
     return true;
   }
 
-  return hasPurchasedCourse(userId, courseId);
+  // Check individual purchase
+  const purchased = await hasPurchasedCourse(userId, courseId);
+  if (purchased) return true;
+
+  // Check subscription
+  const course = await prisma.course.findUnique({
+    where: { id: courseId },
+    select: { tier: true },
+  });
+
+  if (!course) return false;
+
+  const subscription = await getUserSubscription(userId);
+  if (!subscription) return false;
+
+  // Access rules:
+  // - Starter: STANDARD courses
+  // - Pro: STANDARD + PREMIUM courses
+  // - Elite: STANDARD + PREMIUM courses
+  if (course.tier === "STANDARD") {
+    return true; // Any active subscription gives access to Standard
+  }
+
+  if (course.tier === "PREMIUM") {
+    return (
+      subscription.plan.tier === "pro" || subscription.plan.tier === "elite"
+    );
+  }
+
+  return false;
 }

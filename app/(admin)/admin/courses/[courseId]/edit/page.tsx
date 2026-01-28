@@ -18,6 +18,7 @@ async function updateCourseAction(courseId: string, formData: FormData) {
   const inventoryStr = formData.get("inventory") as string;
   const inventory = inventoryStr && inventoryStr.trim() !== "" ? parseInt(inventoryStr) : null;
   const isPublished = formData.get("isPublished") === "on";
+  const tier = formData.get("tier") as "STANDARD" | "PREMIUM";
 
   await updateCourse(courseId, {
     title,
@@ -27,6 +28,7 @@ async function updateCourseAction(courseId: string, formData: FormData) {
     priceCents,
     inventory,
     isPublished,
+    tier,
   });
 
   return { success: true };

@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/access";
+import { getUserSubscription } from "@/lib/subscriptions";
 
 export async function getAllPublishedLearningPaths() {
   return prisma.learningPath.findMany({
@@ -129,6 +130,12 @@ export async function calculateLearningPathPrice(userId: string, pathId: string)
  * Check if user has enrolled in all courses in a learning path
  */
 export async function hasEnrolledInLearningPath(userId: string, pathId: string): Promise<boolean> {
+  // Elite subscribers get access to all learning paths
+  const subscription = await getUserSubscription(userId);
+  if (subscription && subscription.plan.tier === "elite") {
+    return true;
+  }
+
   const path = await prisma.learningPath.findUnique({
     where: { id: pathId },
     include: {

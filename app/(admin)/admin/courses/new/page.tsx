@@ -17,6 +17,7 @@ async function createCourseAction(formData: FormData) {
   const inventoryStr = formData.get("inventory") as string;
   const inventory = inventoryStr && inventoryStr.trim() !== "" ? parseInt(inventoryStr) : null;
   const isPublished = formData.get("isPublished") === "on";
+  const tier = formData.get("tier") as "STANDARD" | "PREMIUM";
 
   if (!title || !slug || !priceCents) {
     throw new Error("Missing required fields");
@@ -31,6 +32,7 @@ async function createCourseAction(formData: FormData) {
       priceCents,
       inventory,
       isPublished,
+      tier,
     });
 
     return course;
