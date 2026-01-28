@@ -1,16 +1,8 @@
 import { NextResponse } from "next/server";
 import { getActiveCategoriesWithCount } from "@/lib/categories";
+import { withErrorHandler } from "../error-handler";
 
-export async function GET() {
-  try {
-    const categories = await getActiveCategoriesWithCount();
-
-    return NextResponse.json({ categories });
-  } catch (error) {
-    console.error("Error fetching categories:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch categories" },
-      { status: 500 }
-    );
-  }
-}
+export const GET = withErrorHandler(async () => {
+  const categories = await getActiveCategoriesWithCount();
+  return NextResponse.json({ categories });
+});

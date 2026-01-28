@@ -2,109 +2,67 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "@/lib/access";
 import { updateLessonProgress, getLessonProgress } from "@/lib/progress";
 import { trackLessonComplete } from "@/lib/analytics";
+import { withErrorHandler } from "../error-handler";
+import { AppError } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { lessonId, lastPosition, completionPercent, completed } = body;
+export const POST = withErrorHandler(async (request: NextRequest) => {
+  const body = await request.json();
+  const { lessonId, lastPosition, completionPercent, completed } = body;
 
-    if (!lessonId) {
-      return NextResponse.json(
-        { error: "lessonId is required" },
-        { status: 400 }
+  if (!lessonId) {
+    throw AppError.badRequest("lessonId is required");
+  }
+
+  const user = await requireUser();
+  const progress = await updateLessonProgress(lessonId, {
+    lastPosition: lastPosition ?? undefined,
+    completionPercent: completionPercent ?? undefined,
+    completedAt: completed ? new Date() : undefined,
+  });
+
+  // Track lesson completion analytics and check for course completion
+  if (completed) {
+    try {
+      const lesson = await import("@/lib/courses").then((m) =>
+        m.getLessonById(lessonId)
       );
-    }
+      if (lesson) {
+        trackLessonComplete(lessonId, lesson.Section.courseId, user.id);
 
-    const user = await requireUser();
-    const progress = await updateLessonProgress(lessonId, {
-      lastPosition: lastPosition ?? undefined,
-      completionPercent: completionPercent ?? undefined,
-      completedAt: completed ? new Date() : undefined,
-    });
-
-    // Track lesson completion analytics and check for course completion
-    if (completed) {
-      try {
-        const lesson = await import("@/lib/courses").then((m) =>
-          m.getLessonById(lessonId)
-        );
-        if (lesson) {
-          trackLessonComplete(lessonId, lesson.Section.courseId, user.id);
+        // Check if course is now complete and generate certificate
+        try {
+          const { hasCompletedCourse, generateCourseCertificate } = await import("@/lib/certificates");
+          const courseCompleted = await hasCompletedCourse(user.id, lesson.Section.courseId);
           
-          // Check if course is now complete and generate certificate
-          try {
-            const { hasCompletedCourse, generateCourseCertificate } = await import("@/lib/certificates");
-            const courseCompleted = await hasCompletedCourse(user.id, lesson.Section.courseId);
-            
-            if (courseCompleted) {
-              // Generate certificate asynchronously (don't block the response)
-              generateCourseCertificate(lesson.Section.courseId).catch((error) => {
-                console.error("Failed to generate certificate:", error);
-                // Don't fail the progress update if certificate generation fails
-              });
-            }
-          } catch (error) {
-            console.error("Failed to check course completion:", error);
-            // Don't fail the progress update if certificate check fails
+          if (courseCompleted) {
+            // Generate certificate asynchronously (don't block the response)
+            generateCourseCertificate(lesson.Section.courseId).catch((error) => {
+              logger.error("Failed to generate certificate", error);
+              // Don't fail the progress update if certificate generation fails
+            });
           }
+        } catch (error) {
+          logger.error("Failed to check course completion", error);
+          // Don't fail the progress update if certificate check fails
         }
-      } catch (error) {
-        console.error("Failed to track lesson completion:", error);
       }
+    } catch (error) {
+      logger.error("Failed to track lesson completion", error);
     }
-
-    return NextResponse.json({ progress });
-  } catch (error) {
-    console.error("Error updating progress:", error);
-
-    if (error instanceof Error) {
-      if (error.message === "UNAUTHORIZED" || error.message === "FORBIDDEN") {
-        return NextResponse.json(
-          { error: "Access denied" },
-          { status: 403 }
-        );
-      }
-      if (error.message === "NOT_FOUND") {
-        return NextResponse.json(
-          { error: "Lesson not found" },
-          { status: 404 }
-        );
-      }
-    }
-
-    return NextResponse.json(
-      { error: "Failed to update progress" },
-      { status: 500 }
-    );
   }
-}
 
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const lessonId = searchParams.get("lessonId");
+  return NextResponse.json({ progress });
+});
 
-    if (!lessonId) {
-      return NextResponse.json(
-        { error: "lessonId is required" },
-        { status: 400 }
-      );
-    }
+export const GET = withErrorHandler(async (request: NextRequest) => {
+  const { searchParams } = new URL(request.url);
+  const lessonId = searchParams.get("lessonId");
 
-    const progress = await getLessonProgress(lessonId);
-    return NextResponse.json({ progress });
-  } catch (error) {
-    console.error("Error fetching progress:", error);
-
-    if (error instanceof Error) {
-      if (error.message === "UNAUTHORIZED") {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-    }
-
-    return NextResponse.json(
-      { error: "Failed to fetch progress" },
-      { status: 500 }
-    );
+  if (!lessonId) {
+    throw AppError.badRequest("lessonId is required");
   }
-}
+
+  const progress = await getLessonProgress(lessonId);
+  return NextResponse.json({ progress });
+});

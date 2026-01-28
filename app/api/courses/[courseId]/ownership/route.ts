@@ -2,24 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { hasPurchasedCourse } from "@/lib/access";
+import { withErrorHandler } from "@/app/api/error-handler";
 
-export async function GET(
+export const GET = withErrorHandler(async (
   request: NextRequest,
   { params }: { params: Promise<{ courseId: string }> }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ owned: false });
-    }
+) => {
+  const session = await getServerSession(authOptions);
 
-    const { courseId } = await params;
-    const owned = await hasPurchasedCourse(session.user.id, courseId);
-
-    return NextResponse.json({ owned });
-  } catch (error) {
-    console.error("Error checking course ownership:", error);
+  if (!session?.user) {
     return NextResponse.json({ owned: false });
   }
-}
+
+  const { courseId } = await params;
+  const owned = await hasPurchasedCourse(session.user.id, courseId);
+
+  return NextResponse.json({ owned });
+});
