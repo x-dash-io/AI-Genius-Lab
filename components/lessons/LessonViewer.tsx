@@ -172,7 +172,9 @@ export function LessonViewer({
       <div className="space-y-6">
         <VideoPlayer
           src={`/api/content/${lessonId}`}
+          originalSrc={contentUrl}
           lessonId={lessonId}
+          contentType={contentType}
           allowDownload={allowDownload}
           onProgress={handleProgressUpdate}
         />
