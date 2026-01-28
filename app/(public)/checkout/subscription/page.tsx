@@ -5,7 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { createPayPalSubscription } from "@/lib/paypal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Check } from "lucide-react";
+import { Check, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 type Props = {
   searchParams: Promise<{ planId?: string; interval?: string }>;
@@ -81,9 +82,22 @@ export default async function SubscriptionCheckoutPage({ searchParams }: Props) 
   const isSwitching = !!existingSub;
 
   const price = interval === "annual" ? plan.priceAnnualCents : plan.priceMonthlyCents;
+  const paypalPlanId = interval === "annual" ? plan.paypalAnnualPlanId : plan.paypalMonthlyPlanId;
+  const isSynced = !!paypalPlanId;
 
   return (
     <div className="max-w-2xl mx-auto py-24 px-4">
+      {!isSynced && (
+        <Alert variant="destructive" className="mb-8">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Plan Not Ready</AlertTitle>
+          <AlertDescription>
+            This subscription plan has not been synced with PayPal yet.
+            If you are the administrator, please go to the admin dashboard and click "Sync to PayPal".
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">
           {isSwitching ? "Switch Subscription Plan" : "Confirm Subscription"}
@@ -135,7 +149,7 @@ export default async function SubscriptionCheckoutPage({ searchParams }: Props) 
           <form action={createSubscriptionAction} className="w-full">
             <input type="hidden" name="planId" value={plan.id} />
             <input type="hidden" name="interval" value={interval} />
-            <Button type="submit" className="w-full" size="lg">
+            <Button type="submit" className="w-full" size="lg" disabled={!isSynced}>
               {isSwitching ? "Confirm & Pay via PayPal" : "Subscribe via PayPal"}
             </Button>
           </form>
