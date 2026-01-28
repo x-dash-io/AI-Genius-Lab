@@ -36,7 +36,7 @@ export async function createPost(data: {
   tags?: string[];
 }) {
   const readTimeMinutes = estimateReadTime(data.content);
-
+  
   return withRetry(async () => {
     return prisma.blogPost.create({
       data: {
@@ -50,7 +50,7 @@ export async function createPost(data: {
         tags: {
           connectOrCreate: data.tags?.map(tagName => ({
             where: { name: tagName },
-            create: {
+            create: { 
               name: tagName,
               slug: tagName.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^\w-]+/g, "")
             }
@@ -74,8 +74,8 @@ export async function updatePost(
   }
 ) {
   const { tags, ...otherData } = data;
-  const updateData: any = { ...otherData };
-
+  const updateData: Record<string, unknown> & { readTimeMinutes?: number; tags?: unknown } = { ...otherData };
+  
   if (data.content) {
     updateData.readTimeMinutes = estimateReadTime(data.content);
   }
@@ -85,7 +85,7 @@ export async function updatePost(
       set: [], // Clear existing tags
       connectOrCreate: tags.map(tagName => ({
         where: { name: tagName },
-        create: {
+        create: { 
           name: tagName,
           slug: tagName.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^\w-]+/g, "")
         }

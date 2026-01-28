@@ -1,8 +1,9 @@
 import { getPostBySlug, incrementPostViews } from "@/lib/blog";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Eye, User, ArrowLeft } from "lucide-react";
+import { Calendar, Clock, Eye, User, ArrowLeft, Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -31,8 +32,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
   });
 }
 
-export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const { slug } = await params;
+async function BlogPostContent({ slug }: { slug: string }) {
   const post = await getPostBySlug(slug);
 
   if (!post || post.status !== "published") {
@@ -98,12 +98,26 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </p>
       )}
 
-      <div
+      <div 
         className="prose prose-lg dark:prose-invert max-w-none prose-primary prose-headings:font-display prose-a:text-primary hover:prose-a:text-primary/80"
         dangerouslySetInnerHTML={{ __html: post.content }}
       />
 
       <BlogReviewSection postId={post.id} reviews={post.reviews} />
     </article>
+  );
+}
+
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
+  const { slug } = await params;
+
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <BlogPostContent slug={slug} />
+    </Suspense>
   );
 }

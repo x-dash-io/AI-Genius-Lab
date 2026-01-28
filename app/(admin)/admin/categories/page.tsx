@@ -5,27 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2 } from "lucide-react";
 import { CategoryList } from "@/components/admin/CategoryList";
 
-export default async function AdminCategoriesPage() {
-  await requireRole("admin");
-
+async function CategoriesContent() {
   const categories = await getAllCategories();
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            Category Management
-          </p>
-          <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
-            Categories
-          </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            Manage course categories, icons, and organization.
-          </p>
-        </div>
-      </div>
-
       {/* Stats Card */}
       <Card>
         <CardHeader>
@@ -59,6 +43,30 @@ export default async function AdminCategoriesPage() {
       </Card>
 
       {/* Category List */}
+      <CategoryList initialCategories={categories} />
+    </div>
+  );
+}
+
+export default async function AdminCategoriesPage() {
+  await requireRole("admin");
+
+  return (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Category Management
+          </p>
+          <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
+            Categories
+          </h1>
+          <p className="mt-2 text-lg text-muted-foreground">
+            Manage course categories, icons, and organization.
+          </p>
+        </div>
+      </div>
+
       <Suspense fallback={
         <Card>
           <CardContent className="py-12 text-center">
@@ -66,7 +74,7 @@ export default async function AdminCategoriesPage() {
           </CardContent>
         </Card>
       }>
-        <CategoryList initialCategories={categories} />
+        <CategoriesContent />
       </Suspense>
     </div>
   );
