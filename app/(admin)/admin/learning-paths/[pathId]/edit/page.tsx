@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect, notFound } from "next/navigation";
 import { requireRole } from "@/lib/access";
 import {
@@ -16,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ArrowLeft, Plus, X, GripVertical } from "lucide-react";
+import { ArrowLeft, Plus, X, GripVertical, Loader2 } from "lucide-react";
 import { LearningPathEditForm } from "@/components/admin/LearningPathEditForm";
 
 async function updateLearningPathAction(pathId: string, formData: FormData) {
@@ -77,14 +78,7 @@ async function reorderCoursesAction(pathId: string, courseIds: string[]) {
   redirect(`/admin/learning-paths/${pathId}/edit`);
 }
 
-export default async function EditLearningPathPage({
-  params,
-}: {
-  params: Promise<{ pathId: string }>;
-}) {
-  await requireRole("admin");
-
-  const { pathId } = await params;
+async function LearningPathEditContent({ pathId }: { pathId: string }) {
   const pathData = await getLearningPathById(pathId);
   const allCourses = await getAllCourses();
 
@@ -136,5 +130,24 @@ export default async function EditLearningPathPage({
         reorderCoursesAction={reorderCoursesAction.bind(null, pathId)}
       />
     </div>
+  );
+}
+
+export default async function EditLearningPathPage({
+  params,
+}: {
+  params: Promise<{ pathId: string }>;
+}) {
+  await requireRole("admin");
+  const { pathId } = await params;
+
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <LearningPathEditContent pathId={pathId} />
+    </Suspense>
   );
 }

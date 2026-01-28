@@ -18,7 +18,7 @@ interface CoursesPageProps {
   searchParams: Promise<{ search?: string; category?: string; price?: string; sort?: string }>;
 }
 
-export default async function CoursesPage({ searchParams }: CoursesPageProps) {
+async function CourseCatalogContent({ searchParams }: CoursesPageProps) {
   const params = await searchParams;
   const allCourses = await getPublishedCourses();
   
@@ -82,7 +82,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
   const hasFilters = params.search || params.category || params.price || params.sort;
 
   return (
-    <section className="grid gap-6">
+    <>
       <div>
         <h1 className="font-display text-4xl font-bold tracking-tight">
           Course Catalog
@@ -114,6 +114,16 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
       ) : (
         <CourseList courses={courses} />
       )}
+    </>
+  );
+}
+
+export default async function CoursesPage({ searchParams }: CoursesPageProps) {
+  return (
+    <section className="grid gap-6">
+      <Suspense fallback={<div className="h-96 animate-pulse bg-muted rounded" />}>
+        <CourseCatalogContent searchParams={searchParams} />
+      </Suspense>
     </section>
   );
 }

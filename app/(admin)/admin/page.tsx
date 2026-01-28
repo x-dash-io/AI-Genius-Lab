@@ -1,9 +1,10 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/access";
 import { getAdminStats } from "@/lib/admin/stats";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Users, DollarSign, GraduationCap, TrendingUp } from "lucide-react";
+import { BookOpen, Users, DollarSign, GraduationCap, TrendingUp, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
@@ -16,9 +17,7 @@ export const metadata: Metadata = generateSEOMetadata({
   nofollow: true,
 });
 
-export default async function AdminDashboardPage() {
-  await requireRole("admin");
-
+async function AdminDashboardContent() {
   const stats = await getAdminStats();
 
   const formatCurrency = (cents: number) => {
@@ -30,16 +29,6 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="font-display text-4xl font-bold tracking-tight">
-          Overview
-        </h1>
-        <p className="mt-2 text-lg text-muted-foreground">
-          Manage courses, users, and monitor platform activity.
-        </p>
-      </div>
-
-      {/* Stats Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -198,6 +187,31 @@ export default async function AdminDashboardPage() {
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+export default async function AdminDashboardPage() {
+  await requireRole("admin");
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="font-display text-4xl font-bold tracking-tight">
+          Overview
+        </h1>
+        <p className="mt-2 text-lg text-muted-foreground">
+          Manage courses, users, and monitor platform activity.
+        </p>
+      </div>
+
+      <Suspense fallback={
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      }>
+        <AdminDashboardContent />
+      </Suspense>
     </div>
   );
 }

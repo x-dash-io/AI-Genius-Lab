@@ -5,7 +5,7 @@ import { getAllPurchases } from "@/lib/admin/purchases";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { PurchaseFilters } from "@/components/admin/PurchaseFilters";
 
@@ -20,9 +20,7 @@ interface AdminPurchasesPageProps {
   searchParams: Promise<{ status?: string; provider?: string; search?: string }>;
 }
 
-export default async function AdminPurchasesPage({ searchParams }: AdminPurchasesPageProps) {
-  await requireRole("admin");
-
+async function PurchaseList({ searchParams }: AdminPurchasesPageProps) {
   const params = await searchParams;
   const allPurchases = await getAllPurchases();
   let purchases = [...allPurchases];
@@ -62,18 +60,6 @@ export default async function AdminPurchasesPage({ searchParams }: AdminPurchase
 
   return (
     <div className="space-y-8">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          Purchase Management
-        </p>
-        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
-          Purchases
-        </h1>
-        <p className="mt-2 text-lg text-muted-foreground">
-          View and manage all course purchases.
-        </p>
-      </div>
-
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
@@ -209,6 +195,34 @@ export default async function AdminPurchasesPage({ searchParams }: AdminPurchase
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+export default async function AdminPurchasesPage({ searchParams }: AdminPurchasesPageProps) {
+  await requireRole("admin");
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          Purchase Management
+        </p>
+        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
+          Purchases
+        </h1>
+        <p className="mt-2 text-lg text-muted-foreground">
+          View and manage all course purchases.
+        </p>
+      </div>
+
+      <Suspense fallback={
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      }>
+        <PurchaseList searchParams={searchParams} />
+      </Suspense>
     </div>
   );
 }

@@ -20,7 +20,7 @@ interface LearningPathsPageProps {
   searchParams: Promise<{ search?: string; sort?: string }>;
 }
 
-export default async function LearningPathsPage({ searchParams }: LearningPathsPageProps) {
+async function LearningPathsContent({ searchParams }: LearningPathsPageProps) {
   const params = await searchParams;
   const allPathsData = await getAllPublishedLearningPaths();
   
@@ -69,7 +69,7 @@ export default async function LearningPathsPage({ searchParams }: LearningPathsP
   const hasFilters = params.search || params.sort;
 
   return (
-    <section className="grid gap-8">
+    <>
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Learning Paths
@@ -149,6 +149,16 @@ export default async function LearningPathsPage({ searchParams }: LearningPathsP
           ))}
         </div>
       )}
+    </>
+  );
+}
+
+export default async function LearningPathsPage({ searchParams }: LearningPathsPageProps) {
+  return (
+    <section className="grid gap-8">
+      <Suspense fallback={<div className="h-96 animate-pulse bg-muted rounded" />}>
+        <LearningPathsContent searchParams={searchParams} />
+      </Suspense>
     </section>
   );
 }
