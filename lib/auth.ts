@@ -226,13 +226,17 @@ export const authOptions: NextAuthOptions = {
             token.role = freshUser.role;
             token.lastRefresh = Date.now();
           } else {
-            // User not found in database - only invalidate if we are sure it's not a connection fluke
-            // Note: withRetry would have already retried if it was a connection error
-            console.warn(`User ${token.id} not found in database during JWT refresh, invalidating token`);
-            return {};
+            // CRITICAL: User not found in database during periodic refresh.
+            // To prevent accidental sign-outs due to transient database issues or eventual consistency,
+            // we do NOT invalidate the token immediately. Instead, we keep the current session
+            // and let the next refresh cycle (or a hard navigation) try again.
+            // Only if the user is consistently missing will they eventually be logged out
+            // when the token expires naturally or they try to perform an action that fails.
+            console.warn(`[Auth] User ${token.id} not found in database during JWT refresh. Preserving session for resilience.`);
+            return token;
           }
         } catch (error) {
-          console.error("Error refreshing user in JWT callback:", error);
+          console.error("[Auth] Error refreshing user in JWT callback:", error);
           // On error, we prefer to keep the user logged in with the existing token
           // than to force a sign-out due to a transient database issue.
           // The next refresh attempt will try again.
