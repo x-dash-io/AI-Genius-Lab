@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "../error-handler";
 import { logger } from "@/lib/logger";
 
