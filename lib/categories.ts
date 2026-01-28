@@ -51,7 +51,7 @@ export async function getActiveCategoriesWithCount(): Promise<
       orderBy: { sortOrder: "asc" },
       include: {
         _count: {
-          select: { Course: true },
+          select: { courses: true },
         },
       },
     });
@@ -67,7 +67,7 @@ export async function getActiveCategoriesWithCount(): Promise<
       isActive: cat.isActive,
       createdAt: cat.createdAt,
       updatedAt: cat.updatedAt,
-      courseCount: cat._count.Course,
+      courseCount: cat._count.courses,
     }));
   });
 }

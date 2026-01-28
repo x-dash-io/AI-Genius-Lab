@@ -48,7 +48,7 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
     // Get total students (users with at least one enrollment)
     const totalStudents = await prisma.user.count({
       where: {
-        Enrollment: {
+        enrollments: {
           some: {},
         },
       },
@@ -79,7 +79,7 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
     const categories = await prisma.category.findMany({
       where: {
         isActive: true,
-        Course: {
+        courses: {
           some: {
             isPublished: true,
           },
@@ -89,7 +89,7 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
         sortOrder: "asc",
       },
       include: {
-        Course: {
+        courses: {
           where: {
             isPublished: true,
           },
@@ -114,8 +114,8 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
       description: category.description,
       icon: category.icon,
       color: category.color,
-      courseCount: category.Course.length,
-      courses: category.Course,
+      courseCount: category.courses.length,
+      courses: category.courses,
     }));
 
     return {
