@@ -2,15 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { withErrorHandler } from "../error-handler";
+import { AppError } from "@/lib/errors";
 
-export async function GET(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+export const GET = withErrorHandler(async (request: NextRequest) => {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    throw AppError.unauthorized();
+  }
 
-    const searchParams = request.nextUrl.searchParams;
+  const searchParams = request.nextUrl.searchParams;
     const type = searchParams.get("type");
     const limit = parseInt(searchParams.get("limit") || "50");
 
@@ -55,12 +56,5 @@ export async function GET(request: NextRequest) {
       })
     );
 
-    return NextResponse.json({ activity: enrichedActivity });
-  } catch (error: any) {
-    console.error("Error fetching activity:", error);
-    return NextResponse.json(
-      { error: error?.message || "Failed to fetch activity" },
-      { status: 500 }
-    );
-  }
-}
+  return NextResponse.json({ activity: enrichedActivity });
+});

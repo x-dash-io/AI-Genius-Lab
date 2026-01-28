@@ -29,9 +29,11 @@ export function CourseFilters() {
   
   const currentSearch = searchParams.get("search") || "";
   const currentCategory = searchParams.get("category") || "all";
+  const currentPrice = searchParams.get("price") || "all";
   const currentSort = searchParams.get("sort") || "newest";
   
   const [category, setCategory] = useState(currentCategory);
+  const [price, setPrice] = useState(currentPrice);
   const [sortBy, setSortBy] = useState(currentSort);
   const [isFiltering, setIsFiltering] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -58,8 +60,9 @@ export function CourseFilters() {
   // Sync state with URL params
   useEffect(() => {
     setCategory(currentCategory);
+    setPrice(currentPrice);
     setSortBy(currentSort);
-  }, [currentCategory, currentSort]);
+  }, [currentCategory, currentPrice, currentSort]);
 
   // Reset filtering state when transition completes
   useEffect(() => {
@@ -76,6 +79,20 @@ export function CourseFilters() {
         params.set("search", value);
       } else {
         params.delete("search");
+      }
+      router.push(`${pathname}?${params.toString()}`);
+    });
+  }, [router, pathname, searchParams]);
+
+  const handlePriceChange = useCallback((value: string) => {
+    setPrice(value);
+    setIsFiltering(true);
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (value && value !== "all") {
+        params.set("price", value);
+      } else {
+        params.delete("price");
       }
       router.push(`${pathname}?${params.toString()}`);
     });
@@ -111,6 +128,7 @@ export function CourseFilters() {
 
   const handleClearAll = useCallback(() => {
     setCategory("all");
+    setPrice("all");
     setSortBy("newest");
     setIsFiltering(true);
     startTransition(() => {
@@ -118,7 +136,7 @@ export function CourseFilters() {
     });
   }, [router, pathname]);
 
-  const hasFilters = currentSearch || currentCategory !== "all" || currentSort !== "newest";
+  const hasFilters = currentSearch || currentCategory !== "all" || currentPrice !== "all" || currentSort !== "newest";
   const showLoading = isPending && isFiltering;
 
   return (
@@ -135,7 +153,7 @@ export function CourseFilters() {
         </div>
         <div className="flex gap-2 flex-wrap">
           <Select value={category} onValueChange={handleCategoryChange} disabled={isLoadingCategories}>
-            <SelectTrigger className="w-[200px]">
+            <SelectTrigger className="w-[180px]">
               <SelectValue placeholder={isLoadingCategories ? "Loading..." : "All Categories"} />
             </SelectTrigger>
             <SelectContent>
@@ -145,6 +163,18 @@ export function CourseFilters() {
                   {cat.name}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+          <Select value={price} onValueChange={handlePriceChange}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Price" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Prices</SelectItem>
+              <SelectItem value="free">Free</SelectItem>
+              <SelectItem value="paid">Paid</SelectItem>
+              <SelectItem value="under-50">Under $50</SelectItem>
+              <SelectItem value="over-50">Over $50</SelectItem>
             </SelectContent>
           </Select>
           <Select value={sortBy} onValueChange={handleSortChange}>
@@ -194,6 +224,17 @@ export function CourseFilters() {
               {categories.find((c) => c.slug === currentCategory)?.name || currentCategory}
               <button
                 onClick={() => handleCategoryChange("all")}
+                className="ml-1 hover:text-foreground"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
+          {currentPrice !== "all" && (
+            <Badge variant="secondary" className="gap-1">
+              Price: {currentPrice}
+              <button
+                onClick={() => handlePriceChange("all")}
                 className="ml-1 hover:text-foreground"
               >
                 <X className="h-3 w-3" />

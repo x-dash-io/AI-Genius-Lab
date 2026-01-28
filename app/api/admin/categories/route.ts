@@ -1,36 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllCategories, createCategory } from "@/lib/admin/categories";
+import { withErrorHandler } from "../../error-handler";
+import { AppError } from "@/lib/errors";
 
-export async function GET() {
-  try {
-    const categories = await getAllCategories();
-    return NextResponse.json({ categories });
-  } catch (error) {
-    console.error("Error fetching categories:", error);
+export const GET = withErrorHandler(async () => {
+  const categories = await getAllCategories();
+  return NextResponse.json({ categories });
+});
 
-    if (error instanceof Error && error.message === "FORBIDDEN") {
-      return NextResponse.json({ error: "Access denied" }, { status: 403 });
-    }
+export const POST = withErrorHandler(async (request: NextRequest) => {
+  const body = await request.json();
+  const { name, slug, description, icon, color, isActive } = body;
 
-    return NextResponse.json(
-      { error: "Failed to fetch categories" },
-      { status: 500 }
-    );
+  if (!name) {
+    throw AppError.badRequest("Name is required");
   }
-}
 
-export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { name, slug, description, icon, color, isActive } = body;
-
-    if (!name) {
-      return NextResponse.json(
-        { error: "Name is required" },
-        { status: 400 }
-      );
-    }
-
     const category = await createCategory({
       name,
       slug,
@@ -42,23 +28,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ category }, { status: 201 });
   } catch (error) {
-    console.error("Error creating category:", error);
-
-    if (error instanceof Error) {
-      if (error.message === "FORBIDDEN") {
-        return NextResponse.json({ error: "Access denied" }, { status: 403 });
-      }
-      if (error.message === "SLUG_EXISTS") {
-        return NextResponse.json(
-          { error: "A category with this slug already exists" },
-          { status: 409 }
-        );
-      }
+    if (error instanceof Error && error.message === "SLUG_EXISTS") {
+      throw AppError.conflict("A category with this slug already exists");
     }
-
-    return NextResponse.json(
-      { error: "Failed to create category" },
-      { status: 500 }
-    );
+    throw error;
   }
-}
+});
