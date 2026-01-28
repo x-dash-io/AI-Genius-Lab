@@ -5,8 +5,15 @@ import { getAllPublishedLearningPaths } from "@/lib/learning-paths";
 const siteUrl = process.env.NEXTAUTH_URL || "https://synapze.dev";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const courses = await getPublishedCourses();
-  const learningPaths = await getAllPublishedLearningPaths();
+  let courses: any[] = [];
+  let learningPaths: any[] = [];
+
+  try {
+    courses = await getPublishedCourses();
+    learningPaths = await getAllPublishedLearningPaths();
+  } catch (error) {
+    console.error("Error generating sitemap entries from database:", error);
+  }
 
   const courseEntries: MetadataRoute.Sitemap = courses.map((course) => ({
     url: `${siteUrl}/courses/${course.slug}`,
