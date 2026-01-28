@@ -59,11 +59,20 @@ export async function POST(request: Request) {
     // Handle Subscription Events
     if (event.event_type?.startsWith("BILLING.SUBSCRIPTION.")) {
       const subscriptionResource = event.resource;
-      const customId = subscriptionResource.custom_id;
+      let customId = subscriptionResource.custom_id;
       const paypalSubId = subscriptionResource.id;
 
+      if (!customId && paypalSubId) {
+        const subByPaypalId = await prisma.subscription.findUnique({
+          where: { paypalSubscriptionId: paypalSubId },
+        });
+        if (subByPaypalId) {
+          customId = subByPaypalId.id;
+        }
+      }
+
       if (!customId) {
-        console.warn(`[WEBHOOK] Missing custom_id in subscription event`);
+        console.warn(`[WEBHOOK] Missing custom_id in subscription event and could not find by PayPal ID`);
         return NextResponse.json({ received: true });
       }
 
@@ -73,6 +82,7 @@ export async function POST(request: Request) {
 
       switch (event.event_type) {
         case "BILLING.SUBSCRIPTION.ACTIVATED":
+        case "BILLING.SUBSCRIPTION.UPDATED":
           const startTime = new Date(
             subscriptionResource.start_time || Date.now()
           );
@@ -80,14 +90,32 @@ export async function POST(request: Request) {
             ? new Date(subscriptionResource.billing_info.next_billing_time)
             : new Date(Date.now() + 31 * 24 * 60 * 60 * 1000); // Fallback 31 days
 
+          // If it's an update, we might need to sync the plan too
+          let updateData: any = {
+            status: "active",
+            paypalSubscriptionId: paypalSubId,
+            currentPeriodStart: startTime,
+            currentPeriodEnd: endTime,
+          };
+
+          if (subscriptionResource.plan_id) {
+            const plan = await prisma.subscriptionPlan.findFirst({
+              where: {
+                OR: [
+                  { paypalMonthlyPlanId: subscriptionResource.plan_id },
+                  { paypalAnnualPlanId: subscriptionResource.plan_id }
+                ]
+              }
+            });
+            if (plan) {
+              updateData.planId = plan.id;
+              updateData.interval = plan.paypalAnnualPlanId === subscriptionResource.plan_id ? "annual" : "monthly";
+            }
+          }
+
           const sub = await prisma.subscription.update({
             where: { id: customId },
-            data: {
-              status: "active",
-              paypalSubscriptionId: paypalSubId,
-              currentPeriodStart: startTime,
-              currentPeriodEnd: endTime,
-            },
+            data: updateData,
           });
 
           // Cancel any other active subscriptions for this user

@@ -3,14 +3,16 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getUserProfile, getUserStats, updateUserProfile, updateUserAvatar, changePassword } from "@/lib/profile";
 import { prisma } from "@/lib/prisma";
+import { getUserSubscription } from "@/lib/subscriptions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { PasswordChangeForm } from "@/components/profile/PasswordChangeForm";
 import { EmailChangeForm } from "@/components/profile/EmailChangeForm";
 import { ProfilePreviewBanner } from "@/components/profile/ProfilePreviewBanner";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, DollarSign, GraduationCap, Calendar } from "lucide-react";
+import { BookOpen, DollarSign, GraduationCap, Calendar, ShieldCheck, Zap, Rocket, Star } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -51,7 +53,7 @@ export default async function ProfilePage() {
     redirect("/sign-in");
   }
 
-  const [profile, stats, userWithPassword] = await Promise.all([
+  const [profile, stats, userWithPassword, subscription] = await Promise.all([
     getUserProfile(session.user.id),
     getUserStats(session.user.id),
     // Check if user has a password
@@ -59,6 +61,7 @@ export default async function ProfilePage() {
       where: { id: session.user.id },
       select: { passwordHash: true },
     }),
+    getUserSubscription(session.user.id),
   ]);
 
   if (!profile) {
@@ -140,6 +143,29 @@ export default async function ProfilePage() {
               <span className="text-sm font-medium">
                 {new Date(stats.memberSince).toLocaleDateString()}
               </span>
+            </div>
+            <Separator />
+            <div className="space-y-3 pt-1 pb-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">Status</span>
+                </div>
+                <Badge variant={subscription ? "default" : "secondary"}>
+                  {subscription ? (subscription.status === "pending" ? "Processing" : "Subscriber") : "Free Member"}
+                </Badge>
+              </div>
+              {subscription && (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {subscription.plan.tier === "starter" && <Zap className="h-4 w-4 text-amber-500" />}
+                    {subscription.plan.tier === "pro" && <Star className="h-4 w-4 text-blue-500" />}
+                    {subscription.plan.tier === "elite" && <Rocket className="h-4 w-4 text-purple-500" />}
+                    <span className="text-sm font-medium">Tier</span>
+                  </div>
+                  <span className="text-sm font-bold uppercase tracking-tight">{subscription.plan.name}</span>
+                </div>
+              )}
             </div>
             <Separator />
             <div className="flex flex-col gap-3">
