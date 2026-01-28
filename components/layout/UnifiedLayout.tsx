@@ -46,48 +46,45 @@ interface UnifiedLayoutProps {
   layoutType?: LayoutType;
 }
 
-// Admin navigation items
-const adminNavigation: NavItem[] = [
-  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { name: "Courses", href: "/admin/courses", icon: BookOpen },
-  { name: "Learning Paths", href: "/admin/learning-paths", icon: Route },
-  { name: "Categories", href: "/admin/categories", icon: ShoppingCart },
-  { name: "Blog", href: "/admin/blog", icon: FileText },
-  { name: "Users", href: "/admin/users", icon: Users },
-  { name: "Purchases", href: "/admin/purchases", icon: Receipt },
-  { name: "Subscriptions", href: "/admin/subscriptions", icon: Crown },
-  { name: "Profile", href: "/admin/profile", icon: User },
-];
+// Unified navigation configuration
+const navigationConfig = {
+  admin: [
+    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Courses", href: "/admin/courses", icon: BookOpen },
+    { name: "Learning Paths", href: "/admin/learning-paths", icon: Route },
+    { name: "Categories", href: "/admin/categories", icon: ShoppingCart },
+    { name: "Blog", href: "/admin/blog", icon: FileText },
+    { name: "Users", href: "/admin/users", icon: Users },
+    { name: "Purchases", href: "/admin/purchases", icon: Receipt },
+    { name: "Subscriptions", href: "/admin/subscriptions", icon: Crown },
+    { name: "Profile", href: "/admin/profile", icon: User },
+  ],
+  customer: [
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "My Courses", href: "/library", icon: BookOpen },
+    { name: "Browse Courses", href: "/courses", icon: GraduationCap },
+    { name: "Learning Paths", href: "/learning-paths", icon: Route },
+    { name: "Blog", href: "/blog", icon: FileText },
+    { name: "Cart", href: "/cart", icon: ShoppingCart },
+    { name: "Activity", href: "/activity", icon: Activity },
+    { name: "Subscription", href: "/subscription", icon: Crown },
+    { name: "Profile", href: "/profile", icon: User },
+  ],
+  public: [
+    { name: "Home", href: "/", icon: Home },
+    { name: "Courses", href: "/courses", icon: BookOpen },
+    { name: "Learning Paths", href: "/learning-paths", icon: Route },
+    { name: "Cart", href: "/cart", icon: ShoppingCart },
+    { name: "FAQ", href: "/faq", icon: HelpCircle },
+    { name: "Contact Us", href: "/contact", icon: Mail },
+  ],
+};
 
-// Customer preview links (for admin)
 const customerPreviewLinks: NavItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Course Catalog", href: "/courses", icon: BookOpen },
   { name: "Learning Paths", href: "/learning-paths", icon: Route },
   { name: "Blog", href: "/blog", icon: FileText },
-];
-
-// Customer navigation items
-const customerNavigation: NavItem[] = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "My Courses", href: "/library", icon: BookOpen },
-  { name: "Browse Courses", href: "/courses", icon: GraduationCap },
-  { name: "Learning Paths", href: "/learning-paths", icon: Route },
-  { name: "Blog", href: "/blog", icon: FileText },
-  { name: "Cart", href: "/cart", icon: ShoppingCart },
-  { name: "Activity", href: "/activity", icon: Activity },
-  { name: "Subscription", href: "/subscription", icon: Crown },
-  { name: "Profile", href: "/profile", icon: User },
-];
-
-// Public navigation items
-const publicNavigation: NavItem[] = [
-  { name: "Home", href: "/", icon: Home },
-  { name: "Courses", href: "/courses", icon: BookOpen },
-  { name: "Learning Paths", href: "/learning-paths", icon: Route },
-  { name: "Cart", href: "/cart", icon: ShoppingCart },
-  { name: "FAQ", href: "/faq", icon: HelpCircle },
-  { name: "Contact Us", href: "/contact", icon: Mail },
 ];
 
 export function UnifiedLayout({ children, layoutType = "public" }: UnifiedLayoutProps) {
@@ -98,36 +95,13 @@ export function UnifiedLayout({ children, layoutType = "public" }: UnifiedLayout
   const { cart } = useCart();
 
   // Determine final layout type.
-  // We prioritize the server-provided layoutType as a baseline to prevent flickering.
-  // We only switch to a different layout if the user is authenticated and their role
-  // requires a different layout (e.g., admin browsing public pages).
-  let currentLayoutType = (status === "authenticated" && session?.user)
-    ? (session.user.role === "admin" ? "admin" : "customer")
-    : layoutType;
-
-  // SAFETY OVERRIDE: Enforce layout consistency based on current URL path.
-  // If we are on an admin route, we should ALWAYS show the admin layout shell,
-  // regardless of session status. This prevents the public top bar from appearing
-  // during session transitions or accidental sign-outs on admin pages.
-  if (pathname.startsWith("/admin") && currentLayoutType === "public") {
-    currentLayoutType = "admin";
-  }
-
-  // Same for protected customer routes
-  const protectedCustomerRoutes = ["/dashboard", "/library", "/profile", "/activity", "/subscription", "/purchase"];
-  const isProtectedCustomerRoute = protectedCustomerRoutes.some(route => pathname.startsWith(route));
-  if (isProtectedCustomerRoute && currentLayoutType === "public") {
-    currentLayoutType = "customer";
-  }
+  // We use the server-provided layoutType as the definitive shell structure.
+  // This prevents flickering between top-bar and sidebar during session hydration.
+  // If the user's role allows them to see more items, we'll handle that within the navigation.
+  const currentLayoutType = layoutType;
 
   // Get navigation items based on layout type
-  const getNavigationItems = (): NavItem[] => {
-    if (currentLayoutType === "admin") return adminNavigation;
-    if (currentLayoutType === "customer") return customerNavigation;
-    return publicNavigation;
-  };
-
-  const navigationItems = getNavigationItems();
+  const navigationItems = navigationConfig[currentLayoutType] || navigationConfig.public;
 
   // Handle preview mode for admins
   const isAdmin = session?.user?.role === "admin";

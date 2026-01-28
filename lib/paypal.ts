@@ -182,6 +182,61 @@ export async function verifyPayPalWebhook({
   return data.verification_status === "SUCCESS";
 }
 
+/**
+ * Create or get a PayPal product ID for subscriptions
+ */
+async function getOrCreatePayPalProduct(accessToken: string) {
+  // Check if we already have a product ID in env
+  if (process.env.PAYPAL_PRODUCT_ID) {
+    return process.env.PAYPAL_PRODUCT_ID;
+  }
+
+  // Try to list products and find one for AI Genius Lab
+  try {
+    const listResponse = await fetch(`${paypalBaseUrl}/v1/catalogs/products?page_size=10`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (listResponse.ok) {
+      const data = await listResponse.json();
+      const existingProduct = data.products?.find((p: any) => p.name === "AI Genius Lab Premium");
+      if (existingProduct) return existingProduct.id;
+    }
+  } catch (error) {
+    console.error("Error listing PayPal products:", error);
+  }
+
+  // Create a new product if none found
+  const createResponse = await fetch(`${paypalBaseUrl}/v1/catalogs/products`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: "AI Genius Lab Premium",
+      description: "Premium subscription for AI Genius Lab courses",
+      type: "SERVICE",
+      category: "SOFTWARE",
+      image_url: "https://ai-genius-lab.vercel.app/logo.png",
+      home_url: "https://ai-genius-lab.vercel.app",
+    }),
+  });
+
+  if (!createResponse.ok) {
+    const err = await createResponse.text();
+    console.error("Failed to create PayPal product:", err);
+    // Fallback to a random but valid-looking ID or throw
+    throw new Error("Failed to create PayPal product.");
+  }
+
+  const product = await createResponse.json();
+  return product.id;
+}
+
 export async function createPayPalSubscription({
   planType,
   returnUrl,
@@ -194,6 +249,7 @@ export async function createPayPalSubscription({
   subscriptionId: string;
 }) {
   const accessToken = await getPayPalAccessToken();
+  const productId = await getOrCreatePayPalProduct(accessToken);
 
   // First, create a billing plan
   const planResponse = await fetch(`${paypalBaseUrl}/v1/billing/plans`, {
@@ -205,7 +261,7 @@ export async function createPayPalSubscription({
       "Prefer": "return=representation",
     },
     body: JSON.stringify({
-      product_id: null, // We'll create the product inline
+      product_id: productId,
       name: planType === "monthly" ? "Monthly Premium Subscription" : "Annual Premium Subscription",
       description: planType === "monthly" 
         ? "Access to all courses - Monthly billing" 

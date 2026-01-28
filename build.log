@@ -1,0 +1,5 @@
+
+> ai-genius-lab@0.1.0 build
+> node scripts/with-prisma-engine.js next build
+
+/bin/sh: 1: next: not found
