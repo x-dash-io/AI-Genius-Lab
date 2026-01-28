@@ -16,12 +16,19 @@ export async function syncSubscriptionPlansToPayPal() {
     where: { isActive: true }
   });
 
-  for (const plan of plans) {
-    let productId = plan.paypalProductId;
+  if (plans.length === 0) {
+    return { success: true, count: 0, message: "No active plans to sync." };
+  }
 
-    // 1. Ensure Product exists in PayPal
-    if (!productId) {
-      try {
+  let syncedCount = 0;
+  let errorMessages: string[] = [];
+
+  for (const plan of plans) {
+    try {
+      let productId = plan.paypalProductId;
+
+      // 1. Ensure Product exists in PayPal
+      if (!productId) {
         const product = await createPayPalProduct({
           name: `AI Genius Lab - ${plan.name}`,
           description: plan.description || `Subscription for ${plan.name} tier`,
@@ -32,15 +39,10 @@ export async function syncSubscriptionPlansToPayPal() {
           data: { paypalProductId: product.id }
         });
         productId = product.id;
-      } catch (error) {
-        console.error(`Failed to create PayPal product for plan ${plan.name}:`, error);
-        continue;
       }
-    }
 
-    // 2. Ensure Monthly Plan exists
-    if (!plan.paypalMonthlyPlanId) {
-      try {
+      // 2. Ensure Monthly Plan exists
+      if (!plan.paypalMonthlyPlanId) {
         const payPalPlan = await createPayPalPlan({
           productId: productId!,
           name: `${plan.name} Monthly`,
@@ -53,14 +55,10 @@ export async function syncSubscriptionPlansToPayPal() {
           where: { id: plan.id },
           data: { paypalMonthlyPlanId: payPalPlan.id }
         });
-      } catch (error) {
-        console.error(`Failed to create PayPal monthly plan for ${plan.name}:`, error);
       }
-    }
 
-    // 3. Ensure Annual Plan exists
-    if (!plan.paypalAnnualPlanId) {
-      try {
+      // 3. Ensure Annual Plan exists
+      if (!plan.paypalAnnualPlanId) {
         const payPalPlan = await createPayPalPlan({
           productId: productId!,
           name: `${plan.name} Annual`,
@@ -73,11 +71,20 @@ export async function syncSubscriptionPlansToPayPal() {
           where: { id: plan.id },
           data: { paypalAnnualPlanId: payPalPlan.id }
         });
-      } catch (error) {
-        console.error(`Failed to create PayPal annual plan for ${plan.name}:`, error);
       }
+      syncedCount++;
+    } catch (error: any) {
+      const msg = `Failed to sync plan ${plan.name}: ${error.message}`;
+      console.error(msg);
+      errorMessages.push(msg);
     }
   }
+
+  return {
+    success: errorMessages.length === 0,
+    count: syncedCount,
+    errors: errorMessages,
+  };
 }
 
 /**

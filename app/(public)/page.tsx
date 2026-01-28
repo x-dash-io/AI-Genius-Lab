@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { connection } from "next/server";
 import { LandingHero } from "@/components/layout/LandingHero";
 import { TrustSection } from "@/components/home/TrustSection";
 import { LaunchCurriculum } from "@/components/home/LaunchCurriculum";
@@ -23,6 +24,7 @@ export const metadata: Metadata = generateSEOMetadata({
 });
 
 export default async function LandingPage() {
+  await connection();
   // Fetch stats with error handling - page will still render if DB is unavailable
   let stats;
   try {

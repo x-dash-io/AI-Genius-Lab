@@ -9,12 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, RefreshCw, CreditCard, Edit } from "lucide-react";
 import { revalidatePath } from "next/cache";
 import { SubscriptionPlanForm } from "@/components/admin/SubscriptionPlanForm";
+import { SyncPlansButton } from "@/components/admin/SyncPlansButton";
 
 async function syncPlansAction() {
   "use server";
   await requireRole("admin");
-  await syncSubscriptionPlansToPayPal();
+  const result = await syncSubscriptionPlansToPayPal();
   revalidatePath("/admin/subscriptions/plans");
+  return result;
 }
 
 async function savePlanAction(formData: FormData) {
@@ -128,12 +130,7 @@ export default async function PlansPage({ searchParams }: { searchParams: Promis
             Manage your subscription tiers and sync them with PayPal.
           </p>
         </div>
-        <form action={syncPlansAction}>
-          <Button type="submit">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Sync to PayPal
-          </Button>
-        </form>
+        <SyncPlansButton syncAction={syncPlansAction} />
       </div>
 
       <SubscriptionPlanForm
