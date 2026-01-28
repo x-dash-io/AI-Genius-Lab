@@ -1,15 +1,13 @@
-import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { requireRole } from "@/lib/access";
 import { getAllLearningPaths } from "@/lib/admin/learning-paths";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { BookOpen, Plus, Edit, Trash2 } from "lucide-react";
+import { BookOpen, Plus, Edit, Trash2, Loader2 } from "lucide-react";
 
-export default async function AdminLearningPathsPage() {
-  await requireRole("admin");
-
+async function LearningPathsList() {
   const pathsData = await getAllLearningPaths();
 
   // Transform the data to match expected format
@@ -23,6 +21,72 @@ export default async function AdminLearningPathsPage() {
       courses: pathData._count.LearningPathCourse,
     },
   }));
+
+  if (paths.length === 0) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+          <p className="text-muted-foreground mb-4">No learning paths yet.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="grid gap-4">
+      {paths.map((path) => (
+        <Card key={path.id}>
+          <CardHeader>
+            <div className="flex items-start justify-between">
+              <div className="space-y-1 flex-1">
+                <CardTitle className="text-xl">{path.title}</CardTitle>
+                {path.description && (
+                  <CardDescription>{path.description}</CardDescription>
+                )}
+                <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                  <span>{path._count.courses} courses</span>
+                  <span>•</span>
+                  <span>
+                    Created {new Date(path.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Link href={`/admin/learning-paths/${path.id}/edit`}>
+                  <Button variant="outline" size="sm">
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </CardHeader>
+          {path.courses.length > 0 && (
+            <CardContent>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Courses in this path:</p>
+                <div className="flex flex-wrap gap-2">
+                  {path.courses.map((pathCourse) => (
+                    <Badge
+                      key={pathCourse.id}
+                      variant={pathCourse.course.isPublished ? "default" : "secondary"}
+                    >
+                      {pathCourse.course.title}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          )}
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+export default async function AdminLearningPathsPage() {
+  await requireRole("admin");
 
   return (
     <div className="space-y-8">
@@ -46,63 +110,13 @@ export default async function AdminLearningPathsPage() {
         </Link>
       </div>
 
-      {paths.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground mb-4">No learning paths yet.</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4">
-          {paths.map((path) => (
-            <Card key={path.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <CardTitle className="text-xl">{path.title}</CardTitle>
-                    {path.description && (
-                      <CardDescription>{path.description}</CardDescription>
-                    )}
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      <span>{path._count.courses} courses</span>
-                      <span>•</span>
-                      <span>
-                        Created {new Date(path.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Link href={`/admin/learning-paths/${path.id}/edit`}>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </CardHeader>
-              {path.courses.length > 0 && (
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Courses in this path:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {path.courses.map((pathCourse) => (
-                        <Badge
-                          key={pathCourse.id}
-                          variant={pathCourse.course.isPublished ? "default" : "secondary"}
-                        >
-                          {pathCourse.course.title}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              )}
-            </Card>
-          ))}
+      <Suspense fallback={
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-      )}
+      }>
+        <LearningPathsList />
+      </Suspense>
     </div>
   );
 }

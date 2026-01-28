@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { BookOpen, Plus, Edit, Trash2 } from "lucide-react";
+import { BookOpen, Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import { CourseFilters } from "@/components/admin/CourseFilters";
 import { BulkImport } from "@/components/admin/BulkImport";
 
@@ -21,9 +21,7 @@ function formatCurrency(cents: number) {
   }).format(cents / 100);
 }
 
-export default async function AdminCoursesPage({ searchParams }: AdminCoursesPageProps) {
-  await requireRole("admin");
-
+async function CourseList({ searchParams }: AdminCoursesPageProps) {
   const params = await searchParams;
   const allCourses = await getAllCourses();
   
@@ -60,29 +58,6 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-            Course Management
-          </p>
-          <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
-            Courses
-          </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            Manage all courses, sections, and lessons.
-          </p>
-        </div>
-        <Link href="/admin/courses/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Course
-          </Button>
-        </Link>
-      </div>
-
-      {/* Bulk Import */}
-      <BulkImport />
-
       {/* Filters */}
       <Card>
         <CardHeader>
@@ -167,6 +142,45 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+export default async function AdminCoursesPage({ searchParams }: AdminCoursesPageProps) {
+  await requireRole("admin");
+
+  return (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Course Management
+          </p>
+          <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
+            Courses
+          </h1>
+          <p className="mt-2 text-lg text-muted-foreground">
+            Manage all courses, sections, and lessons.
+          </p>
+        </div>
+        <Link href="/admin/courses/new">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Course
+          </Button>
+        </Link>
+      </div>
+
+      {/* Bulk Import */}
+      <BulkImport />
+
+      <Suspense fallback={
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      }>
+        <CourseList searchParams={searchParams} />
+      </Suspense>
     </div>
   );
 }

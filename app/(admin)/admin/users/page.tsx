@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Users, User, Shield } from "lucide-react";
+import { Users as UsersIcon, User, Shield, Loader2 } from "lucide-react";
 import { UserFilters } from "@/components/admin/UserFilters";
 import { FilterSkeleton } from "@/components/ui/filter-skeleton";
 
@@ -16,10 +16,8 @@ interface AdminUsersPageProps {
   searchParams: Promise<{ search?: string; role?: string }>;
 }
 
-export default async function AdminUsersPage({ searchParams }: AdminUsersPageProps) {
+async function UserList({ searchParams }: AdminUsersPageProps) {
   const session = await getServerSession(authOptions);
-  await requireRole("admin");
-
   const params = await searchParams;
   const allUsers = await getAllUsers();
   
@@ -47,18 +45,6 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
 
   return (
     <div className="space-y-8">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          User Management
-        </p>
-        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
-          Users
-        </h1>
-        <p className="mt-2 text-lg text-muted-foreground">
-          Manage user accounts, roles, and permissions.
-        </p>
-      </div>
-
       {/* Filters */}
       <Card>
         <CardHeader>
@@ -79,7 +65,7 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
       {users.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <UsersIcon className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-muted-foreground">
               {hasFilters
                 ? "No users match your search criteria."
@@ -137,6 +123,34 @@ export default async function AdminUsersPage({ searchParams }: AdminUsersPagePro
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+export default async function AdminUsersPage({ searchParams }: AdminUsersPageProps) {
+  await requireRole("admin");
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+          User Management
+        </p>
+        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
+          Users
+        </h1>
+        <p className="mt-2 text-lg text-muted-foreground">
+          Manage user accounts, roles, and permissions.
+        </p>
+      </div>
+
+      <Suspense fallback={
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      }>
+        <UserList searchParams={searchParams} />
+      </Suspense>
     </div>
   );
 }

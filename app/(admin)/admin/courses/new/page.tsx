@@ -1,7 +1,8 @@
+import { Suspense } from "react";
 import { requireRole } from "@/lib/access";
 import { createCourse } from "@/lib/admin/courses";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { CourseCreationForm } from "../../../../../components/admin/CourseCreationForm";
 
 async function createCourseAction(formData: FormData) {
@@ -44,9 +45,12 @@ async function createCourseAction(formData: FormData) {
   }
 }
 
-export default async function NewCoursePage() {
+async function NewCourseContent() {
   await requireRole("admin");
+  return <CourseCreationForm createCourseAction={createCourseAction} />;
+}
 
+export default async function NewCoursePage() {
   return (
     <div className="space-y-8">
       <div>
@@ -68,7 +72,13 @@ export default async function NewCoursePage() {
         </p>
       </div>
 
-      <CourseCreationForm createCourseAction={createCourseAction} />
+      <Suspense fallback={
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      }>
+        <NewCourseContent />
+      </Suspense>
     </div>
   );
 }

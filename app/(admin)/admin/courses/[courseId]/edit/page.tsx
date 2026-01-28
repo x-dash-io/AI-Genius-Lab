@@ -1,8 +1,9 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/access";
 import { getCourseForEdit, updateCourse, createSection, deleteSection, createLesson, deleteLesson, updateLesson, updateLessonContent, deleteLessonContent, createLessonContent } from "@/lib/admin/courses";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { CourseEditForm } from "@/components/admin/CourseEditForm";
 
 async function updateCourseAction(courseId: string, formData: FormData) {
@@ -222,14 +223,7 @@ async function updateLessonAction(lessonId: string, formData: FormData) {
   return { success: true };
 }
 
-export default async function EditCoursePage({
-  params,
-}: {
-  params: Promise<{ courseId: string }>;
-}) {
-  await requireRole("admin");
-
-  const { courseId } = await params;
+async function CourseEditContent({ courseId }: { courseId: string }) {
   const course = await getCourseForEdit(courseId);
 
   if (!course) {
@@ -276,5 +270,24 @@ export default async function EditCoursePage({
         updateLessonAction={updateLessonAction}
       />
     </div>
+  );
+}
+
+export default async function EditCoursePage({
+  params,
+}: {
+  params: Promise<{ courseId: string }>;
+}) {
+  await requireRole("admin");
+  const { courseId } = await params;
+
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <CourseEditContent courseId={courseId} />
+    </Suspense>
   );
 }
