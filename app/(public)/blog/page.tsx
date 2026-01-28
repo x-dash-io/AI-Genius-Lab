@@ -3,7 +3,7 @@ import { getPublishedPosts, getBlogTags } from "@/lib/blog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Newspaper, Calendar, Clock, Eye, Search } from "lucide-react";
+import { Newspaper, Calendar, Clock, Eye, Search, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";

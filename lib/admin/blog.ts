@@ -74,7 +74,7 @@ export async function updatePost(
   }
 ) {
   const { tags, ...otherData } = data;
-  const updateData: Record<string, unknown> & { readTimeMinutes?: number; tags?: unknown } = { ...otherData };
+  const updateData: any = { ...otherData };
   
   if (data.content) {
     updateData.readTimeMinutes = estimateReadTime(data.content);
@@ -96,7 +96,7 @@ export async function updatePost(
   return withRetry(async () => {
     return prisma.blogPost.update({
       where: { id: postId },
-      data: updateData,
+      data: updateData as any,
     });
   });
 }
