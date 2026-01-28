@@ -2,6 +2,8 @@ import { UnifiedLayout } from "@/components/layout/UnifiedLayout";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+export const experimental_ppr = true;
+
 export default async function PublicLayout({
   children,
 }: {

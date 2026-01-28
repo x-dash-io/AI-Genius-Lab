@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Navigation, type NavItem } from "./Navigation";
 import { UserProfile } from "./UserProfile";
-import { Button } from "@/components/ui/button";
 import { LogIn, UserPlus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";

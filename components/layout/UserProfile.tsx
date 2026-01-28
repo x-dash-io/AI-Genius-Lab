@@ -26,7 +26,18 @@ export function UserProfile({
   className,
 }: UserProfileProps) {
   const { data: session, status } = useSession();
-  const [avatarUrl, setAvatarUrl] = useState<string | null | undefined>(session?.user?.image);
+  const [avatarUrl, setAvatarUrl] = useState<string | null | undefined>(
+    session?.user?.image
+  );
+  const [prevSessionImage, setPrevSessionImage] = useState<
+    string | null | undefined
+  >(session?.user?.image);
+
+  if (session?.user?.image !== prevSessionImage) {
+    setAvatarUrl(session?.user?.image);
+    setPrevSessionImage(session?.user?.image);
+  }
+
   const isLoadingSession = status === "loading";
 
   // Listen for avatar updates
@@ -41,10 +52,6 @@ export function UserProfile({
     };
   }, []);
 
-  // Update avatar when session changes
-  useEffect(() => {
-    setAvatarUrl(session?.user?.image);
-  }, [session?.user?.image]);
 
   const getInitials = () => {
     if (!session?.user) return "U";

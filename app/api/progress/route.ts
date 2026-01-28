@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
           error: {
             message: "Invalid request data",
             code: "VALIDATION_ERROR",
-            details: validationResult.error.errors,
+            details: validationResult.error.issues,
           },
         },
         { status: 400 }
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
                 console.error("Failed to generate certificate:", error);
                 // Log to error tracking service if available
                 if (typeof window !== "undefined" && "Sentry" in window) {
-                  const Sentry = (window as { Sentry?: { captureException: (error: Error) => void } }).Sentry;
+                  const Sentry = (window as { Sentry?: { captureException: (error: any) => void } }).Sentry;
                   Sentry?.captureException(error);
                 }
                 // Don't fail the progress update if certificate generation fails
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
             console.error("Failed to check course completion:", error);
             // Log to error tracking service if available
             if (typeof window !== "undefined" && "Sentry" in window) {
-              const Sentry = (window as { Sentry?: { captureException: (error: Error) => void } }).Sentry;
+              const Sentry = (window as { Sentry?: { captureException: (error: any) => void } }).Sentry;
               Sentry?.captureException(error);
             }
             // Don't fail the progress update if certificate check fails
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
           error: {
             message: "lessonId is required",
             code: "VALIDATION_ERROR",
-            details: validationResult.error.errors,
+            details: validationResult.error.issues,
           },
         },
         { status: 400 }

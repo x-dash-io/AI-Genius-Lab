@@ -41,6 +41,28 @@ import { cn } from "@/lib/utils";
 
 export type LayoutType = "admin" | "customer" | "public";
 
+const Logo = ({ href, isAdminLayout }: { href: string; isAdminLayout: boolean }) => (
+  <Link href={href} className="flex items-center gap-2">
+    <div
+      className={cn(
+        "h-8 w-8 rounded-lg flex items-center justify-center",
+        isAdminLayout
+          ? "bg-gradient-to-br from-amber-500 to-amber-600"
+          : "bg-gradient-to-br from-primary to-primary/70"
+      )}
+    >
+      {isAdminLayout ? (
+        <Shield className="h-5 w-5 text-white" />
+      ) : (
+        <GraduationCap className="h-5 w-5 text-primary-foreground" />
+      )}
+    </div>
+    <span className="font-display text-lg font-bold tracking-tight">
+      {isAdminLayout ? "ADMIN" : "AI GENIUS LAB"}
+    </span>
+  </Link>
+);
+
 interface UnifiedLayoutProps {
   children: React.ReactNode;
   layoutType?: LayoutType;
@@ -144,33 +166,6 @@ export function UnifiedLayout({ children, layoutType = "public" }: UnifiedLayout
     return item;
   });
 
-  // Logo component
-  const LogoComponent = () => {
-    const logoHref = getLogoHref();
-    const isAdminLayout = currentLayoutType === "admin";
-
-    return (
-      <Link href={logoHref} className="flex items-center gap-2">
-        <div
-          className={cn(
-            "h-8 w-8 rounded-lg flex items-center justify-center",
-            isAdminLayout
-              ? "bg-gradient-to-br from-amber-500 to-amber-600"
-              : "bg-gradient-to-br from-primary to-primary/70"
-          )}
-        >
-          {isAdminLayout ? (
-            <Shield className="h-5 w-5 text-white" />
-          ) : (
-            <GraduationCap className="h-5 w-5 text-primary-foreground" />
-          )}
-        </div>
-        <span className="font-display text-lg font-bold tracking-tight">
-          {isAdminLayout ? "ADMIN" : "AI GENIUS LAB"}
-        </span>
-      </Link>
-    );
-  };
 
   // Public layout uses top navigation bar
   if (currentLayoutType === "public") {
@@ -189,7 +184,10 @@ export function UnifiedLayout({ children, layoutType = "public" }: UnifiedLayout
             >
               <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 h-full">
                 <div className="flex items-center justify-between h-full">
-                  <LogoComponent />
+                  <Logo
+                    href={getLogoHref()}
+                    isAdminLayout={currentLayoutType === "admin"}
+                  />
 
                   <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
                     {navigationWithBadges.map((item) => {
@@ -251,7 +249,10 @@ export function UnifiedLayout({ children, layoutType = "public" }: UnifiedLayout
           <div className="flex lg:hidden flex-col min-h-screen">
             <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md h-16">
               <div className="flex items-center justify-between px-4 h-full">
-                <LogoComponent />
+                <Logo
+                  href={getLogoHref()}
+                  isAdminLayout={currentLayoutType === "admin"}
+                />
                 <div className="flex items-center gap-2">
                   <ThemeToggle />
                   <Button
@@ -272,7 +273,12 @@ export function UnifiedLayout({ children, layoutType = "public" }: UnifiedLayout
               navigationItems={navigationWithBadges}
               profileHref={getProfileHref()}
               logoHref={getLogoHref()}
-              logoComponent={<LogoComponent />}
+              logoComponent={
+                <Logo
+                  href={getLogoHref()}
+                  isAdminLayout={currentLayoutType === "admin"}
+                />
+              }
               showCart={true}
               showThemeToggle={true}
             />
@@ -313,7 +319,10 @@ export function UnifiedLayout({ children, layoutType = "public" }: UnifiedLayout
             {/* Sidebar Header */}
             <div className="flex-shrink-0 border-b p-6">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <LogoComponent />
+                <Logo
+                  href={getLogoHref()}
+                  isAdminLayout={currentLayoutType === "admin"}
+                />
               </motion.div>
             </div>
 
@@ -385,7 +394,10 @@ export function UnifiedLayout({ children, layoutType = "public" }: UnifiedLayout
         <div className="flex lg:hidden flex-col min-h-screen">
           <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md h-16">
             <div className="flex items-center justify-between px-4 h-full">
-              <LogoComponent />
+              <Logo
+                href={getLogoHref()}
+                isAdminLayout={currentLayoutType === "admin"}
+              />
               <div className="flex items-center gap-2">
                 <SignOutButton size="icon" variant="ghost" />
                 {currentLayoutType === "admin" && <CartIcon />}
@@ -408,7 +420,12 @@ export function UnifiedLayout({ children, layoutType = "public" }: UnifiedLayout
             navigationItems={navigationWithBadges}
             profileHref={getProfileHref()}
             logoHref={getLogoHref()}
-            logoComponent={<LogoComponent />}
+            logoComponent={
+              <Logo
+                href={getLogoHref()}
+                isAdminLayout={currentLayoutType === "admin"}
+              />
+            }
             showCart={currentLayoutType === "admin"}
             showThemeToggle={true}
             getHref={getHref}

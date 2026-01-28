@@ -72,7 +72,15 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }: { user: User; account: Account | null; profile?: any }) {
+    async signIn({
+      user,
+      account,
+      profile,
+    }: {
+      user: User;
+      account: Account | null;
+      profile?: { picture?: string };
+    }) {
       // For OAuth providers, handle account linking and role assignment
       if (account && account.provider !== "credentials" && user.email) {
         try {
@@ -84,7 +92,9 @@ export const authOptions: NextAuthOptions = {
           if (existingUser) {
             // Check if this OAuth account is already linked
             const existingAccount = existingUser.Account?.find(
-              (acc: any) => acc.provider === account.provider && acc.providerAccountId === account.providerAccountId
+              (acc) =>
+                acc.provider === account.provider &&
+                acc.providerAccountId === account.providerAccountId
             );
 
             if (!existingAccount) {

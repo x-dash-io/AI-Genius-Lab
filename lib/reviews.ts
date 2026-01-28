@@ -5,6 +5,22 @@ import { requireCustomer, hasPurchasedCourse } from "@/lib/access";
 
 const MIN_COMPLETION_FOR_REVIEW = 50; // Minimum 50% completion required to review
 
+export async function getReviewById(reviewId: string) {
+  return prisma.review.findUnique({
+    where: { id: reviewId },
+    include: {
+      User: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+    },
+  });
+}
+
 export async function getCourseReviews(courseId: string) {
   return prisma.review.findMany({
     where: { courseId },
