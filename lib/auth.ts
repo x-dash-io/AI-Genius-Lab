@@ -191,15 +191,20 @@ export const authOptions: NextAuthOptions = {
       
       if (shouldRefresh && token.id) {
         try {
-          const freshUser = await prisma.user.findUnique({
+          // Use withRetry for database resilience in JWT callback
+          const freshUser = await withRetry(() => prisma.user.findUnique({
             where: { id: token.id as string },
             select: { id: true, name: true, email: true, image: true, role: true },
-          });
+          }));
           
           if (freshUser) {
             // Check if email has changed - this indicates account switch
-            if (token.email && freshUser.email !== token.email) {
-              console.warn("Email mismatch detected - possible account switch, invalidating token");
+            // Use case-insensitive comparison for emails
+            const tokenEmail = (token.email as string || "").toLowerCase().trim();
+            const freshEmail = (freshUser.email || "").toLowerCase().trim();
+
+            if (tokenEmail && freshEmail && tokenEmail !== freshEmail) {
+              console.warn(`Email mismatch detected: ${tokenEmail} vs ${freshEmail} - invalidating token`);
               return {};
             }
             
@@ -221,13 +226,17 @@ export const authOptions: NextAuthOptions = {
             token.role = freshUser.role;
             token.lastRefresh = Date.now();
           } else {
-            // User was deleted from database - invalidate token
-            console.warn("User not found in database, invalidating token");
+            // User not found in database - only invalidate if we are sure it's not a connection fluke
+            // Note: withRetry would have already retried if it was a connection error
+            console.warn(`User ${token.id} not found in database during JWT refresh, invalidating token`);
             return {};
           }
         } catch (error) {
           console.error("Error refreshing user in JWT callback:", error);
-          // Don't invalidate token on error, just log it
+          // On error, we prefer to keep the user logged in with the existing token
+          // than to force a sign-out due to a transient database issue.
+          // The next refresh attempt will try again.
+          return token;
         }
       }
       

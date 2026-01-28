@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { prisma, withRetry } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -58,7 +58,7 @@ export default async function DashboardPage({
     totalProgress,
     certificates,
     enrollments
-  ] = await Promise.all([
+  ] = await withRetry(() => Promise.all([
     // Get purchased courses with progress
     prisma.purchase.findMany({
       where: { userId: session.user.id, status: "paid" },
@@ -132,10 +132,10 @@ export default async function DashboardPage({
         }
       }
     })
-  ]);
+  ]));
 
   // Calculate course progress for each purchased course
-  const coursesWithProgress = await Promise.all(
+  const coursesWithProgress = await withRetry(() => Promise.all(
     purchases.map(async (purchase) => {
       const lessonIds = purchase.Course.Section.flatMap(s => s.Lesson.map(l => l.id));
       const progressRecords = await prisma.progress.findMany({
@@ -161,7 +161,7 @@ export default async function DashboardPage({
           : null
       };
     })
-  );
+  ));
 
   // Sort by last accessed
   const sortedCourses = coursesWithProgress.sort((a, b) => {
@@ -180,13 +180,13 @@ export default async function DashboardPage({
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   
-  const recentProgressDates = await prisma.progress.findMany({
+  const recentProgressDates = await withRetry(() => prisma.progress.findMany({
     where: {
       userId: session.user.id,
       updatedAt: { gte: thirtyDaysAgo }
     },
     select: { updatedAt: true }
-  });
+  }));
 
   const uniqueDays = new Set(
     recentProgressDates.map(p => p.updatedAt.toISOString().split('T')[0])
@@ -202,12 +202,12 @@ export default async function DashboardPage({
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
   
-  const weekProgress = await prisma.progress.count({
+  const weekProgress = await withRetry(() => prisma.progress.count({
     where: {
       userId: session.user.id,
       updatedAt: { gte: weekAgo }
     }
-  });
+  }));
 
   // Calculate total learning time estimate (5 min per lesson completed)
   const estimatedMinutes = totalLessonsCompleted * 5;
