@@ -1,10 +1,12 @@
 import { prisma } from "@/lib/prisma";
+import { connection } from "next/server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import Link from "next/link";
 
 export default async function PricingPage() {
+  await connection();
   const plans = await prisma.subscriptionPlan.findMany({
     where: { isActive: true },
     orderBy: { tier: "asc" }
