@@ -50,14 +50,14 @@ export async function getPublishedPosts(options: { tag?: string; search?: string
                 } : {},
               ],
             },
-            // We use select to explicitly avoid problematic columns like featuredImage or reviews count
+            // Explicitly select all required fields except problematic ones if necessary
+            // However, we'll try to select everything that is likely to exist
             select: {
               id: true,
               title: true,
               slug: true,
               content: true,
               excerpt: true,
-              // featuredImage is likely missing, so we omit it
               status: true,
               authorName: true,
               views: true,
@@ -71,12 +71,12 @@ export async function getPublishedPosts(options: { tag?: string; search?: string
 
           return posts.map(post => ({
             ...post,
-            featuredImage: null, // Provide fallback value
+            featuredImage: null,
             _count: { reviews: 0 }
           }));
         } catch (innerError: any) {
           console.error("[Blog] Even minimal query failed:", innerError.message);
-          // If even that fails, try the most basic fields
+          // If even that fails, try the absolute most basic fields
           const basicPosts = await prisma.blogPost.findMany({
             select: {
               id: true,
@@ -91,6 +91,9 @@ export async function getPublishedPosts(options: { tag?: string; search?: string
             excerpt: "",
             featuredImage: null,
             status: "published",
+            authorName: "Admin",
+            views: 0,
+            readTimeMinutes: 0,
             tags: [],
             _count: { reviews: 0 },
             createdAt: new Date(),
@@ -158,7 +161,7 @@ export async function getPostBySlug(slug: string) {
             reviews: []
           };
         } catch (innerError) {
-           // Super minimal fallback
+           // Super minimal fallback - MUST include all fields used in UI
            return prisma.blogPost.findUnique({
              where: { slug },
              select: {
@@ -172,6 +175,9 @@ export async function getPostBySlug(slug: string) {
              excerpt: "",
              featuredImage: null,
              status: "published",
+             authorName: "Admin",
+             views: 0,
+             readTimeMinutes: 0,
              tags: [],
              reviews: [],
              createdAt: new Date(),
