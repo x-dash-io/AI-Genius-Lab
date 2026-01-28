@@ -39,21 +39,23 @@ async function createSubscriptionAction(formData: FormData) {
 
   const appUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
+  let approvalUrl: string;
   try {
-    const { approvalUrl } = await createPayPalSubscription({
+    const result = await createPayPalSubscription({
       planId: paypalPlanId,
       customId: subscription.id,
-      returnUrl: `${appUrl}/dashboard?subscription=success`,
+      returnUrl: `${appUrl}/checkout/subscription/success?subscriptionId=${subscription.id}`,
       cancelUrl: `${appUrl}/pricing?subscription=cancelled`,
     });
-
-    redirect(approvalUrl);
+    approvalUrl = result.approvalUrl;
   } catch (error) {
     console.error("Failed to create PayPal subscription:", error);
     // Cleanup pending subscription
     await prisma.subscription.delete({ where: { id: subscription.id } });
     throw error;
   }
+
+  redirect(approvalUrl);
 }
 
 export default async function SubscriptionCheckoutPage({ searchParams }: Props) {
