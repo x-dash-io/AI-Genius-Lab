@@ -53,7 +53,7 @@ export default async function LearningPathDetailPage({
   // Transform the data to match expected format
   const path = {
     ...pathData,
-    courses: (pathData.LearningPathCourse || []).map(lpc => ({
+    courses: (pathData.courses || []).map(lpc => ({
       ...lpc,
       course: lpc.Course,
     })),

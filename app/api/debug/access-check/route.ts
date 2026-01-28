@@ -55,17 +55,17 @@ export async function POST(request: NextRequest) {
     // Check lesson content
     const lessons = await prisma.lesson.findMany({
       where: { Section: { courseId } },
-      include: { LessonContent: true },
+      include: { contents: true },
     });
 
-    console.log(`[DEBUG ACCESS] Found ${lessons.length} lessons with ${lessons.reduce((sum, l) => sum + l.LessonContent.length, 0)} content items`);
+    console.log(`[DEBUG ACCESS] Found ${lessons.length} lessons with ${lessons.reduce((sum, l) => sum + l.contents.length, 0)} content items`);
 
     const lessonsWithContent = lessons.map(l => ({
       id: l.id,
       title: l.title,
-      contentCount: l.LessonContent.length,
-      hasContentUrl: l.LessonContent.some(c => !!c.contentUrl),
-      contents: l.LessonContent.map(c => ({
+      contentCount: l.contents.length,
+      hasContentUrl: l.contents.some(c => !!c.contentUrl),
+      contents: l.contents.map(c => ({
         id: c.id,
         contentType: c.contentType,
         hasUrl: !!c.contentUrl,

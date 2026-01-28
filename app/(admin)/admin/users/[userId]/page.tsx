@@ -53,7 +53,7 @@ export default async function UserDetailPage({
     notFound();
   }
 
-  const totalSpent = user.Purchase
+  const totalSpent = user.purchases
     .filter((p) => p.status === "paid")
     .reduce((sum, p) => sum + p.amountCents, 0);
 
@@ -144,15 +144,15 @@ export default async function UserDetailPage({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
-            Purchases ({user.Purchase.length})
+            Purchases ({user.purchases.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {user.Purchase.length === 0 ? (
+          {user.purchases.length === 0 ? (
             <p className="text-sm text-muted-foreground">No purchases yet.</p>
           ) : (
             <div className="space-y-4">
-              {user.Purchase.map((purchase) => (
+              {user.purchases.map((purchase) => (
                 <div
                   key={purchase.id}
                   className="flex items-center justify-between rounded-lg border p-4"
@@ -186,15 +186,15 @@ export default async function UserDetailPage({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <GraduationCap className="h-5 w-5" />
-            Enrollments ({user.Enrollment.length})
+            Enrollments ({user.enrollments.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {user.Enrollment.length === 0 ? (
+          {user.enrollments.length === 0 ? (
             <p className="text-sm text-muted-foreground">No enrollments yet.</p>
           ) : (
             <div className="space-y-4">
-              {user.Enrollment.map((enrollment) => (
+              {user.enrollments.map((enrollment) => (
                 <div
                   key={enrollment.id}
                   className="flex items-center justify-between rounded-lg border p-4"
@@ -226,11 +226,11 @@ export default async function UserDetailPage({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {user.ActivityLog.length === 0 ? (
+          {user.activityLogs.length === 0 ? (
             <p className="text-sm text-muted-foreground">No recent activity.</p>
           ) : (
             <div className="space-y-2">
-              {user.ActivityLog.map((log) => (
+              {user.activityLogs.map((log) => (
                 <div
                   key={log.id}
                   className="flex items-center justify-between rounded-lg border p-3"

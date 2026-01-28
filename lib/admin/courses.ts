@@ -6,9 +6,9 @@ export async function getAllCourses() {
       include: {
         _count: {
           select: {
-            Section: true,
-            Purchase: true,
-            Enrollment: true,
+            sections: true,
+            purchases: true,
+            enrollments: true,
           },
         },
       },
@@ -22,13 +22,13 @@ export async function getCourseForEdit(courseId: string) {
     return prisma.course.findUnique({
       where: { id: courseId },
       include: {
-        Section: {
+        sections: {
           orderBy: { sortOrder: "asc" },
           include: {
-            Lesson: {
+            lessons: {
               orderBy: { sortOrder: "asc" },
               include: {
-                LessonContent: {
+                contents: {
                   orderBy: { sortOrder: "asc" },
                 },
               },

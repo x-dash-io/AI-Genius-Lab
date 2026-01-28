@@ -65,9 +65,9 @@ export default async function DashboardPage({
       include: {
         Course: {
           include: {
-            Section: {
+            sections: {
               include: {
-                Lesson: {
+                lessons: {
                   select: { id: true }
                 }
               }
@@ -137,7 +137,7 @@ export default async function DashboardPage({
   // Calculate course progress for each purchased course
   const coursesWithProgress = await Promise.all(
     purchases.map(async (purchase) => {
-      const lessonIds = purchase.Course.Section.flatMap(s => s.Lesson.map(l => l.id));
+      const lessonIds = purchase.Course.sections.flatMap(s => s.lessons.map(l => l.id));
       const progressRecords = await prisma.progress.findMany({
         where: {
           userId: session.user.id,

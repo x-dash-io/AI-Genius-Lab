@@ -50,18 +50,18 @@ export async function getCoursePreviewBySlug(slug: string) {
             title: true,
             description: true,
             priceCents: true,
-            Section: {
+            sections: {
               orderBy: { sortOrder: "asc" },
               select: {
                 id: true,
                 title: true,
-                Lesson: {
+                lessons: {
                   orderBy: { sortOrder: "asc" },
                   select: {
                     id: true,
                     title: true,
                     isLocked: true,
-                    LessonContent: {
+                    contents: {
                       orderBy: { sortOrder: "asc" },
                       take: 1,
                       select: {
@@ -86,12 +86,12 @@ export async function getCourseForLibraryBySlug(slug: string) {
         id: true,
         slug: true,
         title: true,
-        Section: {
+        sections: {
           orderBy: { sortOrder: "asc" },
           select: {
             id: true,
             title: true,
-            Lesson: {
+            lessons: {
               orderBy: { sortOrder: "asc" },
               select: {
                 id: true,

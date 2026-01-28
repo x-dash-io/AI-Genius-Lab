@@ -46,10 +46,10 @@ export default async function CourseDetailPage({
   }
 
   const reviewStats = await getCourseReviewStats(course.id);
-  const lessons = course.Section.flatMap((section) => 
-    section.Lesson.map(lesson => ({
+  const lessons = course.sections.flatMap((section) =>
+    section.lessons.map(lesson => ({
       ...lesson,
-      contents: lesson.LessonContent,
+      contents: lesson.contents,
     }))
   );
   

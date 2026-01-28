@@ -105,9 +105,9 @@ async function UserList({ searchParams }: AdminUsersPageProps) {
                     </div>
                     <CardDescription>{user.email}</CardDescription>
                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      <span>{user._count.Purchase} purchases</span>
+                      <span>{user._count.purchases} purchases</span>
                       <span>•</span>
-                      <span>{user._count.Enrollment} enrollments</span>
+                      <span>{user._count.enrollments} enrollments</span>
                       <span>•</span>
                       <span>Joined {new Date(user.createdAt).toLocaleDateString()}</span>
                     </div>

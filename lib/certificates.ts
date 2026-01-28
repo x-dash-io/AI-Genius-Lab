@@ -24,9 +24,9 @@ export async function hasCompletedCourse(userId: string, courseId: string): Prom
   const course = await prisma.course.findUnique({
     where: { id: courseId },
     include: {
-      Section: {
+      sections: {
         include: {
-          Lesson: {
+          lessons: {
             select: { id: true },
           },
         },
@@ -36,7 +36,7 @@ export async function hasCompletedCourse(userId: string, courseId: string): Prom
 
   if (!course) return false;
 
-  const lessonIds = course.Section.flatMap((s) => s.Lesson.map((l) => l.id));
+  const lessonIds = course.sections.flatMap((s) => s.lessons.map((l) => l.id));
   if (lessonIds.length === 0) return false;
 
   // Get progress for all lessons
@@ -59,7 +59,7 @@ export async function hasCompletedLearningPath(userId: string, pathId: string): 
   const path = await prisma.learningPath.findUnique({
     where: { id: pathId },
     include: {
-      LearningPathCourse: {
+      courses: {
         include: {
           Course: {
             select: { id: true },
@@ -69,12 +69,12 @@ export async function hasCompletedLearningPath(userId: string, pathId: string): 
     },
   });
 
-  if (!path || path.LearningPathCourse.length === 0) {
+  if (!path || path.courses.length === 0) {
     return false;
   }
 
   // Check if all courses are completed
-  for (const pathCourse of path.LearningPathCourse) {
+  for (const pathCourse of path.courses) {
     const completed = await hasCompletedCourse(userId, pathCourse.courseId);
     if (!completed) {
       return false;
@@ -298,7 +298,7 @@ export async function generatePathCertificate(pathId: string) {
     const path = await tx.learningPath.findUnique({
       where: { id: pathId },
       include: {
-        LearningPathCourse: {
+        courses: {
           include: {
             Course: {
               select: {
@@ -322,8 +322,8 @@ export async function generatePathCertificate(pathId: string) {
         type: "learning_path",
         certificateId,
         metadata: path ? {
-          courseCount: path.LearningPathCourse.length,
-          courses: path.LearningPathCourse.map((pc) => ({
+          courseCount: path.courses.length,
+          courses: path.courses.map((pc) => ({
             courseId: pc.Course.id,
             title: pc.Course.title,
           })),
