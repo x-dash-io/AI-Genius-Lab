@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Upload, FileText, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-import { toast } from "@/lib/toast";
+import { toastSuccess, toastError, toastWarning } from "@/lib/toast";
 
 export function BulkImport() {
   const [file, setFile] = useState<File | null>(null);
@@ -37,16 +37,16 @@ export function BulkImport() {
 
       if (response.ok) {
         setResult(data);
-        toast.success(`Successfully imported ${data.importedCount} courses`);
+        toastSuccess(`Successfully imported ${data.importedCount} courses`);
         if (data.errors.length > 0) {
-          toast.warn(`Imported with ${data.errors.length} errors`);
+          toastWarning(`Imported with ${data.errors.length} errors`);
         }
       } else {
-        toast.error(data.error || "Failed to import courses");
+        toastError(data.error || "Failed to import courses");
       }
     } catch (error) {
       console.error("Upload error:", error);
-      toast.error("An unexpected error occurred during import");
+      toastError("An unexpected error occurred during import");
     } finally {
       setIsUploading(false);
     }

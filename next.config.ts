@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  cacheComponents: true,
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
     cacheComponents: true,
