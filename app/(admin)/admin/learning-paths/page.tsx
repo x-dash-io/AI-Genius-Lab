@@ -13,12 +13,12 @@ async function LearningPathsList() {
   // Transform the data to match expected format
   const paths = pathsData.map(pathData => ({
     ...pathData,
-    courses: (pathData.LearningPathCourse || []).map(lpc => ({
+    courses: (pathData.courses || []).map(lpc => ({
       ...lpc,
       course: lpc.Course,
     })),
     _count: {
-      courses: pathData._count.LearningPathCourse,
+      courses: pathData._count.courses,
     },
   }));
 

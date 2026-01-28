@@ -91,9 +91,9 @@ export async function createReview(
   const course = await prisma.course.findUnique({
     where: { id: courseId },
     include: {
-      Section: {
+      sections: {
         include: {
-          Lesson: {
+          lessons: {
             select: { id: true },
           },
         },
@@ -105,7 +105,7 @@ export async function createReview(
     throw new Error("Course not found");
   }
 
-  const lessonIds = course.Section.flatMap((s) => s.Lesson.map((l) => l.id));
+  const lessonIds = course.sections.flatMap((s) => s.lessons.map((l) => l.id));
   const totalLessons = lessonIds.length;
 
   if (totalLessons > 0) {

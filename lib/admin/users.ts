@@ -6,8 +6,8 @@ export async function getAllUsers() {
     include: {
       _count: {
         select: {
-          Purchase: true,
-          Enrollment: true,
+          purchases: true,
+          enrollments: true,
         },
       },
     },
@@ -19,7 +19,7 @@ export async function getUserById(userId: string) {
   return prisma.user.findUnique({
     where: { id: userId },
     include: {
-      Purchase: {
+      purchases: {
         include: {
           Course: {
             select: {
@@ -31,7 +31,7 @@ export async function getUserById(userId: string) {
         },
         orderBy: { createdAt: "desc" },
       },
-      Enrollment: {
+      enrollments: {
         include: {
           Course: {
             select: {
@@ -43,7 +43,7 @@ export async function getUserById(userId: string) {
         },
         orderBy: { grantedAt: "desc" },
       },
-      Progress: {
+      progress: {
         include: {
           Lesson: {
             include: {
@@ -63,7 +63,7 @@ export async function getUserById(userId: string) {
         orderBy: { updatedAt: "desc" },
         take: 10,
       },
-      ActivityLog: {
+      activityLogs: {
         orderBy: { createdAt: "desc" },
         take: 10,
       },

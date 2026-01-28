@@ -89,7 +89,7 @@ async function LearningPathEditContent({ pathId }: { pathId: string }) {
   // Transform the data to match expected format
   const path = {
     ...pathData,
-    courses: (pathData.LearningPathCourse || []).map(lpc => ({
+    courses: (pathData.courses || []).map(lpc => ({
       ...lpc,
       courseId: lpc.Course.id,
       course: lpc.Course,

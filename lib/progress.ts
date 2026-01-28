@@ -96,9 +96,9 @@ export async function getCourseProgress(courseId: string) {
     return prisma.course.findUnique({
       where: { id: courseId },
       include: {
-        Section: {
+        sections: {
           include: {
-            Lesson: {
+            lessons: {
               select: {
                 id: true,
               },
@@ -113,8 +113,8 @@ export async function getCourseProgress(courseId: string) {
     throw new Error("NOT_FOUND");
   }
 
-  const lessonIds = course.Section.flatMap((s) =>
-    s.Lesson.map((l) => l.id)
+  const lessonIds = course.sections.flatMap((s) =>
+    s.lessons.map((l) => l.id)
   );
 
   const progressRecords = await withRetry(async () => {

@@ -7,7 +7,7 @@ import { getUserSubscription } from "@/lib/subscriptions";
 export async function getAllPublishedLearningPaths() {
   return prisma.learningPath.findMany({
     include: {
-      LearningPathCourse: {
+      courses: {
         where: {
           Course: {
             isPublished: true,
@@ -28,7 +28,7 @@ export async function getAllPublishedLearningPaths() {
       },
       _count: {
         select: {
-          LearningPathCourse: true,
+          courses: true,
         },
       },
     },
@@ -40,7 +40,7 @@ export async function getLearningPathBySlug(slug: string) {
   return prisma.learningPath.findUnique({
     where: { slug },
     include: {
-      LearningPathCourse: {
+      courses: {
         where: {
           Course: {
             isPublished: true,
@@ -76,7 +76,7 @@ export async function calculateLearningPathPrice(userId: string, pathId: string)
   const path = await prisma.learningPath.findUnique({
     where: { id: pathId },
     include: {
-      LearningPathCourse: {
+      courses: {
         include: {
           Course: {
             select: {
@@ -89,7 +89,7 @@ export async function calculateLearningPathPrice(userId: string, pathId: string)
     },
   });
 
-  if (!path || path.LearningPathCourse.length === 0) {
+  if (!path || path.courses.length === 0) {
     return {
       fullPriceCents: 0,
       adjustedPriceCents: 0,
@@ -99,7 +99,7 @@ export async function calculateLearningPathPrice(userId: string, pathId: string)
     };
   }
 
-  const courseIds = path.LearningPathCourse.map((pc) => pc.Course.id);
+  const courseIds = path.courses.map((pc) => pc.Course.id);
   const existingPurchases = await prisma.purchase.findMany({
     where: {
       userId,
@@ -110,19 +110,19 @@ export async function calculateLearningPathPrice(userId: string, pathId: string)
 
   const existingCourseIds = new Set(existingPurchases.map((p) => p.courseId));
   
-  const fullPriceCents = path.LearningPathCourse.reduce((sum, pc) => sum + pc.Course.priceCents, 0);
-  const alreadyPurchasedCents = path.LearningPathCourse
+  const fullPriceCents = path.courses.reduce((sum, pc) => sum + pc.Course.priceCents, 0);
+  const alreadyPurchasedCents = path.courses
     .filter((pc) => existingCourseIds.has(pc.Course.id))
     .reduce((sum, pc) => sum + pc.Course.priceCents, 0);
   const adjustedPriceCents = fullPriceCents - alreadyPurchasedCents;
-  const coursesToPurchase = path.LearningPathCourse.filter((pc) => !existingCourseIds.has(pc.Course.id)).length;
+  const coursesToPurchase = path.courses.filter((pc) => !existingCourseIds.has(pc.Course.id)).length;
 
   return {
     fullPriceCents,
     adjustedPriceCents,
     alreadyPurchasedCents,
     coursesToPurchase,
-    totalCourses: path.LearningPathCourse.length,
+    totalCourses: path.courses.length,
   };
 }
 
@@ -139,7 +139,7 @@ export async function hasEnrolledInLearningPath(userId: string, pathId: string):
   const path = await prisma.learningPath.findUnique({
     where: { id: pathId },
     include: {
-      LearningPathCourse: {
+      courses: {
         include: {
           Course: {
             select: { id: true },
@@ -149,11 +149,11 @@ export async function hasEnrolledInLearningPath(userId: string, pathId: string):
     },
   });
 
-  if (!path || path.LearningPathCourse.length === 0) {
+  if (!path || path.courses.length === 0) {
     return false;
   }
 
-  const courseIds = path.LearningPathCourse.map((pc) => pc.Course.id);
+  const courseIds = path.courses.map((pc) => pc.Course.id);
   const purchases = await prisma.purchase.findMany({
     where: {
       userId,
@@ -177,7 +177,7 @@ export async function createLearningPathPurchases(userId: string, pathId: string
   const path = await prisma.learningPath.findUnique({
     where: { id: pathId },
     include: {
-      LearningPathCourse: {
+      courses: {
         include: {
           Course: {
             select: {
@@ -192,12 +192,12 @@ export async function createLearningPathPurchases(userId: string, pathId: string
     },
   });
 
-  if (!path || path.LearningPathCourse.length === 0) {
+  if (!path || path.courses.length === 0) {
     throw new Error("Learning path not found or has no courses");
   }
 
   // Check existing purchases
-  const courseIds = path.LearningPathCourse.map((pc) => pc.Course.id);
+  const courseIds = path.courses.map((pc) => pc.Course.id);
   const existingPurchases = await prisma.purchase.findMany({
     where: {
       userId,
@@ -207,7 +207,7 @@ export async function createLearningPathPurchases(userId: string, pathId: string
   });
 
   const existingCourseIds = new Set(existingPurchases.map((p) => p.courseId));
-  const coursesToPurchase = path.LearningPathCourse.filter(
+  const coursesToPurchase = path.courses.filter(
     (pc) => !existingCourseIds.has(pc.Course.id)
   );
 

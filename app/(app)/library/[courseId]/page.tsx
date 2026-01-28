@@ -65,8 +65,8 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
     );
   }
 
-  const lessonIds = course.Section.flatMap((section) =>
-    section.Lesson.map((lesson) => lesson.id)
+  const lessonIds = course.sections.flatMap((section) =>
+    section.lessons.map((lesson) => lesson.id)
   );
 
   const progressEntries =
@@ -128,8 +128,8 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
 
       {/* Sections */}
       <div className="space-y-4">
-        {course.Section.map((section, sectionIndex) => {
-          const sectionLessons = section.Lesson;
+        {course.sections.map((section, sectionIndex) => {
+          const sectionLessons = section.lessons;
           const sectionCompleted = sectionLessons.filter(l => 
             progressMap.get(l.id)?.completedAt != null
           ).length;
@@ -241,7 +241,7 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
           );
         })}
         
-        {course.Section.length === 0 && (
+        {course.sections.length === 0 && (
           <div className="rounded-xl border bg-card p-8 text-center">
             <p className="text-muted-foreground">
               This course has no sections yet. Content will be added soon.

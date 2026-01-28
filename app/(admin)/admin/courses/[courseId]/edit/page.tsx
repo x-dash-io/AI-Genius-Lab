@@ -42,7 +42,7 @@ async function addSectionAction(courseId: string, formData: FormData) {
   const course = await getCourseForEdit(courseId);
   if (!course) throw new Error("Course not found");
 
-  const maxSortOrder = Math.max(...(course.Section || []).map(s => s.sortOrder), -1);
+  const maxSortOrder = Math.max(...(course.sections || []).map(s => s.sortOrder), -1);
   const section = await createSection(courseId, title, maxSortOrder + 1);
 
   return { ...section, lessons: [] };
@@ -68,10 +68,10 @@ async function addLessonAction(sectionId: string, formData: FormData) {
   const course = await getCourseForEdit(formData.get("courseId") as string);
   if (!course) throw new Error("Course not found");
 
-  const section = (course.Section || []).find(s => s.id === sectionId);
+  const section = (course.sections || []).find(s => s.id === sectionId);
   if (!section) throw new Error("Section not found");
 
-  const maxSortOrder = Math.max(...(section.Lesson || []).map(l => l.sortOrder), -1);
+  const maxSortOrder = Math.max(...(section.lessons || []).map(l => l.sortOrder), -1);
 
   const lesson = await createLesson({
     sectionId,
@@ -180,10 +180,10 @@ async function updateLessonAction(lessonId: string, formData: FormData) {
   if (!course) throw new Error("Course not found");
   
   const existingContent: Array<{ id: string }> = [];
-  for (const section of (course.Section || [])) {
-    const foundLesson = (section.Lesson || []).find(l => l.id === lessonId);
+  for (const section of (course.sections || [])) {
+    const foundLesson = (section.lessons || []).find(l => l.id === lessonId);
     if (foundLesson) {
-      existingContent.push(...(foundLesson.LessonContent || []).map(c => ({ id: c.id })));
+      existingContent.push(...(foundLesson.contents || []).map(c => ({ id: c.id })));
       break;
     }
   }
@@ -232,18 +232,6 @@ async function CourseEditContent({ courseId }: { courseId: string }) {
     notFound();
   }
 
-  // Transform the course data to match the expected type
-  const courseWithSections = {
-    ...course,
-    sections: (course.Section || []).map(section => ({
-      ...section,
-      lessons: (section.Lesson || []).map(lesson => ({
-        ...lesson,
-        contents: lesson.LessonContent || [],
-      })),
-    })),
-  };
-
   return (
     <div className="space-y-8">
       <div>
@@ -263,7 +251,7 @@ async function CourseEditContent({ courseId }: { courseId: string }) {
       </div>
 
       <CourseEditForm
-        course={courseWithSections}
+        course={course as any}
         updateCourseAction={updateCourseAction.bind(null, courseId)}
         addSectionAction={addSectionAction.bind(null, courseId)}
         deleteSectionAction={deleteSectionAction}

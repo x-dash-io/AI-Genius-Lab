@@ -87,7 +87,7 @@ export async function getAuthorizedLessonContent(lessonId: string) {
             Course: true,
           },
         },
-        LessonContent: {
+        contents: {
           orderBy: { sortOrder: "asc" },
           take: 1,
         },
@@ -110,7 +110,7 @@ export async function getAuthorizedLessonContent(lessonId: string) {
   }
 
   // Get content type from the first content item, or default to 'video'
-  const firstContent = lesson.LessonContent[0];
+  const firstContent = lesson.contents[0];
 
   // Check if there's old contentUrl in the lesson table (migration issue)
   const oldContentUrl = (lesson as any).contentUrl;
