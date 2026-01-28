@@ -47,7 +47,7 @@ interface UnifiedLayoutProps {
 }
 
 // Unified navigation configuration
-const navigationConfig = {
+const navigationConfig: Record<LayoutType, NavItem[]> = {
   admin: [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { name: "Courses", href: "/admin/courses", icon: BookOpen },
