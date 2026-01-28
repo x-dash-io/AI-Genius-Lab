@@ -128,6 +128,50 @@ export async function capturePayPalOrder(orderId: string) {
   return response.json();
 }
 
+export async function revisePayPalSubscription({
+  subscriptionId,
+  planId,
+  returnUrl,
+  cancelUrl,
+}: {
+  subscriptionId: string;
+  planId: string;
+  returnUrl: string;
+  cancelUrl: string;
+}) {
+  const accessToken = await getPayPalAccessToken();
+
+  const response = await fetch(
+    `${paypalBaseUrl}/v1/billing/subscriptions/${subscriptionId}/revise`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        plan_id: planId,
+        application_context: {
+          return_url: returnUrl,
+          cancel_url: cancelUrl,
+          user_action: "SUBSCRIBE_NOW",
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    console.error("PayPal Revise Subscription Error:", error);
+    throw new Error("Failed to revise PayPal subscription.");
+  }
+
+  const data = await response.json();
+  const approvalUrl = data.links?.find((link: any) => link.rel === "approve")?.href;
+
+  return { subscriptionId: data.id, approvalUrl };
+}
+
 export async function createPayPalSubscription({
   planId,
   customId,

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getPayPalSubscription } from "@/lib/paypal";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +21,11 @@ import Link from "next/link";
 import { format } from "date-fns";
 
 type SuccessPageProps = {
-  searchParams: Promise<{ subscriptionId?: string }>;
+  searchParams: Promise<{
+    subscriptionId?: string;
+    targetPlanId?: string;
+    targetInterval?: string;
+  }>;
 };
 
 export default async function SubscriptionSuccessPage({
@@ -31,19 +36,52 @@ export default async function SubscriptionSuccessPage({
     redirect("/sign-in");
   }
 
-  const { subscriptionId } = await searchParams;
+  const { subscriptionId, targetPlanId, targetInterval } = await searchParams;
 
   if (!subscriptionId) {
     redirect("/dashboard");
   }
 
-  const subscription = await prisma.subscription.findUnique({
+  let subscription = await prisma.subscription.findUnique({
     where: { id: subscriptionId },
     include: { plan: true }
   });
 
   if (!subscription || subscription.userId !== session.user.id) {
     redirect("/dashboard");
+  }
+
+  // Handle plan revision immediately if target plan info is provided
+  // We verify with PayPal to prevent unauthorized upgrades via URL manipulation
+  if (targetPlanId && subscription.paypalSubscriptionId) {
+    try {
+      const paypalSub = await getPayPalSubscription(subscription.paypalSubscriptionId);
+
+      // Check if the plan ID on PayPal matches one of our expected plans
+      const confirmedPlan = await prisma.subscriptionPlan.findFirst({
+        where: {
+          OR: [
+            { paypalMonthlyPlanId: paypalSub.plan_id },
+            { paypalAnnualPlanId: paypalSub.plan_id }
+          ]
+        }
+      });
+
+      if (confirmedPlan && confirmedPlan.id === targetPlanId && paypalSub.status === "ACTIVE") {
+        subscription = await prisma.subscription.update({
+          where: { id: subscriptionId },
+          data: {
+            planId: confirmedPlan.id,
+            interval: confirmedPlan.paypalAnnualPlanId === paypalSub.plan_id ? "annual" : "monthly",
+            status: "active",
+          },
+          include: { plan: true }
+        });
+      }
+    } catch (error) {
+      console.error("[SUCCESS_PAGE] Failed to verify subscription revision:", error);
+      // Fallback to existing subscription data if verification fails
+    }
   }
 
   const isPending = subscription.status === "pending";

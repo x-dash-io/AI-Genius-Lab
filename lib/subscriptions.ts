@@ -90,17 +90,69 @@ export async function syncSubscriptionPlansToPayPal() {
 /**
  * Get the current active subscription for a user.
  * Returns the subscription if it's active or cancelled but still within the paid period.
+ * Also includes pending subscriptions created in the last 24 hours to handle webhook delays.
  */
 export async function getUserSubscription(userId: string) {
   return prisma.subscription.findFirst({
     where: {
       userId,
-      status: { in: ["active", "cancelled"] },
-      currentPeriodEnd: { gt: new Date() }
+      OR: [
+        {
+          status: { in: ["active", "cancelled", "past_due"] },
+          currentPeriodEnd: { gt: new Date() }
+        },
+        {
+          status: "pending",
+          createdAt: { gt: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+        }
+      ]
     },
     include: { plan: true },
-    orderBy: { currentPeriodEnd: "desc" }
+    orderBy: [
+      { status: "asc" }, // active/cancelled before pending usually (alphabetical: active, cancelled, pending)
+      { createdAt: "desc" }
+    ]
   });
+}
+
+/**
+ * Sync a subscription's status with PayPal.
+ * Useful for "pending" subscriptions to check if they've been activated.
+ */
+export async function refreshSubscriptionStatus(subscriptionId: string) {
+  const subscription = await prisma.subscription.findUnique({
+    where: { id: subscriptionId },
+    include: { plan: true }
+  });
+
+  if (!subscription || !subscription.paypalSubscriptionId || subscription.status !== "pending") {
+    return subscription;
+  }
+
+  try {
+    const paypalSub = await getPayPalSubscription(subscription.paypalSubscriptionId);
+
+    if (paypalSub.status === "ACTIVE") {
+      const startTime = new Date(paypalSub.start_time || Date.now());
+      const endTime = paypalSub.billing_info?.next_billing_time
+        ? new Date(paypalSub.billing_info.next_billing_time)
+        : new Date(Date.now() + 31 * 24 * 60 * 60 * 1000);
+
+      return await prisma.subscription.update({
+        where: { id: subscriptionId },
+        data: {
+          status: "active",
+          currentPeriodStart: startTime,
+          currentPeriodEnd: endTime,
+        },
+        include: { plan: true }
+      });
+    }
+  } catch (error) {
+    console.error(`Failed to refresh subscription ${subscriptionId}:`, error);
+  }
+
+  return subscription;
 }
 
 /**

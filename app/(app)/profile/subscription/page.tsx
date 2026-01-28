@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getUserSubscription, cancelSubscription } from "@/lib/subscriptions";
+import { getUserSubscription, cancelSubscription, refreshSubscriptionStatus } from "@/lib/subscriptions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,21 +27,22 @@ export default async function UserSubscriptionPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/sign-in");
 
-  const subscription = await prisma.subscription.findFirst({
-    where: {
-      userId: session.user.id,
-      status: { in: ["active", "cancelled", "past_due"] },
-      currentPeriodEnd: { gt: new Date() }
-    },
+  let subscriptionData = await getUserSubscription(session.user.id);
+
+  if (subscriptionData?.status === "pending") {
+    subscriptionData = await refreshSubscriptionStatus(subscriptionData.id);
+  }
+
+  const subscription = subscriptionData ? await prisma.subscription.findUnique({
+    where: { id: subscriptionData.id },
     include: {
       plan: true,
       payments: {
         orderBy: { paidAt: "desc" },
         take: 10
       }
-    },
-    orderBy: { currentPeriodEnd: "desc" }
-  });
+    }
+  }) : null;
 
   return (
     <div className="space-y-8 pb-8">
@@ -78,8 +79,11 @@ export default async function UserSubscriptionPage() {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <CardTitle className="text-2xl">{subscription.plan.name} Plan</CardTitle>
-                    <Badge variant={subscription.status === "active" ? "default" : "secondary"}>
-                      {subscription.status}
+                    <Badge
+                      variant={subscription.status === "active" ? "default" : "secondary"}
+                      className={subscription.status === "pending" ? "animate-pulse" : ""}
+                    >
+                      {subscription.status === "pending" ? "Processing" : subscription.status}
                     </Badge>
                   </div>
                   <CardDescription>
@@ -123,8 +127,15 @@ export default async function UserSubscriptionPage() {
                 <div className="space-y-4 p-4 rounded-lg bg-muted/50 border">
                   <h4 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Billing Details</h4>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">Next billing date</span>
-                    <span className="font-medium">{format(new Date(subscription.currentPeriodEnd), "PPP")}</span>
+                    <span className="text-muted-foreground">
+                      {subscription.status === "pending" ? "Expected renewal" : "Next billing date"}
+                    </span>
+                    <span className="font-medium">
+                      {subscription.status === "pending"
+                        ? "Pending confirmation"
+                        : format(new Date(subscription.currentPeriodEnd), "PPP")
+                      }
+                    </span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-muted-foreground">Payment method</span>
