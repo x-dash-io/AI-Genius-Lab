@@ -268,6 +268,7 @@ model User {
   Purchase      Purchase[]
   Review        Review[]
   Session       Session[]
+  BlogReview    BlogReview[]
 }
 
 model VerificationToken {
@@ -305,4 +306,49 @@ enum PurchaseStatus {
 enum Role {
   customer
   admin
+}
+
+model BlogPost {
+  id              String       @id @default(cuid())
+  title           String
+  slug            String       @unique
+  content         String       @db.Text
+  excerpt         String?      @db.Text
+  featuredImage   String?
+  status          PostStatus   @default(draft)
+  authorName      String       @default("Admin")
+  views           Int          @default(0)
+  readTimeMinutes Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  tags            BlogTag[]    @relation("BlogPostToTag")
+  reviews         BlogReview[]
+
+  @@index([slug])
+}
+
+model BlogTag {
+  id    String     @id @default(cuid())
+  name  String     @unique
+  slug  String     @unique
+  posts BlogPost[] @relation("BlogPostToTag")
+}
+
+model BlogReview {
+  id         String   @id @default(cuid())
+  userId     String
+  blogPostId String
+  rating     Int
+  text       String?
+  createdAt  DateTime @default(now())
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  BlogPost   BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, blogPostId])
+  @@index([blogPostId])
+}
+
+enum PostStatus {
+  draft
+  published
 }
