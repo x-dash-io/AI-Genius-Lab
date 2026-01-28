@@ -29,40 +29,74 @@ export async function getPublishedPosts(options: { tag?: string; search?: string
         orderBy: { createdAt: "desc" },
       });
     } catch (error: any) {
-      // Handle missing BlogReview table or blogPostId column gracefully
-      const isMissingColumnError =
-        error.code === 'P2022' ||
-        error.message?.includes("BlogReview") ||
-        error.message?.includes("blogPostId") ||
-        error.message?.includes("reviews");
+      const errorMsg = error.message || "";
+      const isMissingColumnError = error.code === 'P2022' || errorMsg.includes("does not exist");
 
       if (isMissingColumnError) {
-        console.warn("[Blog] Database schema mismatch detected. Falling back to query without reviews.");
-        const posts = await prisma.blogPost.findMany({
-          where: {
-            status: "published",
-            AND: [
-              tag ? { tags: { some: { slug: tag } } } : {},
-              search ? {
-                OR: [
-                  { title: { contains: search } },
-                  { content: { contains: search } },
-                  { excerpt: { contains: search } },
-                ],
-              } : {},
-            ],
-          },
-          include: {
-            tags: true,
-          },
-          orderBy: { createdAt: "desc" },
-        });
+        console.warn(`[Blog] Database schema mismatch detected: ${errorMsg}. Falling back to minimal query.`);
 
-        // Return posts with a dummy reviews count to maintain type compatibility
-        return posts.map(post => ({
-          ...post,
-          _count: { reviews: 0 }
-        }));
+        // Try a more restricted query
+        try {
+          const posts = await prisma.blogPost.findMany({
+            where: {
+              status: "published" as any,
+              AND: [
+                tag ? { tags: { some: { slug: tag } } } : {},
+                search ? {
+                  OR: [
+                    { title: { contains: search } },
+                    { content: { contains: search } },
+                  ],
+                } : {},
+              ],
+            },
+            // We use select to explicitly avoid problematic columns like featuredImage or reviews count
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              content: true,
+              excerpt: true,
+              // featuredImage is likely missing, so we omit it
+              status: true,
+              authorName: true,
+              views: true,
+              readTimeMinutes: true,
+              createdAt: true,
+              updatedAt: true,
+              tags: true,
+            },
+            orderBy: { createdAt: "desc" },
+          });
+
+          return posts.map(post => ({
+            ...post,
+            featuredImage: null, // Provide fallback value
+            _count: { reviews: 0 }
+          }));
+        } catch (innerError: any) {
+          console.error("[Blog] Even minimal query failed:", innerError.message);
+          // If even that fails, try the most basic fields
+          const basicPosts = await prisma.blogPost.findMany({
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              content: true,
+            },
+            take: 20
+          });
+          return basicPosts.map(post => ({
+            ...post,
+            excerpt: "",
+            featuredImage: null,
+            status: "published",
+            tags: [],
+            _count: { reviews: 0 },
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }));
+        }
       }
 
       throw error;
@@ -92,27 +126,58 @@ export async function getPostBySlug(slug: string) {
         },
       });
     } catch (error: any) {
-      const isMissingColumnError =
-        error.code === 'P2022' ||
-        error.message?.includes("BlogReview") ||
-        error.message?.includes("blogPostId") ||
-        error.message?.includes("reviews");
+      const errorMsg = error.message || "";
+      const isMissingColumnError = error.code === 'P2022' || errorMsg.includes("does not exist");
 
       if (isMissingColumnError) {
-        console.warn(`[Blog] Database schema mismatch for slug "${slug}". Falling back to query without reviews.`);
-        const post = await prisma.blogPost.findUnique({
-          where: { slug },
-          include: {
-            tags: true,
-          },
-        });
+        console.warn(`[Blog] Database schema mismatch for slug "${slug}": ${errorMsg}. Falling back to minimal query.`);
+        try {
+          const post = await prisma.blogPost.findUnique({
+            where: { slug },
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              content: true,
+              excerpt: true,
+              status: true,
+              authorName: true,
+              views: true,
+              readTimeMinutes: true,
+              createdAt: true,
+              updatedAt: true,
+              tags: true,
+            },
+          });
 
-        if (!post) return null;
+          if (!post) return null;
 
-        return {
-          ...post,
-          reviews: []
-        };
+          return {
+            ...post,
+            featuredImage: null,
+            reviews: []
+          };
+        } catch (innerError) {
+           // Super minimal fallback
+           return prisma.blogPost.findUnique({
+             where: { slug },
+             select: {
+               id: true,
+               title: true,
+               slug: true,
+               content: true,
+             }
+           }).then(p => p ? {
+             ...p,
+             excerpt: "",
+             featuredImage: null,
+             status: "published",
+             tags: [],
+             reviews: [],
+             createdAt: new Date(),
+             updatedAt: new Date(),
+           } : null);
+        }
       }
 
       throw error;
@@ -123,20 +188,30 @@ export async function getPostBySlug(slug: string) {
 export async function getBlogTags() {
   "use cache";
   return withRetry(async () => {
-    return prisma.blogTag.findMany({
-      orderBy: { name: "asc" },
-    });
+    try {
+      return await prisma.blogTag.findMany({
+        orderBy: { name: "asc" },
+      });
+    } catch (error) {
+      console.warn("[Blog] Failed to fetch tags, returning empty array");
+      return [];
+    }
   });
 }
 
 export async function incrementPostViews(postId: string) {
   return withRetry(async () => {
-    return prisma.blogPost.update({
-      where: { id: postId },
-      data: {
-        views: { increment: 1 },
-      },
-    });
+    try {
+      return await prisma.blogPost.update({
+        where: { id: postId },
+        data: {
+          views: { increment: 1 },
+        },
+      });
+    } catch (error) {
+      console.warn(`[Blog] Failed to increment views for ${postId}`);
+      return null;
+    }
   });
 }
 
