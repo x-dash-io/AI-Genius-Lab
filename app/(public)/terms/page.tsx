@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { Mail, MessageCircle } from "lucide-react";
+import { FormattedDate } from "@/components/ui/formatted-date";
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Terms and Conditions",
@@ -18,7 +19,7 @@ export default function TermsPage() {
           Terms and Conditions
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+          Last updated: <FormattedDate />
         </p>
       </div>
 

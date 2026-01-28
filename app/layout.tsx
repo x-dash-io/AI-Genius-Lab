@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SessionProvider } from "@/components/providers/SessionProvider";
@@ -69,7 +70,9 @@ export default function RootLayout({
               <ConfirmDialogProvider>
                 <ToastProvider>
                   <DevIndicatorRemover />
-                  {children}
+                  <Suspense fallback={null}>
+                    {children}
+                  </Suspense>
                 </ToastProvider>
               </ConfirmDialogProvider>
             </CartProvider>
