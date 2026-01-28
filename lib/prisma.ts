@@ -43,11 +43,18 @@ export async function withRetry<T>(
     } catch (error) {
       lastError = error as Error;
       
-      // Check if it's a connection pool timeout error
+      // Check for common transient database or network errors
+      const errorMessage = lastError.message || "";
       const isConnectionError = 
-        lastError.message?.includes("connection pool") ||
-        lastError.message?.includes("P2024") ||
-        lastError.message?.includes("Timed out");
+        errorMessage.includes("connection pool") ||
+        errorMessage.includes("P2024") ||
+        errorMessage.includes("Timed out") ||
+        errorMessage.includes("socket hang up") ||
+        errorMessage.includes("ECONNRESET") ||
+        errorMessage.includes("ECONNREFUSED") ||
+        errorMessage.includes("EOF") ||
+        errorMessage.includes("closed") ||
+        errorMessage.includes("interrupted");
       
       if (!isConnectionError || attempt === maxRetries) {
         throw lastError;

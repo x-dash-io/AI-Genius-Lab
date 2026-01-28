@@ -97,18 +97,28 @@ export function UnifiedLayout({ children, layoutType = "public" }: UnifiedLayout
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { cart } = useCart();
 
-  // Determine actual layout type based on user role from the session
-  const sessionLayoutType: LayoutType =
-    session?.user?.role === "admin" ? "admin" : session?.user ? "customer" : "public";
-
   // Determine final layout type.
   // We prioritize the server-provided layoutType as a baseline to prevent flickering.
   // We only switch to a different layout if the user is authenticated and their role
-  // requires a different layout (e.g., admin browsing public pages or upgrading from public to customer).
-  // This ensures the sidebar doesn't disappear intermittently while the session is loading.
-  const currentLayoutType = (status === "authenticated" && session?.user)
+  // requires a different layout (e.g., admin browsing public pages).
+  let currentLayoutType = (status === "authenticated" && session?.user)
     ? (session.user.role === "admin" ? "admin" : "customer")
     : layoutType;
+
+  // SAFETY OVERRIDE: Enforce layout consistency based on current URL path.
+  // If we are on an admin route, we should ALWAYS show the admin layout shell,
+  // regardless of session status. This prevents the public top bar from appearing
+  // during session transitions or accidental sign-outs on admin pages.
+  if (pathname.startsWith("/admin") && currentLayoutType === "public") {
+    currentLayoutType = "admin";
+  }
+
+  // Same for protected customer routes
+  const protectedCustomerRoutes = ["/dashboard", "/library", "/profile", "/activity", "/subscription", "/purchase"];
+  const isProtectedCustomerRoute = protectedCustomerRoutes.some(route => pathname.startsWith(route));
+  if (isProtectedCustomerRoute && currentLayoutType === "public") {
+    currentLayoutType = "customer";
+  }
 
   // Get navigation items based on layout type
   const getNavigationItems = (): NavItem[] => {
