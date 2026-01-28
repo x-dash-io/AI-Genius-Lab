@@ -15,7 +15,7 @@ export const metadata: Metadata = generateSEOMetadata({
 });
 
 interface CoursesPageProps {
-  searchParams: Promise<{ search?: string; category?: string; sort?: string }>;
+  searchParams: Promise<{ search?: string; category?: string; price?: string; sort?: string }>;
 }
 
 export default async function CoursesPage({ searchParams }: CoursesPageProps) {
@@ -37,6 +37,24 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
   // Apply category filter
   if (params.category) {
     courses = courses.filter((course) => course.category === params.category);
+  }
+
+  // Apply price filter
+  if (params.price) {
+    switch (params.price) {
+      case "free":
+        courses = courses.filter((course) => course.priceCents === 0);
+        break;
+      case "paid":
+        courses = courses.filter((course) => course.priceCents > 0);
+        break;
+      case "under-50":
+        courses = courses.filter((course) => course.priceCents < 5000);
+        break;
+      case "over-50":
+        courses = courses.filter((course) => course.priceCents >= 5000);
+        break;
+    }
   }
 
   // Apply sorting
@@ -61,7 +79,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
 
   const totalCourses = allCourses.length;
   const filteredCount = courses.length;
-  const hasFilters = params.search || params.category || params.sort;
+  const hasFilters = params.search || params.category || params.price || params.sort;
 
   return (
     <section className="grid gap-6">

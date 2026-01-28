@@ -1,3 +1,5 @@
+import { logger } from "@/lib/logger";
+
 /**
  * Centralized error handling utilities
  */
@@ -61,7 +63,7 @@ export function handleServerError(error: unknown): {
   statusCode: number;
   userMessage: string;
 } {
-  console.error("Server error:", error);
+  logger.error("Server error occurred", error);
 
   if (error instanceof AppError) {
     return {

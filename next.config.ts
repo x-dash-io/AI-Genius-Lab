@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
+    cacheComponents: true,
   },
   // Disable React strict mode warnings in dev (optional, helps reduce noise)
   reactStrictMode: true,

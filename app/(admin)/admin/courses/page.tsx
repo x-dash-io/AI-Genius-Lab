@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { BookOpen, Plus, Edit, Trash2 } from "lucide-react";
 import { CourseFilters } from "@/components/admin/CourseFilters";
+import { BulkImport } from "@/components/admin/BulkImport";
 
 interface AdminCoursesPageProps {
   searchParams: Promise<{ search?: string; status?: string; category?: string }>;
@@ -78,6 +79,9 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
           </Button>
         </Link>
       </div>
+
+      {/* Bulk Import */}
+      <BulkImport />
 
       {/* Filters */}
       <Card>
