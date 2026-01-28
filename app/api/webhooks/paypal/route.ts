@@ -1,17 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verifyPayPalWebhook } from "@/lib/paypal";
+import { verifyPayPalWebhook, getPayPalSubscription } from "@/lib/paypal";
 
 type PayPalEvent = {
   event_type?: string;
-  resource?: {
-    id?: string;
-    supplementary_data?: {
-      related_ids?: {
-        order_id?: string;
-      };
-    };
-  };
+  resource?: any;
 };
 
 function getOrderId(event: PayPalEvent) {
@@ -62,6 +55,142 @@ export async function POST(request: Request) {
     }
 
     console.log(`[WEBHOOK] Signature verified successfully`);
+
+    // Handle Subscription Events
+    if (event.event_type?.startsWith("BILLING.SUBSCRIPTION.")) {
+      const subscriptionResource = event.resource;
+      const customId = subscriptionResource.custom_id;
+      const paypalSubId = subscriptionResource.id;
+
+      if (!customId) {
+        console.warn(`[WEBHOOK] Missing custom_id in subscription event`);
+        return NextResponse.json({ received: true });
+      }
+
+      console.log(
+        `[WEBHOOK] Processing subscription event ${event.event_type} for ${customId}`
+      );
+
+      switch (event.event_type) {
+        case "BILLING.SUBSCRIPTION.ACTIVATED":
+          const startTime = new Date(
+            subscriptionResource.start_time || Date.now()
+          );
+          const endTime = subscriptionResource.billing_info?.next_billing_time
+            ? new Date(subscriptionResource.billing_info.next_billing_time)
+            : new Date(Date.now() + 31 * 24 * 60 * 60 * 1000); // Fallback 31 days
+
+          const sub = await prisma.subscription.update({
+            where: { id: customId },
+            data: {
+              status: "active",
+              paypalSubscriptionId: paypalSubId,
+              currentPeriodStart: startTime,
+              currentPeriodEnd: endTime,
+            },
+          });
+
+          // Cancel any other active subscriptions for this user
+          const otherSubs = await prisma.subscription.findMany({
+            where: {
+              userId: sub.userId,
+              id: { not: sub.id },
+              status: { in: ["active", "cancelled", "past_due"] },
+            },
+          });
+
+          for (const other of otherSubs) {
+            try {
+              if (other.paypalSubscriptionId) {
+                const { cancelPayPalSubscription } = await import("@/lib/paypal");
+                await cancelPayPalSubscription(
+                  other.paypalSubscriptionId,
+                  "Replaced by new subscription"
+                );
+              }
+            } catch (err) {
+              console.error(`Failed to cancel old sub ${other.id}:`, err);
+            }
+
+            await prisma.subscription.update({
+              where: { id: other.id },
+              data: { status: "expired" },
+            });
+          }
+          break;
+
+        case "BILLING.SUBSCRIPTION.CANCELLED":
+          await prisma.subscription.update({
+            where: { id: customId },
+            data: {
+              status: "cancelled",
+              cancelAtPeriodEnd: true,
+            },
+          });
+          break;
+
+        case "BILLING.SUBSCRIPTION.EXPIRED":
+        case "BILLING.SUBSCRIPTION.SUSPENDED":
+          await prisma.subscription.update({
+            where: { id: customId },
+            data: { status: "expired" },
+          });
+          break;
+      }
+
+      return NextResponse.json({ received: true });
+    }
+
+    // Handle Recurring Payment Completion
+    if (event.event_type === "PAYMENT.SALE.COMPLETED") {
+      const saleResource = event.resource;
+      const paypalSubId = saleResource.billing_agreement_id;
+
+      if (paypalSubId) {
+        console.log(
+          `[WEBHOOK] Recurring payment completed for subscription: ${paypalSubId}`
+        );
+        const sub = await prisma.subscription.findUnique({
+          where: { paypalSubscriptionId: paypalSubId },
+        });
+
+        if (sub) {
+          // Record payment
+          await prisma.subscriptionPayment.create({
+            data: {
+              subscriptionId: sub.id,
+              amountCents: Math.round(parseFloat(saleResource.amount.total) * 100),
+              currency: saleResource.amount.currency_code.toLowerCase(),
+              status: "completed",
+              paypalSaleId: saleResource.id,
+            }
+          });
+
+          try {
+            const paypalSub = await getPayPalSubscription(paypalSubId);
+            const nextBillingTime = paypalSub.billing_info?.next_billing_time;
+            if (nextBillingTime) {
+              await prisma.subscription.update({
+                where: { id: sub.id },
+                data: {
+                  status: "active",
+                  currentPeriodEnd: new Date(nextBillingTime),
+                },
+              });
+              console.log(
+                `[WEBHOOK] Subscription ${sub.id} extended until ${nextBillingTime}`
+              );
+            }
+          } catch (error) {
+            console.error(
+              `[WEBHOOK] Failed to fetch PayPal subscription details to extend period:`,
+              error
+            );
+          }
+        }
+      }
+      return NextResponse.json({ received: true });
+    }
 
     if (
       event.event_type !== "PAYMENT.CAPTURE.COMPLETED" &&

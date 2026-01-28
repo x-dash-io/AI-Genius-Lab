@@ -1,8 +1,9 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireCustomer } from "@/lib/access";
+import { requireCustomer, hasCourseAccess, hasPurchasedCourse } from "@/lib/access";
 import { hasEnrolledInLearningPath } from "./learning-paths";
+import { getUserSubscription } from "@/lib/subscriptions";
 import { generateCertificatePDF } from "./certificate-pdf";
 import { sendCertificateEmail } from "./email";
 
@@ -90,17 +91,21 @@ export async function hasCompletedLearningPath(userId: string, pathId: string): 
 export async function generateCourseCertificate(courseId: string) {
   const user = await requireCustomer();
 
-  // Verify user has purchased the course
-  const purchase = await prisma.purchase.findFirst({
-    where: {
-      userId: user.id,
-      courseId,
-      status: "paid",
-    },
-  });
+  // Verify access (either purchase OR subscription)
+  const hasAccess = await hasCourseAccess(user.id, user.role, courseId);
+  if (!hasAccess) {
+    throw new Error("Course access required");
+  }
 
-  if (!purchase) {
-    throw new Error("Course not purchased");
+  // Verify certificate inclusion
+  const purchased = await hasPurchasedCourse(user.id, courseId);
+  if (!purchased) {
+    const subscription = await getUserSubscription(user.id);
+    if (!subscription || subscription.plan.tier === "starter") {
+      throw new Error(
+        "Your current subscription does not include certificates. Upgrade to Pro to earn certificates."
+      );
+    }
   }
 
   // Verify course completion
@@ -223,10 +228,35 @@ export async function generateCourseCertificate(courseId: string) {
 export async function generatePathCertificate(pathId: string) {
   const user = await requireCustomer();
 
-  // Verify user has enrolled in the path (all courses purchased)
+  // Verify user has enrolled in the path (all courses purchased or Elite sub)
   const enrolled = await hasEnrolledInLearningPath(user.id, pathId);
   if (!enrolled) {
-    throw new Error("Learning path not enrolled");
+    throw new Error("Learning path access required");
+  }
+
+  // Verify certificate inclusion
+  // For Learning Paths, only Elite subscribers or full-path buyers get certificates
+  const pathCourses = await prisma.learningPathCourse.findMany({
+    where: { learningPathId: pathId },
+    select: { courseId: true }
+  });
+  const purchases = await prisma.purchase.count({
+    where: {
+      userId: user.id,
+      status: "paid",
+      courseId: { in: pathCourses.map(pc => pc.courseId) }
+    }
+  });
+
+  const isFullPurchase = purchases === pathCourses.length;
+
+  if (!isFullPurchase) {
+    const subscription = await getUserSubscription(user.id);
+    if (!subscription || subscription.plan.tier !== "elite") {
+      throw new Error(
+        "Your current subscription does not include Learning Path certificates. Upgrade to Elite to earn them."
+      );
+    }
   }
 
   // Verify path completion

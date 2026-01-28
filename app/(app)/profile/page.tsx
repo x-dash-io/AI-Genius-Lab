@@ -143,6 +143,11 @@ export default async function ProfilePage() {
             </div>
             <Separator />
             <div className="flex flex-col gap-3">
+              <Link href="/profile/subscription">
+                <Button className="w-full" size="sm">
+                  Manage Subscription
+                </Button>
+              </Link>
               <Link href="/library">
                 <Button variant="outline" className="w-full" size="sm">
                   View My Courses

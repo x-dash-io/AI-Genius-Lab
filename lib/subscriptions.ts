@@ -1,0 +1,173 @@
+import { prisma } from "@/lib/prisma";
+import {
+  createPayPalProduct,
+  createPayPalPlan,
+  cancelPayPalSubscription,
+  getPayPalSubscription
+} from "@/lib/paypal";
+import { SubscriptionTier, SubscriptionStatus, SubscriptionInterval } from "@prisma/client";
+
+/**
+ * Sync all active subscription plans from the database to PayPal.
+ * This ensures that each plan has a corresponding Product and Billing Plans (Monthly/Annual) in PayPal.
+ */
+export async function syncSubscriptionPlansToPayPal() {
+  const plans = await prisma.subscriptionPlan.findMany({
+    where: { isActive: true }
+  });
+
+  for (const plan of plans) {
+    let productId = plan.paypalProductId;
+
+    // 1. Ensure Product exists in PayPal
+    if (!productId) {
+      try {
+        const product = await createPayPalProduct({
+          name: `AI Genius Lab - ${plan.name}`,
+          description: plan.description || `Subscription for ${plan.name} tier`,
+        });
+
+        await prisma.subscriptionPlan.update({
+          where: { id: plan.id },
+          data: { paypalProductId: product.id }
+        });
+        productId = product.id;
+      } catch (error) {
+        console.error(`Failed to create PayPal product for plan ${plan.name}:`, error);
+        continue;
+      }
+    }
+
+    // 2. Ensure Monthly Plan exists
+    if (!plan.paypalMonthlyPlanId) {
+      try {
+        const payPalPlan = await createPayPalPlan({
+          productId: productId!,
+          name: `${plan.name} Monthly`,
+          description: `Monthly subscription for ${plan.name}`,
+          priceCents: plan.priceMonthlyCents,
+          intervalUnit: "MONTH",
+        });
+
+        await prisma.subscriptionPlan.update({
+          where: { id: plan.id },
+          data: { paypalMonthlyPlanId: payPalPlan.id }
+        });
+      } catch (error) {
+        console.error(`Failed to create PayPal monthly plan for ${plan.name}:`, error);
+      }
+    }
+
+    // 3. Ensure Annual Plan exists
+    if (!plan.paypalAnnualPlanId) {
+      try {
+        const payPalPlan = await createPayPalPlan({
+          productId: productId!,
+          name: `${plan.name} Annual`,
+          description: `Annual subscription for ${plan.name}`,
+          priceCents: plan.priceAnnualCents,
+          intervalUnit: "YEAR",
+        });
+
+        await prisma.subscriptionPlan.update({
+          where: { id: plan.id },
+          data: { paypalAnnualPlanId: payPalPlan.id }
+        });
+      } catch (error) {
+        console.error(`Failed to create PayPal annual plan for ${plan.name}:`, error);
+      }
+    }
+  }
+}
+
+/**
+ * Get the current active subscription for a user.
+ * Returns the subscription if it's active or cancelled but still within the paid period.
+ */
+export async function getUserSubscription(userId: string) {
+  return prisma.subscription.findFirst({
+    where: {
+      userId,
+      status: { in: ["active", "cancelled"] },
+      currentPeriodEnd: { gt: new Date() }
+    },
+    include: { plan: true },
+    orderBy: { currentPeriodEnd: "desc" }
+  });
+}
+
+/**
+ * Check if a user has an active subscription of at least a certain tier.
+ */
+export async function hasSubscriptionTier(userId: string, requiredTier: SubscriptionTier) {
+  const subscription = await getUserSubscription(userId);
+  if (!subscription) return false;
+
+  const tiers: SubscriptionTier[] = ["starter", "pro", "elite"];
+  const userTierIndex = tiers.indexOf(subscription.plan.tier);
+  const requiredTierIndex = tiers.indexOf(requiredTier);
+
+  return userTierIndex >= requiredTierIndex;
+}
+
+/**
+ * Cancel a user's subscription.
+ * This marks it as cancelled in our DB and calls PayPal to stop future billing.
+ */
+export async function cancelSubscription(subscriptionId: string) {
+  const subscription = await prisma.subscription.findUnique({
+    where: { id: subscriptionId },
+  });
+
+  if (!subscription) {
+    throw new Error("Subscription not found");
+  }
+
+  if (subscription.paypalSubscriptionId) {
+    try {
+      await cancelPayPalSubscription(subscription.paypalSubscriptionId);
+    } catch (error) {
+      console.error("Failed to cancel PayPal subscription:", error);
+      // We continue to update our DB even if PayPal fails,
+      // though ideally we should handle this better.
+    }
+  }
+
+  return prisma.subscription.update({
+    where: { id: subscriptionId },
+    data: {
+      status: "cancelled",
+      cancelAtPeriodEnd: true
+    }
+  });
+}
+
+/**
+ * Grant a subscription manually to a user (Admin feature).
+ */
+export async function grantSubscriptionManually({
+  userId,
+  planId,
+  interval,
+  durationDays = 30
+}: {
+  userId: string;
+  planId: string;
+  interval: SubscriptionInterval;
+  durationDays?: number;
+}) {
+  const now = new Date();
+  const end = new Date();
+  end.setDate(now.getDate() + durationDays);
+
+  return prisma.subscription.create({
+    data: {
+      userId,
+      planId,
+      status: "active",
+      interval,
+      currentPeriodStart: now,
+      currentPeriodEnd: end,
+    }
+  });
+}

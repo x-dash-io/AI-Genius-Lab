@@ -17,6 +17,8 @@ import {
   User,
   Eye,
   Newspaper,
+  CreditCard,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -34,6 +36,8 @@ const adminNavigation = [
   { name: "Courses", href: "/admin/courses", icon: BookOpen },
   { name: "Learning Paths", href: "/admin/learning-paths", icon: Route },
   { name: "Categories", href: "/admin/categories", icon: ShoppingCart },
+  { name: "Subscription Plans", href: "/admin/subscriptions/plans", icon: CreditCard },
+  { name: "User Subscriptions", href: "/admin/subscriptions/users", icon: ShieldCheck },
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Purchases", href: "/admin/purchases", icon: Receipt },
   { name: "Blog", href: "/admin/blog", icon: Newspaper },

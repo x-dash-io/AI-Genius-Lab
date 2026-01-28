@@ -536,6 +536,22 @@ export function CourseEditForm({
                 </p>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="tier">Course Tier</Label>
+                <Select name="tier" defaultValue={course.tier} disabled={isSavingCourse}>
+                  <SelectTrigger id="tier">
+                    <SelectValue placeholder="Select a tier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="STANDARD">Standard (Starter+)</SelectItem>
+                    <SelectItem value="PREMIUM">Premium (Pro+)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Standard courses are available to all subscribers. Premium courses require a Pro or Elite subscription.
+                </p>
+              </div>
+
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -606,6 +622,7 @@ export function CourseEditForm({
                       ) : (
                         <Badge variant="secondary">Draft</Badge>
                       )}
+                      <Badge variant="outline">{course.tier}</Badge>
                     </div>
                   </div>
 
