@@ -59,15 +59,27 @@ export function getSignedCloudinaryUrl(
 
   // If it's a full Cloudinary URL, extract the public ID
   if (cleanPublicId.includes('cloudinary.com')) {
-    try {
-      const url = new URL(cleanPublicId);
-      // Extract path after /v1/ or similar version
-      const pathParts = url.pathname.split('/').filter(p => p && p !== 'v1');
-      cleanPublicId = pathParts.join('/');
-      console.log('[Cloudinary] Extracted from URL:', cleanPublicId);
-    } catch (error) {
-      console.error('[Cloudinary] Error parsing URL:', cleanPublicId, error);
-      return null;
+    const match = cleanPublicId.match(/\/(?:image|video|raw)\/upload\/(?:v\d+\/)?([^\?#]+)/);
+    if (match) {
+      cleanPublicId = match[1];
+      console.log('[Cloudinary] Extracted public ID using regex:', cleanPublicId);
+    } else {
+      try {
+        const url = new URL(cleanPublicId);
+        const parts = url.pathname.split('/');
+        const uploadIndex = parts.indexOf('upload');
+        if (uploadIndex !== -1 && uploadIndex < parts.length - 1) {
+          let publicIdParts = parts.slice(uploadIndex + 1);
+          if (publicIdParts[0].startsWith('v') && /^\d+$/.test(publicIdParts[0].substring(1))) {
+            publicIdParts = publicIdParts.slice(1);
+          }
+          cleanPublicId = publicIdParts.join('/');
+          console.log('[Cloudinary] Extracted public ID using fallback:', cleanPublicId);
+        }
+      } catch (error) {
+        console.error('[Cloudinary] Error parsing URL:', cleanPublicId, error);
+        return null;
+      }
     }
   }
 
