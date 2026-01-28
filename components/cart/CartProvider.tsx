@@ -32,7 +32,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await fetch("/api/cart");
       if (response.ok) {
-        const data = await safeJsonParse(response);
+        const data = (await safeJsonParse(response)) as Cart;
         setCart(data);
       }
     } catch (error) {

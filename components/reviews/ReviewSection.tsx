@@ -20,7 +20,11 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
   const [showForm, setShowForm] = useState(false);
   const [stats, setStats] = useState(initialStats);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
-  const [userReview, setUserReview] = useState<unknown>(null);
+  const [userReview, setUserReview] = useState<{
+    id: string;
+    rating: number;
+    text: string | null;
+  } | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
 
   useEffect(() => {

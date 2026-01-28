@@ -77,9 +77,9 @@ export const authOptions: NextAuthOptions = {
       account,
       profile,
     }: {
-      user: User;
+      user: any;
       account: Account | null;
-      profile?: { picture?: string };
+      profile?: any;
     }) {
       // For OAuth providers, handle account linking and role assignment
       if (account && account.provider !== "credentials" && user.email) {
@@ -124,10 +124,11 @@ export const authOptions: NextAuthOptions = {
             }
 
             // Update user info from OAuth profile if missing
-            if (!existingUser.image && profile?.picture) {
+            const picture = profile?.picture || profile?.image;
+            if (!existingUser.image && picture) {
               await prisma.user.update({
                 where: { id: existingUser.id },
-                data: { image: profile.picture },
+                data: { image: picture },
               });
             }
           } else {

@@ -64,7 +64,10 @@ export function ContentUpload({
         body: formData,
       });
 
-      const data = await safeJsonParse(response);
+      const data = (await safeJsonParse(response)) as {
+        error?: string;
+        publicId: string;
+      };
 
       if (!response.ok) {
         throw new Error(data.error || "Upload failed");
@@ -115,7 +118,10 @@ export function ContentUpload({
         }),
       });
 
-      const data = await safeJsonParse(response);
+      const data = (await safeJsonParse(response)) as {
+        error?: string;
+        publicId: string;
+      };
 
       if (!response.ok) {
         throw new Error(data.error || "Upload failed");

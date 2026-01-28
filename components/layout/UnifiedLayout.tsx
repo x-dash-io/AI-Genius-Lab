@@ -186,7 +186,7 @@ export function UnifiedLayout({ children, layoutType = "public" }: UnifiedLayout
                 <div className="flex items-center justify-between h-full">
                   <Logo
                     href={getLogoHref()}
-                    isAdminLayout={currentLayoutType === "admin"}
+                    isAdminLayout={(currentLayoutType as LayoutType) === "admin"}
                   />
 
                   <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
@@ -251,7 +251,7 @@ export function UnifiedLayout({ children, layoutType = "public" }: UnifiedLayout
               <div className="flex items-center justify-between px-4 h-full">
                 <Logo
                   href={getLogoHref()}
-                  isAdminLayout={currentLayoutType === "admin"}
+                  isAdminLayout={(currentLayoutType as LayoutType) === "admin"}
                 />
                 <div className="flex items-center gap-2">
                   <ThemeToggle />
@@ -276,7 +276,7 @@ export function UnifiedLayout({ children, layoutType = "public" }: UnifiedLayout
               logoComponent={
                 <Logo
                   href={getLogoHref()}
-                  isAdminLayout={currentLayoutType === "admin"}
+                  isAdminLayout={(currentLayoutType as LayoutType) === "admin"}
                 />
               }
               showCart={true}
