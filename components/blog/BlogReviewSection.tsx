@@ -44,7 +44,7 @@ export function BlogReviewSection({ postId, reviews: initialReviews }: BlogRevie
       // Update local state
       const newReview = {
         ...review,
-        User: {
+        user: {
           name: session.user.name,
           image: session.user.image,
         }
@@ -132,12 +132,12 @@ export function BlogReviewSection({ postId, reviews: initialReviews }: BlogRevie
           reviews.map((review) => (
             <div key={review.id} className="flex gap-4 p-4 border rounded-lg bg-card shadow-sm">
               <Avatar className="h-10 w-10 border">
-                <AvatarImage src={review.User.image} />
-                <AvatarFallback className="bg-primary/10 text-primary">{review.User.name?.[0] || "?"}</AvatarFallback>
+                <AvatarImage src={review.user?.image || review.User?.image} />
+                <AvatarFallback className="bg-primary/10 text-primary">{(review.user?.name || review.User?.name)?.[0] || "?"}</AvatarFallback>
               </Avatar>
               <div className="flex-1 space-y-1">
                 <div className="flex items-center justify-between">
-                  <p className="font-semibold text-sm">{review.User.name}</p>
+                  <p className="font-semibold text-sm">{review.user?.name || review.User?.name}</p>
                   <p className="text-[10px] text-muted-foreground">
                     {format(new Date(review.createdAt), "MMM d, yyyy")}
                   </p>

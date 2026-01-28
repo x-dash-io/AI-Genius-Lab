@@ -3,15 +3,40 @@ import { estimateReadTime } from "../blog";
 
 export async function getAllPosts() {
   return withRetry(async () => {
-    return prisma.blogPost.findMany({
-      include: {
-        tags: true,
-        _count: {
-          select: { reviews: true },
+    try {
+      return await prisma.blogPost.findMany({
+        include: {
+          tags: true,
+          _count: {
+            select: { reviews: true },
+          },
         },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+        orderBy: { createdAt: "desc" },
+      });
+    } catch (error: any) {
+      const isMissingColumnError =
+        error.code === 'P2022' ||
+        error.message?.includes("BlogReview") ||
+        error.message?.includes("blogPostId") ||
+        error.message?.includes("reviews");
+
+      if (isMissingColumnError) {
+        console.warn("[Admin Blog] Database schema mismatch detected. Falling back to query without reviews count.");
+        const posts = await prisma.blogPost.findMany({
+          include: {
+            tags: true,
+          },
+          orderBy: { createdAt: "desc" },
+        });
+
+        return posts.map(post => ({
+          ...post,
+          _count: { reviews: 0 }
+        }));
+      }
+
+      throw error;
+    }
   });
 }
 

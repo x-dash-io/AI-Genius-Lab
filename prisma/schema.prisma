@@ -268,7 +268,7 @@ model User {
   Purchase      Purchase[]
   Review        Review[]
   Session       Session[]
-  BlogReview    BlogReview[]
+  blogReviews   BlogReview[]
 }
 
 model VerificationToken {
@@ -341,8 +341,8 @@ model BlogReview {
   rating     Int
   text       String?
   createdAt  DateTime @default(now())
-  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  BlogPost   BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blogPost   BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
 
   @@unique([userId, blogPostId])
   @@index([blogPostId])
