@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
 import { ReviewForm } from "./ReviewForm";
 import { ReviewList } from "./ReviewList";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
 interface ReviewSectionProps {
   courseId: string;
@@ -22,16 +20,14 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
   const [showForm, setShowForm] = useState(false);
   const [stats, setStats] = useState(initialStats);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
-  const [userReview, setUserReview] = useState<any>(null);
+  const [userReview, setUserReview] = useState<unknown>(null);
   const [loadingStats, setLoadingStats] = useState(false);
-  const [loadingUserReview, setLoadingUserReview] = useState(false);
 
   useEffect(() => {
     // Set timeout for session fetch
     const sessionTimeout = setTimeout(() => {
       console.warn("Session fetch timeout in ReviewSection");
       setLoadingStats(false);
-      setLoadingUserReview(false);
     }, 5000); // 5 seconds
 
     // Fetch current user session
@@ -51,7 +47,6 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
         console.error("Error fetching session:", error);
         clearTimeout(sessionTimeout);
         setLoadingStats(false);
-        setLoadingUserReview(false);
       });
 
     fetchStats();
@@ -85,7 +80,6 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
   };
 
   const fetchUserReview = async (userId: string) => {
-    setLoadingUserReview(true);
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
@@ -106,8 +100,6 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
       } else {
         console.error("Error fetching user review:", error);
       }
-    } finally {
-      setLoadingUserReview(false);
     }
   };
 

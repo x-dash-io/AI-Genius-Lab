@@ -28,19 +28,24 @@ export function SearchInput({
   autoFocus = false,
 }: SearchInputProps) {
   const [internalValue, setInternalValue] = useState(externalValue);
+  const [prevExternalValue, setPrevExternalValue] = useState(externalValue);
+
+  if (externalValue !== prevExternalValue) {
+    setInternalValue(externalValue);
+    setPrevExternalValue(externalValue);
+  }
+
   const onSearchRef = useRef(onSearch);
   const lastSearchedValue = useRef(externalValue);
+
+  if (externalValue !== prevExternalValue) {
+    lastSearchedValue.current = externalValue;
+  }
 
   // Keep callback ref updated
   useEffect(() => {
     onSearchRef.current = onSearch;
   }, [onSearch]);
-
-  // Sync with external value changes (e.g., when URL changes)
-  useEffect(() => {
-    setInternalValue(externalValue);
-    lastSearchedValue.current = externalValue;
-  }, [externalValue]);
 
   // Debounced search - only when value actually changes from what was last searched
   useEffect(() => {

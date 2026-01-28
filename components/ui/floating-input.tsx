@@ -10,9 +10,10 @@ export interface FloatingInputProps
 
 const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputProps>(
   ({ className, label, placeholder, id, ...props }, ref) => {
+    const generatedId = React.useId();
+    const inputId = id || generatedId;
     const [isFocused, setIsFocused] = React.useState(false);
     const [hasValue, setHasValue] = React.useState(false);
-    const inputId = id || `floating-input-${Math.random().toString(36).substr(2, 9)}`;
     // Use label if provided, otherwise fall back to placeholder
     const displayLabel = label || placeholder;
 

@@ -4,6 +4,12 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { Cart, CartItem } from "@/lib/cart/types";
 import { toast } from "@/lib/toast";
 import { safeJsonParse } from "@/lib/utils";
+import {
+  addToCartAction,
+  removeFromCartAction,
+  updateCartQuantityAction,
+  clearCartAction
+} from "@/lib/cart/actions";
 
 interface CartContextType {
   cart: Cart;
@@ -42,19 +48,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addToCart = useCallback(async (courseId: string) => {
     try {
-      const response = await fetch("/api/cart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "add", courseId }),
-      });
+      const result = await addToCartAction(courseId);
 
-      const data = await safeJsonParse(response);
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to add to cart");
+      if (result.error) {
+        throw new Error(result.error);
       }
 
-      setCart(data);
+      if (result.cart) {
+        setCart(result.cart);
+      }
+
       toast({
         title: "Added to cart",
         description: "Course added to your shopping cart",
@@ -73,19 +76,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const removeFromCart = useCallback(async (courseId: string) => {
     try {
-      const response = await fetch("/api/cart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "remove", courseId }),
-      });
+      const result = await removeFromCartAction(courseId);
 
-      const data = await safeJsonParse(response);
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to remove from cart");
+      if (result.error) {
+        throw new Error(result.error);
       }
 
-      setCart(data);
+      if (result.cart) {
+        setCart(result.cart);
+      }
+
       toast({
         title: "Removed from cart",
         description: "Course removed from your shopping cart",
@@ -103,19 +103,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = useCallback(async () => {
     try {
-      const response = await fetch("/api/cart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "clear" }),
-      });
+      const result = await clearCartAction();
 
-      const data = await safeJsonParse(response);
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to clear cart");
+      if (result.error) {
+        throw new Error(result.error);
       }
 
-      setCart(data);
+      if (result.cart) {
+        setCart(result.cart);
+      }
+
       toast({
         title: "Cart cleared",
         description: "All items have been removed from your cart",
@@ -137,19 +134,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const updateQuantity = useCallback(async (courseId: string, quantity: number) => {
     try {
-      const response = await fetch("/api/cart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "updateQuantity", courseId, quantity }),
-      });
+      const result = await updateCartQuantityAction(courseId, quantity);
 
-      const data = await safeJsonParse(response);
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to update quantity");
+      if (result.error) {
+        throw new Error(result.error);
       }
 
-      setCart(data);
+      if (result.cart) {
+        setCart(result.cart);
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to update quantity";
       toast({
@@ -164,15 +157,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       // Remove each course ID from the cart
       for (const courseId of courseIds) {
-        const response = await fetch("/api/cart", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "remove", courseId }),
-        });
-
-        if (response.ok) {
-          const data = await safeJsonParse(response);
-          setCart(data);
+        const result = await removeFromCartAction(courseId);
+        if (result.cart) {
+          setCart(result.cart);
         }
       }
     } catch (error) {

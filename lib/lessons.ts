@@ -113,8 +113,9 @@ export async function getAuthorizedLessonContent(lessonId: string) {
   const firstContent = lesson.LessonContent[0];
 
   // Check if there's old contentUrl in the lesson table (migration issue)
-  const oldContentUrl = (lesson as any).contentUrl;
-  const oldContentType = (lesson as any).contentType;
+  const lessonAny = lesson as unknown as { contentUrl?: string; contentType?: string };
+  const oldContentUrl = lessonAny.contentUrl;
+  const oldContentType = lessonAny.contentType;
 
   const contentType = firstContent?.contentType || oldContentType || 'video';
   let contentUrl = firstContent?.contentUrl || oldContentUrl || null;
