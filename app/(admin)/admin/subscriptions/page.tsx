@@ -1,7 +1,7 @@
 // app/admin/subscriptions/page.tsx
 import { Metadata } from "next";
 import { getSubscriptionStats } from "@/lib/subscription";
-import { prisma } from "@/lib/prisma";
+import { prisma, withRetry } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, DollarSign, TrendingUp, Crown } from "lucide-react";
 import { SubscriptionsTable } from "@/components/admin/SubscriptionsTable";
@@ -81,7 +81,7 @@ async function StatsCards() {
 
 export default async function AdminSubscriptionsPage() {
   // Fetch all subscriptions for the table
-  const subscriptions = await prisma.subscription.findMany({
+  const subscriptions = await withRetry(() => prisma.subscription.findMany({
     include: {
       User: {
         select: {
@@ -97,7 +97,7 @@ export default async function AdminSubscriptionsPage() {
       createdAt: "desc",
     },
     take: 50, // Limit to last 50 for performance
-  });
+  }));
 
   return (
     <div className="space-y-6 p-8">

@@ -23,7 +23,7 @@ export default async function SubscriptionPage({
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    redirect("/auth/signin?callbackUrl=/subscription");
+    redirect("/sign-in?callbackUrl=/subscription");
   }
 
   const subscription = await getUserSubscription(session.user.id);
