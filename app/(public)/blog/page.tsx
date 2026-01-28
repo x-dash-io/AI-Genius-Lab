@@ -22,9 +22,9 @@ interface BlogPageProps {
 
 async function BlogContent({ searchParams }: BlogPageProps) {
   const params = await searchParams;
-  const posts = await getPublishedPosts({
-    tag: params.tag,
-    search: params.search
+  const posts = await getPublishedPosts({ 
+    tag: params.tag, 
+    search: params.search 
   });
   const tags = await getBlogTags();
 
@@ -55,7 +55,7 @@ async function BlogContent({ searchParams }: BlogPageProps) {
             </Link>
             {tags.map((tag) => (
               <Link key={tag.id} href={`/blog?tag=${tag.slug}`}>
-                <Badge
+                <Badge 
                   variant={params.tag === tag.slug ? "default" : "outline"}
                   className="cursor-pointer"
                 >

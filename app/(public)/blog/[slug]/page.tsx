@@ -98,7 +98,7 @@ async function BlogPostContent({ slug }: { slug: string }) {
         </p>
       )}
 
-      <div
+      <div 
         className="prose prose-lg dark:prose-invert max-w-none prose-primary prose-headings:font-display prose-a:text-primary hover:prose-a:text-primary/80"
         dangerouslySetInnerHTML={{ __html: post.content }}
       />
