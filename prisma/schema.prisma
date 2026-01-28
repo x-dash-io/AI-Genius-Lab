@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Account {
@@ -66,7 +65,7 @@ model Category {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  Course      Course[]
+  courses     Course[]
 
   @@index([slug])
   @@index([isActive])
@@ -86,12 +85,12 @@ model Course {
   createdAt          DateTime             @default(now())
   updatedAt          DateTime
   Category           Category?            @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  Certificate        Certificate[]
-  Enrollment         Enrollment[]
-  LearningPathCourse LearningPathCourse[]
-  Purchase           Purchase[]
-  Review             Review[]
-  Section            Section[]
+  certificates       Certificate[]
+  enrollments        Enrollment[]
+  learningPathCourse LearningPathCourse[]
+  purchases          Purchase[]
+  reviews            Review[]
+  sections           Section[]
 
   @@index([categoryId])
 }
@@ -116,8 +115,8 @@ model LearningPath {
   description        String?
   createdAt          DateTime             @default(now())
   updatedAt          DateTime
-  Certificate        Certificate[]
-  LearningPathCourse LearningPathCourse[]
+  certificates       Certificate[]
+  courses            LearningPathCourse[]
 
   @@index([slug])
 }
@@ -144,8 +143,8 @@ model Lesson {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime
   Section         Section         @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-  LessonContent   LessonContent[]
-  Progress        Progress[]
+  contents        LessonContent[]
+  progress        Progress[]
 
   @@index([sectionId])
 }
@@ -235,7 +234,7 @@ model Section {
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime
-  Lesson    Lesson[]
+  lessons   Lesson[]
   Course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([courseId])
@@ -261,16 +260,16 @@ model User {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   Account       Account[]
-  ActivityLog   ActivityLog[]
-  Certificate   Certificate[]
-  Enrollment    Enrollment[]
-  Payment       Payment[]
-  Progress      Progress[]
-  Purchase      Purchase[]
-  Review        Review[]
-  Session       Session[]
-  BlogReview    BlogReview[]
-  Subscription  Subscription[]
+  activityLogs  ActivityLog[]
+  certificates  Certificate[]
+  enrollments   Enrollment[]
+  payments      Payment[]
+  progress      Progress[]
+  purchases     Purchase[]
+  reviews       Review[]
+  sessions      Session[]
+  blogReviews   BlogReview[]
+  subscriptions Subscription[]
 }
 
 model VerificationToken {

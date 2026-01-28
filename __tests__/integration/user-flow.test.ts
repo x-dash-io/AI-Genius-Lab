@@ -158,6 +158,7 @@ describeMaybeSkip("Course Purchase Flow", () => {
     await expect(
       prisma.purchase.create({
         data: {
+          id: `purchase_dup_test_${Date.now()}`,
           userId: testUser.id,
           courseId: testCourse.id,
           amountCents: testCourse.priceCents,
@@ -183,18 +184,32 @@ describeMaybeSkip("Learning Path Enrollment Flow", () => {
     course1 = await createTestCourse({ slug: "test-path-course-1", title: "Course 1" });
     course2 = await createTestCourse({ slug: "test-path-course-2", title: "Course 2" });
 
+    const now = new Date();
     learningPath = await prisma.learningPath.create({
       data: {
+        id: `path_test_${Date.now()}`,
+        slug: `path-test-${Date.now()}`,
         title: "Test Learning Path",
         description: "A test path with multiple courses",
+        updatedAt: now,
       },
     });
 
-    await prisma.learningPathCourse.createMany({
-      data: [
-        { learningPathId: learningPath.id, courseId: course1.id, sortOrder: 0 },
-        { learningPathId: learningPath.id, courseId: course2.id, sortOrder: 1 },
-      ],
+    await prisma.learningPathCourse.create({
+      data: {
+        id: `lpc_test_${Date.now()}_0`,
+        learningPathId: learningPath.id,
+        courseId: course1.id,
+        sortOrder: 0,
+      },
+    });
+    await prisma.learningPathCourse.create({
+      data: {
+        id: `lpc_test_${Date.now()}_1`,
+        learningPathId: learningPath.id,
+        courseId: course2.id,
+        sortOrder: 1,
+      },
     });
   });
 
@@ -265,11 +280,13 @@ describeMaybeSkip("Lesson Progress Flow", () => {
   it("should track lesson start", async () => {
     const progress = await prisma.progress.create({
       data: {
+        id: `prog_test_${Date.now()}`,
         userId: testUser.id,
         lessonId: testLesson.id,
         startedAt: new Date(),
         lastPosition: 0,
         completionPercent: 0,
+        updatedAt: new Date(),
       },
     });
 
@@ -373,6 +390,7 @@ describeMaybeSkip("Review System Flow", () => {
   it("should create a review", async () => {
     const review = await prisma.review.create({
       data: {
+        id: `rev_test_${Date.now()}`,
         userId: testUser.id,
         courseId: testCourse.id,
         rating: 5,
@@ -389,6 +407,7 @@ describeMaybeSkip("Review System Flow", () => {
     await expect(
       prisma.review.create({
         data: {
+          id: `rev_dup_test_${Date.now()}`,
           userId: testUser.id,
           courseId: testCourse.id,
           rating: 4,
@@ -424,6 +443,7 @@ describeMaybeSkip("Review System Flow", () => {
 
     await prisma.review.create({
       data: {
+        id: `rev_test_2_${Date.now()}`,
         userId: user2.id,
         courseId: testCourse.id,
         rating: 5,
@@ -462,11 +482,13 @@ describeMaybeSkip("Certificate Generation Flow", () => {
     // Complete the lesson
     await prisma.progress.create({
       data: {
+        id: `prog_cert_test_${Date.now()}`,
         userId: testUser.id,
         lessonId: testLesson.id,
         startedAt: new Date(),
         completedAt: new Date(),
         completionPercent: 100,
+        updatedAt: new Date(),
       },
     });
   });
@@ -479,6 +501,7 @@ describeMaybeSkip("Certificate Generation Flow", () => {
   it("should generate certificate for completed course", async () => {
     const certificate = await prisma.certificate.create({
       data: {
+        id: `cert_test_${Date.now()}`,
         userId: testUser.id,
         courseId: testCourse.id,
         type: "course",
