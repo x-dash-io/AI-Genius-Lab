@@ -38,8 +38,6 @@ export const metadata: Metadata = generateSEOMetadata({
   ],
 });
 
-export const runtime = "nodejs";
-
 export default async function RootLayout({
   children,
 }: Readonly<{

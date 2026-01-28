@@ -51,6 +51,8 @@ export async function proxy(request: NextRequest) {
     "/library",
     "/profile",
     "/activity",
+    "/subscription",
+    "/purchase",
   ];
 
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));

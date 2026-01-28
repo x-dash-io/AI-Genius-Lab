@@ -297,13 +297,13 @@ export async function updateSubscriptionExpiry(subscriptionId: string, newEndDat
 }
 
 export async function getSubscriptionStats() {
-  const [total, active, monthly, annual, churned] = await Promise.all([
+  const [total, active, monthly, annual, churned] = await withRetry(() => Promise.all([
     prisma.subscription.count(),
     prisma.subscription.count({ where: { status: "active" } }),
     prisma.subscription.count({ where: { status: "active", planType: "monthly" } }),
     prisma.subscription.count({ where: { status: "active", planType: "annual" } }),
     prisma.subscription.count({ where: { status: "cancelled" } }),
-  ]);
+  ]));
 
   const mrr = (monthly * SUBSCRIPTION_PLANS.monthly.priceCents + annual * SUBSCRIPTION_PLANS.annual.priceCents) / 100;
   const arr = (annual * SUBSCRIPTION_PLANS.annual.priceCents) / 100;

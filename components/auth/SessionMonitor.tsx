@@ -30,7 +30,7 @@ export function SessionMonitor() {
       previousRoleRef.current = null;
       
       // If on a protected route, redirect to sign-in
-      const protectedRoutes = ["/dashboard", "/library", "/profile", "/activity", "/admin"];
+      const protectedRoutes = ["/dashboard", "/library", "/profile", "/activity", "/admin", "/subscription", "/purchase"];
       const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
       
       if (isProtectedRoute) {

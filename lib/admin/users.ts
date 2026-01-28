@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/prisma";
+import { prisma, withRetry } from "@/lib/prisma";
 import type { Role } from "@/lib/rbac";
 
 export async function getAllUsers() {
-  return prisma.user.findMany({
+  return withRetry(() => prisma.user.findMany({
     include: {
       _count: {
         select: {
@@ -12,11 +12,11 @@ export async function getAllUsers() {
       },
     },
     orderBy: { createdAt: "desc" },
-  });
+  }));
 }
 
 export async function getUserById(userId: string) {
-  return prisma.user.findUnique({
+  return withRetry(() => prisma.user.findUnique({
     where: { id: userId },
     include: {
       Purchase: {
@@ -68,12 +68,12 @@ export async function getUserById(userId: string) {
         take: 10,
       },
     },
-  });
+  }));
 }
 
 export async function updateUserRole(userId: string, role: Role) {
-  return prisma.user.update({
+  return withRetry(() => prisma.user.update({
     where: { id: userId },
     data: { role },
-  });
+  }));
 }
