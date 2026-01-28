@@ -107,25 +107,32 @@ export async function createTestLesson(
   title: string = "Test Lesson",
   contentType: "video" | "audio" | "pdf" | "link" | "file" = "video"
 ) {
+  const lessonId = `lesson_test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const now = new Date();
   const lesson = await prisma.lesson.create({
     data: {
+      id: lessonId,
       sectionId,
       title,
       sortOrder: 0,
       isLocked: true,
       durationSeconds: 300,
       allowDownload: false,
+      updatedAt: now,
     },
   });
 
   // Create lesson content
+  const contentId = `content_test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   await prisma.lessonContent.create({
     data: {
+      id: contentId,
       lessonId: lesson.id,
       contentType,
       contentUrl: "test-content-url",
       title: "Test Content",
       sortOrder: 1,
+      updatedAt: now,
     },
   });
 
@@ -145,8 +152,10 @@ export async function createTestPurchase(
     select: { priceCents: true },
   });
 
+  const purchaseId = `purchase_test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   return prisma.purchase.create({
     data: {
+      id: purchaseId,
       userId,
       courseId,
       amountCents: course?.priceCents || 9999,
@@ -161,8 +170,10 @@ export async function createTestPurchase(
  * Create an enrollment for a user and course
  */
 export async function createTestEnrollment(userId: string, courseId: string, purchaseId?: string) {
+  const enrollmentId = `enroll_test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   return prisma.enrollment.create({
     data: {
+      id: enrollmentId,
       userId,
       courseId,
       purchaseId,
@@ -177,17 +188,24 @@ export async function createTestLearningPath(
   title: string = "Test Learning Path",
   courseIds: string[] = []
 ) {
+  const pathId = `path_test_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+  const slug = `path-test-${Date.now()}`;
   const path = await prisma.learningPath.create({
     data: {
+      id: pathId,
       title,
+      slug,
       description: "A test learning path",
+      updatedAt: new Date(),
     },
   });
 
   // Add courses to the path
   for (let i = 0; i < courseIds.length; i++) {
+    const lpcId = `lpc_test_${Date.now()}_${Math.random().toString(36).substring(2, i)}`;
     await prisma.learningPathCourse.create({
       data: {
+        id: lpcId,
         learningPathId: path.id,
         courseId: courseIds[i],
         sortOrder: i,
@@ -205,7 +223,7 @@ export async function cleanupTestUsers(emailPattern: string = "test") {
   // Delete in order to respect foreign key constraints
   await prisma.activityLog.deleteMany({
     where: {
-      user: {
+      User: {
         email: { contains: emailPattern },
       },
     },
@@ -213,7 +231,7 @@ export async function cleanupTestUsers(emailPattern: string = "test") {
 
   await prisma.progress.deleteMany({
     where: {
-      user: {
+      User: {
         email: { contains: emailPattern },
       },
     },
@@ -221,7 +239,7 @@ export async function cleanupTestUsers(emailPattern: string = "test") {
 
   await prisma.certificate.deleteMany({
     where: {
-      user: {
+      User: {
         email: { contains: emailPattern },
       },
     },
@@ -229,7 +247,7 @@ export async function cleanupTestUsers(emailPattern: string = "test") {
 
   await prisma.review.deleteMany({
     where: {
-      user: {
+      User: {
         email: { contains: emailPattern },
       },
     },
@@ -237,7 +255,7 @@ export async function cleanupTestUsers(emailPattern: string = "test") {
 
   await prisma.payment.deleteMany({
     where: {
-      user: {
+      User: {
         email: { contains: emailPattern },
       },
     },
@@ -245,7 +263,7 @@ export async function cleanupTestUsers(emailPattern: string = "test") {
 
   await prisma.enrollment.deleteMany({
     where: {
-      user: {
+      User: {
         email: { contains: emailPattern },
       },
     },
@@ -253,7 +271,7 @@ export async function cleanupTestUsers(emailPattern: string = "test") {
 
   await prisma.purchase.deleteMany({
     where: {
-      user: {
+      User: {
         email: { contains: emailPattern },
       },
     },
@@ -261,7 +279,7 @@ export async function cleanupTestUsers(emailPattern: string = "test") {
 
   await prisma.session.deleteMany({
     where: {
-      user: {
+      User: {
         email: { contains: emailPattern },
       },
     },
@@ -289,8 +307,8 @@ export async function cleanupTestCourses(slugPattern: string = "test-") {
   // Delete lessons first
   await prisma.lesson.deleteMany({
     where: {
-      section: {
-        course: {
+      Section: {
+        Course: {
           slug: { startsWith: slugPattern },
         },
       },
@@ -300,7 +318,7 @@ export async function cleanupTestCourses(slugPattern: string = "test-") {
   // Delete sections
   await prisma.section.deleteMany({
     where: {
-      course: {
+      Course: {
         slug: { startsWith: slugPattern },
       },
     },
@@ -309,7 +327,7 @@ export async function cleanupTestCourses(slugPattern: string = "test-") {
   // Delete related data
   await prisma.review.deleteMany({
     where: {
-      course: {
+      Course: {
         slug: { startsWith: slugPattern },
       },
     },
@@ -317,7 +335,7 @@ export async function cleanupTestCourses(slugPattern: string = "test-") {
 
   await prisma.enrollment.deleteMany({
     where: {
-      course: {
+      Course: {
         slug: { startsWith: slugPattern },
       },
     },
@@ -325,7 +343,7 @@ export async function cleanupTestCourses(slugPattern: string = "test-") {
 
   await prisma.purchase.deleteMany({
     where: {
-      course: {
+      Course: {
         slug: { startsWith: slugPattern },
       },
     },
@@ -333,7 +351,7 @@ export async function cleanupTestCourses(slugPattern: string = "test-") {
 
   await prisma.learningPathCourse.deleteMany({
     where: {
-      course: {
+      Course: {
         slug: { startsWith: slugPattern },
       },
     },
@@ -341,7 +359,7 @@ export async function cleanupTestCourses(slugPattern: string = "test-") {
 
   await prisma.certificate.deleteMany({
     where: {
-      course: {
+      Course: {
         slug: { startsWith: slugPattern },
       },
     },
@@ -361,7 +379,7 @@ export async function cleanupTestCourses(slugPattern: string = "test-") {
 export async function cleanupTestLearningPaths(titlePattern: string = "Test") {
   await prisma.learningPathCourse.deleteMany({
     where: {
-      learningPath: {
+      LearningPath: {
         title: { startsWith: titlePattern },
       },
     },
@@ -369,7 +387,7 @@ export async function cleanupTestLearningPaths(titlePattern: string = "Test") {
 
   await prisma.certificate.deleteMany({
     where: {
-      path: {
+      LearningPath: {
         title: { startsWith: titlePattern },
       },
     },
