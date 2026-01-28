@@ -33,7 +33,7 @@ export async function getAllCategories() {
       orderBy: { sortOrder: "asc" },
       include: {
         _count: {
-          select: { Course: true },
+          select: { courses: true },
         },
       },
     });
@@ -49,7 +49,7 @@ export async function getAllCategories() {
       isActive: cat.isActive,
       createdAt: cat.createdAt,
       updatedAt: cat.updatedAt,
-      courseCount: cat._count.Course,
+      courseCount: cat._count.courses,
     }));
   });
 }
@@ -144,7 +144,7 @@ export async function updateCategory(id: string, data: Partial<CategoryInput>) {
       },
       include: {
         _count: {
-          select: { Course: true },
+          select: { courses: true },
         },
       },
     });
@@ -165,7 +165,7 @@ export async function updateCategory(id: string, data: Partial<CategoryInput>) {
     isActive: category.isActive,
     createdAt: category.createdAt,
     updatedAt: category.updatedAt,
-    courseCount: category._count.Course,
+    courseCount: category._count.courses,
   };
 }
 
@@ -243,7 +243,7 @@ export async function toggleCategoryStatus(id: string) {
     where: { id },
     include: {
       _count: {
-        select: { Course: true },
+        select: { courses: true },
       },
     },
   });
@@ -258,7 +258,7 @@ export async function toggleCategoryStatus(id: string) {
       data: { isActive: !category.isActive },
       include: {
         _count: {
-          select: { Course: true },
+          select: { courses: true },
         },
       },
     });
@@ -279,6 +279,6 @@ export async function toggleCategoryStatus(id: string) {
     isActive: updated.isActive,
     createdAt: updated.createdAt,
     updatedAt: updated.updatedAt,
-    courseCount: updated._count.Course,
+    courseCount: updated._count.courses,
   };
 }
