@@ -97,12 +97,18 @@ export function UnifiedLayout({ children, layoutType = "public" }: UnifiedLayout
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { cart } = useCart();
 
-  // Determine actual layout type based on user role
-  const actualLayoutType: LayoutType =
+  // Determine actual layout type based on user role from the session
+  const sessionLayoutType: LayoutType =
     session?.user?.role === "admin" ? "admin" : session?.user ? "customer" : "public";
 
-  // Use actual layout type if session is loaded, otherwise use provided type
-  const currentLayoutType = status === "loading" ? layoutType : actualLayoutType;
+  // Determine final layout type.
+  // We prioritize the server-provided layoutType as a baseline to prevent flickering.
+  // We only switch to a different layout if the user is authenticated and their role
+  // requires a different layout (e.g., admin browsing public pages or upgrading from public to customer).
+  // This ensures the sidebar doesn't disappear intermittently while the session is loading.
+  const currentLayoutType = (status === "authenticated" && session?.user)
+    ? (session.user.role === "admin" ? "admin" : "customer")
+    : layoutType;
 
   // Get navigation items based on layout type
   const getNavigationItems = (): NavItem[] => {
