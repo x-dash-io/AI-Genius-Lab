@@ -23,12 +23,22 @@ export async function getCourseReviews(courseId: string) {
 }
 
 export async function getCourseReviewStats(courseId: string) {
-  const reviews = await prisma.review.findMany({
-    where: { courseId },
-    select: { rating: true },
-  });
+  const [aggregates, distribution] = await Promise.all([
+    prisma.review.aggregate({
+      where: { courseId },
+      _avg: { rating: true },
+      _count: { _all: true },
+    }),
+    prisma.review.groupBy({
+      by: ["rating"],
+      where: { courseId },
+      _count: { _all: true },
+    }),
+  ]);
 
-  if (reviews.length === 0) {
+  const totalReviews = aggregates._count._all;
+
+  if (totalReviews === 0) {
     return {
       averageRating: 0,
       totalReviews: 0,
@@ -36,20 +46,20 @@ export async function getCourseReviewStats(courseId: string) {
     };
   }
 
-  const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
-  const averageRating = totalRating / reviews.length;
+  const ratingDistribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
 
-  const ratingDistribution = reviews.reduce(
-    (acc, review) => {
-      acc[review.rating as keyof typeof acc]++;
-      return acc;
-    },
-    { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
-  );
+  distribution.forEach((group) => {
+    const rating = group.rating as keyof typeof ratingDistribution;
+    if (rating >= 1 && rating <= 5) {
+      ratingDistribution[rating] = group._count._all;
+    }
+  });
+
+  const averageRating = aggregates._avg.rating || 0;
 
   return {
     averageRating: Math.round(averageRating * 10) / 10,
-    totalReviews: reviews.length,
+    totalReviews,
     ratingDistribution,
   };
 }
