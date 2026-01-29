@@ -28,12 +28,13 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
   const { courseId, lessonId } = await params;
 
-  let lesson, courseSlug, signedUrl, contentMetadata;
+  let lesson, courseSlug, signedUrl, downloadUrl, contentMetadata;
   try {
     const result = await getAuthorizedLessonContent(lessonId);
     lesson = result.lesson;
     courseSlug = result.courseSlug;
     signedUrl = result.signedUrl;
+    downloadUrl = result.downloadUrl;
     contentMetadata = result.contentMetadata;
   } catch (error) {
     if (error instanceof Error && error.message === "NOT_FOUND") {
@@ -156,6 +157,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
             lessonId={lesson.id}
             contentType={lesson.contentType}
             contentUrl={signedUrl}
+            downloadUrl={downloadUrl}
             allowDownload={lesson.allowDownload}
             contentMetadata={contentMetadata}
             initialProgress={progress ? {
