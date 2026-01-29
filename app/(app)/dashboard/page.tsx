@@ -316,7 +316,7 @@ export default async function DashboardPage({
               <div className="text-2xl sm:text-3xl font-bold text-orange-800 dark:text-orange-300">
                 {learningStreak}
               </div>
-              <p className="text-xs text-orange-700 dark:text-orange-400/80 mt-1">
+              <p className="text-xs text-orange-900 dark:text-orange-400/80 mt-1">
                 Active days (30d)
               </p>
             </CardContent>
@@ -333,7 +333,7 @@ export default async function DashboardPage({
               <div className="text-2xl sm:text-3xl font-bold text-blue-800 dark:text-blue-300">
                 {weekProgress}
               </div>
-              <p className="text-xs text-blue-700 dark:text-blue-400/80 mt-1">
+              <p className="text-xs text-blue-900 dark:text-blue-400/80 mt-1">
                 Lessons accessed
               </p>
             </CardContent>
@@ -350,7 +350,7 @@ export default async function DashboardPage({
               <div className="text-2xl sm:text-3xl font-bold text-green-800 dark:text-green-300">
                 {avgCompletionRate}%
               </div>
-              <p className="text-xs text-green-700 dark:text-green-400/80 mt-1">
+              <p className="text-xs text-green-900 dark:text-green-400/80 mt-1">
                 Course completion
               </p>
             </CardContent>
@@ -367,7 +367,7 @@ export default async function DashboardPage({
               <div className="text-2xl sm:text-3xl font-bold text-purple-800 dark:text-purple-300">
                 {learningHours}h {learningMinutes}m
               </div>
-              <p className="text-xs text-purple-700 dark:text-purple-400/80 mt-1">
+              <p className="text-xs text-purple-900 dark:text-purple-400/80 mt-1">
                 Estimated total
               </p>
             </CardContent>
@@ -459,7 +459,7 @@ export default async function DashboardPage({
                     <p className="font-semibold text-sm text-amber-900 dark:text-amber-100">
                       Course Completer
                     </p>
-                    <p className="text-xs text-amber-800 dark:text-amber-300/80">
+                    <p className="text-xs text-amber-900 dark:text-amber-300/80">
                       Completed {completedCourses} {completedCourses === 1 ? 'course' : 'courses'}
                     </p>
                   </div>
@@ -474,7 +474,7 @@ export default async function DashboardPage({
                     <p className="font-semibold text-sm text-amber-900 dark:text-amber-100">
                       On Fire!
                     </p>
-                    <p className="text-xs text-amber-800 dark:text-amber-300/80">
+                    <p className="text-xs text-amber-900 dark:text-amber-300/80">
                       {learningStreak} day learning streak
                     </p>
                   </div>
@@ -489,7 +489,7 @@ export default async function DashboardPage({
                     <p className="font-semibold text-sm text-amber-900 dark:text-amber-100">
                       Dedicated Learner
                     </p>
-                    <p className="text-xs text-amber-800 dark:text-amber-300/80">
+                    <p className="text-xs text-amber-900 dark:text-amber-300/80">
                       {totalLessonsCompleted} lessons completed
                     </p>
                   </div>
@@ -504,7 +504,7 @@ export default async function DashboardPage({
                     <p className="font-semibold text-sm text-amber-900 dark:text-amber-100">
                       Certified
                     </p>
-                    <p className="text-xs text-amber-800 dark:text-amber-300/80">
+                    <p className="text-xs text-amber-900 dark:text-amber-300/80">
                       Earned {certificates.length} {certificates.length === 1 ? 'certificate' : 'certificates'}
                     </p>
                   </div>
@@ -513,7 +513,7 @@ export default async function DashboardPage({
               {totalCourses > 0 && completedCourses === 0 && learningStreak < 7 && totalLessonsCompleted < 10 && certificates.length === 0 && (
                 <div className="text-center py-4">
                   <Sparkles className="h-8 w-8 mx-auto text-amber-600 dark:text-amber-500 mb-2" />
-                  <p className="text-sm text-amber-800 dark:text-amber-300">
+                  <p className="text-sm text-amber-900 dark:text-amber-300">
                     Keep learning to unlock achievements!
                   </p>
                 </div>
