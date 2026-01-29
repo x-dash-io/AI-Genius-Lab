@@ -423,8 +423,7 @@ button[data-nextjs-toast-close] {
 
   /* Invoice Card */
   #invoice,
-  [class*="Card"],
-  [class*="card"] {
+  .invoice-card {
     border: 1px solid #e5e5e5 !important;
     box-shadow: none !important;
     background: #ffffff !important;

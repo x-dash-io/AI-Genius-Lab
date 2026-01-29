@@ -483,3 +483,42 @@ export async function verifyCertificate(certificateId: string) {
     },
   };
 }
+
+/**
+ * Get a single certificate by its database ID or its public certificate ID
+ */
+export async function getCertificate(idOrCertificateId: string) {
+  return prisma.certificate.findFirst({
+    where: {
+      OR: [
+        { id: idOrCertificateId },
+        { certificateId: idOrCertificateId },
+      ],
+    },
+    include: {
+      User: {
+        select: {
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+      Course: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          slug: true,
+        },
+      },
+      LearningPath: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          slug: true,
+        },
+      },
+    },
+  });
+}
