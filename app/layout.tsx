@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
@@ -79,6 +80,7 @@ export default function RootLayout({
           </SessionProvider>
         </ThemeProvider>
         <Analytics />
+        <SpeedInsights />
         {/* Hide Next.js development indicator - works in both dev and production */}
         <style dangerouslySetInnerHTML={{
           __html: `
