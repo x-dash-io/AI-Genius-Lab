@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Check, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CheckoutIntervalToggle } from "@/components/subscriptions/CheckoutIntervalToggle";
 
 type Props = {
   searchParams: Promise<{ planId?: string; interval?: string }>;
@@ -147,6 +148,8 @@ export default async function SubscriptionCheckoutPage({ searchParams }: Props) 
             : "Review your selection before proceeding to payment."}
         </p>
       </div>
+
+      <CheckoutIntervalToggle />
 
       <Card>
         <CardHeader>
