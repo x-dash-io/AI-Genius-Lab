@@ -74,14 +74,24 @@ export function CourseActions({
     );
   }
 
-  // User already owns the course
-  if (isOwned) {
+  // User doesn't own - check subscription access
+  const isPremium = tier === "PREMIUM";
+  const planTier = subscription?.plan?.tier;
+  const hasProAccess = planTier === "pro" || planTier === "elite";
+  const hasStandardAccess = planTier === "starter" || hasProAccess;
+
+  const hasAccessViaSubscription =
+    (tier === "STANDARD" && hasStandardAccess) ||
+    (tier === "PREMIUM" && hasProAccess);
+
+  // User already owns the course or has access via subscription
+  if (isOwned || hasAccessViaSubscription) {
     return (
       <div className="flex flex-wrap gap-4">
         <div className="flex items-center gap-2 rounded-lg bg-green-500/10 border border-green-500/20 px-4 py-2">
           <CheckCircle className="h-5 w-5 text-green-500" />
           <span className="text-sm font-medium text-green-600 dark:text-green-400">
-            You own this course
+            {isOwned ? "You own this course" : "Included with your subscription"}
           </span>
         </div>
         <Link href={`/library/${courseSlug}`}>
@@ -98,10 +108,6 @@ export function CourseActions({
       </div>
     );
   }
-
-  // User doesn't own - show purchase options
-  const isPremium = tier === "PREMIUM";
-  const hasProAccess = subscription?.plan?.tier === "pro" || subscription?.plan?.tier === "elite";
 
   // If it's a premium course and user doesn't have Pro/Elite subscription
   if (isPremium && !hasProAccess) {
