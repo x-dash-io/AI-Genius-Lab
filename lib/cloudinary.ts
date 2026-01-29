@@ -113,15 +113,15 @@ export function getSignedCloudinaryUrl(
     // For video resource type, Cloudinary often requires an extension in the URL
     // for the browser to correctly identify and play the media.
     const hasExtension = cleanPublicId.split('/').pop()?.includes('.');
-
+    
     const signedUrl = cloudinary.url(cleanPublicId, {
       secure: true,
       sign_url: true,
       type: "upload", // Changed from "authenticated" to match actual file type
       resource_type: resourceType,
       // Automatically add extension for video/audio if missing to help browser identification
-      format: (!hasExtension && resourceType === 'video')
-        ? (options.isAudio ? 'mp3' : 'mp4')
+      format: (!hasExtension && resourceType === 'video') 
+        ? (options.isAudio ? 'mp3' : 'mp4') 
         : undefined,
       expires_at: expiresAt,
       attachment: options.download ? cleanPublicId.split('/').pop() : undefined,

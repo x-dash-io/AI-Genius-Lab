@@ -1,0 +1,9 @@
+
+> ai-genius-lab@0.1.0 predev
+> npm run prisma:generate
+
+
+> ai-genius-lab@0.1.0 prisma:generate
+> node scripts/with-prisma-engine.js prisma generate
+
+/bin/sh: 1: prisma: not found

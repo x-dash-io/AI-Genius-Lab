@@ -81,10 +81,10 @@ export function VideoPlayer({
           default: errorDetail = "An unknown error occurred.";
         }
       }
-
+      
       console.error("Media error:", e, media?.error);
-      setError({
-        message: `Failed to load ${contentType || 'media'} content. ${errorDetail}`
+      setError({ 
+        message: `Failed to load ${contentType || 'media'} content. ${errorDetail}` 
       });
       setIsLoading(false);
     };
@@ -142,7 +142,7 @@ export function VideoPlayer({
   // Helper to detect external video services
   const getEmbedUrl = (url: string) => {
     if (!url) return null;
-
+    
     // YouTube
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
       let videoId = '';
@@ -155,18 +155,18 @@ export function VideoPlayer({
       }
       return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
     }
-
+    
     // Vimeo
     if (url.includes('vimeo.com')) {
       const videoId = url.split('/').pop()?.split('?')[0];
       return videoId ? `https://player.vimeo.com/video/${videoId}` : null;
     }
-
+    
     return null;
   };
 
   const embedUrl = getEmbedUrl(originalSrc || '');
-
+  
   // Use the signed URL directly for better reliability with media elements (redirects can break range requests)
   const mediaSrc = (contentType === 'video' || contentType === 'audio') && originalSrc ? originalSrc : src;
 
@@ -192,9 +192,9 @@ export function VideoPlayer({
           <p className="text-sm text-muted-foreground">{error.message}</p>
           {originalSrc && originalSrc.startsWith('http') && !originalSrc.includes('cloudinary.com') && (
             <div className="mt-4">
-              <a
-                href={originalSrc}
-                target="_blank"
+              <a 
+                href={originalSrc} 
+                target="_blank" 
                 rel="noreferrer"
                 className="text-primary hover:underline text-sm font-medium"
               >
@@ -243,7 +243,7 @@ export function VideoPlayer({
               <p className="text-sm text-muted-foreground">Click the play button below to listen to this lesson</p>
             </div>
           </div>
-
+          
           <div className="relative">
             <audio
               ref={videoRef as any}
@@ -255,7 +255,7 @@ export function VideoPlayer({
               onLoadedData={() => setIsLoading(false)}
               onCanPlay={() => setIsLoading(false)}
             />
-
+            
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-card/60 backdrop-blur-[1px] pointer-events-none">
                 <Loader2 className="h-6 w-6 text-primary animate-spin" />

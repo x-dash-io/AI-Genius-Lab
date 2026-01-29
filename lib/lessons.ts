@@ -26,7 +26,7 @@ function buildLessonUrl(lesson: {
   }
 
   // If it's a link type OR an external URL (YouTube/Vimeo), return as is
-  const isExternal = lesson.contentUrl.startsWith('http') &&
+  const isExternal = lesson.contentUrl.startsWith('http') && 
     !lesson.contentUrl.includes('cloudinary.com');
 
   if (lesson.contentType === "link" || isExternal) {
