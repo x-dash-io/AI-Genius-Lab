@@ -173,7 +173,6 @@ export function VideoPlayer({
           onEnded={handleEnded}
           // @ts-expect-error ReactPlayer onProgress type definition conflict with strict TS
           onProgress={handleProgress}
-          // @ts-expect-error Config type definition mismatch
           config={{
             file: {
               attributes: {
