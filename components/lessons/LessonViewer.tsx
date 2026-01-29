@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { VideoPlayer } from "./VideoPlayer";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -115,12 +115,12 @@ export function LessonViewer({
     }
   };
 
-  const handleProgressUpdate = (percent: number) => {
+  const handleProgressUpdate = useCallback((percent: number) => {
     setProgress((prev) => ({
       ...prev!,
       completionPercent: percent,
     }));
-  };
+  }, []);
 
   if (!contentUrl) {
     return (

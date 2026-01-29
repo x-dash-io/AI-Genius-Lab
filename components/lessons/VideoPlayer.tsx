@@ -69,8 +69,23 @@ export function VideoPlayer({
       setIsLoading(false);
     };
 
-    const handleError = () => {
-      setError({ message: "Failed to load video content. The content may not be available yet." });
+    const handleError = (e: any) => {
+      const media = videoRef.current;
+      let errorDetail = "";
+      if (media?.error) {
+        switch (media.error.code) {
+          case 1: errorDetail = "The fetching process was aborted by the user."; break;
+          case 2: errorDetail = "A network error occurred."; break;
+          case 3: errorDetail = "An error occurred while decoding the media."; break;
+          case 4: errorDetail = "The media could not be loaded, either because the server or network failed or because the format is not supported."; break;
+          default: errorDetail = "An unknown error occurred.";
+        }
+      }
+      
+      console.error("Media error:", e, media?.error);
+      setError({ 
+        message: `Failed to load ${contentType || 'media'} content. ${errorDetail}` 
+      });
       setIsLoading(false);
     };
 
@@ -92,23 +107,29 @@ export function VideoPlayer({
 
     const handleWaiting = () => setIsLoading(true);
     const handleCanPlay = () => setIsLoading(false);
+    const handleCanPlayThrough = () => setIsLoading(false);
+    const handleLoadedData = () => setIsLoading(false);
     const handleLoadStart = () => setIsLoading(true);
 
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    video.addEventListener("loadeddata", handleLoadedData);
     video.addEventListener("ended", handleEnded);
     video.addEventListener("error", handleError);
     video.addEventListener("waiting", handleWaiting);
     video.addEventListener("canplay", handleCanPlay);
+    video.addEventListener("canplaythrough", handleCanPlayThrough);
     video.addEventListener("loadstart", handleLoadStart);
 
     return () => {
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      video.removeEventListener("loadeddata", handleLoadedData);
       video.removeEventListener("ended", handleEnded);
       video.removeEventListener("error", handleError);
       video.removeEventListener("waiting", handleWaiting);
       video.removeEventListener("canplay", handleCanPlay);
+      video.removeEventListener("canplaythrough", handleCanPlayThrough);
       video.removeEventListener("loadstart", handleLoadStart);
     };
   }, [lessonId, debouncedProgressUpdate, onProgress]);
@@ -116,7 +137,7 @@ export function VideoPlayer({
   // Helper to detect external video services
   const getEmbedUrl = (url: string) => {
     if (!url) return null;
-
+    
     // YouTube
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
       let videoId = '';
@@ -129,13 +150,13 @@ export function VideoPlayer({
       }
       return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
     }
-
+    
     // Vimeo
     if (url.includes('vimeo.com')) {
       const videoId = url.split('/').pop()?.split('?')[0];
       return videoId ? `https://player.vimeo.com/video/${videoId}` : null;
     }
-
+    
     return null;
   };
 
@@ -157,9 +178,9 @@ export function VideoPlayer({
           <p className="text-sm text-muted-foreground">{error.message}</p>
           {originalSrc && originalSrc.startsWith('http') && !originalSrc.includes('cloudinary.com') && (
             <div className="mt-4">
-              <a
-                href={originalSrc}
-                target="_blank"
+              <a 
+                href={originalSrc} 
+                target="_blank" 
                 rel="noreferrer"
                 className="text-primary hover:underline text-sm font-medium"
               >
@@ -208,7 +229,7 @@ export function VideoPlayer({
               <p className="text-sm text-muted-foreground">Click the play button below to listen to this lesson</p>
             </div>
           </div>
-
+          
           <div className="relative">
             <audio
               ref={videoRef as any}
@@ -216,10 +237,9 @@ export function VideoPlayer({
               className="w-full"
               controls
               controlsList={allowDownload ? undefined : "nodownload"}
-              preload="metadata"
-              onPlay={() => setIsLoading(false)}
+              preload="auto"
             />
-
+            
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-card/60 backdrop-blur-[1px] pointer-events-none">
                 <Loader2 className="h-6 w-6 text-primary animate-spin" />
@@ -241,7 +261,7 @@ export function VideoPlayer({
           className="w-full h-full"
           controls
           controlsList={allowDownload ? undefined : "nodownload"}
-          preload="metadata"
+          preload="auto"
           playsInline
         />
         

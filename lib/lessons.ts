@@ -26,7 +26,7 @@ function buildLessonUrl(lesson: {
   }
 
   // If it's a link type OR an external URL (YouTube/Vimeo), return as is
-  const isExternal = lesson.contentUrl.startsWith('http') &&
+  const isExternal = lesson.contentUrl.startsWith('http') && 
     !lesson.contentUrl.includes('cloudinary.com');
 
   if (lesson.contentType === "link" || isExternal) {
@@ -124,9 +124,8 @@ export async function getAuthorizedLessonContent(lessonId: string) {
   let contentUrl = firstContent?.contentUrl || oldContentUrl || null;
 
   console.log('[Lesson Content] Lesson:', lesson.id, lesson.title);
-  console.log('[Lesson Content] First content record:', firstContent ? 'EXISTS' : 'NONE');
   console.log('[Lesson Content] Content type:', contentType);
-  console.log('[Lesson Content] Content URL:', contentUrl);
+  console.log('[Lesson Content] Raw content URL from DB:', contentUrl);
 
   // If no content URL is found, return null to show "content not available" message
   if (!contentUrl) {
@@ -146,11 +145,16 @@ export async function getAuthorizedLessonContent(lessonId: string) {
     };
   }
 
+  // Strip leading version if present (e.g. v1234567890/folder/file)
+  if (contentUrl && contentUrl.match(/^v\d+\//)) {
+    contentUrl = contentUrl.replace(/^v\d+\//, '');
+  }
+
   // Clean up contentUrl if it's a full Cloudinary URL - extract just the public ID
   if (contentUrl && contentUrl.includes('cloudinary.com')) {
     // Use a robust regex to extract public ID from Cloudinary URL
-    // It looks for /upload/, skips optional version (v123/), and captures everything until query params
-    const match = contentUrl.match(/\/(?:image|video|raw)\/upload\/(?:v\d+\/)?([^\?#]+)/);
+    // It looks for /upload/, skips signature and optional version, and captures everything until query params
+    const match = contentUrl.match(/\/upload\/(?:s--[^-]+--\/)?(?:v\d+\/)?([^\?#]+)/);
     if (match) {
       contentUrl = match[1];
     } else {
@@ -173,6 +177,15 @@ export async function getAuthorizedLessonContent(lessonId: string) {
     }
   }
 
+  const signedUrl = buildLessonUrl({
+    contentType,
+    contentUrl,
+    allowDownload: lesson.allowDownload,
+  }, user.id);
+
+  console.log('[Lesson Content] Generated publicId/cleanUrl:', contentUrl);
+  console.log('[Lesson Content] Generated signedUrl:', signedUrl ? 'SUCCESS' : 'FAILED');
+
   return {
     lesson: {
       id: lesson.id,
@@ -183,11 +196,7 @@ export async function getAuthorizedLessonContent(lessonId: string) {
     },
     courseSlug: lesson.Section.Course.slug,
     publicId: contentUrl, // Return the original public ID for existence checking
-    signedUrl: buildLessonUrl({
-      contentType,
-      contentUrl,
-      allowDownload: lesson.allowDownload,
-    }, user.id),
+    signedUrl,
     contentMetadata: firstContent ? {
       title: firstContent.title,
       description: firstContent.description,

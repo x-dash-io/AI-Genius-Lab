@@ -57,9 +57,15 @@ export function getSignedCloudinaryUrl(
   let cleanPublicId = publicId.trim();
   console.log('[Cloudinary] Original publicId:', publicId);
 
+  // Strip leading version if present (e.g. v1234567890/folder/file)
+  if (cleanPublicId.match(/^v\d+\//)) {
+    cleanPublicId = cleanPublicId.replace(/^v\d+\//, '');
+    console.log('[Cloudinary] Stripped leading version:', cleanPublicId);
+  }
+
   // If it's a full Cloudinary URL, extract the public ID
   if (cleanPublicId.includes('cloudinary.com')) {
-    const match = cleanPublicId.match(/\/(?:image|video|raw)\/upload\/(?:v\d+\/)?([^\?#]+)/);
+    const match = cleanPublicId.match(/\/upload\/(?:s--[^-]+--\/)?(?:v\d+\/)?([^\?#]+)/);
     if (match) {
       cleanPublicId = match[1];
       console.log('[Cloudinary] Extracted public ID using regex:', cleanPublicId);
@@ -86,9 +92,9 @@ export function getSignedCloudinaryUrl(
   // Remove any query parameters or fragments
   cleanPublicId = cleanPublicId.split('?')[0].split('#')[0];
 
-  // Basic validation - should contain folder structure
-  if (!cleanPublicId.includes('/') || cleanPublicId.length < 10) {
-    console.error('[Cloudinary] Invalid format:', cleanPublicId, 'from original:', publicId);
+  // Basic validation
+  if (!cleanPublicId || cleanPublicId.length < 3) {
+    console.error('[Cloudinary] Invalid format (too short):', cleanPublicId, 'from original:', publicId);
     return null;
   }
 
