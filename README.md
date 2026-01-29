@@ -2,9 +2,9 @@
 
 A comprehensive online learning management system built for modern education. Deliver courses, track progress, issue certificates, and manage payments through a single, powerful platform.
 
-![Next.js](https://img.shields.io/badge/Next.js-16-black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
-![Prisma](https://img.shields.io/badge/Prisma-6.0-2D3748)
+![Next.js](https://img.shields.io/badge/Next.js-16.1.4-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue)
+![Prisma](https://img.shields.io/badge/Prisma-7.3.0-2D3748)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791)
 
 ## Overview
@@ -22,6 +22,22 @@ AI Genius Lab is a production-ready learning management system designed for educ
 - Course inventory management with stock tracking
 - Bulk course operations and management
 - Course preview and draft modes
+
+### Blog System
+- Admin management for blog posts
+- Public blog with slug-based routing
+- Tagging system for better content organization
+- Review system for blog posts with ratings
+- Draft and publish workflows
+- Read time estimation and view counting
+
+### Subscription System
+- Flexible subscription plans with multiple tiers (Starter, Pro, Elite)
+- Recurring payments integration via PayPal
+- Monthly and annual billing intervals
+- User subscription management and status tracking
+- Admin capabilities to manage plans and grant subscriptions manually
+- PayPal webhook integration for subscription events
 
 ### Student Experience
 - Real-time progress tracking across all courses
@@ -55,29 +71,37 @@ AI Genius Lab is a production-ready learning management system designed for educ
 - SQL injection prevention via Prisma ORM
 
 ### Payment Processing
-- PayPal integration for course purchases
+- PayPal integration for course purchases and subscriptions
 - Automated invoice generation
-- Email delivery of receipts
+- Email delivery of receipts via Resend
 - Webhook handling for payment events
 - Support for individual courses and learning paths
+
+### Additional Pages
+- **FAQ**: Frequently asked questions section
+- **Instructors**: Information about course instructors
+- **Contact**: Contact form and support information
+- **Legal**: Privacy Policy and Terms of Service pages
+- **Pricing**: Detailed pricing page for subscription plans
 
 ## Technology Stack
 
 ### Frontend
-- Next.js 16 with App Router
-- TypeScript for type safety
+- Next.js 16.1.4 with App Router
+- TypeScript 5.9.3 for type safety
 - Tailwind CSS for styling
 - Radix UI component library
 - Framer Motion for animations
 - Recharts for data visualization
+- React 19
 
 ### Backend
 - PostgreSQL database
-- Prisma ORM
+- Prisma ORM 7.3.0
 - NextAuth.js for authentication
 - Resend for email delivery
 - Cloudinary for media storage
-- Redis for caching (optional)
+- Upstash Redis for caching and rate limiting
 
 ### Infrastructure
 - Vercel-ready deployment
@@ -202,6 +226,15 @@ npx prisma studio
 npx prisma generate
 ```
 
+### Key Models
+- **User Management**: User, Account, Session, VerificationToken
+- **Course Content**: Course, Section, Lesson, LessonContent, Category
+- **Commerce**: Purchase, Payment, Enrollment
+- **Learning Paths**: LearningPath, LearningPathCourse
+- **Blog**: BlogPost, BlogTag, BlogReview
+- **Subscriptions**: Subscription, SubscriptionPlan, SubscriptionPayment
+- **Progress & Reviews**: Progress, Certificate, Review, ActivityLog
+
 ## Testing
 
 The platform includes comprehensive test coverage:
@@ -271,51 +304,62 @@ npx prisma migrate deploy
 
 ```
 ai-genius-lab/
-├── app/                    # Next.js application
-│   ├── (admin)/           # Admin dashboard routes
-│   │   ├── admin/         # Admin pages
-│   │   └── api/           # Admin API endpoints
-│   ├── (app)/             # Student portal routes
-│   │   ├── dashboard/     # User dashboard
-│   │   ├── library/       # Course library
-│   │   └── purchase/      # Purchase history
-│   ├── (public)/          # Public pages
-│   │   ├── courses/       # Course catalog
-│   │   ├── sign-in/       # Authentication
-│   │   └── api/           # Public API endpoints
-│   └── api/               # Shared API endpoints
-├── components/            # React components
+├── app/
+│   ├── (admin)/          # Admin dashboard (protected)
+│   │   └── admin/
+│   │       ├── blog/          # Blog management
+│   │       ├── categories/    # Category management
+│   │       ├── courses/       # Course management
+│   │       ├── learning-paths/# Learning path management
+│   │       ├── purchases/     # Purchase history
+│   │       ├── subscriptions/ # Subscription management
+│   │       └── users/         # User management
+│   ├── (app)/            # Authenticated user routes
+│   │   ├── activity/     # User activity log
+│   │   ├── checkout/     # Checkout flow (incl. subscriptions)
+│   │   ├── dashboard/    # User dashboard
+│   │   ├── library/      # Course library
+│   │   ├── profile/      # User profile (incl. subscription)
+│   │   └── purchase/     # Purchase success/history
+│   ├── (public)/         # Public pages
+│   │   ├── blog/         # Public blog
+│   │   ├── cart/         # Shopping cart
+│   │   ├── contact/      # Contact page
+│   │   ├── courses/      # Course catalog
+│   │   ├── faq/          # FAQ page
+│   │   ├── instructors/  # Instructors page
+│   │   ├── learning-paths/# Learning paths
+│   │   ├── pricing/      # Pricing page
+│   │   ├── privacy/      # Privacy policy
+│   │   ├── terms/        # Terms of service
+│   │   └── sign-in/up    # Auth pages
+│   └── api/              # API endpoints
+│       ├── admin/        # Admin APIs
+│       ├── auth/         # Auth APIs
+│       ├── blog/         # Blog APIs
+│       ├── cart/         # Cart APIs
+│       ├── certificates/ # Certificate APIs
+│       ├── checkout/     # Checkout APIs
+│       ├── courses/      # Course APIs
+│       ├── payments/     # Payment APIs
+│       ├── subscriptions/# Subscription APIs
+│       └── webhooks/     # Webhooks
+├── components/           # React components
 │   ├── admin/            # Admin-specific components
-│   ├── auth/             # Authentication components
+│   ├── auth/             # Auth forms
 │   ├── cart/             # Shopping cart components
-│   ├── contact/          # Contact form components
-│   ├── layout/           # Layout components
-│   ├── lessons/          # Lesson viewer components
-│   ├── reviews/          # Review system components
-│   └── ui/               # Reusable UI primitives
-├── lib/                   # Utility functions
-│   ├── admin/            # Admin utilities
-│   ├── auth/             # Authentication logic
-│   ├── cart/             # Cart logic
+│   ├── layout/           # Navigation, footer, sidebar
+│   ├── ui/               # Reusable UI primitives
+│   └── ...               # Other feature components
+├── lib/                  # Core business logic
 │   ├── config.ts         # Centralized configuration
-│   ├── courses/          # Course utilities
-│   ├── email/            # Email templates
-│   ├── payments/         # Payment processing
-│   ├── progress/         # Progress tracking
-│   └── seo/              # SEO utilities
-├── prisma/               # Database schema
+│   ├── blog.ts           # Blog logic
+│   ├── subscriptions.ts  # Subscription logic
+│   └── ...               # Other utility modules
+├── prisma/
 │   ├── schema.prisma     # Database schema
-│   ├── migrations/       # Migration files
-│   └── seed.ts           # Seed data script
-├── public/               # Static assets
-├── scripts/              # Build and deployment scripts
-├── __tests__/            # Test suites
-│   ├── integration/      # Integration tests
-│   └── unit/             # Unit tests
-└── docs/                 # Documentation
-    ├── api/              # API documentation
-    ├── deployment/       # Deployment guides
-    └── security/         # Security best practices
+│   └── migrations/
+└── __tests__/            # Jest test suites
 ```
 
 ## Security Features
@@ -391,11 +435,13 @@ export const siteConfig = {
 ## Known Issues & Recent Fixes
 
 ### Recently Resolved Issues
-1. **OAuth Authentication**: Fixed Prisma schema relation naming from `User` to `user` for NextAuth compatibility
-2. **Database IDs**: Added `@default(cuid())` to User, Account, and Session models for auto-generation
-3. **UI Consistency**: Removed duplicate buttons in admin dashboard (Create Course, Create Learning Path)
-4. **Mobile Menu**: Fixed bottom positioning of Sign In/Sign Up buttons with proper flexbox layout
-5. **Hardcoded Data**: Centralized all hardcoded data in `lib/config.ts` for better maintainability
+1. **Learning Path Slug Added**: Added `slug` field to `LearningPath` model and updated lookup logic.
+2. **Certificate Generation Race Condition Fixed**: Implemented `prisma.$transaction()` to prevent duplicate certificates.
+3. **Session Callback Optimized**: Cached user data in JWT to reduce database queries on every request.
+4. **Review Completion Check Added**: Reviews now require a minimum of 50% course completion.
+5. **Error Handling Enhanced**: Improved error handling with typed `ErrorCode` enum and better server error parsing.
+6. **OAuth Authentication**: Fixed Prisma schema relation naming from `User` to `user` for NextAuth compatibility.
+7. **Database IDs**: Added `@default(cuid())` to User, Account, and Session models for auto-generation.
 
 ### Debug Endpoints
 The application includes debug endpoints for troubleshooting:
@@ -456,6 +502,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ### v0.1.0 (Latest)
 - ✨ Initial release with core LMS features
+- 🚀 Added Blog and Subscription systems
 - 🐛 Fixed OAuth authentication issues
 - 🔧 Centralized configuration management
 - 📱 Improved mobile UI consistency
