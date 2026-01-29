@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireCustomer, hasPurchasedCourse } from "@/lib/access";
+import { hasCourseAccess, requireCustomer } from "@/lib/access";
 
 const MIN_COMPLETION_FOR_REVIEW = 50; // Minimum 50% completion required to review
 
@@ -91,10 +91,10 @@ export async function createReview(
 ) {
   const user = await requireCustomer();
 
-  // Verify user has purchased the course
-  const hasPurchased = await hasPurchasedCourse(user.id, courseId);
-  if (!hasPurchased) {
-    throw new Error("FORBIDDEN: You must purchase the course before reviewing");
+  // Verify user has access to the course (purchase or eligible subscription)
+  const hasAccess = await hasCourseAccess(user.id, user.role, courseId);
+  if (!hasAccess) {
+    throw new Error("FORBIDDEN: You must have access to the course before reviewing");
   }
 
   // Verify user has completed minimum percentage of the course
