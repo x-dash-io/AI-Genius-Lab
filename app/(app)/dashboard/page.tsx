@@ -305,69 +305,69 @@ export default async function DashboardPage({
       {/* Learning Analytics */}
       {totalCourses > 0 && (
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="bg-orange-600! dark:bg-orange-950/20 border-orange-500 dark:border-orange-900">
+          <Card className="bg-orange-600 dark:bg-orange-950/20 border-orange-500 dark:border-orange-900">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-white! dark:text-orange-100">
+              <CardTitle className="text-xs sm:text-sm font-medium text-white dark:text-orange-100">
                 Learning Streak
               </CardTitle>
-              <Flame className="h-4 w-4 text-white! dark:text-orange-400" />
+              <Flame className="h-4 w-4 text-white dark:text-orange-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold text-white! dark:text-orange-300">
+              <div className="text-2xl sm:text-3xl font-bold text-white dark:text-orange-300">
                 {learningStreak}
               </div>
-              <p className="text-xs text-white/80! dark:text-orange-400/80 mt-1">
+              <p className="text-xs text-white/80 dark:text-orange-400/80 mt-1">
                 Active days (30d)
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-blue-600! dark:bg-blue-950/20 border-blue-500 dark:border-blue-900">
+          <Card className="bg-blue-600 dark:bg-blue-950/20 border-blue-500 dark:border-blue-900">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-white! dark:text-blue-100">
+              <CardTitle className="text-xs sm:text-sm font-medium text-white dark:text-blue-100">
                 This Week
               </CardTitle>
-              <Calendar className="h-4 w-4 text-white! dark:text-blue-400" />
+              <Calendar className="h-4 w-4 text-white dark:text-blue-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold text-white! dark:text-blue-300">
+              <div className="text-2xl sm:text-3xl font-bold text-white dark:text-blue-300">
                 {weekProgress}
               </div>
-              <p className="text-xs text-white/80! dark:text-blue-400/80 mt-1">
+              <p className="text-xs text-white/80 dark:text-blue-400/80 mt-1">
                 Lessons accessed
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-green-600! dark:bg-green-950/20 border-green-500 dark:border-green-900">
+          <Card className="bg-green-600 dark:bg-green-950/20 border-green-500 dark:border-green-900">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-white! dark:text-green-100">
+              <CardTitle className="text-xs sm:text-sm font-medium text-white dark:text-green-100">
                 Avg Progress
               </CardTitle>
-              <BarChart3 className="h-4 w-4 text-white! dark:text-green-400" />
+              <BarChart3 className="h-4 w-4 text-white dark:text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold text-white! dark:text-green-300">
+              <div className="text-2xl sm:text-3xl font-bold text-white dark:text-green-300">
                 {avgCompletionRate}%
               </div>
-              <p className="text-xs text-white/80! dark:text-green-400/80 mt-1">
+              <p className="text-xs text-white/80 dark:text-green-400/80 mt-1">
                 Course completion
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-purple-600! dark:bg-purple-950/20 border-purple-500 dark:border-purple-900">
+          <Card className="bg-purple-600 dark:bg-purple-950/20 border-purple-500 dark:border-purple-900">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-white! dark:text-purple-100">
+              <CardTitle className="text-xs sm:text-sm font-medium text-white dark:text-purple-100">
                 Learning Time
               </CardTitle>
-              <Clock className="h-4 w-4 text-white! dark:text-purple-400" />
+              <Clock className="h-4 w-4 text-white dark:text-purple-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold text-white! dark:text-purple-300">
+              <div className="text-2xl sm:text-3xl font-bold text-white dark:text-purple-300">
                 {learningHours}h {learningMinutes}m
               </div>
-              <p className="text-xs text-white/80! dark:text-purple-400/80 mt-1">
+              <p className="text-xs text-white/80 dark:text-purple-400/80 mt-1">
                 Estimated total
               </p>
             </CardContent>
