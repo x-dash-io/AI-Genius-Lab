@@ -30,12 +30,12 @@ type CourseWithSections = Course & {
 
 type CourseEditFormProps = {
   course: CourseWithSections;
-  updateCourseAction: (formData: FormData) => Promise<{ success: boolean }>;
-  addSectionAction: (formData: FormData) => Promise<Section & { lessons: Lesson[] }>;
-  deleteSectionAction: (sectionId: string, courseId: string) => Promise<{ success: boolean }>;
-  addLessonAction: (sectionId: string, formData: FormData) => Promise<Lesson>;
-  deleteLessonAction: (lessonId: string, courseId: string) => Promise<{ success: boolean }>;
-  updateLessonAction?: (lessonId: string, formData: FormData) => Promise<{ success: boolean }>;
+  updateCourseAction: (formData: FormData) => Promise<{ success: boolean; error?: string }>;
+  addSectionAction: (formData: FormData) => Promise<(Section & { lessons: Lesson[] }) | { error: string }>;
+  deleteSectionAction: (sectionId: string, courseId: string) => Promise<{ success: boolean; error?: string }>;
+  addLessonAction: (sectionId: string, formData: FormData) => Promise<Lesson | { error: string }>;
+  deleteLessonAction: (lessonId: string, courseId: string) => Promise<{ success: boolean; error?: string }>;
+  updateLessonAction?: (lessonId: string, formData: FormData) => Promise<{ success: boolean; error?: string }>;
 };
 
 export function CourseEditForm({
@@ -132,7 +132,17 @@ export function CourseEditForm({
     setIsSavingCourse(true);
     try {
       const formData = new FormData(e.currentTarget);
-      await updateCourseAction(formData);
+      const result = await updateCourseAction(formData);
+
+      if (result.error) {
+        toast({
+          title: "Update failed",
+          description: result.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
         title: "Course updated",
         description: "Course details have been saved successfully.",
@@ -176,7 +186,13 @@ export function CourseEditForm({
     }));
     
     try {
-      const newSection = await addSectionAction(formData);
+      const result = await addSectionAction(formData);
+
+      if ('error' in result) {
+        throw new Error(result.error);
+      }
+
+      const newSection = result;
       
       // Transform newSection to match expected format
       const transformedSection = {
@@ -240,7 +256,12 @@ export function CourseEditForm({
     }));
     
     try {
-      await deleteSectionAction(sectionId, course.id);
+      const result = await deleteSectionAction(sectionId, course.id);
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
       toast({
         title: "Section deleted",
         description: "Section has been deleted successfully.",
@@ -298,7 +319,13 @@ export function CourseEditForm({
     }));
     
     try {
-      const newLesson = await addLessonAction(sectionId, formData);
+      const result = await addLessonAction(sectionId, formData);
+
+      if ('error' in result) {
+        throw new Error(result.error);
+      }
+
+      const newLesson = result;
       
       // Replace temp lesson with real one
       setCourse(prev => ({
@@ -373,7 +400,12 @@ export function CourseEditForm({
     }));
     
     try {
-      await deleteLessonAction(lessonId, course.id);
+      const result = await deleteLessonAction(lessonId, course.id);
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
       toast({
         title: "Lesson deleted",
         description: "Lesson has been deleted successfully.",
@@ -413,7 +445,17 @@ export function CourseEditForm({
     try {
       const formData = new FormData(e.currentTarget);
       formData.append("courseId", course.id);
-      await updateLessonAction(lessonId, formData);
+      const result = await updateLessonAction(lessonId, formData);
+
+      if (result.error) {
+        toast({
+          title: "Failed to update lesson",
+          description: result.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
         title: "Lesson updated",
         description: "Lesson has been updated successfully.",

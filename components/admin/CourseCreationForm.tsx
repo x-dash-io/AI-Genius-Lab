@@ -28,7 +28,7 @@ type CourseWithSections = Course & {
 export function CourseCreationForm({
   createCourseAction,
 }: {
-  createCourseAction: (formData: FormData) => Promise<Course>;
+  createCourseAction: (formData: FormData) => Promise<{ course?: Course; error?: string }>;
 }) {
   const router = useRouter();
   const { confirm } = useConfirmDialog();
@@ -69,7 +69,18 @@ export function CourseCreationForm({
     const formData = new FormData(e.currentTarget);
 
     try {
-      const course = await createCourseAction(formData);
+      const result = await createCourseAction(formData);
+
+      if (result.error) {
+        toast({
+          title: "Failed to create course",
+          description: result.error,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const course = result.course!;
       const courseWithSections: CourseWithSections = {
         ...course,
         sections: [],

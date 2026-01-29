@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { requireRole } from "@/lib/access";
 import { createCourse } from "@/lib/admin/courses";
+import { handleServerError } from "@/lib/errors";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { CourseCreationForm } from "../../../../../components/admin/CourseCreationForm";
@@ -9,21 +10,22 @@ async function createCourseAction(formData: FormData) {
   "use server";
   await requireRole("admin");
 
-  const title = formData.get("title") as string;
-  const slug = formData.get("slug") as string;
-  const description = formData.get("description") as string;
-  const category = formData.get("category") as string;
-  const priceCents = parseInt(formData.get("priceCents") as string) * 100;
-  const inventoryStr = formData.get("inventory") as string;
-  const inventory = inventoryStr && inventoryStr.trim() !== "" ? parseInt(inventoryStr) : null;
-  const isPublished = formData.get("isPublished") === "on";
-  const tier = formData.get("tier") as "STANDARD" | "PREMIUM";
-
-  if (!title || !slug || !priceCents) {
-    throw new Error("Missing required fields");
-  }
-
   try {
+    const title = formData.get("title") as string;
+    const slug = formData.get("slug") as string;
+    const description = formData.get("description") as string;
+    const category = formData.get("category") as string;
+    const priceCentsStr = formData.get("priceCents") as string;
+    const priceCents = priceCentsStr ? parseInt(priceCentsStr) * 100 : 0;
+    const inventoryStr = formData.get("inventory") as string;
+    const inventory = inventoryStr && inventoryStr.trim() !== "" ? parseInt(inventoryStr) : null;
+    const isPublished = formData.get("isPublished") === "on";
+    const tier = formData.get("tier") as "STANDARD" | "PREMIUM";
+
+    if (!title || !slug || !priceCentsStr) {
+      throw new Error("Missing required fields");
+    }
+
     const course = await createCourse({
       title,
       slug,
@@ -35,15 +37,15 @@ async function createCourseAction(formData: FormData) {
       tier,
     });
 
-    return course;
+    return { course };
   } catch (error: any) {
     // Handle Prisma unique constraint errors
     if (error.code === 'P2002' && error.meta?.target?.includes('slug')) {
-      throw new Error(`A course with the slug "${slug}" already exists. Please choose a different slug.`);
+      return { error: `A course with the slug "${formData.get("slug")}" already exists. Please choose a different slug.` };
     }
 
-    // Re-throw other errors
-    throw error;
+    const { userMessage } = handleServerError(error);
+    return { error: userMessage };
   }
 }
 

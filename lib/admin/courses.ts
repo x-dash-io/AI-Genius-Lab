@@ -98,7 +98,7 @@ export async function deleteCourse(courseId: string) {
   });
 
   if (purchaseCount > 0) {
-    throw new Error(`Cannot delete course: ${purchaseCount} user(s) have purchased this course.`);
+    throw new Error(`This course cannot be deleted because ${purchaseCount} user(s) have already purchased it. Consider unpublishing it instead to prevent new purchases.`);
   }
 
   return withRetry(async () => {
@@ -154,7 +154,7 @@ export async function deleteSection(sectionId: string) {
   });
 
   if (purchaseCount > 0) {
-    throw new Error(`Cannot delete section: ${purchaseCount} user(s) have purchased this course.`);
+    throw new Error(`This section cannot be deleted because the course has ${purchaseCount} active purchases. To protect student access, content cannot be removed from purchased courses.`);
   }
 
   return withRetry(async () => {
@@ -255,7 +255,7 @@ export async function deleteLesson(lessonId: string) {
   });
 
   if (purchaseCount > 0) {
-    throw new Error(`Cannot delete lesson: ${purchaseCount} user(s) have purchased this course.`);
+    throw new Error(`This lesson cannot be deleted because the course has ${purchaseCount} active purchases. To protect student access, content cannot be removed from purchased courses.`);
   }
 
   return withRetry(async () => {
