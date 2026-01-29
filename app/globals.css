@@ -340,12 +340,6 @@ button:focus {
   background: hsl(var(--muted-foreground) / 0.6);
 }
 
-/* NOTE:
- * Avoid forcing text color globally for button variants.
- * It makes icon/buttons (like the theme toggle) hard to style and can override
- * intended Tailwind classes. Prefer fixing contrast in `components/ui/button.tsx`.
- */
-
 /* Hide Next.js development indicator in production and development */
 #__next-build-watcher,
 #__next-dev-overlay,
