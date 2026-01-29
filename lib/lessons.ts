@@ -25,7 +25,11 @@ function buildLessonUrl(lesson: {
     return null;
   }
 
-  if (lesson.contentType === "link") {
+  // If it's a link type OR an external URL (YouTube/Vimeo), return as is
+  const isExternal = lesson.contentUrl.startsWith('http') &&
+    !lesson.contentUrl.includes('cloudinary.com');
+
+  if (lesson.contentType === "link" || isExternal) {
     return lesson.contentUrl;
   }
 
@@ -120,9 +124,8 @@ export async function getAuthorizedLessonContent(lessonId: string) {
   let contentUrl = firstContent?.contentUrl || oldContentUrl || null;
 
   console.log('[Lesson Content] Lesson:', lesson.id, lesson.title);
-  console.log('[Lesson Content] First content record:', firstContent ? 'EXISTS' : 'NONE');
   console.log('[Lesson Content] Content type:', contentType);
-  console.log('[Lesson Content] Content URL:', contentUrl);
+  console.log('[Lesson Content] Raw content URL from DB:', contentUrl);
 
   // If no content URL is found, return null to show "content not available" message
   if (!contentUrl) {
@@ -142,26 +145,46 @@ export async function getAuthorizedLessonContent(lessonId: string) {
     };
   }
 
+  // Strip leading version if present (e.g. v1234567890/folder/file)
+  if (contentUrl && contentUrl.match(/^v\d+\//)) {
+    contentUrl = contentUrl.replace(/^v\d+\//, '');
+  }
+
   // Clean up contentUrl if it's a full Cloudinary URL - extract just the public ID
   if (contentUrl && contentUrl.includes('cloudinary.com')) {
-    try {
-      const url = new URL(contentUrl);
-      const pathParts = url.pathname.split('/').filter(p => p && p !== 'v1' && p !== 'upload');
-      // Remove the resource type prefix if present
-      const resourceTypeIndex = pathParts.findIndex(p => ['image', 'video', 'raw'].includes(p));
-      if (resourceTypeIndex >= 0) {
-        pathParts.splice(resourceTypeIndex, 1);
-      }
-      contentUrl = pathParts.join('/');
-    } catch (error) {
-      console.error('Error parsing Cloudinary URL:', contentUrl, error);
-      // If parsing fails, try to extract public ID manually
-      const match = contentUrl.match(/\/(?:image|video|raw)\/upload\/.*?\/(.+)$/);
-      if (match) {
-        contentUrl = match[1].split('?')[0]; // Remove query params
+    // Use a robust regex to extract public ID from Cloudinary URL
+    // It looks for /upload/, skips signature and optional version, and captures everything until query params
+    const match = contentUrl.match(/\/upload\/(?:s--[^-]+--\/)?(?:v\d+\/)?([^\?#]+)/);
+    if (match) {
+      contentUrl = match[1];
+    } else {
+      // Fallback: try to extract it from the path parts if regex fails
+      try {
+        const url = new URL(contentUrl);
+        const parts = url.pathname.split('/');
+        const uploadIndex = parts.indexOf('upload');
+        if (uploadIndex !== -1 && uploadIndex < parts.length - 1) {
+          let publicIdParts = parts.slice(uploadIndex + 1);
+          // Remove version if present
+          if (publicIdParts[0].startsWith('v') && /^\d+$/.test(publicIdParts[0].substring(1))) {
+            publicIdParts = publicIdParts.slice(1);
+          }
+          contentUrl = publicIdParts.join('/');
+        }
+      } catch (e) {
+        console.error('Failed to parse Cloudinary URL:', contentUrl);
       }
     }
   }
+
+  const signedUrl = buildLessonUrl({
+    contentType,
+    contentUrl,
+    allowDownload: lesson.allowDownload,
+  }, user.id);
+
+  console.log('[Lesson Content] Generated publicId/cleanUrl:', contentUrl);
+  console.log('[Lesson Content] Generated signedUrl:', signedUrl ? 'SUCCESS' : 'FAILED');
 
   return {
     lesson: {
@@ -173,11 +196,7 @@ export async function getAuthorizedLessonContent(lessonId: string) {
     },
     courseSlug: lesson.Section.Course.slug,
     publicId: contentUrl, // Return the original public ID for existence checking
-    signedUrl: buildLessonUrl({
-      contentType,
-      contentUrl,
-      allowDownload: lesson.allowDownload,
-    }, user.id),
+    signedUrl,
     contentMetadata: firstContent ? {
       title: firstContent.title,
       description: firstContent.description,
