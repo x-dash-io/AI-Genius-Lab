@@ -37,6 +37,7 @@ function buildLessonUrl(lesson: {
   return getSignedCloudinaryUrl(lesson.contentUrl, resourceType, {
     download: lesson.allowDownload,
     userId, // Add user ID for enhanced security
+    isAudio: lesson.contentType === "audio",
   });
 }
 
@@ -154,7 +155,7 @@ export async function getAuthorizedLessonContent(lessonId: string) {
   if (contentUrl && contentUrl.includes('cloudinary.com')) {
     // Use a robust regex to extract public ID from Cloudinary URL
     // It looks for /upload/, skips signature and optional version, and captures everything until query params
-    const match = contentUrl.match(/\/upload\/(?:s--[^-]+--\/)?(?:v\d+\/)?([^\?#]+)/);
+    const match = contentUrl.match(/\/(?:image|video|raw)\/upload\/(?:s--[^-]+--\/)?(?:v\d+\/)?([^\?#]+)/);
     if (match) {
       contentUrl = match[1];
     } else {

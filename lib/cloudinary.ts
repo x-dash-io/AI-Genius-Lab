@@ -44,7 +44,7 @@ type CloudinaryResourceType = "image" | "video" | "raw";
 export function getSignedCloudinaryUrl(
   publicId: string,
   resourceType: CloudinaryResourceType,
-  options: { download?: boolean; userId?: string } = {}
+  options: { download?: boolean; userId?: string; isAudio?: boolean } = {}
 ) {
   configureCloudinary();
 
@@ -65,10 +65,11 @@ export function getSignedCloudinaryUrl(
 
   // If it's a full Cloudinary URL, extract the public ID
   if (cleanPublicId.includes('cloudinary.com')) {
-    const match = cleanPublicId.match(/\/upload\/(?:s--[^-]+--\/)?(?:v\d+\/)?([^\?#]+)/);
+    // Regex that handles: .../resource_type/upload/signature/version/public_id
+    const match = cleanPublicId.match(/\/(?:image|video|raw)\/upload\/(?:s--[^-]+--\/)?(?:v\d+\/)?([^\?#]+)/);
     if (match) {
       cleanPublicId = match[1];
-      console.log('[Cloudinary] Extracted public ID using regex:', cleanPublicId);
+      console.log('[Cloudinary] Extracted public ID using robust regex:', cleanPublicId);
     } else {
       try {
         const url = new URL(cleanPublicId);
@@ -112,14 +113,16 @@ export function getSignedCloudinaryUrl(
     // For video resource type, Cloudinary often requires an extension in the URL
     // for the browser to correctly identify and play the media.
     const hasExtension = cleanPublicId.split('/').pop()?.includes('.');
-
+    
     const signedUrl = cloudinary.url(cleanPublicId, {
       secure: true,
       sign_url: true,
       type: "upload", // Changed from "authenticated" to match actual file type
       resource_type: resourceType,
-      // Automatically add .mp4 extension for video/audio if missing
-      format: (!hasExtension && resourceType === 'video') ? 'mp4' : undefined,
+      // Automatically add extension for video/audio if missing to help browser identification
+      format: (!hasExtension && resourceType === 'video') 
+        ? (options.isAudio ? 'mp3' : 'mp4') 
+        : undefined,
       expires_at: expiresAt,
       attachment: options.download ? cleanPublicId.split('/').pop() : undefined,
     });

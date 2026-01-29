@@ -11,6 +11,7 @@ interface CourseActionsProps {
   courseId: string;
   courseSlug: string;
   priceCents: number;
+  tier: "STANDARD" | "PREMIUM";
   inventory?: number | null;
 }
 
@@ -18,10 +19,12 @@ export function CourseActions({
   courseId,
   courseSlug,
   priceCents,
+  tier,
   inventory,
 }: CourseActionsProps) {
   const { data: session, status } = useSession();
   const [isOwned, setIsOwned] = useState(false);
+  const [subscription, setSubscription] = useState<any>(null);
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
@@ -35,10 +38,19 @@ export function CourseActions({
       }
 
       try {
-        const response = await fetch(`/api/courses/${courseId}/ownership`);
-        if (response.ok) {
-          const data = await response.json();
+        const [ownershipRes, subRes] = await Promise.all([
+          fetch(`/api/courses/${courseId}/ownership`),
+          fetch(`/api/subscriptions/current`)
+        ]);
+
+        if (ownershipRes.ok) {
+          const data = await ownershipRes.json();
           setIsOwned(data.owned);
+        }
+
+        if (subRes.ok) {
+          const data = await subRes.json();
+          setSubscription(data.subscription);
         }
       } catch (error) {
         console.error("Failed to check ownership:", error);
@@ -88,6 +100,34 @@ export function CourseActions({
   }
 
   // User doesn't own - show purchase options
+  const isPremium = tier === "PREMIUM";
+  const hasProAccess = subscription?.plan?.tier === "pro" || subscription?.plan?.tier === "elite";
+
+  // If it's a premium course and user doesn't have Pro/Elite subscription
+  if (isPremium && !hasProAccess) {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <p className="text-sm font-medium text-amber-600 dark:text-amber-400">
+            This is a <span className="font-bold uppercase">Premium</span> course. It is available exclusively to Pro and Elite subscribers.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-4">
+          <Link href="/pricing">
+            <Button size="lg" className="bg-primary hover:bg-primary/90">
+              Upgrade to Pro to Access
+            </Button>
+          </Link>
+          <Link href="/courses">
+            <Button variant="outline" size="lg">
+              Back to catalog
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-wrap gap-4">
       <AddToCartButton

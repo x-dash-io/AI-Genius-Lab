@@ -166,6 +166,15 @@ export function VideoPlayer({
   };
 
   const embedUrl = getEmbedUrl(originalSrc || '');
+  
+  // Use the signed URL directly for better reliability with media elements (redirects can break range requests)
+  const mediaSrc = (contentType === 'video' || contentType === 'audio') && originalSrc ? originalSrc : src;
+
+  useEffect(() => {
+    if (mediaSrc) {
+      console.log(`[VideoPlayer] Loading ${contentType}:`, mediaSrc);
+    }
+  }, [mediaSrc, contentType]);
 
   if (error) {
     return (
@@ -238,7 +247,7 @@ export function VideoPlayer({
           <div className="relative">
             <audio
               ref={videoRef as any}
-              src={src}
+              src={mediaSrc}
               className="w-full"
               controls
               controlsList={allowDownload ? undefined : "nodownload"}
@@ -264,7 +273,7 @@ export function VideoPlayer({
       <div className="relative aspect-video bg-black rounded-xl overflow-hidden shadow-lg">
         <video
           ref={videoRef}
-          src={src}
+          src={mediaSrc}
           className="w-full h-full"
           controls
           controlsList={allowDownload ? undefined : "nodownload"}

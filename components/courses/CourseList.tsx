@@ -13,6 +13,7 @@ type Course = {
   description: string | null;
   slug: string;
   priceCents: number;
+  tier: "STANDARD" | "PREMIUM";
 };
 
 type CourseListProps = {
@@ -44,12 +45,18 @@ export function CourseList({ courses }: CourseListProps) {
                 <Badge variant="secondary" className="text-lg font-semibold px-3 py-1">
                   ${(course.priceCents / 100).toFixed(2)}
                 </Badge>
+                {course.tier === "PREMIUM" && (
+                  <Badge variant="default" className="bg-amber-500 hover:bg-amber-600 text-white font-bold">
+                    PREMIUM
+                  </Badge>
+                )}
               </div>
               <div className="flex gap-2">
                 <AddToCartButton
                   courseId={course.id}
                   courseSlug={course.slug}
                   priceCents={course.priceCents}
+                  tier={course.tier}
                   variant="default"
                   className="flex-1"
                   checkOwnership

@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Fetch course details with inventory
+      // Fetch course details with inventory and tier
       const course = await prisma.course.findUnique({
         where: { id: courseId },
         select: {
@@ -105,11 +105,20 @@ export async function POST(request: NextRequest) {
           title: true,
           priceCents: true,
           inventory: true,
+          tier: true,
         },
       });
 
       if (!course) {
         return NextResponse.json({ error: "Course not found" }, { status: 404 });
+      }
+
+      // PREMIUM courses cannot be purchased individually
+      if (course.tier === "PREMIUM") {
+        return NextResponse.json(
+          { error: "Premium courses are exclusive to Pro and Elite subscribers." },
+          { status: 400 }
+        );
       }
 
       // Check inventory availability
