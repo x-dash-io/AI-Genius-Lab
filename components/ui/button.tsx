@@ -9,16 +9,14 @@ const buttonVariants = cva(
   {
       variants: {
         variant: {
-          default: "bg-blue-600 text-white hover:bg-blue-600/90 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-600/90 shadow-sm hover:shadow-md",
+          default: "bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700 shadow-md hover:shadow-lg active:scale-[0.98]",
           destructive:
-            "bg-red-600 text-white hover:bg-red-600/90 dark:bg-red-600 dark:text-white dark:hover:bg-red-600/90 shadow-sm hover:shadow-md",
+            "bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:text-white dark:hover:bg-red-700 shadow-md hover:shadow-lg active:scale-[0.98]",
           outline:
-            "border-2 border-gray-400 dark:border-gray-500 bg-blue-50/80 dark:bg-transparent hover:bg-blue-100/80 dark:hover:bg-gray-800/70 hover:border-gray-500 dark:hover:border-gray-400 shadow-sm hover:shadow-md font-semibold text-foreground transition-all",
+            "border-2 border-gray-500 dark:border-gray-400 bg-white/80 dark:bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800/70 hover:border-gray-600 dark:hover:border-gray-300 shadow-sm hover:shadow-md font-semibold text-foreground transition-all active:scale-[0.98]",
           secondary:
-            "bg-gray-200 text-foreground hover:bg-gray-200/80 dark:bg-gray-700 dark:hover:bg-gray-700/80 shadow-sm hover:shadow-md font-semibold",
-          // Use theme tokens (foreground) so buttons remain readable even if
-          // a parent accidentally toggles the `dark` class without updating CSS vars.
-          ghost: "bg-blue-50/60 dark:bg-transparent hover:bg-blue-200/80 dark:hover:bg-gray-700/70 font-medium text-foreground transition-all",
+            "bg-gray-300 text-gray-900 hover:bg-gray-400 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 shadow-sm hover:shadow-md font-semibold active:scale-[0.98]",
+          ghost: "bg-gray-100/80 dark:bg-transparent hover:bg-gray-200 dark:hover:bg-gray-800/70 font-medium text-foreground transition-all active:scale-[0.98]",
           link: "text-blue-600 dark:text-blue-400 underline-offset-4 hover:underline font-medium",
         },
       size: {
