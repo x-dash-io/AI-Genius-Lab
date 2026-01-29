@@ -116,7 +116,7 @@ export function getSignedCloudinaryUrl(
     // like mp4 for video or mp3 for audio, regardless of the original file extension.
     // Cloudinary handles the transcoding on the fly.
     let format = undefined;
-
+    
     // For video/audio resources, ensure we have an extension for browser compatibility.
     // However, only add it if missing to avoid breaking existing valid formats (e.g. .m4a)
     // or forcing invalid transcoding.
@@ -125,7 +125,7 @@ export function getSignedCloudinaryUrl(
     if (resourceType === 'video' && !hasExtension) {
       format = options.isAudio ? 'mp3' : 'mp4';
     }
-
+    
     const signedUrl = cloudinary.url(cleanPublicId, {
       secure: true,
       sign_url: true,
