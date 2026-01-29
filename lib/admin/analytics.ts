@@ -86,34 +86,21 @@ export async function getRevenueOverTime(days: number = 30): Promise<RevenueData
  * Get sales by category
  */
 export async function getCategorySales(): Promise<CategorySalesData[]> {
-  const purchases = await prisma.purchase.findMany({
-    where: {
-      status: "paid",
-    },
-    include: {
-      Course: {
-        select: {
-          category: true,
-        },
-      },
-    },
-  });
+  const result = await prisma.$queryRaw<Array<{ category: string; sales: bigint; revenue: bigint }>>`
+    SELECT
+      COALESCE(c.category, 'Uncategorized') as category,
+      COUNT(p.id) as sales,
+      SUM(p."amountCents") as revenue
+    FROM "Purchase" p
+    JOIN "Course" c ON p."courseId" = c.id
+    WHERE p.status::text = 'paid'
+    GROUP BY COALESCE(c.category, 'Uncategorized')
+  `;
 
-  const categoryMap = new Map<string, { sales: number; revenue: number }>();
-
-  purchases.forEach((purchase) => {
-    const category = purchase.Course.category || "Uncategorized";
-    const existing = categoryMap.get(category) || { sales: 0, revenue: 0 };
-    categoryMap.set(category, {
-      sales: existing.sales + 1,
-      revenue: existing.revenue + purchase.amountCents,
-    });
-  });
-
-  return Array.from(categoryMap.entries()).map(([category, data]) => ({
-    category,
-    sales: data.sales,
-    revenue: data.revenue / 100, // Convert cents to dollars
+  return result.map((row) => ({
+    category: row.category,
+    sales: Number(row.sales),
+    revenue: Number(row.revenue) / 100, // Convert cents to dollars
   }));
 }
 
@@ -221,43 +208,45 @@ export async function getEnrollmentTrends(days: number = 30): Promise<Enrollment
  * Get top courses by revenue
  */
 export async function getTopCoursesByRevenue(limit: number = 10): Promise<TopCourseData[]> {
-  const purchases = await prisma.purchase.findMany({
+  const groupedPurchases = await prisma.purchase.groupBy({
+    by: ["courseId"],
     where: {
       status: "paid",
     },
-    include: {
-      Course: {
-        select: {
-          id: true,
-          title: true,
-        },
+    _sum: {
+      amountCents: true,
+    },
+    _count: {
+      _all: true,
+    },
+    orderBy: {
+      _sum: {
+        amountCents: "desc",
       },
+    },
+    take: limit,
+  });
+
+  const courseIds = groupedPurchases.map((p) => p.courseId);
+
+  const courses = await prisma.course.findMany({
+    where: {
+      id: {
+        in: courseIds,
+      },
+    },
+    select: {
+      id: true,
+      title: true,
     },
   });
 
-  const courseMap = new Map<string, { title: string; sales: number; revenue: number }>();
+  const courseMap = new Map(courses.map((c) => [c.id, c.title]));
 
-  purchases.forEach((purchase) => {
-    const courseId = purchase.courseId;
-    const existing = courseMap.get(courseId) || {
-      title: purchase.Course.title,
-      sales: 0,
-      revenue: 0,
-    };
-    courseMap.set(courseId, {
-      title: purchase.Course.title,
-      sales: existing.sales + 1,
-      revenue: existing.revenue + purchase.amountCents,
-    });
-  });
-
-  return Array.from(courseMap.values())
-    .map((data) => ({
-      courseId: Array.from(courseMap.entries()).find(([_, v]) => v.title === data.title)?.[0] || "",
-      title: data.title,
-      sales: data.sales,
-      revenue: data.revenue / 100, // Convert cents to dollars
-    }))
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, limit);
+  return groupedPurchases.map((group) => ({
+    courseId: group.courseId,
+    title: courseMap.get(group.courseId) || "Unknown Course",
+    sales: group._count._all,
+    revenue: (group._sum.amountCents || 0) / 100, // Convert cents to dollars
+  }));
 }

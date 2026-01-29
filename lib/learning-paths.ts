@@ -166,14 +166,10 @@ export async function hasEnrolledInLearningPath(userId: string, pathId: string):
 }
 
 /**
- * Create purchases for all courses in a learning path
+ * Core logic for creating learning path purchases
+ * Extracted for performance optimization and testing
  */
-export async function createLearningPathPurchases(userId: string, pathId: string) {
-  const user = await requireUser();
-  if (user.id !== userId) {
-    throw new Error("FORBIDDEN: You can only enroll yourself");
-  }
-
+export async function createLearningPathPurchasesCore(userId: string, pathId: string) {
   const path = await prisma.learningPath.findUnique({
     where: { id: pathId },
     include: {
@@ -202,45 +198,74 @@ export async function createLearningPathPurchases(userId: string, pathId: string
     where: {
       userId,
       courseId: { in: courseIds },
-      status: "paid",
     },
   });
 
-  const existingCourseIds = new Set(existingPurchases.map((p) => p.courseId));
+  const paidCourseIds = new Set(
+    existingPurchases
+      .filter((p) => p.status === "paid")
+      .map((p) => p.courseId)
+  );
+
   const coursesToPurchase = path.courses.filter(
-    (pc) => !existingCourseIds.has(pc.Course.id)
+    (pc) => !paidCourseIds.has(pc.Course.id)
   );
 
   if (coursesToPurchase.length === 0) {
     throw new Error("You have already enrolled in all courses in this path");
   }
 
-  // Create pending purchases for courses not yet purchased
-  const purchases = await Promise.all(
-    coursesToPurchase.map((pc) =>
-      prisma.purchase.upsert({
-        where: {
-          userId_courseId: {
-            userId,
-            courseId: pc.Course.id,
-          },
-        },
-        update: {
-          status: "pending",
-          provider: "paypal",
-        },
-        create: {
-          id: `purchase_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-          userId,
-          courseId: pc.Course.id,
-          amountCents: pc.Course.priceCents,
-          currency: "usd",
-          status: "pending",
-          provider: "paypal",
-        },
-      })
-    )
+  // Split into create and update
+  const existingPurchaseMap = new Map(
+    existingPurchases.map((p) => [p.courseId, p])
   );
+
+  const toCreate: any[] = [];
+  const toUpdateIds: string[] = [];
+
+  for (const pc of coursesToPurchase) {
+    if (existingPurchaseMap.has(pc.Course.id)) {
+      toUpdateIds.push(pc.Course.id);
+    } else {
+      toCreate.push({
+        id: `purchase_${Date.now()}_${Math.random().toString(36).substring(2, 9)}_${toCreate.length}`,
+        userId,
+        courseId: pc.Course.id,
+        amountCents: pc.Course.priceCents,
+        currency: "usd",
+        status: "pending",
+        provider: "paypal",
+      });
+    }
+  }
+
+  if (toCreate.length > 0) {
+    await prisma.purchase.createMany({
+      data: toCreate,
+    });
+  }
+
+  if (toUpdateIds.length > 0) {
+    await prisma.purchase.updateMany({
+      where: {
+        userId,
+        courseId: { in: toUpdateIds },
+      },
+      data: {
+        status: "pending",
+        provider: "paypal",
+      },
+    });
+  }
+
+  // Fetch final results
+  const allRelevantCourseIds = coursesToPurchase.map((pc) => pc.Course.id);
+  const purchases = await prisma.purchase.findMany({
+    where: {
+      userId,
+      courseId: { in: allRelevantCourseIds },
+    },
+  });
 
   return {
     purchases,
@@ -249,4 +274,16 @@ export async function createLearningPathPurchases(userId: string, pathId: string
       0
     ),
   };
+}
+
+/**
+ * Create purchases for all courses in a learning path
+ */
+export async function createLearningPathPurchases(userId: string, pathId: string) {
+  const user = await requireUser();
+  if (user.id !== userId) {
+    throw new Error("FORBIDDEN: You can only enroll yourself");
+  }
+
+  return createLearningPathPurchasesCore(userId, pathId);
 }

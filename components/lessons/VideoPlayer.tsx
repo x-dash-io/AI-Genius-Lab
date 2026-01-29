@@ -25,7 +25,7 @@ export function VideoPlayer({
   // Use separate refs for video and audio to avoid type conflicts with strict RefObjects
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-
+  
   const [isLoading, setIsLoading] = useState(true);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [error, setError] = useState<{
