@@ -19,7 +19,20 @@ const globalForPrisma = globalThis as unknown as {
  */
 function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL || process.env.DIRECT_URL;
-  const pool = new Pool({ connectionString });
+
+  // Serverless optimization: Use a small pool size (1) in production to avoid
+  // exhausting database connections when Vercel scales lambda instances.
+  // In development, we can use a larger pool for better local performance.
+  const isProduction = process.env.NODE_ENV === "production";
+
+  const pool = new Pool({
+    connectionString,
+    max: isProduction ? 1 : 10,
+    connectionTimeoutMillis: 15000, // 15 seconds
+    idleTimeoutMillis: 15000,       // 15 seconds
+    allowExitOnIdle: true           // Allow process to exit if pool is idle
+  });
+
   const adapter = new PrismaPg(pool);
 
   return new PrismaClient({
