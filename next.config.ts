@@ -32,6 +32,10 @@ const nextConfig = (phase: string): NextConfig => {
     typescript: {
       ignoreBuildErrors: true,
     },
+    // Skip linting during build to speed up CI
+    eslint: {
+      ignoreDuringBuilds: true,
+    },
     poweredByHeader: false,
   };
 };
