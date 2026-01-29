@@ -90,7 +90,9 @@ async function CourseCatalogContent({ searchParams }: CoursesPageProps) {
         <p className="mt-2 text-lg text-muted-foreground">
           {hasFilters
             ? `Showing ${filteredCount} of ${totalCourses} courses`
-            : `Browse ${totalCourses} curated AI courses with previews and structured learning paths.`}
+            : totalCourses > 0
+              ? `Browse ${totalCourses} curated AI courses with previews and structured learning paths.`
+              : "Courses organized by outcomes, not creators. New courses are being added—check back soon!"}
         </p>
       </div>
       
@@ -107,7 +109,7 @@ async function CourseCatalogContent({ searchParams }: CoursesPageProps) {
             <p className="text-muted-foreground">
               {hasFilters
                 ? "No courses match your search criteria. Try adjusting your filters."
-                : "No courses available at the moment. Check back soon for new courses!"}
+                : "Courses organized by outcomes, not creators. New courses are being added—check back soon!"}
             </p>
           </CardContent>
         </Card>
