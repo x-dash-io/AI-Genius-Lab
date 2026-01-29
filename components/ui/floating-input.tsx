@@ -45,7 +45,7 @@ const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputProps>(
           onBlur={handleBlur}
           onChange={handleChange}
           className={cn(
-            "peer flex h-12 w-full rounded-md border border-input bg-background px-4 pt-4 pb-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all",
+            "peer flex h-12 w-full rounded-md border-2 border-input bg-background px-4 pt-4 pb-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50 transition-all shadow-sm hover:border-gray-400 dark:hover:border-gray-500",
             className
           )}
         />
@@ -53,7 +53,7 @@ const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputProps>(
           <label
             htmlFor={inputId}
             className={cn(
-              "absolute left-4 pointer-events-none transition-all duration-200 origin-left",
+              "absolute left-4 pointer-events-none transition-all duration-200 origin-left font-medium",
               isFloating
                 ? "top-2 text-xs text-muted-foreground scale-90"
                 : "top-1/2 -translate-y-1/2 text-sm text-muted-foreground scale-100"
@@ -64,7 +64,7 @@ const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputProps>(
         )}
         <div
           className={cn(
-            "absolute bottom-0 left-0 right-0 h-0.5 bg-primary transition-all duration-200 origin-center",
+            "absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 transition-all duration-200 origin-center",
             isFocused ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0"
           )}
         />
