@@ -137,33 +137,38 @@ export default async function DashboardPage({
   ]);
 
   // Calculate course progress for each purchased course
-  const coursesWithProgress = await Promise.all(
-    purchases.map(async (purchase) => {
-      const lessonIds = purchase.Course.sections.flatMap(s => s.lessons.map(l => l.id));
-      const progressRecords = await prisma.progress.findMany({
-        where: {
-          userId: session.user.id,
-          lessonId: { in: lessonIds }
-        }
-      });
-
-      const totalLessons = lessonIds.length;
-      const completedLessons = progressRecords.filter(p => p.completedAt != null).length;
-      const inProgressLessons = progressRecords.filter(p => p.startedAt && !p.completedAt).length;
-      const completionPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-
-      return {
-        ...purchase,
-        totalLessons,
-        completedLessons,
-        inProgressLessons,
-        completionPercent,
-        lastAccessed: progressRecords.length > 0 
-          ? progressRecords.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())[0].updatedAt
-          : null
-      };
-    })
+  const allLessonIds = purchases.flatMap(purchase =>
+    purchase.Course.sections.flatMap(s => s.lessons.map(l => l.id))
   );
+
+  const allProgressRecords = await prisma.progress.findMany({
+    where: {
+      userId: session.user.id,
+      lessonId: { in: allLessonIds }
+    }
+  });
+
+  const coursesWithProgress = purchases.map((purchase) => {
+    const lessonIds = purchase.Course.sections.flatMap(s => s.lessons.map(l => l.id));
+    const lessonIdsSet = new Set(lessonIds);
+    const progressRecords = allProgressRecords.filter(p => lessonIdsSet.has(p.lessonId));
+
+    const totalLessons = lessonIds.length;
+    const completedLessons = progressRecords.filter(p => p.completedAt != null).length;
+    const inProgressLessons = progressRecords.filter(p => p.startedAt && !p.completedAt).length;
+    const completionPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+
+    return {
+      ...purchase,
+      totalLessons,
+      completedLessons,
+      inProgressLessons,
+      completionPercent,
+      lastAccessed: progressRecords.length > 0
+        ? progressRecords.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())[0].updatedAt
+        : null
+    };
+  });
 
   // Sort by last accessed
   const sortedCourses = coursesWithProgress.sort((a, b) => {
