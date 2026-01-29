@@ -28,11 +28,21 @@ export async function GET(
     }
 
     // Validate access and get lesson content (this checks purchase status)
-    const { lesson, signedUrl, publicId } = await getAuthorizedLessonContent(lessonId);
+    const { lesson, signedUrl, downloadUrl, publicId } = await getAuthorizedLessonContent(lessonId);
 
     console.log(`[Content API] lessonId: ${lessonId}, contentType: ${lesson.contentType}, hasSignedUrl: ${!!signedUrl}`);
 
-    if (!signedUrl) {
+    // Check for download intent
+    const { searchParams } = request.nextUrl;
+    const isDownload = searchParams.get("download") === "true";
+
+    const targetUrl = (isDownload && downloadUrl) ? downloadUrl : signedUrl;
+
+    if (!targetUrl) {
+      if (isDownload && !downloadUrl) {
+        return NextResponse.json({ error: "Download not allowed" }, { status: 403 });
+      }
+
       return NextResponse.json(
         {
           error: "Content not available",
@@ -44,7 +54,7 @@ export async function GET(
 
     // For link type, redirect directly (no proxy needed)
     if (lesson.contentType === "link") {
-      return NextResponse.redirect(signedUrl);
+      return NextResponse.redirect(targetUrl);
     }
 
     // For Cloudinary content, we'll redirect directly to the signed URL
@@ -55,7 +65,7 @@ export async function GET(
     // Content exists, redirect to the signed URL
     // The signed URL is already user-specific and expires in 10 minutes
     // Each request generates a fresh URL, so sharing won't work
-    return NextResponse.redirect(signedUrl, {
+    return NextResponse.redirect(targetUrl, {
       headers: {
         "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
         "Pragma": "no-cache",

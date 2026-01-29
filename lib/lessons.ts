@@ -20,7 +20,7 @@ function buildLessonUrl(lesson: {
   contentType: string;
   contentUrl: string | null;
   allowDownload: boolean;
-}, userId?: string) {
+}, userId?: string, forceDownload: boolean = false) {
   if (!lesson.contentUrl) {
     return null;
   }
@@ -34,8 +34,13 @@ function buildLessonUrl(lesson: {
   }
 
   const resourceType = resolveResourceType(lesson.contentType);
+
+  // Only enable download flag if allowed AND requested (forceDownload)
+  // This ensures the view URL (forceDownload=false) doesn't have attachment disposition
+  const shouldDownload = lesson.allowDownload && forceDownload;
+
   return getSignedCloudinaryUrl(lesson.contentUrl, resourceType, {
-    download: lesson.allowDownload,
+    download: shouldDownload,
     userId, // Add user ID for enhanced security
     isAudio: lesson.contentType === "audio",
   });
@@ -178,11 +183,19 @@ export async function getAuthorizedLessonContent(lessonId: string) {
     }
   }
 
+  // Generate view URL (streaming/inline)
   const signedUrl = buildLessonUrl({
     contentType,
     contentUrl,
     allowDownload: lesson.allowDownload,
-  }, user.id);
+  }, user.id, false);
+
+  // Generate download URL (attachment) if allowed
+  const downloadUrl = lesson.allowDownload ? buildLessonUrl({
+    contentType,
+    contentUrl,
+    allowDownload: lesson.allowDownload,
+  }, user.id, true) : null;
 
   console.log('[Lesson Content] Generated publicId/cleanUrl:', contentUrl);
   console.log('[Lesson Content] Generated signedUrl:', signedUrl ? 'SUCCESS' : 'FAILED');
@@ -198,6 +211,7 @@ export async function getAuthorizedLessonContent(lessonId: string) {
     courseSlug: lesson.Section.Course.slug,
     publicId: contentUrl, // Return the original public ID for existence checking
     signedUrl,
+    downloadUrl,
     contentMetadata: firstContent ? {
       title: firstContent.title,
       description: firstContent.description,
