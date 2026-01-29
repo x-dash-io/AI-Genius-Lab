@@ -272,7 +272,7 @@ export function PublicLayoutClient({
                   damping: 30,
                   stiffness: 300
                 }}
-                className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-card/95 backdrop-blur-md border-r shadow-2xl flex flex-col md:hidden"
+                className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-card/98 backdrop-blur-md border-r-2 border-border shadow-2xl flex flex-col md:hidden"
               >
                 {/* Menu Header */}
                 <div className="border-b p-4 flex items-center justify-between bg-card/95 backdrop-blur-md z-10 h-16 flex-shrink-0">
