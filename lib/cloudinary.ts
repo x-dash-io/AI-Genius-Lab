@@ -109,11 +109,17 @@ export function getSignedCloudinaryUrl(
     // - Time-limited access (10 minutes)
     // - Signature verification
     // - Per-request validation (via /api/content/[lessonId])
+    // For video resource type, Cloudinary often requires an extension in the URL
+    // for the browser to correctly identify and play the media.
+    const hasExtension = cleanPublicId.split('/').pop()?.includes('.');
+
     const signedUrl = cloudinary.url(cleanPublicId, {
       secure: true,
       sign_url: true,
       type: "upload", // Changed from "authenticated" to match actual file type
       resource_type: resourceType,
+      // Automatically add .mp4 extension for video/audio if missing
+      format: (!hasExtension && resourceType === 'video') ? 'mp4' : undefined,
       expires_at: expiresAt,
       attachment: options.download ? cleanPublicId.split('/').pop() : undefined,
     });

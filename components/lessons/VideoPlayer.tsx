@@ -111,6 +111,11 @@ export function VideoPlayer({
     const handleLoadedData = () => setIsLoading(false);
     const handleLoadStart = () => setIsLoading(true);
 
+    // If media is already loaded (e.g. from cache), clear loading state
+    if (video.readyState >= 2) { // HAVE_CURRENT_DATA
+      setIsLoading(false);
+    }
+
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
     video.addEventListener("loadeddata", handleLoadedData);
@@ -238,6 +243,8 @@ export function VideoPlayer({
               controls
               controlsList={allowDownload ? undefined : "nodownload"}
               preload="auto"
+              onLoadedData={() => setIsLoading(false)}
+              onCanPlay={() => setIsLoading(false)}
             />
             
             {isLoading && (
@@ -263,6 +270,8 @@ export function VideoPlayer({
           controlsList={allowDownload ? undefined : "nodownload"}
           preload="auto"
           playsInline
+          onLoadedData={() => setIsLoading(false)}
+          onCanPlay={() => setIsLoading(false)}
         />
         
         {/* Loading Overlay */}
