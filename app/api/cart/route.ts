@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { getCartFromCookies, setCartInCookies, addItemToCart, removeItemFromCart, updateItemQuantity, clearCart } from "@/lib/cart/utils";
 import { CartItem } from "@/lib/cart/types";
 import { prisma } from "@/lib/prisma";
+import { getUserSubscription } from "@/lib/subscriptions";
 
 export async function GET() {
   try {
@@ -113,12 +114,21 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Course not found" }, { status: 404 });
       }
 
-      // PREMIUM courses cannot be purchased individually
+      // PREMIUM courses can only be purchased by Pro/Elite subscribers
       if (course.tier === "PREMIUM") {
-        return NextResponse.json(
-          { error: "Premium courses are exclusive to Pro and Elite subscribers." },
-          { status: 400 }
-        );
+        const subscription = session?.user
+          ? await getUserSubscription(session.user.id)
+          : null;
+        const hasProAccess =
+          subscription?.plan.tier === "pro" ||
+          subscription?.plan.tier === "elite";
+
+        if (!hasProAccess) {
+          return NextResponse.json(
+            { error: "Premium courses are exclusive to Pro and Elite subscribers." },
+            { status: 400 }
+          );
+        }
       }
 
       // Check inventory availability
