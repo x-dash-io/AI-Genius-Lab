@@ -22,8 +22,12 @@ export function VideoPlayer({
   allowDownload,
   onProgress,
 }: VideoPlayerProps) {
+  // Use separate refs for video and audio to avoid type conflicts with strict RefObjects
   const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
   const [isLoading, setIsLoading] = useState(true);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [error, setError] = useState<{
     message: string;
     adminActionRequired?: boolean;
@@ -51,9 +55,9 @@ export function VideoPlayer({
   );
 
   const handleTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement | HTMLAudioElement>) => {
-    const video = e.currentTarget;
-    const current = video.currentTime;
-    const total = video.duration || 0;
+    const media = e.currentTarget;
+    const current = media.currentTime;
+    const total = media.duration || 0;
 
     if (total > 0) {
       const percent = (current / total) * 100;
@@ -62,10 +66,18 @@ export function VideoPlayer({
     }
   }, [debouncedProgressUpdate, onProgress]);
 
-  const handleLoadedMetadata = useCallback(() => setIsLoading(false), []);
-  const handleCanPlay = useCallback(() => setIsLoading(false), []);
-  const handleCanPlayThrough = useCallback(() => setIsLoading(false), []);
-  const handleLoadedData = useCallback(() => setIsLoading(false), []);
+  const clearLoadingTimeout = useCallback(() => {
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
+    setIsLoading(false);
+  }, []);
+
+  const handleLoadedMetadata = useCallback(() => clearLoadingTimeout(), [clearLoadingTimeout]);
+  const handleCanPlay = useCallback(() => clearLoadingTimeout(), [clearLoadingTimeout]);
+  const handleCanPlayThrough = useCallback(() => clearLoadingTimeout(), [clearLoadingTimeout]);
+  const handleLoadedData = useCallback(() => clearLoadingTimeout(), [clearLoadingTimeout]);
   const handleLoadStart = useCallback(() => setIsLoading(true), []);
   const handleWaiting = useCallback(() => setIsLoading(true), []);
 
@@ -86,8 +98,8 @@ export function VideoPlayer({
     setError({
       message: `Failed to load ${contentType || 'media'} content. ${errorDetail}`
     });
-    setIsLoading(false);
-  }, [contentType]);
+    clearLoadingTimeout();
+  }, [contentType, clearLoadingTimeout]);
 
   const handleEnded = useCallback(async () => {
     try {
@@ -106,11 +118,12 @@ export function VideoPlayer({
   }, [lessonId]);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    // Check both refs
+    const mediaElement = videoRef.current || audioRef.current;
+    if (!mediaElement) return;
 
     // If media is already loaded (e.g. from cache), clear loading state
-    if (video.readyState >= 2) { // HAVE_CURRENT_DATA
+    if (mediaElement.readyState >= 2) { // HAVE_CURRENT_DATA
       setIsLoading(false);
     }
   }, []);
@@ -152,7 +165,19 @@ export function VideoPlayer({
       // Reset error state when src changes
       setError(null);
       setIsLoading(true);
+
+      // Set a timeout to force-disable loading indicator after 5 seconds
+      // This prevents the "infinite loading" UI state if the browser is slow or blocks auto-loading
+      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = setTimeout(() => {
+        setIsLoading(false);
+        loadingTimeoutRef.current = null;
+      }, 5000);
     }
+
+    return () => {
+      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+    };
   }, [mediaSrc, contentType]);
 
   if (error) {
@@ -195,7 +220,7 @@ export function VideoPlayer({
           className="w-full h-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
-          onLoad={() => setIsLoading(false)}
+          onLoad={() => clearLoadingTimeout()}
         />
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm pointer-events-none">
@@ -225,7 +250,7 @@ export function VideoPlayer({
           
           <div className="relative">
             <audio
-              ref={videoRef as any}
+              ref={audioRef}
               src={mediaSrc}
               className="w-full"
               controls
