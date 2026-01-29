@@ -86,34 +86,21 @@ export async function getRevenueOverTime(days: number = 30): Promise<RevenueData
  * Get sales by category
  */
 export async function getCategorySales(): Promise<CategorySalesData[]> {
-  const purchases = await prisma.purchase.findMany({
-    where: {
-      status: "paid",
-    },
-    include: {
-      Course: {
-        select: {
-          category: true,
-        },
-      },
-    },
-  });
+  const result = await prisma.$queryRaw<Array<{ category: string; sales: bigint; revenue: bigint }>>`
+    SELECT
+      COALESCE(c.category, 'Uncategorized') as category,
+      COUNT(p.id) as sales,
+      SUM(p."amountCents") as revenue
+    FROM "Purchase" p
+    JOIN "Course" c ON p."courseId" = c.id
+    WHERE p.status::text = 'paid'
+    GROUP BY COALESCE(c.category, 'Uncategorized')
+  `;
 
-  const categoryMap = new Map<string, { sales: number; revenue: number }>();
-
-  purchases.forEach((purchase) => {
-    const category = purchase.Course.category || "Uncategorized";
-    const existing = categoryMap.get(category) || { sales: 0, revenue: 0 };
-    categoryMap.set(category, {
-      sales: existing.sales + 1,
-      revenue: existing.revenue + purchase.amountCents,
-    });
-  });
-
-  return Array.from(categoryMap.entries()).map(([category, data]) => ({
-    category,
-    sales: data.sales,
-    revenue: data.revenue / 100, // Convert cents to dollars
+  return result.map((row) => ({
+    category: row.category,
+    sales: Number(row.sales),
+    revenue: Number(row.revenue) / 100, // Convert cents to dollars
   }));
 }
 
