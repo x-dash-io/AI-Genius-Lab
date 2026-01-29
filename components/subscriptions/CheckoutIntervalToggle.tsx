@@ -24,7 +24,7 @@ export function CheckoutIntervalToggle() {
 
   return (
     <div className="flex justify-center mb-8">
-      <div className="grid grid-cols-2 p-1.5 rounded-xl bg-muted/50 border border-border/50 relative w-full max-w-[400px]">
+      <div className="grid grid-cols-2 p-1.5 rounded-xl bg-muted border-2 border-border shadow-md relative w-full max-w-[400px]">
         {options.map((option) => {
           const isActive = interval === option.value;
           return (
