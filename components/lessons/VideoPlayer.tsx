@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import ReactPlayer from "react-player";
 import { useDebouncedCallback } from "use-debounce";
 import { Loader2, AlertCircle } from "lucide-react";
@@ -92,8 +92,6 @@ export function VideoPlayer({
   }, [lessonId]);
 
   // Determine source URL
-  // If originalSrc is a valid HTTP URL, use it directly (e.g. YouTube, Vimeo, direct S3 link)
-  // Otherwise, fallback to the proxy URL (src) which handles Cloudinary signing and redirection
   const isOriginalSrcValidUrl = originalSrc && (originalSrc.startsWith('http://') || originalSrc.startsWith('https://'));
   const mediaSrc = (contentType === 'video' || contentType === 'audio') && isOriginalSrcValidUrl ? originalSrc : src;
 
@@ -157,6 +155,8 @@ export function VideoPlayer({
 
       <div className={cn("relative w-full h-full", contentType === 'audio' ? "h-12" : "")}>
         <ReactPlayer
+          // KEY PROP: Forces player to re-mount when URL changes (Fixes loading spinner)
+          key={mediaSrc} 
           url={mediaSrc || ""}
           width="100%"
           height="100%"
@@ -177,15 +177,13 @@ export function VideoPlayer({
             file: {
               attributes: {
                 controlsList: allowDownload ? undefined : 'nodownload',
-                // Important for audio to prevent layout issues
                 style: contentType === 'audio' ? { height: '54px' } : {}
               },
               forceAudio: contentType === 'audio'
             }
-          } as any}
+          } as any} 
         />
 
-        {/* Loading Overlay */}
         {isLoading && !isReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm pointer-events-none z-10">
             <div className="flex flex-col items-center gap-3">
