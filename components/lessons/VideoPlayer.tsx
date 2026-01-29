@@ -22,7 +22,10 @@ export function VideoPlayer({
   allowDownload,
   onProgress,
 }: VideoPlayerProps) {
-  const videoRef = useRef<HTMLVideoElement | HTMLAudioElement>(null);
+  // Use separate refs for video and audio to avoid type conflicts with strict RefObjects
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  
   const [isLoading, setIsLoading] = useState(true);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [error, setError] = useState<{
@@ -52,9 +55,9 @@ export function VideoPlayer({
   );
 
   const handleTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement | HTMLAudioElement>) => {
-    const video = e.currentTarget;
-    const current = video.currentTime;
-    const total = video.duration || 0;
+    const media = e.currentTarget;
+    const current = media.currentTime;
+    const total = media.duration || 0;
 
     if (total > 0) {
       const percent = (current / total) * 100;
@@ -115,12 +118,12 @@ export function VideoPlayer({
   }, [lessonId]);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    // Check both refs
+    const mediaElement = videoRef.current || audioRef.current;
+    if (!mediaElement) return;
 
     // If media is already loaded (e.g. from cache), clear loading state
-    // We check if it's an HTMLVideoElement to access readyState, though Audio also has it.
-    if ('readyState' in video && video.readyState >= 2) { // HAVE_CURRENT_DATA
+    if (mediaElement.readyState >= 2) { // HAVE_CURRENT_DATA
       setIsLoading(false);
     }
   }, []);
@@ -247,7 +250,7 @@ export function VideoPlayer({
           
           <div className="relative">
             <audio
-              ref={videoRef}
+              ref={audioRef}
               src={mediaSrc}
               className="w-full"
               controls
