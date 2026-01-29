@@ -50,7 +50,7 @@ export function PricingGrid({ plans }: PricingGridProps) {
           const perMonthPrice = interval === "annual" ? (priceCents / 12 / 100).toFixed(2) : displayPrice;
 
           return (
-            <Card key={plan.id} className={plan.tier === "pro" ? "border-primary shadow-xl relative md:scale-105 ring-2 ring-primary/20 pt-8" : ""}>
+            <Card key={plan.id} className={plan.tier === "pro" ? "border-primary shadow-xl relative md:scale-105 ring-2 ring-primary/20 z-10" : ""}>
               {plan.tier === "pro" && (
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-lg border border-primary-foreground/20 z-20">
                   Most Popular
