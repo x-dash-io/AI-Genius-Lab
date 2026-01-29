@@ -11,6 +11,7 @@ interface LessonViewerProps {
   lessonId: string;
   contentType: string | undefined;
   contentUrl: string | null;
+  downloadUrl?: string | null;
   allowDownload: boolean;
   contentMetadata?: {
     title: string | null;
@@ -27,6 +28,7 @@ export function LessonViewer({
   lessonId,
   contentType,
   contentUrl,
+  downloadUrl,
   allowDownload,
   contentMetadata,
   initialProgress,
@@ -171,6 +173,7 @@ export function LessonViewer({
     return (
       <div className="space-y-6">
         <VideoPlayer
+          key={lessonId}
           src={`/api/content/${lessonId}`}
           originalSrc={contentUrl}
           lessonId={lessonId}
@@ -179,6 +182,21 @@ export function LessonViewer({
           onProgress={handleProgressUpdate}
         />
         
+        {allowDownload && (
+          <div className="flex justify-end">
+            <Button variant="outline" asChild>
+              <a
+                href={downloadUrl || `/api/content/${lessonId}?download=true`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Download {contentType === 'audio' ? 'Audio' : 'Video'}
+              </a>
+            </Button>
+          </div>
+        )}
+
         {/* Progress Section */}
         <div className="rounded-xl border bg-card p-6">
           <div className="flex items-center justify-between mb-3">
