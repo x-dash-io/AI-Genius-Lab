@@ -116,16 +116,14 @@ export function getSignedCloudinaryUrl(
     // like mp4 for video or mp3 for audio, regardless of the original file extension.
     // Cloudinary handles the transcoding on the fly.
     let format = undefined;
-
-    if (resourceType === 'video' && !options.download) {
-      // Force standard web formats for streaming/inline viewing
+    
+    // For video/audio resources, ensure we have an extension for browser compatibility.
+    // However, only add it if missing to avoid breaking existing valid formats (e.g. .m4a)
+    // or forcing invalid transcoding.
+    const hasExtension = cleanPublicId.split('/').pop()?.includes('.');
+    
+    if (resourceType === 'video' && !hasExtension) {
       format = options.isAudio ? 'mp3' : 'mp4';
-    } else {
-      // For downloads or other types, only add extension if missing
-      const hasExtension = cleanPublicId.split('/').pop()?.includes('.');
-      if (!hasExtension && resourceType === 'video') {
-        format = options.isAudio ? 'mp3' : 'mp4';
-      }
     }
     
     const signedUrl = cloudinary.url(cleanPublicId, {
