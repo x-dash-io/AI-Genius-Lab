@@ -35,6 +35,7 @@ export function LessonViewer({
 }: LessonViewerProps) {
   const [progress, setProgress] = useState(initialProgress);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [contentError, setContentError] = useState<{
     message: string;
     adminActionRequired?: boolean;
@@ -124,6 +125,35 @@ export function LessonViewer({
     }));
   }, []);
 
+  const handleDownload = async () => {
+    const targetUrl = downloadUrl || `/api/content/${lessonId}?download=true`;
+    setIsDownloading(true);
+    try {
+      const response = await fetch(targetUrl);
+      if (!response.ok) {
+        throw new Error("Download failed");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to download content",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   if (!contentUrl) {
     return (
       <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-8 text-center">
@@ -184,11 +214,11 @@ export function LessonViewer({
         
         {allowDownload && (
           <div className="flex justify-end">
-            <Button variant="outline" asChild>
-              <a href={downloadUrl || `/api/content/${lessonId}?download=true`}>
-                <Download className="mr-2 h-4 w-4" />
-                Download {contentType === 'audio' ? 'Audio' : 'Video'}
-              </a>
+            <Button variant="outline" onClick={handleDownload} disabled={isDownloading}>
+              <Download className="mr-2 h-4 w-4" />
+              {isDownloading
+                ? "Downloading..."
+                : `Download ${contentType === 'audio' ? 'Audio' : 'Video'}`}
             </Button>
           </div>
         )}
