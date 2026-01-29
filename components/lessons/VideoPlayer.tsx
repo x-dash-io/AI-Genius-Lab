@@ -15,6 +15,13 @@ interface VideoPlayerProps {
   onProgress?: (progress: number) => void;
 }
 
+interface ProgressState {
+  played: number;
+  playedSeconds: number;
+  loaded: number;
+  loadedSeconds: number;
+}
+
 export function VideoPlayer({
   src,
   originalSrc,
@@ -51,7 +58,7 @@ export function VideoPlayer({
     3000
   );
 
-  const handleProgress = useCallback((state: { played: number; playedSeconds: number; loaded: number; loadedSeconds: number }) => {
+  const handleProgress = useCallback((state: ProgressState) => {
     // Only track progress if video is actually playing and we have a valid duration
     if (state.played > 0) {
       const percent = state.played * 100;
@@ -164,7 +171,9 @@ export function VideoPlayer({
           onBufferEnd={() => setIsLoading(false)}
           onError={handleError}
           onEnded={handleEnded}
+          // @ts-expect-error ReactPlayer onProgress type definition conflict with strict TS
           onProgress={handleProgress}
+          // @ts-expect-error Config type definition mismatch
           config={{
             file: {
               attributes: {
