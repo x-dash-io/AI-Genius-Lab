@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getCoursePreviewBySlug } from "@/lib/courses";
 import { prisma } from "@/lib/prisma";
+import { getUserSubscription } from "@/lib/subscriptions";
 import { createPayPalOrder } from "@/lib/paypal";
 import { getCartFromCookies } from "@/lib/cart/utils";
 import { Button } from "@/components/ui/button";
@@ -37,9 +38,15 @@ async function createCheckoutSession(formData: FormData) {
     redirect("/courses");
   }
 
-  // PREMIUM courses cannot be purchased individually
+  // PREMIUM courses can only be purchased by Pro/Elite subscribers
   if (course.tier === "PREMIUM") {
-    redirect(`/courses/${course.slug}?error=premium_only`);
+    const subscription = await getUserSubscription(session.user.id);
+    const hasProAccess =
+      subscription?.plan.tier === "pro" || subscription?.plan.tier === "elite";
+
+    if (!hasProAccess) {
+      redirect(`/courses/${course.slug}?error=premium_only`);
+    }
   }
 
   const existingPurchase = await prisma.purchase.findFirst({
@@ -191,9 +198,17 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
     redirect("/courses");
   }
 
-  // PREMIUM courses cannot be purchased individually
+  // PREMIUM courses can only be purchased by Pro/Elite subscribers
   if (course.tier === "PREMIUM") {
-    redirect(`/courses/${course.slug}?error=premium_only`);
+    const subscription = session?.user
+      ? await getUserSubscription(session.user.id)
+      : null;
+    const hasProAccess =
+      subscription?.plan.tier === "pro" || subscription?.plan.tier === "elite";
+
+    if (!hasProAccess) {
+      redirect(`/courses/${course.slug}?error=premium_only`);
+    }
   }
 
   if (!session?.user) {
