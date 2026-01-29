@@ -118,11 +118,9 @@ export function getSignedCloudinaryUrl(
     let format = undefined;
     
     // For video/audio resources, ensure we have an extension for browser compatibility.
-    // However, only add it if missing to avoid breaking existing valid formats (e.g. .m4a)
-    // or forcing invalid transcoding.
-    const hasExtension = cleanPublicId.split('/').pop()?.includes('.');
-    
-    if (resourceType === 'video' && !hasExtension) {
+    // We enforce mp4 (video) or mp3 (audio) for inline viewing to ensure that
+    // formats like .mkv, .avi, or .mov are transcoded by Cloudinary to something the browser can play.
+    if (resourceType === 'video' && !options.download) {
       format = options.isAudio ? 'mp3' : 'mp4';
     }
     

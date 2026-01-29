@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import ReactPlayer from "react-player";
 import { useDebouncedCallback } from "use-debounce";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface VideoPlayerProps {
@@ -22,19 +23,15 @@ export function VideoPlayer({
   allowDownload,
   onProgress,
 }: VideoPlayerProps) {
-  // Use separate refs for video and audio to avoid type conflicts with strict RefObjects
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  
+  const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [error, setError] = useState<{
     message: string;
     adminActionRequired?: boolean;
     code?: string;
   } | null>(null);
 
-  // Debounced progress update to avoid too many API calls
+  // Debounced progress update
   const debouncedProgressUpdate = useDebouncedCallback(
     async (position: number, percent: number) => {
       try {
@@ -51,55 +48,25 @@ export function VideoPlayer({
         console.error("Failed to update progress:", error);
       }
     },
-    3000 // Update every 3 seconds to reduce API calls
+    3000
   );
 
-  const handleTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement | HTMLAudioElement>) => {
-    const media = e.currentTarget;
-    const current = media.currentTime;
-    const total = media.duration || 0;
-
-    if (total > 0) {
-      const percent = (current / total) * 100;
-      debouncedProgressUpdate(current, percent);
+  const handleProgress = useCallback((state: { played: number; playedSeconds: number; loaded: number; loadedSeconds: number }) => {
+    // Only track progress if video is actually playing and we have a valid duration
+    if (state.played > 0) {
+      const percent = state.played * 100;
+      debouncedProgressUpdate(state.playedSeconds, percent);
       onProgress?.(percent);
     }
   }, [debouncedProgressUpdate, onProgress]);
 
-  const clearLoadingTimeout = useCallback(() => {
-    if (loadingTimeoutRef.current) {
-      clearTimeout(loadingTimeoutRef.current);
-      loadingTimeoutRef.current = null;
-    }
+  const handleError = useCallback((e: any) => {
+    console.error("Media error:", e);
     setIsLoading(false);
-  }, []);
-
-  const handleLoadedMetadata = useCallback(() => clearLoadingTimeout(), [clearLoadingTimeout]);
-  const handleCanPlay = useCallback(() => clearLoadingTimeout(), [clearLoadingTimeout]);
-  const handleCanPlayThrough = useCallback(() => clearLoadingTimeout(), [clearLoadingTimeout]);
-  const handleLoadedData = useCallback(() => clearLoadingTimeout(), [clearLoadingTimeout]);
-  const handleLoadStart = useCallback(() => setIsLoading(true), []);
-  const handleWaiting = useCallback(() => setIsLoading(true), []);
-
-  const handleError = useCallback((e: React.SyntheticEvent<HTMLVideoElement | HTMLAudioElement>) => {
-    const media = e.currentTarget;
-    let errorDetail = "";
-    if (media.error) {
-      switch (media.error.code) {
-        case 1: errorDetail = "The fetching process was aborted by the user."; break;
-        case 2: errorDetail = "A network error occurred."; break;
-        case 3: errorDetail = "An error occurred while decoding the media."; break;
-        case 4: errorDetail = "The media could not be loaded, either because the server or network failed or because the format is not supported."; break;
-        default: errorDetail = "An unknown error occurred.";
-      }
-    }
-
-    console.error("Media error:", e, media.error);
     setError({
-      message: `Failed to load ${contentType || 'media'} content. ${errorDetail}`
+      message: "Failed to load content. The format might not be supported or the network connection failed."
     });
-    clearLoadingTimeout();
-  }, [contentType, clearLoadingTimeout]);
+  }, []);
 
   const handleEnded = useCallback(async () => {
     try {
@@ -117,71 +84,18 @@ export function VideoPlayer({
     }
   }, [lessonId]);
 
-  useEffect(() => {
-    // Check both refs
-    const mediaElement = videoRef.current || audioRef.current;
-    if (!mediaElement) return;
-
-    // If media is already loaded (e.g. from cache), clear loading state
-    if (mediaElement.readyState >= 2) { // HAVE_CURRENT_DATA
-      setIsLoading(false);
-    }
-  }, []);
-
-  // Helper to detect external video services
-  const getEmbedUrl = (url: string) => {
-    if (!url) return null;
-    
-    // YouTube
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      let videoId = '';
-      if (url.includes('v=')) {
-        videoId = url.split('v=')[1].split('&')[0];
-      } else if (url.includes('youtu.be/')) {
-        videoId = url.split('youtu.be/')[1].split('?')[0];
-      } else if (url.includes('embed/')) {
-        videoId = url.split('embed/')[1].split('?')[0];
-      }
-      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
-    }
-    
-    // Vimeo
-    if (url.includes('vimeo.com')) {
-      const videoId = url.split('/').pop()?.split('?')[0];
-      return videoId ? `https://player.vimeo.com/video/${videoId}` : null;
-    }
-    
-    return null;
-  };
-
-  const embedUrl = getEmbedUrl(originalSrc || '');
-  
-  // Use the signed URL directly for better reliability with media elements (redirects can break range requests)
-  // Only use originalSrc if it's a valid absolute URL (e.g. external content).
-  // If it's a Cloudinary public ID (DB contentUrl), we must use the proxy (src) to get a signed URL.
+  // Determine source URL
+  // If originalSrc is a valid HTTP URL, use it directly (e.g. YouTube, Vimeo, direct S3 link)
+  // Otherwise, fallback to the proxy URL (src) which handles Cloudinary signing and redirection
   const isOriginalSrcValidUrl = originalSrc && (originalSrc.startsWith('http://') || originalSrc.startsWith('https://'));
   const mediaSrc = (contentType === 'video' || contentType === 'audio') && isOriginalSrcValidUrl ? originalSrc : src;
 
+  // Reset state when src changes
   useEffect(() => {
-    if (mediaSrc) {
-      console.log(`[VideoPlayer] Loading ${contentType}:`, mediaSrc);
-      // Reset error state when src changes
-      setError(null);
-      setIsLoading(true);
-
-      // Set a timeout to force-disable loading indicator after 5 seconds
-      // This prevents the "infinite loading" UI state if the browser is slow or blocks auto-loading
-      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
-      loadingTimeoutRef.current = setTimeout(() => {
-        setIsLoading(false);
-        loadingTimeoutRef.current = null;
-      }, 5000);
-    }
-
-    return () => {
-      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
-    };
-  }, [mediaSrc, contentType]);
+    setIsLoading(true);
+    setError(null);
+    setIsReady(false);
+  }, [mediaSrc]);
 
   if (error) {
     return (
@@ -191,9 +105,7 @@ export function VideoPlayer({
       )}>
         <div className="text-center p-8 max-w-md">
           <div className="h-16 w-16 rounded-2xl bg-destructive/10 flex items-center justify-center border border-destructive/20 mx-auto mb-4">
-            <svg className="h-8 w-8 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
+            <AlertCircle className="h-8 w-8 text-destructive" />
           </div>
           <p className="text-lg font-semibold mb-2">Content Unavailable</p>
           <p className="text-sm text-muted-foreground">{error.message}</p>
@@ -214,102 +126,63 @@ export function VideoPlayer({
     );
   }
 
-  // Handle YouTube/Vimeo embeds
-  if (embedUrl) {
-    return (
-      <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden shadow-lg border">
-        <iframe
-          src={embedUrl}
-          className="w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          onLoad={() => clearLoadingTimeout()}
-        />
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm pointer-events-none">
-            <Loader2 className="h-12 w-12 text-white animate-spin" />
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // Handle Audio Content
-  if (contentType === 'audio') {
-    return (
-      <div className="relative w-full rounded-xl border bg-card p-6 shadow-sm overflow-hidden">
-        <div className="flex flex-col gap-6">
-          <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
-              <svg className="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-lg truncate">Audio Lesson</h3>
-              <p className="text-sm text-muted-foreground">Click the play button below to listen to this lesson</p>
-            </div>
-          </div>
-          
-          <div className="relative">
-            <audio
-              ref={audioRef}
-              src={mediaSrc}
-              className="w-full"
-              controls
-              controlsList={allowDownload ? undefined : "nodownload"}
-              preload="auto"
-              onTimeUpdate={handleTimeUpdate}
-              onLoadedMetadata={handleLoadedMetadata}
-              onLoadedData={handleLoadedData}
-              onEnded={handleEnded}
-              onError={handleError}
-              onWaiting={handleWaiting}
-              onCanPlay={handleCanPlay}
-              onCanPlayThrough={handleCanPlayThrough}
-              onLoadStart={handleLoadStart}
-            />
-            
-            {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-card/60 backdrop-blur-[1px] pointer-events-none">
-                <Loader2 className="h-6 w-6 text-primary animate-spin" />
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Common wrapper styling
+  const wrapperClass = cn(
+    "relative w-full overflow-hidden rounded-xl border bg-black shadow-lg",
+    contentType === 'audio' ? "h-auto p-4 bg-card" : "aspect-video"
+  );
 
   return (
-    <div className="relative w-full">
-      {/* Video Element with Native Controls */}
-      <div className="relative aspect-video bg-black rounded-xl overflow-hidden shadow-lg">
-        <video
-          ref={videoRef}
-          src={mediaSrc}
-          className="w-full h-full"
-          controls
-          controlsList={allowDownload ? undefined : "nodownload"}
-          preload="auto"
-          playsInline
-          onTimeUpdate={handleTimeUpdate}
-          onLoadedMetadata={handleLoadedMetadata}
-          onLoadedData={handleLoadedData}
-          onEnded={handleEnded}
+    <div className={wrapperClass}>
+      {contentType === 'audio' && (
+        <div className="flex items-center gap-4 mb-4">
+          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
+             <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+            </svg>
+          </div>
+          <div>
+             <h3 className="font-semibold text-base">Audio Lesson</h3>
+             <p className="text-xs text-muted-foreground">Listen to the audio content</p>
+          </div>
+        </div>
+      )}
+
+      <div className={cn("relative w-full h-full", contentType === 'audio' ? "h-12" : "")}>
+        <ReactPlayer
+          url={mediaSrc || ""}
+          width="100%"
+          height="100%"
+          controls={true}
+          playing={false}
+          onReady={() => {
+            setIsReady(true);
+            setIsLoading(false);
+          }}
+          onStart={() => setIsLoading(false)}
+          onBuffer={() => setIsLoading(true)}
+          onBufferEnd={() => setIsLoading(false)}
           onError={handleError}
-          onWaiting={handleWaiting}
-          onCanPlay={handleCanPlay}
-          onCanPlayThrough={handleCanPlayThrough}
-          onLoadStart={handleLoadStart}
+          onEnded={handleEnded}
+          onProgress={handleProgress}
+          config={{
+            file: {
+              attributes: {
+                controlsList: allowDownload ? undefined : 'nodownload',
+                // Important for audio to prevent layout issues
+                style: contentType === 'audio' ? { height: '54px' } : {}
+              },
+              forceAudio: contentType === 'audio'
+            }
+          }}
         />
-        
+
         {/* Loading Overlay */}
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm pointer-events-none">
+        {isLoading && !isReady && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm pointer-events-none z-10">
             <div className="flex flex-col items-center gap-3">
-              <Loader2 className="h-12 w-12 text-white animate-spin" />
-              <p className="text-sm text-white/80">Loading video...</p>
+              <Loader2 className="h-10 w-10 text-white animate-spin" />
+              {contentType === 'video' && <p className="text-xs text-white/80">Loading...</p>}
             </div>
           </div>
         )}
