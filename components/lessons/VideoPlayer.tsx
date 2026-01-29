@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -50,94 +50,70 @@ export function VideoPlayer({
     3000 // Update every 3 seconds to reduce API calls
   );
 
+  const handleTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement | HTMLAudioElement>) => {
+    const video = e.currentTarget;
+    const current = video.currentTime;
+    const total = video.duration || 0;
+
+    if (total > 0) {
+      const percent = (current / total) * 100;
+      debouncedProgressUpdate(current, percent);
+      onProgress?.(percent);
+    }
+  }, [debouncedProgressUpdate, onProgress]);
+
+  const handleLoadedMetadata = useCallback(() => setIsLoading(false), []);
+  const handleCanPlay = useCallback(() => setIsLoading(false), []);
+  const handleCanPlayThrough = useCallback(() => setIsLoading(false), []);
+  const handleLoadedData = useCallback(() => setIsLoading(false), []);
+  const handleLoadStart = useCallback(() => setIsLoading(true), []);
+  const handleWaiting = useCallback(() => setIsLoading(true), []);
+
+  const handleError = useCallback((e: React.SyntheticEvent<HTMLVideoElement | HTMLAudioElement>) => {
+    const media = e.currentTarget;
+    let errorDetail = "";
+    if (media.error) {
+      switch (media.error.code) {
+        case 1: errorDetail = "The fetching process was aborted by the user."; break;
+        case 2: errorDetail = "A network error occurred."; break;
+        case 3: errorDetail = "An error occurred while decoding the media."; break;
+        case 4: errorDetail = "The media could not be loaded, either because the server or network failed or because the format is not supported."; break;
+        default: errorDetail = "An unknown error occurred.";
+      }
+    }
+
+    console.error("Media error:", e, media.error);
+    setError({
+      message: `Failed to load ${contentType || 'media'} content. ${errorDetail}`
+    });
+    setIsLoading(false);
+  }, [contentType]);
+
+  const handleEnded = useCallback(async () => {
+    try {
+      await fetch("/api/progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lessonId,
+          completed: true,
+          completionPercent: 100,
+        }),
+      });
+    } catch (error) {
+      console.error("Failed to mark lesson as completed:", error);
+    }
+  }, [lessonId]);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-
-    const handleTimeUpdate = () => {
-      const current = video.currentTime;
-      const total = video.duration || 0;
-
-      if (total > 0) {
-        const percent = (current / total) * 100;
-        debouncedProgressUpdate(current, percent);
-        onProgress?.(percent);
-      }
-    };
-
-    const handleLoadedMetadata = () => {
-      setIsLoading(false);
-    };
-
-    const handleError = (e: any) => {
-      const media = videoRef.current;
-      let errorDetail = "";
-      if (media?.error) {
-        switch (media.error.code) {
-          case 1: errorDetail = "The fetching process was aborted by the user."; break;
-          case 2: errorDetail = "A network error occurred."; break;
-          case 3: errorDetail = "An error occurred while decoding the media."; break;
-          case 4: errorDetail = "The media could not be loaded, either because the server or network failed or because the format is not supported."; break;
-          default: errorDetail = "An unknown error occurred.";
-        }
-      }
-      
-      console.error("Media error:", e, media?.error);
-      setError({ 
-        message: `Failed to load ${contentType || 'media'} content. ${errorDetail}` 
-      });
-      setIsLoading(false);
-    };
-
-    const handleEnded = async () => {
-      try {
-        await fetch("/api/progress", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            lessonId,
-            completed: true,
-            completionPercent: 100,
-          }),
-        });
-      } catch (error) {
-        console.error("Failed to mark lesson as completed:", error);
-      }
-    };
-
-    const handleWaiting = () => setIsLoading(true);
-    const handleCanPlay = () => setIsLoading(false);
-    const handleCanPlayThrough = () => setIsLoading(false);
-    const handleLoadedData = () => setIsLoading(false);
-    const handleLoadStart = () => setIsLoading(true);
 
     // If media is already loaded (e.g. from cache), clear loading state
     if (video.readyState >= 2) { // HAVE_CURRENT_DATA
       setIsLoading(false);
     }
-
-    video.addEventListener("timeupdate", handleTimeUpdate);
-    video.addEventListener("loadedmetadata", handleLoadedMetadata);
-    video.addEventListener("loadeddata", handleLoadedData);
-    video.addEventListener("ended", handleEnded);
-    video.addEventListener("error", handleError);
-    video.addEventListener("waiting", handleWaiting);
-    video.addEventListener("canplay", handleCanPlay);
-    video.addEventListener("canplaythrough", handleCanPlayThrough);
-    video.addEventListener("loadstart", handleLoadStart);
-
-    return () => {
-      video.removeEventListener("timeupdate", handleTimeUpdate);
-      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-      video.removeEventListener("loadeddata", handleLoadedData);
-      video.removeEventListener("ended", handleEnded);
-      video.removeEventListener("error", handleError);
-      video.removeEventListener("waiting", handleWaiting);
-      video.removeEventListener("canplay", handleCanPlay);
-      video.removeEventListener("canplaythrough", handleCanPlayThrough);
-      video.removeEventListener("loadstart", handleLoadStart);
-    };
-  }, [lessonId, debouncedProgressUpdate, onProgress]);
+  }, []);
 
   // Helper to detect external video services
   const getEmbedUrl = (url: string) => {
@@ -173,6 +149,9 @@ export function VideoPlayer({
   useEffect(() => {
     if (mediaSrc) {
       console.log(`[VideoPlayer] Loading ${contentType}:`, mediaSrc);
+      // Reset error state when src changes
+      setError(null);
+      setIsLoading(true);
     }
   }, [mediaSrc, contentType]);
 
@@ -252,8 +231,15 @@ export function VideoPlayer({
               controls
               controlsList={allowDownload ? undefined : "nodownload"}
               preload="auto"
-              onLoadedData={() => setIsLoading(false)}
-              onCanPlay={() => setIsLoading(false)}
+              onTimeUpdate={handleTimeUpdate}
+              onLoadedMetadata={handleLoadedMetadata}
+              onLoadedData={handleLoadedData}
+              onEnded={handleEnded}
+              onError={handleError}
+              onWaiting={handleWaiting}
+              onCanPlay={handleCanPlay}
+              onCanPlayThrough={handleCanPlayThrough}
+              onLoadStart={handleLoadStart}
             />
             
             {isLoading && (
@@ -279,8 +265,15 @@ export function VideoPlayer({
           controlsList={allowDownload ? undefined : "nodownload"}
           preload="auto"
           playsInline
-          onLoadedData={() => setIsLoading(false)}
-          onCanPlay={() => setIsLoading(false)}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
+          onLoadedData={handleLoadedData}
+          onEnded={handleEnded}
+          onError={handleError}
+          onWaiting={handleWaiting}
+          onCanPlay={handleCanPlay}
+          onCanPlayThrough={handleCanPlayThrough}
+          onLoadStart={handleLoadStart}
         />
         
         {/* Loading Overlay */}
