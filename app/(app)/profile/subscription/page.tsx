@@ -145,7 +145,7 @@ export default async function UserSubscriptionPage() {
                     </span>
                   </div>
                   {subscription.cancelAtPeriodEnd && (
-                    <div className="bg-amber-100 dark:bg-amber-950/30 p-3 rounded text-xs text-amber-900 dark:text-amber-300 flex items-start gap-2">
+                    <div className="bg-amber-100 dark:bg-amber-950/30 p-3 rounded text-xs text-zinc-900 dark:text-amber-300 flex items-start gap-2">
                       <RefreshCw className="h-4 w-4 mt-0.5 flex-shrink-0" />
                       <span>Your subscription will end on {format(new Date(subscription.currentPeriodEnd), "PPP")} and will not renew.</span>
                     </div>
