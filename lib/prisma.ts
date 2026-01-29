@@ -55,9 +55,14 @@ export async function withRetry<T>(
   maxRetries: number = 3,
   delayMs: number = 1000
 ): Promise<T> {
+  // Reduce retries during build time to prevent long hangs on Vercel
+  // when database might be inaccessible.
+  const isBuildPhase = process.env.NEXT_IS_BUILDING === "true";
+  const actualMaxRetries = isBuildPhase ? 1 : maxRetries;
+
   let lastError: Error | undefined;
   
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+  for (let attempt = 1; attempt <= actualMaxRetries; attempt++) {
     try {
       return await operation();
     } catch (error) {
