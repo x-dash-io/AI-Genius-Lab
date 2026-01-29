@@ -116,7 +116,7 @@ export function getSignedCloudinaryUrl(
     // like mp4 for video or mp3 for audio, regardless of the original file extension.
     // Cloudinary handles the transcoding on the fly.
     let format = undefined;
-
+    
     // For video/audio resources, ensure we have an extension for browser compatibility.
     // We enforce mp4 (video) or mp3 (audio) for inline viewing to ensure that
     // formats like .mkv, .avi, or .mov are transcoded by Cloudinary to something the browser can play.
