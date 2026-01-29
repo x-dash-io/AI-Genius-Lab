@@ -307,7 +307,7 @@ export default async function DashboardPage({
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card className="bg-gradient-to-br from-orange-500 to-orange-600 dark:bg-orange-950/20 border-orange-600 dark:border-orange-900 shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-white dark:text-orange-100">
+              <CardTitle className="text-xs sm:text-sm font-semibold text-white dark:text-orange-100">
                 Learning Streak
               </CardTitle>
               <Flame className="h-4 w-4 text-white dark:text-orange-400" />
@@ -316,7 +316,7 @@ export default async function DashboardPage({
               <div className="text-2xl sm:text-3xl font-bold text-white dark:text-orange-300">
                 {learningStreak}
               </div>
-              <p className="text-xs text-white/90 dark:text-orange-400/80 mt-1">
+              <p className="text-sm font-medium text-orange-50 dark:text-orange-400/80 mt-1.5">
                 Active days (30d)
               </p>
             </CardContent>
@@ -324,7 +324,7 @@ export default async function DashboardPage({
 
           <Card className="bg-gradient-to-br from-blue-500 to-blue-600 dark:bg-blue-950/20 border-blue-600 dark:border-blue-900 shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-white dark:text-blue-100">
+              <CardTitle className="text-xs sm:text-sm font-semibold text-white dark:text-blue-100">
                 This Week
               </CardTitle>
               <Calendar className="h-4 w-4 text-white dark:text-blue-400" />
@@ -333,7 +333,7 @@ export default async function DashboardPage({
               <div className="text-2xl sm:text-3xl font-bold text-white dark:text-blue-300">
                 {weekProgress}
               </div>
-              <p className="text-xs text-white/90 dark:text-blue-400/80 mt-1">
+              <p className="text-sm font-medium text-blue-50 dark:text-blue-400/80 mt-1.5">
                 Lessons accessed
               </p>
             </CardContent>
@@ -341,7 +341,7 @@ export default async function DashboardPage({
 
           <Card className="bg-gradient-to-br from-green-500 to-green-600 dark:bg-green-950/20 border-green-600 dark:border-green-900 shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-white dark:text-green-100">
+              <CardTitle className="text-xs sm:text-sm font-semibold text-white dark:text-green-100">
                 Avg Progress
               </CardTitle>
               <BarChart3 className="h-4 w-4 text-white dark:text-green-400" />
@@ -350,7 +350,7 @@ export default async function DashboardPage({
               <div className="text-2xl sm:text-3xl font-bold text-white dark:text-green-300">
                 {avgCompletionRate}%
               </div>
-              <p className="text-xs text-white/90 dark:text-green-400/80 mt-1">
+              <p className="text-sm font-medium text-green-50 dark:text-green-400/80 mt-1.5">
                 Course completion
               </p>
             </CardContent>
@@ -358,7 +358,7 @@ export default async function DashboardPage({
 
           <Card className="bg-gradient-to-br from-purple-500 to-purple-600 dark:bg-purple-950/20 border-purple-600 dark:border-purple-900 shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-white dark:text-purple-100">
+              <CardTitle className="text-xs sm:text-sm font-semibold text-white dark:text-purple-100">
                 Learning Time
               </CardTitle>
               <Clock className="h-4 w-4 text-white dark:text-purple-400" />
@@ -367,7 +367,7 @@ export default async function DashboardPage({
               <div className="text-2xl sm:text-3xl font-bold text-white dark:text-purple-300">
                 {learningHours}h {learningMinutes}m
               </div>
-              <p className="text-xs text-white/90 dark:text-purple-400/80 mt-1">
+              <p className="text-sm font-medium text-purple-50 dark:text-purple-400/80 mt-1.5">
                 Estimated total
               </p>
             </CardContent>
