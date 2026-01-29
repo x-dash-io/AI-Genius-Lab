@@ -182,7 +182,7 @@ export function VideoPlayer({
               },
               forceAudio: contentType === 'audio'
             }
-          }}
+          } as any}
         />
 
         {/* Loading Overlay */}
