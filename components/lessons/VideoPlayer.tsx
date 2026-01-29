@@ -91,9 +91,8 @@ export function VideoPlayer({
     }
   }, [lessonId]);
 
-  // Determine source URL
-  const isOriginalSrcValidUrl = originalSrc && (originalSrc.startsWith('http://') || originalSrc.startsWith('https://'));
-  const mediaSrc = (contentType === 'video' || contentType === 'audio') && isOriginalSrcValidUrl ? originalSrc : src;
+  // Always use the protected proxy endpoint for playback to keep inline behavior
+  const mediaSrc = src;
 
   // Reset state when src changes
   useEffect(() => {

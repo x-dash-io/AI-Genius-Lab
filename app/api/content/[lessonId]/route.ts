@@ -57,20 +57,37 @@ export async function GET(
       return NextResponse.redirect(targetUrl);
     }
 
-    // For Cloudinary content, we'll redirect directly to the signed URL
-    // Cloudinary will handle validation - if content doesn't exist, it will return 404
-    // Pre-checking adds latency and can have false negatives, so we let Cloudinary validate
-    // The signed URL will fail if content doesn't exist, and the client will handle the error
-
-    // Content exists, redirect to the signed URL
-    // The signed URL is already user-specific and expires in 10 minutes
-    // Each request generates a fresh URL, so sharing won't work
-    return NextResponse.redirect(targetUrl, {
+    // Stream media through this endpoint to control inline vs download behavior
+    const upstreamResponse = await fetch(targetUrl, {
       headers: {
-        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0",
+        ...(request.headers.get("range")
+          ? { Range: request.headers.get("range") as string }
+          : {}),
       },
+    });
+
+    if (!upstreamResponse.ok || !upstreamResponse.body) {
+      return NextResponse.json(
+        { error: "Content not available" },
+        { status: upstreamResponse.status || 502 }
+      );
+    }
+
+    const headers = new Headers(upstreamResponse.headers);
+    const filename = (publicId || "content").split("/").pop() || "content";
+    const dispositionType = isDownload ? "attachment" : "inline";
+
+    headers.set(
+      "Content-Disposition",
+      `${dispositionType}; filename=\"${encodeURIComponent(filename)}\"`
+    );
+    headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    headers.set("Pragma", "no-cache");
+    headers.set("Expires", "0");
+
+    return new NextResponse(upstreamResponse.body, {
+      status: upstreamResponse.status,
+      headers,
     });
   } catch (error) {
     console.error("Content proxy error:", error);
