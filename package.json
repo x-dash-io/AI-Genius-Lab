@@ -13,7 +13,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "clean": "rmdir /s /q .next 2>nul || echo Clean complete",
+    "clean": "rm -rf .next",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
     "paypal:sync": "tsx scripts/sync-plans.ts"
