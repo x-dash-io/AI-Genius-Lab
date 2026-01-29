@@ -157,7 +157,10 @@ export function VideoPlayer({
   const embedUrl = getEmbedUrl(originalSrc || '');
   
   // Use the signed URL directly for better reliability with media elements (redirects can break range requests)
-  const mediaSrc = (contentType === 'video' || contentType === 'audio') && originalSrc ? originalSrc : src;
+  // Only use originalSrc if it's a valid absolute URL (e.g. external content).
+  // If it's a Cloudinary public ID (DB contentUrl), we must use the proxy (src) to get a signed URL.
+  const isOriginalSrcValidUrl = originalSrc && (originalSrc.startsWith('http://') || originalSrc.startsWith('https://'));
+  const mediaSrc = (contentType === 'video' || contentType === 'audio') && isOriginalSrcValidUrl ? originalSrc : src;
 
   useEffect(() => {
     if (mediaSrc) {
