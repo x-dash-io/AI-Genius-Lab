@@ -109,6 +109,7 @@ export default async function CourseDetailPage({
         courseId={course.id}
         courseSlug={course.slug}
         priceCents={course.priceCents}
+        tier={course.tier}
       />
 
       {/* Reviews Section */}

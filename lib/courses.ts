@@ -13,6 +13,7 @@ export async function getPublishedCourses() {
         description: true,
         category: true,
         priceCents: true,
+        tier: true,
         inventory: true,
       },
       orderBy: { createdAt: "desc" },
@@ -32,6 +33,7 @@ export async function getPublishedCoursesByCategory(category: string) {
         description: true,
         category: true,
         priceCents: true,
+        tier: true,
         inventory: true,
       },
       orderBy: { createdAt: "desc" },
@@ -50,6 +52,7 @@ export async function getCoursePreviewBySlug(slug: string) {
             title: true,
             description: true,
             priceCents: true,
+            tier: true,
             sections: {
               orderBy: { sortOrder: "asc" },
               select: {
@@ -86,6 +89,7 @@ export async function getCourseForLibraryBySlug(slug: string) {
         id: true,
         slug: true,
         title: true,
+        tier: true,
         sections: {
           orderBy: { sortOrder: "asc" },
           select: {

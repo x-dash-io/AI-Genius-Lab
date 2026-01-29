@@ -30,6 +30,8 @@ export async function GET(
     // Validate access and get lesson content (this checks purchase status)
     const { lesson, signedUrl, publicId } = await getAuthorizedLessonContent(lessonId);
 
+    console.log(`[Content API] lessonId: ${lessonId}, contentType: ${lesson.contentType}, hasSignedUrl: ${!!signedUrl}`);
+
     if (!signedUrl) {
       return NextResponse.json(
         {

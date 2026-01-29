@@ -16,6 +16,7 @@ interface AddToCartButtonProps {
   size?: "default" | "sm" | "lg" | "icon";
   className?: string;
   checkOwnership?: boolean; // If true, checks if user already owns the course
+  tier?: "STANDARD" | "PREMIUM";
 }
 
 export function AddToCartButton({
@@ -27,12 +28,14 @@ export function AddToCartButton({
   size = "default",
   className,
   checkOwnership = false,
+  tier = "STANDARD",
 }: AddToCartButtonProps) {
   const { data: session } = useSession();
   const { cart, addToCart, isLoading } = useCart();
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [isOwned, setIsOwned] = useState(false);
+  const [subscription, setSubscription] = useState<any>(null);
   const [isCheckingOwnership, setIsCheckingOwnership] = useState(checkOwnership);
 
   // Check ownership if enabled
@@ -44,10 +47,19 @@ export function AddToCartButton({
 
     async function checkCourseOwnership() {
       try {
-        const response = await fetch(`/api/courses/${courseId}/ownership`);
-        if (response.ok) {
-          const data = await response.json();
+        const [ownershipRes, subRes] = await Promise.all([
+          fetch(`/api/courses/${courseId}/ownership`),
+          fetch(`/api/subscriptions/current`)
+        ]);
+
+        if (ownershipRes.ok) {
+          const data = await ownershipRes.json();
           setIsOwned(data.owned);
+        }
+
+        if (subRes.ok) {
+          const data = await subRes.json();
+          setSubscription(data.subscription);
         }
       } catch (error) {
         console.error("Failed to check ownership:", error);
@@ -90,6 +102,19 @@ export function AddToCartButton({
   };
 
   // Show loading while checking ownership
+  const isPremium = tier === "PREMIUM";
+  const hasProAccess = subscription?.plan?.tier === "pro" || subscription?.plan?.tier === "elite";
+
+  if (isPremium && !hasProAccess && !isOwned) {
+    return (
+      <Link href="/pricing" className={className}>
+        <Button variant="outline" size={size} className="w-full border-amber-500/50 text-amber-600 hover:bg-amber-50">
+          Unlock with Pro
+        </Button>
+      </Link>
+    );
+  }
+
   if (isCheckingOwnership) {
     return (
       <Button variant="outline" size={size} className={className} disabled>

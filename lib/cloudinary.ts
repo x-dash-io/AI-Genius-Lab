@@ -44,7 +44,7 @@ type CloudinaryResourceType = "image" | "video" | "raw";
 export function getSignedCloudinaryUrl(
   publicId: string,
   resourceType: CloudinaryResourceType,
-  options: { download?: boolean; userId?: string } = {}
+  options: { download?: boolean; userId?: string; isAudio?: boolean } = {}
 ) {
   configureCloudinary();
 
@@ -57,26 +57,45 @@ export function getSignedCloudinaryUrl(
   let cleanPublicId = publicId.trim();
   console.log('[Cloudinary] Original publicId:', publicId);
 
+  // Strip leading version if present (e.g. v1234567890/folder/file)
+  if (cleanPublicId.match(/^v\d+\//)) {
+    cleanPublicId = cleanPublicId.replace(/^v\d+\//, '');
+    console.log('[Cloudinary] Stripped leading version:', cleanPublicId);
+  }
+
   // If it's a full Cloudinary URL, extract the public ID
   if (cleanPublicId.includes('cloudinary.com')) {
-    try {
-      const url = new URL(cleanPublicId);
-      // Extract path after /v1/ or similar version
-      const pathParts = url.pathname.split('/').filter(p => p && p !== 'v1');
-      cleanPublicId = pathParts.join('/');
-      console.log('[Cloudinary] Extracted from URL:', cleanPublicId);
-    } catch (error) {
-      console.error('[Cloudinary] Error parsing URL:', cleanPublicId, error);
-      return null;
+    // Regex that handles: .../resource_type/upload/signature/version/public_id
+    const match = cleanPublicId.match(/\/(?:image|video|raw)\/upload\/(?:s--[^-]+--\/)?(?:v\d+\/)?([^\?#]+)/);
+    if (match) {
+      cleanPublicId = match[1];
+      console.log('[Cloudinary] Extracted public ID using robust regex:', cleanPublicId);
+    } else {
+      try {
+        const url = new URL(cleanPublicId);
+        const parts = url.pathname.split('/');
+        const uploadIndex = parts.indexOf('upload');
+        if (uploadIndex !== -1 && uploadIndex < parts.length - 1) {
+          let publicIdParts = parts.slice(uploadIndex + 1);
+          if (publicIdParts[0].startsWith('v') && /^\d+$/.test(publicIdParts[0].substring(1))) {
+            publicIdParts = publicIdParts.slice(1);
+          }
+          cleanPublicId = publicIdParts.join('/');
+          console.log('[Cloudinary] Extracted public ID using fallback:', cleanPublicId);
+        }
+      } catch (error) {
+        console.error('[Cloudinary] Error parsing URL:', cleanPublicId, error);
+        return null;
+      }
     }
   }
 
   // Remove any query parameters or fragments
   cleanPublicId = cleanPublicId.split('?')[0].split('#')[0];
 
-  // Basic validation - should contain folder structure
-  if (!cleanPublicId.includes('/') || cleanPublicId.length < 10) {
-    console.error('[Cloudinary] Invalid format:', cleanPublicId, 'from original:', publicId);
+  // Basic validation
+  if (!cleanPublicId || cleanPublicId.length < 3) {
+    console.error('[Cloudinary] Invalid format (too short):', cleanPublicId, 'from original:', publicId);
     return null;
   }
 
@@ -91,11 +110,19 @@ export function getSignedCloudinaryUrl(
     // - Time-limited access (10 minutes)
     // - Signature verification
     // - Per-request validation (via /api/content/[lessonId])
+    // For video resource type, Cloudinary often requires an extension in the URL
+    // for the browser to correctly identify and play the media.
+    const hasExtension = cleanPublicId.split('/').pop()?.includes('.');
+
     const signedUrl = cloudinary.url(cleanPublicId, {
       secure: true,
       sign_url: true,
       type: "upload", // Changed from "authenticated" to match actual file type
       resource_type: resourceType,
+      // Automatically add extension for video/audio if missing to help browser identification
+      format: (!hasExtension && resourceType === 'video')
+        ? (options.isAudio ? 'mp3' : 'mp4')
+        : undefined,
       expires_at: expiresAt,
       attachment: options.download ? cleanPublicId.split('/').pop() : undefined,
     });

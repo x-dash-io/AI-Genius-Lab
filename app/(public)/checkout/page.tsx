@@ -37,6 +37,11 @@ async function createCheckoutSession(formData: FormData) {
     redirect("/courses");
   }
 
+  // PREMIUM courses cannot be purchased individually
+  if (course.tier === "PREMIUM") {
+    redirect(`/courses/${course.slug}?error=premium_only`);
+  }
+
   const existingPurchase = await prisma.purchase.findFirst({
     where: { userId: session.user.id, courseId: course.id },
   });
@@ -184,6 +189,11 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
   const course = await getCoursePreviewBySlug(slug);
   if (!course) {
     redirect("/courses");
+  }
+
+  // PREMIUM courses cannot be purchased individually
+  if (course.tier === "PREMIUM") {
+    redirect(`/courses/${course.slug}?error=premium_only`);
   }
 
   if (!session?.user) {

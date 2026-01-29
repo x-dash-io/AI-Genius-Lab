@@ -41,6 +41,8 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
   );
   
   if (!hasAccess) {
+    const isPremium = course.tier === "PREMIUM";
+
     return (
       <div className="space-y-6">
         <div className="rounded-xl border bg-card p-8 text-center">
@@ -50,15 +52,29 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
             </div>
             <div className="space-y-2">
               <h1 className="text-2xl font-bold">{course.title}</h1>
-              <p className="text-muted-foreground">
-                Purchase required to unlock the full lesson experience.
-              </p>
+              {isPremium ? (
+                <p className="text-muted-foreground">
+                  This is a <span className="font-bold uppercase">Premium</span> course. It is available exclusively to Pro and Elite subscribers.
+                </p>
+              ) : (
+                <p className="text-muted-foreground">
+                  Purchase required to unlock the full lesson experience.
+                </p>
+              )}
             </div>
-            <Link href={`/courses/${course.slug}`}>
-              <Button size="lg">
-                View Course Details
-              </Button>
-            </Link>
+            {isPremium ? (
+              <Link href="/pricing">
+                <Button size="lg">
+                  Upgrade to Pro
+                </Button>
+              </Link>
+            ) : (
+              <Link href={`/courses/${course.slug}`}>
+                <Button size="lg">
+                  View Course Details
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
