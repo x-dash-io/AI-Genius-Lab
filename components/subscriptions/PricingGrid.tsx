@@ -23,11 +23,19 @@ export function PricingGrid({ plans }: PricingGridProps) {
           onValueChange={(v) => setInterval(v as "monthly" | "annual")}
           className="w-[300px]"
         >
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="monthly">Monthly</TabsTrigger>
-            <TabsTrigger value="annual">
+          <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-lg">
+            <TabsTrigger 
+              value="monthly" 
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border rounded-md transition-all"
+            >
+              Monthly
+            </TabsTrigger>
+            <TabsTrigger 
+              value="annual"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border rounded-md transition-all"
+            >
               Annual
-              <span className="ml-1.5 inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+              <span className="ml-1.5 inline-flex items-center rounded-full bg-green-100 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-800 dark:text-green-300">
                 -20%
               </span>
             </TabsTrigger>
@@ -42,7 +50,7 @@ export function PricingGrid({ plans }: PricingGridProps) {
           const perMonthPrice = interval === "annual" ? (priceCents / 12 / 100).toFixed(2) : displayPrice;
 
           return (
-            <Card key={plan.id} className={plan.tier === "pro" ? "border-primary shadow-lg relative md:scale-105" : ""}>
+            <Card key={plan.id} className={plan.tier === "pro" ? "border-primary shadow-xl relative md:scale-105 ring-2 ring-primary/20" : ""}>
               {plan.tier === "pro" && (
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                   Most Popular
@@ -96,7 +104,7 @@ export function PricingGrid({ plans }: PricingGridProps) {
               </CardContent>
               <CardFooter>
                 <Link href={`/checkout/subscription?planId=${plan.id}&interval=${interval}`} className="w-full">
-                  <Button className="w-full" variant={plan.tier === "pro" ? "default" : "outline"}>
+                  <Button className="w-full hover:scale-105 transition-transform" variant={plan.tier === "pro" ? "default" : "outline"}>
                     {plan.tier === "starter" ? "Start for Free-ish" : "Choose " + plan.name}
                   </Button>
                 </Link>
