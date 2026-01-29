@@ -439,10 +439,10 @@ export default async function DashboardPage({
           </Card>
 
           {/* Quick Achievements */}
-          <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-amber-200 dark:border-amber-900">
+          <Card className="bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-400 dark:border-amber-900 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-zinc-900 dark:text-amber-100">
-                <Trophy className="h-5 w-5 text-amber-700 dark:text-amber-400" />
+                <Trophy className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                 Achievements
               </CardTitle>
               <CardDescription className="text-zinc-700 dark:text-amber-300/80">
@@ -451,8 +451,8 @@ export default async function DashboardPage({
             </CardHeader>
             <CardContent className="space-y-3">
               {completedCourses > 0 && (
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-white/50 dark:bg-black/20">
-                  <div className="h-10 w-10 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-white/70 dark:bg-black/20 border-2 border-amber-300 dark:border-amber-800">
+                  <div className="h-10 w-10 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0 shadow-md">
                     <Trophy className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -466,8 +466,8 @@ export default async function DashboardPage({
                 </div>
               )}
               {learningStreak >= 7 && (
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-white/50 dark:bg-black/20">
-                  <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-white/70 dark:bg-black/20 border-2 border-orange-300 dark:border-orange-800">
+                  <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0 shadow-md">
                     <Flame className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -481,8 +481,8 @@ export default async function DashboardPage({
                 </div>
               )}
               {totalLessonsCompleted >= 10 && (
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-white/50 dark:bg-black/20">
-                  <div className="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-white/70 dark:bg-black/20 border-2 border-green-300 dark:border-green-800">
+                  <div className="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 shadow-md">
                     <CheckCircle2 className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -496,8 +496,8 @@ export default async function DashboardPage({
                 </div>
               )}
               {certificates.length > 0 && (
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-white/50 dark:bg-black/20">
-                  <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-white/70 dark:bg-black/20 border-2 border-blue-300 dark:border-blue-800">
+                  <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 shadow-md">
                     <Award className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
