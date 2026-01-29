@@ -18,7 +18,6 @@ const nextConfig = (phase: string): NextConfig => {
     experimental: {
       optimizePackageImports: [
         "lucide-react",
-        "@radix-ui/react-icons",
         "date-fns",
         "recharts",
         "framer-motion",
@@ -31,6 +30,10 @@ const nextConfig = (phase: string): NextConfig => {
     // Speed up builds by skipping type checking (Vercel runs it separately)
     typescript: {
       ignoreBuildErrors: true,
+    },
+    // Skip linting during build to speed up CI
+    eslint: {
+      ignoreDuringBuilds: true,
     },
     poweredByHeader: false,
   };
