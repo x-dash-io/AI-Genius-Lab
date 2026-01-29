@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import ReactPlayer from "react-player";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { Loader2, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface VideoPlayerProps {
@@ -15,13 +14,6 @@ interface VideoPlayerProps {
   onProgress?: (progress: number) => void;
 }
 
-interface ProgressState {
-  played: number;
-  playedSeconds: number;
-  loaded: number;
-  loadedSeconds: number;
-}
-
 export function VideoPlayer({
   src,
   originalSrc,
@@ -30,13 +22,13 @@ export function VideoPlayer({
   allowDownload,
   onProgress,
 }: VideoPlayerProps) {
-  const [isReady, setIsReady] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<{
     message: string;
     adminActionRequired?: boolean;
     code?: string;
   } | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Debounced progress update
   const debouncedProgressUpdate = useDebouncedCallback(
@@ -58,24 +50,7 @@ export function VideoPlayer({
     3000
   );
 
-  const handleProgress = useCallback((state: ProgressState) => {
-    // Only track progress if video is actually playing and we have a valid duration
-    if (state.played > 0) {
-      const percent = state.played * 100;
-      debouncedProgressUpdate(state.playedSeconds, percent);
-      onProgress?.(percent);
-    }
-  }, [debouncedProgressUpdate, onProgress]);
-
-  const handleError = useCallback((e: any) => {
-    console.error("Media error:", e);
-    setIsLoading(false);
-    setError({
-      message: "Failed to load content. The format might not be supported or the network connection failed."
-    });
-  }, []);
-
-  const handleEnded = useCallback(async () => {
+  const handleEnded = useDebouncedCallback(async () => {
     try {
       await fetch("/api/progress", {
         method: "POST",
@@ -89,17 +64,37 @@ export function VideoPlayer({
     } catch (error) {
       console.error("Failed to mark lesson as completed:", error);
     }
-  }, [lessonId]);
+  }, 0, { maxWait: 0 });
 
   // Always use the protected proxy endpoint for playback to keep inline behavior
   const mediaSrc = src;
 
-  // Reset state when src changes
   useEffect(() => {
-    setIsLoading(true);
     setError(null);
-    setIsReady(false);
   }, [mediaSrc]);
+
+  const mediaAttributes = useMemo(() => ({
+    controls: true,
+    playsInline: true,
+    preload: "metadata" as const,
+    controlsList: allowDownload ? undefined : "nodownload",
+  }), [allowDownload]);
+
+  const handleTimeUpdate = () => {
+    const element = contentType === "audio" ? audioRef.current : videoRef.current;
+    if (!element || !element.duration) return;
+    const percent = (element.currentTime / element.duration) * 100;
+    if (percent > 0) {
+      debouncedProgressUpdate(element.currentTime, percent);
+      onProgress?.(percent);
+    }
+  };
+
+  const handleError = () => {
+    setError({
+      message: "Failed to load content. The format might not be supported or the network connection failed.",
+    });
+  };
 
   if (error) {
     return (
@@ -153,43 +148,26 @@ export function VideoPlayer({
       )}
 
       <div className={cn("relative w-full h-full", contentType === 'audio' ? "h-12" : "")}>
-        <ReactPlayer
-          // KEY PROP: Forces player to re-mount when URL changes (Fixes loading spinner)
-          key={mediaSrc} 
-          url={mediaSrc || ""}
-          width="100%"
-          height="100%"
-          controls={true}
-          playing={false}
-          onReady={() => {
-            setIsReady(true);
-            setIsLoading(false);
-          }}
-          onStart={() => setIsLoading(false)}
-          onBuffer={() => setIsLoading(true)}
-          onBufferEnd={() => setIsLoading(false)}
-          onError={handleError}
-          onEnded={handleEnded}
-          // @ts-expect-error ReactPlayer onProgress type definition conflict with strict TS
-          onProgress={handleProgress}
-          config={{
-            file: {
-              attributes: {
-                controlsList: allowDownload ? undefined : 'nodownload',
-                style: contentType === 'audio' ? { height: '54px' } : {}
-              },
-              forceAudio: contentType === 'audio'
-            }
-          } as any} 
-        />
-
-        {isLoading && !isReady && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm pointer-events-none z-10">
-            <div className="flex flex-col items-center gap-3">
-              <Loader2 className="h-10 w-10 text-white animate-spin" />
-              {contentType === 'video' && <p className="text-xs text-white/80">Loading...</p>}
-            </div>
-          </div>
+        {contentType === "audio" ? (
+          <audio
+            ref={audioRef}
+            src={mediaSrc || ""}
+            {...mediaAttributes}
+            onTimeUpdate={handleTimeUpdate}
+            onEnded={handleEnded}
+            onError={handleError}
+            className="w-full"
+          />
+        ) : (
+          <video
+            ref={videoRef}
+            src={mediaSrc || ""}
+            {...mediaAttributes}
+            onTimeUpdate={handleTimeUpdate}
+            onEnded={handleEnded}
+            onError={handleError}
+            className="h-full w-full"
+          />
         )}
       </div>
     </div>

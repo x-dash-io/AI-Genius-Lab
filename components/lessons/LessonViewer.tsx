@@ -185,11 +185,7 @@ export function LessonViewer({
         {allowDownload && (
           <div className="flex justify-end">
             <Button variant="outline" asChild>
-              <a
-                href={downloadUrl || `/api/content/${lessonId}?download=true`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={downloadUrl || `/api/content/${lessonId}?download=true`}>
                 <Download className="mr-2 h-4 w-4" />
                 Download {contentType === 'audio' ? 'Audio' : 'Video'}
               </a>
@@ -323,8 +319,6 @@ export function LessonViewer({
 
           <a
             href={`/api/content/${lessonId}`}
-            target="_blank"
-            rel="noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm hover:bg-primary/90 transition-all w-full sm:w-auto justify-center"
           >
             <ExternalLink className="h-5 w-5" />
