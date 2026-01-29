@@ -90,6 +90,32 @@ export function VideoPlayer({
     }
   };
 
+  useEffect(() => {
+    const pauseMedia = () => {
+      const element = contentType === "audio" ? audioRef.current : videoRef.current;
+      if (element && !element.paused) {
+        element.pause();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState !== "visible") {
+        pauseMedia();
+      }
+    };
+
+    window.addEventListener("beforeunload", pauseMedia);
+    window.addEventListener("pagehide", pauseMedia);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      pauseMedia();
+      window.removeEventListener("beforeunload", pauseMedia);
+      window.removeEventListener("pagehide", pauseMedia);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [contentType]);
+
   const handleError = () => {
     setError({
       message: "Failed to load content. The format might not be supported or the network connection failed.",
