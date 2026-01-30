@@ -31,7 +31,7 @@ async function createSubscriptionAction(formData: FormData) {
   const existingSub = await prisma.subscription.findFirst({
     where: {
       userId: session.user.id,
-      status: { in: ["active", "past_due", "cancelled"] },
+      status: { in: ["active", "past_due"] },
       currentPeriodEnd: { gt: new Date() }
     }
   });

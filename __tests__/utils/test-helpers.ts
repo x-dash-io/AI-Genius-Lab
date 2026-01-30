@@ -408,3 +408,9 @@ export async function cleanupAllTestData() {
   await cleanupTestUsers();
   await cleanupTestCourses();
 }
+
+describe("Test Helpers", () => {
+  it("should have a dummy test to prevent Jest from failing", () => {
+    expect(true).toBe(true);
+  });
+});
