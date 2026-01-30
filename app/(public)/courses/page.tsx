@@ -83,15 +83,14 @@ async function CourseCatalogContent({ searchParams }: CoursesPageProps) {
 
   return (
     <>
-      <div>
-        <h1 className="font-display text-4xl font-bold tracking-tight">
-          Course Catalog
-        </h1>
-        <p className="mt-2 text-lg text-muted-foreground">
-          {hasFilters
-            ? `Showing ${filteredCount} of ${totalCourses} courses`
-            : `Browse ${totalCourses} curated AI courses with previews and structured learning paths.`}
-        </p>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="text-muted-foreground">
+            {hasFilters
+              ? `Showing ${filteredCount} of ${totalCourses} courses`
+              : `Browse ${totalCourses} curated AI courses`}
+          </p>
+        </div>
       </div>
       
       {/* Filters */}
@@ -101,13 +100,14 @@ async function CourseCatalogContent({ searchParams }: CoursesPageProps) {
 
       {/* Course List */}
       {courses.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+        <Card className="border-dashed">
+          <CardContent className="py-16 text-center">
+            <BookOpen className="mx-auto h-16 w-16 text-muted-foreground/30 mb-4" />
+            <p className="text-lg font-medium mb-2">No courses found</p>
             <p className="text-muted-foreground">
               {hasFilters
-                ? "No courses match your search criteria. Try adjusting your filters."
-                : "No courses available at the moment. Check back soon for new courses!"}
+                ? "Try adjusting your filters to find what you're looking for."
+                : "Check back soon for new courses!"}
             </p>
           </CardContent>
         </Card>
@@ -120,10 +120,25 @@ async function CourseCatalogContent({ searchParams }: CoursesPageProps) {
 
 export default async function CoursesPage({ searchParams }: CoursesPageProps) {
   return (
-    <section className="grid gap-6">
-      <Suspense fallback={<div className="h-96 animate-pulse bg-muted rounded" />}>
-        <CourseCatalogContent searchParams={searchParams} />
-      </Suspense>
-    </section>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
+      <section className="container mx-auto py-12 px-4 grid gap-8">
+        {/* Header */}
+        <div className="space-y-4">
+          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm font-medium text-primary">
+            📚 Course Library
+          </div>
+          <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight">
+            Discover AI Courses
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl">
+            Learn from our curated collection of AI courses. Filter by category, price, and more to find the perfect course for you.
+          </p>
+        </div>
+
+        <Suspense fallback={<div className="h-96 animate-pulse bg-muted rounded" />}>
+          <CourseCatalogContent searchParams={searchParams} />
+        </Suspense>
+      </section>
+    </div>
   );
 }

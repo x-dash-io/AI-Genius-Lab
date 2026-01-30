@@ -126,80 +126,181 @@ export default async function SubscriptionCheckoutPage({ searchParams }: Props) 
   const isSynced = !!paypalPlanId;
 
   return (
-    <div className="max-w-2xl mx-auto py-24 px-4">
-      {!isSynced && (
-        <Alert variant="destructive" className="mb-8">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Plan Not Ready</AlertTitle>
-          <AlertDescription>
-            This subscription plan has not been synced with PayPal yet.
-            If you are the administrator, please go to the admin dashboard and click "Sync to PayPal".
-          </AlertDescription>
-        </Alert>
-      )}
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="max-w-4xl mx-auto py-12 px-4 sm:py-16 sm:px-6 lg:px-8">
+        {/* Progress indicator */}
+        <div className="mb-8 flex items-center justify-center gap-2 text-sm">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">1</div>
+          <div className="h-1 w-12 bg-primary" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-muted-foreground font-semibold">2</div>
+          <span className="ml-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">Confirmation</span>
+        </div>
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {isSwitching ? "Switch Subscription Plan" : "Confirm Subscription"}
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          {isSwitching
-            ? `You are switching from ${existingSub.plan.name} to ${plan.name}. Your new plan will start immediately.`
-            : "Review your selection before proceeding to payment."}
-        </p>
-      </div>
+        {!isSynced && (
+          <Alert variant="destructive" className="mb-8">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Plan Not Ready</AlertTitle>
+            <AlertDescription>
+              This subscription plan has not been synced with PayPal yet.
+              If you are the administrator, please go to the admin dashboard and click "Sync to PayPal".
+            </AlertDescription>
+          </Alert>
+        )}
 
-      <CheckoutIntervalToggle />
-
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle className="text-2xl">{plan.name}</CardTitle>
-              <CardDescription>{plan.description}</CardDescription>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold">${(price / 100).toFixed(2)}</p>
-              <p className="text-sm text-muted-foreground capitalize">{interval} billing</p>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-3">
-            <p className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">What you get</p>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2 text-sm">
-                <Check className="h-4 w-4 text-green-500" />
-                <span>Unlimited access to {plan.tier === "starter" ? "standard" : "all"} courses</span>
-              </li>
-              {plan.tier !== "starter" && (
-                <li className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span>Verified certificates of completion</span>
-                </li>
-              )}
-              {plan.tier === "elite" && (
-                <li className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-green-500" />
-                  <span>Access to all Learning Paths</span>
-                </li>
-              )}
-            </ul>
-          </div>
-        </CardContent>
-        <CardFooter className="flex-col gap-4 border-t pt-6">
-          <form action={createSubscriptionAction} className="w-full">
-            <input type="hidden" name="planId" value={plan.id} />
-            <input type="hidden" name="interval" value={interval} />
-            <Button type="submit" className="w-full" size="lg" disabled={!isSynced}>
-              {isSwitching ? "Confirm & Pay via PayPal" : "Subscribe via PayPal"}
-            </Button>
-          </form>
-          <p className="text-xs text-center text-muted-foreground max-w-sm mx-auto">
-            By subscribing, you agree to automatic recurring billing. You can cancel at any time from your dashboard.
+        {/* Header */}
+        <div className="mb-12 text-center">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            {isSwitching ? "Switch Your Plan" : "Confirm Your Subscription"}
+          </h1>
+          <p className="mt-4 text-lg text-muted-foreground">
+            {isSwitching
+              ? `Upgrading from ${existingSub.plan.name} to ${plan.name}. Changes apply immediately.`
+              : "Review your selection and complete your payment securely."}
           </p>
-        </CardFooter>
-      </Card>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-3">
+          {/* Order Summary */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Interval Toggle */}
+            <Card>
+              <CardContent className="pt-6">
+                <CheckoutIntervalToggle />
+              </CardContent>
+            </Card>
+
+            {/* Plan Details Card */}
+            <Card className="border-2 border-primary/20">
+              <CardHeader className="pb-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-3xl">{plan.name}</CardTitle>
+                    <CardDescription className="mt-2 text-base">{plan.description}</CardDescription>
+                  </div>
+                  {isSwitching && (
+                    <span className="inline-flex items-center rounded-full bg-blue-100 dark:bg-blue-900/30 px-3 py-1 text-xs font-semibold text-blue-800 dark:text-blue-300">
+                      Upgrade
+                    </span>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Price Section */}
+                <div className="rounded-lg bg-muted/30 p-6">
+                  <div className="mb-2 text-sm font-medium text-muted-foreground uppercase tracking-wider">Price</div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-5xl font-bold">${(price / 100).toFixed(2)}</span>
+                    <span className="text-muted-foreground">/{interval === "annual" ? "year" : "month"}</span>
+                  </div>
+                  {interval === "annual" && (
+                    <p className="mt-3 text-sm text-green-600 dark:text-green-400 font-medium">
+                      💰 Save ${(price / 100 * 0.2).toFixed(2)}/year vs. monthly
+                    </p>
+                  )}
+                </div>
+
+                {/* What's Included */}
+                <div>
+                  <h3 className="mb-4 font-semibold text-sm uppercase tracking-wider text-foreground">What's Included</h3>
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="font-medium text-sm">Unlimited Courses</p>
+                        <p className="text-xs text-muted-foreground">Access to {plan.tier === "starter" ? "standard" : "all"} curated courses</p>
+                      </div>
+                    </li>
+                    {plan.tier !== "starter" && (
+                      <li className="flex items-start gap-3">
+                        <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+                        <div>
+                          <p className="font-medium text-sm">Certificates</p>
+                          <p className="text-xs text-muted-foreground">Verified certificates of completion</p>
+                        </div>
+                      </li>
+                    )}
+                    {plan.tier === "elite" && (
+                      <li className="flex items-start gap-3">
+                        <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+                        <div>
+                          <p className="font-medium text-sm">Learning Paths</p>
+                          <p className="text-xs text-muted-foreground">Structured learning journeys</p>
+                        </div>
+                      </li>
+                    )}
+                    {plan.tier !== "starter" && (
+                      <li className="flex items-start gap-3">
+                        <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+                        <div>
+                          <p className="font-medium text-sm">Priority Support</p>
+                          <p className="text-xs text-muted-foreground">Dedicated support team</p>
+                        </div>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+
+                {isSwitching && existingSub && (
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900/30 dark:bg-amber-900/10 p-4">
+                    <p className="text-sm font-medium text-amber-900 dark:text-amber-300">
+                      💡 Your current plan ({existingSub.plan.name}) will be replaced. No refunds are issued.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar - Order Summary */}
+          <div className="sticky top-4 h-fit space-y-4">
+            <Card className="border-2 border-border bg-muted/30">
+              <CardHeader>
+                <CardTitle className="text-lg">Order Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2 border-b pb-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{plan.name}</span>
+                    <span className="font-medium">${(price / 100).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{interval === "annual" ? "Annual" : "Monthly"} billing</span>
+                  </div>
+                </div>
+                <div className="flex justify-between font-semibold text-base">
+                  <span>Total</span>
+                  <span>${(price / 100).toFixed(2)}</span>
+                </div>
+                <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                  Your next billing date: <span className="font-medium">{new Date(Date.now() + (interval === "annual" ? 365 : 30) * 24 * 60 * 60 * 1000).toLocaleDateString()}</span>
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Payment Button */}
+            <form action={createSubscriptionAction} className="space-y-3">
+              <input type="hidden" name="planId" value={plan.id} />
+              <input type="hidden" name="interval" value={interval} />
+              <Button type="submit" className="w-full h-12 text-base" size="lg" disabled={!isSynced}>
+                {isSwitching ? "Confirm & Pay via PayPal" : "Subscribe via PayPal"}
+              </Button>
+              <p className="text-xs text-center text-muted-foreground">
+                Secure payment powered by PayPal
+              </p>
+            </form>
+
+            {/* Terms */}
+            <div className="space-y-2 text-xs text-muted-foreground">
+              <p>✓ Cancel anytime</p>
+              <p>✓ No hidden fees</p>
+              <p>✓ Instant access</p>
+              <p className="!mt-4 text-xs text-muted-foreground/70">
+                By clicking "Subscribe", you agree to our <a href="/terms" className="underline hover:text-foreground">Terms of Service</a> and <a href="/privacy" className="underline hover:text-foreground">Privacy Policy</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
