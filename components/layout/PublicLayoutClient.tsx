@@ -47,8 +47,14 @@ export function PublicLayoutClient({
   const { data: session } = useSession();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const menuRef = useRef<HTMLElement>(null);
   const { cart } = useCart();
+
+  // Prevent hydration mismatch by mounting on client only
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close menu on scroll
   useEffect(() => {
@@ -94,9 +100,17 @@ export function PublicLayoutClient({
   // Hide dashboard button on sign-in/sign-up pages to avoid conflicts during redirect
   const isAuthPage = pathname === "/sign-in" || pathname === "/sign-up";
 
+  // Don't render until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
+        <BackgroundBlobs />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
-      <BackgroundBlobs />
       
       {/* Desktop Layout - Top Navigation Bar */}
       <div className="hidden md:flex flex-col min-h-screen" suppressHydrationWarning>

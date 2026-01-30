@@ -48,12 +48,20 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { cart } = useCart();
   const menuRef = useRef<HTMLElement>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null | undefined>(session?.user?.image);
 
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Listen for avatar updates
   useEffect(() => {
+    if (!mounted) return;
+
     const handleAvatarUpdate = (event: CustomEvent) => {
       setAvatarUrl(event.detail.imageUrl);
     };
@@ -62,7 +70,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
     return () => {
       window.removeEventListener('avatarUpdated', handleAvatarUpdate as EventListener);
     };
-  }, []);
+  }, [mounted]);
 
   // Update avatar when session changes
   useEffect(() => {
@@ -123,13 +131,22 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
     return baseHref;
   };
 
+  // Don't render until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
+        <BackgroundBlobs />
+      </div>
+    );
+  }
+
   return (
     <ConfirmDialogProvider>
       <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
         <BackgroundBlobs />
       
       {/* Desktop Layout */}
-      <div className="hidden md:flex min-h-screen">
+      <div className="hidden md:flex min-h-screen" suppressHydrationWarning>
         {/* Desktop Sidebar - Fixed */}
         <motion.aside
           initial={{ x: -100, opacity: 0 }}
@@ -260,7 +277,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Mobile Layout */}
-      <div className="flex md:hidden flex-col min-h-screen">
+      <div className="flex md:hidden flex-col min-h-screen" suppressHydrationWarning>
         <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 h-16">
           <div className="flex items-center justify-between px-4 h-full">
             <Link href={getHref("/dashboard")} className="flex items-center gap-2">
