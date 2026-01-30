@@ -27,19 +27,19 @@ async function PurchaseList({ searchParams }: AdminPurchasesPageProps) {
 
   // Filter by status
   if (params.status && params.status !== "all") {
-    purchases = purchases.filter((p) => p.status === params.status);
+    purchases = purchases.filter((p: any) => p.status === params.status);
   }
 
   // Filter by provider
   if (params.provider && params.provider !== "all") {
-    purchases = purchases.filter((p) => p.provider === params.provider);
+    purchases = purchases.filter((p: any) => p.provider === params.provider);
   }
 
   // Search
   if (params.search) {
     const searchLower = params.search.toLowerCase();
     purchases = purchases.filter(
-      (p) =>
+      (p: any) =>
         p.User.email.toLowerCase().includes(searchLower) ||
         p.Course.title.toLowerCase().includes(searchLower) ||
         p.User.name?.toLowerCase().includes(searchLower)
@@ -47,12 +47,12 @@ async function PurchaseList({ searchParams }: AdminPurchasesPageProps) {
   }
 
   const totalRevenue = purchases
-    .filter((p) => p.status === "paid")
-    .reduce((sum, p) => sum + p.amountCents, 0);
+    .filter((p: any) => p.status === "paid")
+    .reduce((sum: number, p: any) => sum + p.amountCents, 0);
 
   const allTimeTotalRevenue = allPurchases
-    .filter((p) => p.status === "paid")
-    .reduce((sum, p) => sum + p.amountCents, 0);
+    .filter((p: any) => p.status === "paid")
+    .reduce((sum: number, p: any) => sum + p.amountCents, 0);
 
   const totalPurchases = allPurchases.length;
   const filteredCount = purchases.length;
@@ -71,7 +71,7 @@ async function PurchaseList({ searchParams }: AdminPurchasesPageProps) {
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalRevenue)}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              From {purchases.filter((p) => p.status === "paid").length} paid purchases
+              From {purchases.filter((p: any) => p.status === "paid").length} paid purchases
             </p>
             {hasFilters && (
               <p className="text-xs text-muted-foreground">
@@ -86,7 +86,7 @@ async function PurchaseList({ searchParams }: AdminPurchasesPageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {purchases.filter((p) => p.status === "pending").length}
+              {purchases.filter((p: any) => p.status === "pending").length}
             </div>
             <p className="text-xs text-muted-foreground mt-1">Awaiting payment</p>
           </CardContent>
@@ -142,7 +142,7 @@ async function PurchaseList({ searchParams }: AdminPurchasesPageProps) {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {purchases.map((purchase) => (
+          {purchases.map((purchase: any) => (
             <Card key={purchase.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">

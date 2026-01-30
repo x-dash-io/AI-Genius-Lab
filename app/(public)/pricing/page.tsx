@@ -40,7 +40,7 @@ export default async function PricingPage() {
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-4 px-4 font-semibold">Feature</th>
-                  {plans.map((plan) => (
+                  {plans.map((plan: any) => (
                     <th key={plan.id} className="text-center py-4 px-4 font-semibold">{plan.name}</th>
                   ))}
                 </tr>
@@ -48,7 +48,7 @@ export default async function PricingPage() {
               <tbody className="text-sm">
                 <tr className="border-b hover:bg-muted/30">
                   <td className="py-4 px-4">Courses</td>
-                  {plans.map((plan) => (
+                  {plans.map((plan: any) => (
                     <td key={plan.id} className="text-center py-4 px-4">
                       <span className="font-medium">{plan.tier === "starter" ? "Select" : "All"}</span>
                     </td>
@@ -56,7 +56,7 @@ export default async function PricingPage() {
                 </tr>
                 <tr className="border-b hover:bg-muted/30">
                   <td className="py-4 px-4">Certificates</td>
-                  {plans.map((plan) => (
+                  {plans.map((plan: any) => (
                     <td key={plan.id} className="text-center py-4 px-4">
                       {plan.tier !== "starter" ? "✓" : "—"}
                     </td>
@@ -64,7 +64,7 @@ export default async function PricingPage() {
                 </tr>
                 <tr className="border-b hover:bg-muted/30">
                   <td className="py-4 px-4">Learning Paths</td>
-                  {plans.map((plan) => (
+                  {plans.map((plan: any) => (
                     <td key={plan.id} className="text-center py-4 px-4">
                       {plan.tier === "elite" ? "✓" : "—"}
                     </td>
@@ -72,7 +72,7 @@ export default async function PricingPage() {
                 </tr>
                 <tr className="border-b hover:bg-muted/30">
                   <td className="py-4 px-4">Support</td>
-                  {plans.map((plan) => (
+                  {plans.map((plan: any) => (
                     <td key={plan.id} className="text-center py-4 px-4">
                       <span className="text-xs">{plan.tier === "starter" ? "Community" : plan.tier === "pro" ? "Standard" : "Priority"}</span>
                     </td>

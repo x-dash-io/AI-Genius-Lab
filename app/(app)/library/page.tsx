@@ -35,7 +35,7 @@ export default async function LibraryPage() {
         </p>
       </div>
       <div className="grid gap-6">
-        {purchases.map((purchase) => (
+        {purchases.map((purchase: any) => (
           <Card key={purchase.id}>
             <CardHeader>
               <div className="flex items-start justify-between">

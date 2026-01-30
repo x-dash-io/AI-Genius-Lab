@@ -138,8 +138,8 @@ export default async function DashboardPage({
   ]);
 
   // Calculate course progress for each purchased course
-  const allLessonIds = purchases.flatMap(purchase =>
-    purchase.Course.sections.flatMap(s => s.lessons.map(l => l.id))
+  const allLessonIds = purchases.flatMap((purchase: any) =>
+    purchase.Course.sections.flatMap((s: any) => s.lessons.map((l: any) => l.id))
   );
 
   const allProgressRecords = await prisma.progress.findMany({
@@ -149,14 +149,14 @@ export default async function DashboardPage({
     }
   });
 
-  const coursesWithProgress = purchases.map((purchase) => {
-    const lessonIds = purchase.Course.sections.flatMap(s => s.lessons.map(l => l.id));
+  const coursesWithProgress = purchases.map((purchase: any) => {
+    const lessonIds = purchase.Course.sections.flatMap((s: any) => s.lessons.map((l: any) => l.id));
     const lessonIdsSet = new Set(lessonIds);
-    const progressRecords = allProgressRecords.filter(p => lessonIdsSet.has(p.lessonId));
+    const progressRecords = allProgressRecords.filter((p: any) => lessonIdsSet.has(p.lessonId));
 
     const totalLessons = lessonIds.length;
-    const completedLessons = progressRecords.filter(p => p.completedAt != null).length;
-    const inProgressLessons = progressRecords.filter(p => p.startedAt && !p.completedAt).length;
+    const completedLessons = progressRecords.filter((p: any) => p.completedAt != null).length;
+    const inProgressLessons = progressRecords.filter((p: any) => p.startedAt && !p.completedAt).length;
     const completionPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
     return {
@@ -166,13 +166,13 @@ export default async function DashboardPage({
       inProgressLessons,
       completionPercent,
       lastAccessed: progressRecords.length > 0
-        ? progressRecords.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())[0].updatedAt
+        ? progressRecords.sort((a: any, b: any) => b.updatedAt.getTime() - a.updatedAt.getTime())[0].updatedAt
         : null
     };
   });
 
   // Sort by last accessed
-  const sortedCourses = coursesWithProgress.sort((a, b) => {
+  const sortedCourses = coursesWithProgress.sort((a: any, b: any) => {
     if (!a.lastAccessed) return 1;
     if (!b.lastAccessed) return -1;
     return b.lastAccessed.getTime() - a.lastAccessed.getTime();
@@ -180,9 +180,9 @@ export default async function DashboardPage({
 
   // Calculate stats
   const totalCourses = purchases.length;
-  const completedCourses = coursesWithProgress.filter(c => c.completionPercent === 100).length;
-  const inProgressCourses = coursesWithProgress.filter(c => c.completionPercent > 0 && c.completionPercent < 100).length;
-  const totalLessonsCompleted = coursesWithProgress.reduce((sum, c) => sum + c.completedLessons, 0);
+  const completedCourses = coursesWithProgress.filter((c: any) => c.completionPercent === 100).length;
+  const inProgressCourses = coursesWithProgress.filter((c: any) => c.completionPercent > 0 && c.completionPercent < 100).length;
+  const totalLessonsCompleted = coursesWithProgress.reduce((sum: number, c: any) => sum + c.completedLessons, 0);
 
   // Calculate learning streak (days with activity in last 30 days)
   const thirtyDaysAgo = new Date();
@@ -197,13 +197,13 @@ export default async function DashboardPage({
   });
 
   const uniqueDays = new Set(
-    recentProgressDates.map(p => p.updatedAt.toISOString().split('T')[0])
+    recentProgressDates.map((p: any) => p.updatedAt.toISOString().split('T')[0])
   );
   const learningStreak = uniqueDays.size;
 
   // Calculate average completion rate
   const avgCompletionRate = totalCourses > 0 
-    ? Math.round(coursesWithProgress.reduce((sum, c) => sum + c.completionPercent, 0) / totalCourses)
+    ? Math.round(coursesWithProgress.reduce((sum: number, c: any) => sum + c.completionPercent, 0) / totalCourses)
     : 0;
 
   // Get this week's activity
@@ -400,7 +400,7 @@ export default async function DashboardPage({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {sortedCourses.slice(0, 3).map((course) => (
+                {sortedCourses.slice(0, 3).map((course: any) => (
                   <div
                     key={course.id}
                     className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border hover:bg-muted/50 transition-colors"
@@ -538,7 +538,7 @@ export default async function DashboardPage({
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {recentProgress.map((progress) => (
+              {recentProgress.map((progress: any) => (
                 <div
                   key={progress.id}
                   className="flex items-start gap-3 p-3 rounded-lg border"
@@ -589,7 +589,7 @@ export default async function DashboardPage({
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {certificates.map((cert) => (
+              {certificates.map((cert: any) => (
                 <div
                   key={cert.id}
                   className="p-4 rounded-lg border bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20"

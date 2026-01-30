@@ -68,9 +68,9 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await Promise.all(
-      lessons.map(async (lesson) => {
+      lessons.map(async (lesson: any) => {
         const contentChecks = await Promise.all(
-          lesson.contents.map(async (content) => {
+          lesson.contents.map(async (content: any) => {
             let exists = false;
             let error = null;
 
@@ -109,9 +109,9 @@ export async function POST(request: NextRequest) {
 
     const summary = {
       lessonsChecked: result.length,
-      lessonsWithMissingContent: result.filter(l => !l.allContentExists).length,
-      totalContentItems: result.reduce((sum, l) => sum + l.contentCount, 0),
-      missingContentItems: result.reduce((sum, l) => sum + l.missingContent.length, 0),
+      lessonsWithMissingContent: result.filter((l: any) => !l.allContentExists).length,
+      totalContentItems: result.reduce((sum: number, l: any) => sum + l.contentCount, 0),
+      missingContentItems: result.reduce((sum: number, l: any) => sum + l.missingContent.length, 0),
     };
 
     return NextResponse.json({

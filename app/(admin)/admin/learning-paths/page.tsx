@@ -11,9 +11,9 @@ async function LearningPathsList() {
   const pathsData = await getAllLearningPaths();
 
   // Transform the data to match expected format
-  const paths = pathsData.map(pathData => ({
+  const paths = pathsData.map((pathData: any) => ({
     ...pathData,
-    courses: (pathData.courses || []).map(lpc => ({
+    courses: (pathData.courses || []).map((lpc: any) => ({
       ...lpc,
       course: lpc.Course,
     })),
@@ -35,7 +35,7 @@ async function LearningPathsList() {
 
   return (
     <div className="grid gap-4">
-      {paths.map((path) => (
+      {paths.map((path: any) => (
         <Card key={path.id}>
           <CardHeader>
             <div className="flex items-start justify-between">
@@ -67,7 +67,7 @@ async function LearningPathsList() {
               <div className="space-y-2">
                 <p className="text-sm font-medium">Courses in this path:</p>
                 <div className="flex flex-wrap gap-2">
-                  {path.courses.map((pathCourse) => (
+                  {path.courses.map((pathCourse: any) => (
                     <Badge
                       key={pathCourse.id}
                       variant={pathCourse.course.isPublished ? "default" : "secondary"}

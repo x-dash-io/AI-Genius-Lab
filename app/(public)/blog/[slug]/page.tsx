@@ -53,7 +53,7 @@ async function BlogPostContent({ slug }: { slug: string }) {
 
       <div className="space-y-4 mb-8">
         <div className="flex gap-2 flex-wrap">
-          {post.tags.map(tag => (
+          {post.tags.map((tag: any) => (
             <Badge key={tag.id} variant="secondary">{tag.name}</Badge>
           ))}
         </div>

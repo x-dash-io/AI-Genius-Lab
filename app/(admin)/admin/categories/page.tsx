@@ -23,19 +23,19 @@ async function CategoriesContent() {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Active</p>
               <p className="text-2xl font-bold">
-                {categories.filter((c) => c.isActive).length}
+                {categories.filter((c: any) => c.isActive).length}
               </p>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Inactive</p>
               <p className="text-2xl font-bold">
-                {categories.filter((c) => !c.isActive).length}
+                {categories.filter((c: any) => !c.isActive).length}
               </p>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Total Courses</p>
               <p className="text-2xl font-bold">
-                {categories.reduce((sum, c) => sum + c.courseCount, 0)}
+                {categories.reduce((sum: number, c: any) => sum + c.courseCount, 0)}
               </p>
             </div>
           </div>

@@ -81,8 +81,8 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
     );
   }
 
-  const lessonIds = course.sections.flatMap((section) =>
-    section.lessons.map((lesson) => lesson.id)
+  const lessonIds = course.sections.flatMap((section: any) =>
+    section.lessons.map((lesson: any) => lesson.id)
   );
 
   const progressEntries =
@@ -92,13 +92,13 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
           where: { userId: session.user.id, lessonId: { in: lessonIds } },
         });
 
-  const progressMap = new Map(
-    progressEntries.map((entry) => [entry.lessonId, entry])
+  const progressMap = new Map<string, any>(
+    progressEntries.map((entry: any) => [entry.lessonId, entry])
   );
 
   // Calculate overall progress
   const totalLessons = lessonIds.length;
-  const completedLessons = progressEntries.filter(p => p.completedAt != null).length;
+  const completedLessons = progressEntries.filter((p: any) => p.completedAt != null).length;
   const overallProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
   return (
@@ -144,9 +144,9 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
 
       {/* Sections */}
       <div className="space-y-4">
-        {course.sections.map((section, sectionIndex) => {
+        {course.sections.map((section: any, sectionIndex: number) => {
           const sectionLessons = section.lessons;
-          const sectionCompleted = sectionLessons.filter(l => 
+          const sectionCompleted = sectionLessons.filter((l: any) =>
             progressMap.get(l.id)?.completedAt != null
           ).length;
           const sectionProgress = sectionLessons.length > 0 
@@ -189,7 +189,7 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
 
               {/* Lessons */}
               <div className="divide-y">
-                {sectionLessons.map((lesson, lessonIndex) => {
+                {sectionLessons.map((lesson: any, lessonIndex: number) => {
                   const progress = progressMap.get(lesson.id);
                   const isCompleted = progress?.completedAt != null;
                   const progressPercent = progress?.completionPercent ?? 0;

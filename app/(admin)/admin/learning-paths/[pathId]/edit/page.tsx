@@ -89,7 +89,7 @@ async function LearningPathEditContent({ pathId }: { pathId: string }) {
   // Transform the data to match expected format
   const path = {
     ...pathData,
-    courses: (pathData.courses || []).map(lpc => ({
+    courses: (pathData.courses || []).map((lpc: any) => ({
       ...lpc,
       courseId: lpc.Course.id,
       course: lpc.Course,
@@ -97,9 +97,9 @@ async function LearningPathEditContent({ pathId }: { pathId: string }) {
   };
 
   // Get courses not already in the path
-  const pathCourseIds = new Set(path.courses.map((pc) => pc.courseId));
+  const pathCourseIds = new Set(path.courses.map((pc: any) => pc.courseId));
   const availableCourses = allCourses.filter(
-    (course) => !pathCourseIds.has(course.id)
+    (course: any) => !pathCourseIds.has(course.id)
   );
 
   return (

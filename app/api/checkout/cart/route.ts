@@ -45,8 +45,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const purchasedCourseIds = new Set(existingPurchases.map((p) => p.courseId));
-    const coursesToPurchase = courses.filter((c) => !purchasedCourseIds.has(c.id));
+    const purchasedCourseIds = new Set(existingPurchases.map((p: any) => p.courseId));
+    const coursesToPurchase = courses.filter((c: any) => !purchasedCourseIds.has(c.id));
 
     if (coursesToPurchase.length === 0) {
       return NextResponse.json(
@@ -57,14 +57,14 @@ export async function POST(request: NextRequest) {
 
     // Check inventory availability
     const outOfStockCourses = coursesToPurchase.filter(
-      (course) => course.inventory !== null && course.inventory <= 0
+      (course: any) => course.inventory !== null && course.inventory <= 0
     );
 
     if (outOfStockCourses.length > 0) {
       return NextResponse.json(
         { 
-          error: `Some courses are out of stock: ${outOfStockCourses.map(c => c.title).join(", ")}`,
-          outOfStock: outOfStockCourses.map(c => c.id),
+          error: `Some courses are out of stock: ${outOfStockCourses.map((c: any) => c.title).join(", ")}`,
+          outOfStock: outOfStockCourses.map((c: any) => c.id),
         },
         { status: 400 }
       );
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     // Create purchases
     const purchases = await Promise.all(
-      coursesToPurchase.map((course) => {
+      coursesToPurchase.map((course: any) => {
         const purchaseId = `purchase_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
         
         return prisma.purchase.upsert({
@@ -100,8 +100,8 @@ export async function POST(request: NextRequest) {
       })
     );
 
-    const totalAmountCents = purchases.reduce((sum, p) => sum + p.amountCents, 0);
-    const purchaseIds = purchases.map((p) => p.id).join(",");
+    const totalAmountCents = purchases.reduce((sum: number, p: any) => sum + p.amountCents, 0);
+    const purchaseIds = purchases.map((p: any) => p.id).join(",");
     const appUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
 
     const { orderId, approvalUrl } = await createPayPalOrder({
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     // Update all purchases with order ID
     await prisma.purchase.updateMany({
       where: {
-        id: { in: purchases.map((p) => p.id) },
+        id: { in: purchases.map((p: any) => p.id) },
       },
       data: {
         providerRef: orderId,
