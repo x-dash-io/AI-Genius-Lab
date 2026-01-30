@@ -161,9 +161,9 @@ export async function calculateLearningPathPrice(userId: string, pathId: string)
  * Check if user has enrolled in all courses in a learning path
  */
 export async function hasEnrolledInLearningPath(userId: string, pathId: string): Promise<boolean> {
-  // Pro and Elite subscribers get access to all learning paths
+  // Elite subscribers only get access to all learning paths
   const subscription = await getUserSubscription(userId);
-  if (subscription && (subscription.plan.tier === "pro" || subscription.plan.tier === "elite")) {
+  if (subscription && subscription.plan.tier === "elite") {
     return true;
   }
 

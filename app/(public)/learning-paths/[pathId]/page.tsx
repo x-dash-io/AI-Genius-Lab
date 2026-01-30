@@ -71,7 +71,7 @@ export default async function LearningPathDetailPage({
   
   if (session?.user) {
     userSubscription = await getUserSubscription(session.user.id);
-    hasAccessToPath = userSubscription?.plan.tier === "pro" || userSubscription?.plan.tier === "elite" || false;
+    hasAccessToPath = userSubscription?.plan.tier === "elite" || false;
   }
 
   const isEnrolled = session?.user && hasAccessToPath
@@ -233,12 +233,12 @@ export default async function LearningPathDetailPage({
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              Learning Paths are curated, structured learning journeys available to Pro and Elite subscribers. These guide you through a complete learning path with carefully sequenced courses.
+              Learning Paths are premium, curated learning journeys exclusive to our Elite subscribers. They guide you through complete learning paths with carefully sequenced courses.
             </p>
             <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg p-4 space-y-3">
               <h3 className="font-semibold text-foreground flex items-center gap-2">
                 <Zap className="h-4 w-4 text-blue-600" />
-                Pro & Elite Plans Include:
+                Elite Membership Includes:
               </h3>
               <ul className="space-y-2 text-sm text-foreground/80">
                 <li className="flex items-center gap-2">
@@ -309,7 +309,7 @@ export default async function LearningPathDetailPage({
               Upgrade Your Plan
             </CardTitle>
             <CardDescription className="text-foreground/60 mt-2">
-              Learning Paths require a Pro or Elite subscription
+              Learning Paths are exclusive to Elite members
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -318,14 +318,14 @@ export default async function LearningPathDetailPage({
                 Your Current Plan: <span className="text-amber-600">{userSubscription?.plan.name || 'Free'}</span>
               </h3>
               <p className="text-muted-foreground mb-4">
-                Upgrade to Pro or Elite to unlock this learning path and access all structured learning journeys.
+                Upgrade to Elite to unlock this learning path and access all premium structured learning journeys.
               </p>
             </div>
 
             <div className="space-y-3">
               <h4 className="font-semibold text-foreground flex items-center gap-2">
                 <Zap className="h-4 w-4 text-amber-600" />
-                Why Choose Pro or Elite?
+                Why Choose Elite?
               </h4>
               <div className="grid gap-2">
                 <div className="flex items-center gap-2 text-sm text-foreground/80">

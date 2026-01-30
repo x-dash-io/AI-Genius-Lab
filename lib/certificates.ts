@@ -534,8 +534,8 @@ export async function generateLearningPathCertificate(userId: string, pathId: st
 
   // Verify user has access and completed the path
   const subscription = await getUserSubscription(userId);
-  if (!subscription || (subscription.plan.tier !== "pro" && subscription.plan.tier !== "elite")) {
-    throw new Error("You need a Pro or Elite subscription to generate learning path certificates");
+  if (!subscription || subscription.plan.tier !== "elite") {
+    throw new Error("You need an Elite subscription to generate learning path certificates");
   }
 
   const hasAccess = await hasEnrolledInLearningPath(userId, pathId);
