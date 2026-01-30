@@ -113,6 +113,11 @@ model LearningPath {
   slug               String               @unique
   title              String
   description        String?
+  objectives         String[]             @default([])
+  skills             String[]             @default([])
+  targetAudience     String?
+  prerequisites      String?
+  estimatedHours     Int?
   createdAt          DateTime             @default(now())
   updatedAt          DateTime
   certificates       Certificate[]

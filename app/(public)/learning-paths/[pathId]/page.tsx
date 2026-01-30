@@ -3,17 +3,20 @@ import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getLearningPathBySlug, createLearningPathPurchases, hasEnrolledInLearningPath, calculateLearningPathPrice } from "@/lib/learning-paths";
+import { getLearningPathBySlug, createLearningPathPurchases, hasEnrolledInLearningPath, calculateLearningPathPrice, getLearningPathProgress, hasCompletedLearningPath } from "@/lib/learning-paths";
 import { getUserSubscription } from "@/lib/subscriptions";
 import { createPayPalOrder } from "@/lib/paypal";
+import { generateLearningPathCertificate } from "@/lib/certificates";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, BookOpen, CheckCircle2, Lock, Zap } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle2, Lock, Zap, Award } from "lucide-react";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateLearningPathSchema } from "@/lib/seo/schemas";
 import { LearningPathEnrollment } from "@/components/learning-paths/LearningPathEnrollment";
+import { PathProgressSection } from "@/components/learning-paths/PathProgressSection";
+import { PathObjectivesSection } from "@/components/learning-paths/PathObjectivesSection";
 
 type LearningPathDetailPageProps = {
   params: Promise<{ pathId: string }>;
@@ -74,6 +77,14 @@ export default async function LearningPathDetailPage({
   const isEnrolled = session?.user && hasAccessToPath
     ? await hasEnrolledInLearningPath(session.user.id, path.id)
     : false;
+
+  // Get progress if user has access
+  let pathProgress = null;
+  let isPathCompleted = false;
+  if (session?.user && hasAccessToPath) {
+    pathProgress = await getLearningPathProgress(session.user.id, path.id);
+    isPathCompleted = await hasCompletedLearningPath(session.user.id, path.id);
+  }
 
   const totalPrice = path.courses.reduce(
     (sum, pc) => sum + pc.course.priceCents,
@@ -381,6 +392,53 @@ export default async function LearningPathDetailPage({
           </p>
         )}
       </div>
+
+      {/* Progress Section for enrolled users */}
+      {isEnrolled && pathProgress && (
+        <PathProgressSection
+          totalCourses={pathProgress.totalCourses}
+          completedCount={pathProgress.completedCount}
+          inProgressCount={pathProgress.inProgressCount}
+          progressPercent={pathProgress.progressPercent}
+          estimatedHours={(pathData as any).estimatedHours}
+          courses={pathProgress.courses}
+        />
+      )}
+
+      {/* Objectives Section */}
+      {(((pathData as any).objectives?.length) || ((pathData as any).skills?.length) || ((pathData as any).targetAudience) || ((pathData as any).prerequisites) || ((pathData as any).estimatedHours)) && (
+        <PathObjectivesSection
+          objectives={(pathData as any).objectives}
+          skills={(pathData as any).skills}
+          targetAudience={(pathData as any).targetAudience}
+          prerequisites={(pathData as any).prerequisites}
+          estimatedHours={(pathData as any).estimatedHours}
+        />
+      )}
+
+      {/* Completion Certificate Section */}
+      {isEnrolled && isPathCompleted && (
+        <Card className="border-l-4 border-l-green-500 bg-green-50 dark:bg-green-950/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-foreground">
+              <Award className="h-5 w-5 text-green-600" />
+              Path Completed! 🎉
+            </CardTitle>
+            <CardDescription className="text-foreground/60 mt-2">
+              You've successfully completed all courses in this learning path
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-foreground">
+              Congratulations on completing <span className="font-semibold">{path.title}</span>! Generate your official completion certificate to showcase your achievement.
+            </p>
+            <Button size="lg" className="w-full sm:w-auto bg-green-600 hover:bg-green-700">
+              <Award className="h-4 w-4 mr-2" />
+              Generate Completion Certificate
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {path.courses.length === 0 ? (
         <Card>

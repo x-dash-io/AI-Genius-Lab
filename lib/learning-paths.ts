@@ -318,3 +318,136 @@ export async function createLearningPathPurchases(userId: string, pathId: string
 
   return createLearningPathPurchasesCore(userId, pathId);
 }
+
+/**
+ * Calculate user's progress through a learning path
+ */
+export async function getLearningPathProgress(userId: string, pathId: string): Promise<{
+  totalCourses: number;
+  completedCount: number;
+  inProgressCount: number;
+  notStartedCount: number;
+  progressPercent: number;
+  courses: Array<{
+    id: string;
+    title: string;
+    status: 'completed' | 'in-progress' | 'not-started';
+  }>;
+} | null> {
+  const path = await prisma.learningPath.findUnique({
+    where: { id: pathId },
+    include: {
+      courses: {
+        include: {
+          Course: {
+            select: { id: true, title: true },
+          },
+        },
+        orderBy: { sortOrder: "asc" },
+      },
+    },
+  });
+
+  if (!path) {
+    return null;
+  }
+
+  const totalCourses = path.courses.length;
+
+  let completedCount = 0;
+  let inProgressCount = 0;
+
+  // Helper function to check if user completed a course
+  async function userCompletedCourse(userId: string, courseId: string): Promise<boolean> {
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      include: {
+        sections: {
+          include: {
+            lessons: {
+              select: { id: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!course) return false;
+
+    const lessonIds = course.sections.flatMap((s) => s.lessons.map((l) => l.id));
+    if (lessonIds.length === 0) return false;
+
+    const progressRecords = await prisma.progress.findMany({
+      where: {
+        userId,
+        lessonId: { in: lessonIds },
+      },
+    });
+
+    return progressRecords.length === lessonIds.length;
+  }
+
+  const coursesProgress = await Promise.all(
+    path.courses.map(async (pc) => {
+      const courseId = pc.Course.id;
+      // Check if course is completed
+      const isCompleted = await userCompletedCourse(userId, courseId);
+
+      if (isCompleted) {
+        completedCount++;
+        return {
+          id: courseId,
+          title: pc.Course.title,
+          status: 'completed' as const,
+        };
+      }
+
+      // Check if course is in progress (has any progress)
+      const hasProgress = await prisma.progress.findFirst({
+        where: {
+          userId,
+          Lesson: {
+            Section: {
+              courseId: courseId,
+            },
+          },
+        },
+      });
+
+      if (hasProgress) {
+        inProgressCount++;
+        return {
+          id: courseId,
+          title: pc.Course.title,
+          status: 'in-progress' as const,
+        };
+      }
+
+      return {
+        id: courseId,
+        title: pc.Course.title,
+        status: 'not-started' as const,
+      };
+    })
+  );
+
+  const progressPercent = totalCourses > 0 ? Math.round((completedCount / totalCourses) * 100) : 0;
+
+  return {
+    totalCourses,
+    completedCount,
+    inProgressCount,
+    notStartedCount: totalCourses - completedCount - inProgressCount,
+    progressPercent,
+    courses: coursesProgress,
+  };
+}
+
+/**
+ * Check if user has completed a learning path
+ */
+export async function hasCompletedLearningPath(userId: string, pathId: string): Promise<boolean> {
+  const progress = await getLearningPathProgress(userId, pathId);
+  if (!progress) return false;
+  return progress.progressPercent === 100;
+}

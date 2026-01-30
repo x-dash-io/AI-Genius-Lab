@@ -522,3 +522,163 @@ export async function getCertificate(idOrCertificateId: string) {
     },
   });
 }
+
+/**
+ * Generate a learning path completion certificate
+ */
+export async function generateLearningPathCertificate(userId: string, pathId: string) {
+  const user = await requireCustomer();
+  if (user.id !== userId) {
+    throw new Error("FORBIDDEN: You can only generate certificates for yourself");
+  }
+
+  // Verify user has access and completed the path
+  const subscription = await getUserSubscription(userId);
+  if (!subscription || (subscription.plan.tier !== "pro" && subscription.plan.tier !== "elite")) {
+    throw new Error("You need a Pro or Elite subscription to generate learning path certificates");
+  }
+
+  const hasAccess = await hasEnrolledInLearningPath(userId, pathId);
+  if (!hasAccess) {
+    throw new Error("You do not have access to this learning path");
+  }
+
+  // Get the learning path
+  const path = await prisma.learningPath.findUnique({
+    where: { id: pathId },
+    include: {
+      courses: {
+        include: {
+          Course: {
+            select: { id: true, title: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!path) {
+    throw new Error("Learning path not found");
+  }
+
+  // Check if all courses are completed
+  const courseIds = path.courses.map(pc => pc.Course.id);
+  if (courseIds.length === 0) {
+    throw new Error("Learning path has no courses");
+  }
+
+  // For each course, check if all lessons are completed
+  let allCoursesCompleted = true;
+  for (const courseId of courseIds) {
+    const isCompleted = await hasCompletedCourse(userId, courseId);
+    if (!isCompleted) {
+      allCoursesCompleted = false;
+      break;
+    }
+  }
+
+  if (!allCoursesCompleted) {
+    throw new Error("You must complete all courses in this learning path to generate a certificate");
+  }
+
+  // Check if certificate already exists
+  const existingCertificate = await prisma.certificate.findFirst({
+    where: {
+      userId,
+      pathId,
+      type: "learning_path",
+    },
+  });
+
+  if (existingCertificate) {
+    return existingCertificate;
+  }
+
+  // Generate certificate
+  const certificateId = generateCertificateId();
+  const issuedAt = new Date();
+
+  // Create PDF
+  const pdfUrl = await generateCertificatePDF({
+    recipientName: user.name || "Student",
+    pathName: path.title,
+    certificateId,
+    issuedAt,
+    type: "learning_path",
+  });
+
+  // Save certificate to database
+  const certificate = await prisma.certificate.create({
+    data: {
+      id: `cert-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+      userId,
+      pathId,
+      type: "learning_path",
+      certificateId,
+      issuedAt,
+      pdfUrl,
+      metadata: {
+        courses: courseIds,
+        completedAt: issuedAt.toISOString(),
+      },
+    },
+    include: {
+      User: {
+        select: {
+          name: true,
+          email: true,
+        },
+      },
+      LearningPath: {
+        select: {
+          title: true,
+        },
+      },
+    },
+  });
+
+  // Send email notification
+  if (user.email) {
+    await sendCertificateEmail(
+      user.email,
+      user.name || "Student",
+      path.title,
+      certificate.certificateId,
+      pdfUrl
+    );
+  }
+
+  return certificate;
+}
+
+/**
+ * Check if user has completed a learning path (certificate version)
+ */
+export async function hasCompletedLearningPathForCertificate(userId: string, pathId: string): Promise<boolean> {
+  const path = await prisma.learningPath.findUnique({
+    where: { id: pathId },
+    include: {
+      courses: {
+        select: {
+          courseId: true,
+        },
+      },
+    },
+  });
+
+  if (!path || path.courses.length === 0) {
+    return false;
+  }
+
+  const courseIds = path.courses.map(pc => pc.courseId);
+
+  // Check if all courses are completed
+  for (const courseId of courseIds) {
+    const isCompleted = await hasCompletedCourse(userId, courseId);
+    if (!isCompleted) {
+      return false;
+    }
+  }
+
+  return true;
+}
