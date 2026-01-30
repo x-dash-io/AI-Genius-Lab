@@ -16,7 +16,7 @@ export const courseSchema = z.object({
 // Review validation schemas
 export const reviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
-  text: z.string().max(1000).optional(),
+  text: z.string().max(1000).nullable().optional(),
 });
 
 // User validation schemas
