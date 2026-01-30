@@ -79,20 +79,12 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
     const categories = await prisma.category.findMany({
       where: {
         isActive: true,
-        courses: {
-          some: {
-            isPublished: true,
-          },
-        },
       },
       orderBy: {
         sortOrder: "asc",
       },
       include: {
         courses: {
-          where: {
-            isPublished: true,
-          },
           select: {
             id: true,
             title: true,
