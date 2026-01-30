@@ -20,7 +20,11 @@ async function cancelAction(formData: FormData) {
 
   const subId = formData.get("subId") as string;
   await cancelSubscription(subId);
+  
+  // Revalidate all subscription-related pages to ensure UI updates
   revalidatePath("/profile/subscription");
+  revalidatePath("/profile");
+  revalidatePath("/pricing");
 }
 
 export default async function UserSubscriptionPage() {

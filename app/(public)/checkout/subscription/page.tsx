@@ -27,8 +27,8 @@ async function createSubscriptionAction(formData: FormData) {
   const paypalPlanId = interval === "annual" ? plan.paypalAnnualPlanId : plan.paypalMonthlyPlanId;
   if (!paypalPlanId) throw new Error("Plan not synced with PayPal");
 
-  // Check for existing active subscription to revise
-  let existingSub = await prisma.subscription.findFirst({
+  // Check for existing active subscription
+  const existingSub = await prisma.subscription.findFirst({
     where: {
       userId: session.user.id,
       status: { in: ["active", "past_due", "cancelled"] },
@@ -38,28 +38,10 @@ async function createSubscriptionAction(formData: FormData) {
 
   const appUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
-  if (existingSub?.paypalSubscriptionId) {
-    try {
-      // Cancel the existing PayPal subscription instead of revising
-      // (Revise fails when switching between different products)
-      await cancelPayPalSubscription(existingSub.paypalSubscriptionId);
-      
-      // Mark the old subscription as cancelled
-      await prisma.subscription.update({
-        where: { id: existingSub.id },
-        data: { 
-          status: "cancelled",
-          cancelAtPeriodEnd: false
-        },
-      });
-    } catch (error) {
-      console.error("Failed to cancel existing PayPal subscription:", error);
-      // Continue anyway - we'll create a new subscription
-    }
-    existingSub = null; // Clear for new creation
-  }
+  // DON'T cancel the old subscription yet - wait for webhook confirmation
+  // Store the existing subscription ID to cancel it later when new one activates
 
-  // Create a new pending subscription record
+  // Create a new pending subscription record with reference to old subscription
   const subscription = await prisma.subscription.create({
     data: {
       userId: session.user.id,
@@ -69,6 +51,9 @@ async function createSubscriptionAction(formData: FormData) {
       currentPeriodEnd: new Date(), // Initial value
     }
   });
+
+  // Store metadata about plan change (for webhook to handle old subscription)
+  // This ensures we know this is a plan change, not a new subscription
 
   let approvalUrl: string;
   try {

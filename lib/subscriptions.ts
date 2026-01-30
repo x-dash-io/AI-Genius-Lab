@@ -91,28 +91,38 @@ export async function syncSubscriptionPlansToPayPal() {
  * Get the current active subscription for a user.
  * Returns the subscription if it's active or cancelled but still within the paid period.
  * Also includes pending subscriptions created in the last 24 hours to handle webhook delays.
+ * IMPORTANT: Prioritizes active subscriptions over pending ones to prevent showing incorrect data during plan changes.
  */
 export async function getUserSubscription(userId: string) {
-  return prisma.subscription.findFirst({
+  // First try to get an active subscription (including cancelled but still in period)
+  const activeSubscription = await prisma.subscription.findFirst({
     where: {
       userId,
-      OR: [
-        {
-          status: { in: ["active", "cancelled", "past_due"] },
-          currentPeriodEnd: { gt: new Date() }
-        },
-        {
-          status: "pending",
-          createdAt: { gt: new Date(Date.now() - 24 * 60 * 60 * 1000) }
-        }
-      ]
+      status: { in: ["active", "cancelled", "past_due"] },
+      currentPeriodEnd: { gt: new Date() }
     },
     include: { plan: true },
-    orderBy: [
-      { status: "asc" }, // active/cancelled before pending usually (alphabetical: active, cancelled, pending)
-      { createdAt: "desc" }
-    ]
+    orderBy: { createdAt: "desc" }
   });
+
+  // If we have an active subscription, return it
+  if (activeSubscription) {
+    return activeSubscription;
+  }
+
+  // Otherwise, check for recent pending subscriptions (within 24 hours)
+  // This handles the case where a new subscription is being processed
+  const pendingSubscription = await prisma.subscription.findFirst({
+    where: {
+      userId,
+      status: "pending",
+      createdAt: { gt: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+    },
+    include: { plan: true },
+    orderBy: { createdAt: "desc" }
+  });
+
+  return pendingSubscription;
 }
 
 /**
@@ -229,4 +239,38 @@ export async function grantSubscriptionManually({
       currentPeriodEnd: end,
     }
   });
+}
+
+/**
+ * Clean up abandoned pending subscriptions that are older than 24 hours.
+ * This handles cases where users abandoned the checkout flow.
+ * Returns the number of subscriptions cleaned up.
+ */
+export async function cleanupAbandonedPendingSubscriptions() {
+  const cutoffDate = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  
+  const abandoned = await prisma.subscription.findMany({
+    where: {
+      status: "pending",
+      createdAt: { lt: cutoffDate }
+    }
+  });
+
+  if (abandoned.length === 0) {
+    return 0;
+  }
+
+  // Mark them as expired
+  await prisma.subscription.updateMany({
+    where: {
+      status: "pending",
+      createdAt: { lt: cutoffDate }
+    },
+    data: {
+      status: "expired"
+    }
+  });
+
+  console.log(`[CLEANUP] Marked ${abandoned.length} abandoned pending subscriptions as expired`);
+  return abandoned.length;
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { verifyPayPalWebhook, getPayPalSubscription } from "@/lib/paypal";
 
@@ -118,43 +119,81 @@ export async function POST(request: Request) {
             data: updateData,
           });
 
-          // Cancel any other active subscriptions for this user
+          console.log(`[WEBHOOK] Subscription ${sub.id} activated successfully`);
+
+          // Cancel any other active/pending subscriptions for this user
+          // This handles plan changes where old subscription should be replaced
           const otherSubs = await prisma.subscription.findMany({
             where: {
               userId: sub.userId,
               id: { not: sub.id },
-              status: { in: ["active", "cancelled", "past_due"] },
+              status: { in: ["active", "cancelled", "past_due", "pending"] },
             },
           });
 
+          console.log(`[WEBHOOK] Found ${otherSubs.length} other subscriptions to clean up`);
+
           for (const other of otherSubs) {
             try {
+              // Cancel pending subscriptions immediately (abandoned plan changes)
+              if (other.status === "pending") {
+                console.log(`[WEBHOOK] Cleaning up abandoned pending subscription ${other.id}`);
+                await prisma.subscription.update({
+                  where: { id: other.id },
+                  data: { status: "expired" },
+                });
+                continue;
+              }
+
+              // For active subscriptions, cancel in PayPal first
               if (other.paypalSubscriptionId) {
+                console.log(`[WEBHOOK] Cancelling old PayPal subscription ${other.paypalSubscriptionId}`);
                 const { cancelPayPalSubscription } = await import("@/lib/paypal");
                 await cancelPayPalSubscription(
                   other.paypalSubscriptionId,
                   "Replaced by new subscription"
                 );
               }
-            } catch (err) {
-              console.error(`Failed to cancel old sub ${other.id}:`, err);
-            }
 
-            await prisma.subscription.update({
-              where: { id: other.id },
-              data: { status: "expired" },
-            });
+              await prisma.subscription.update({
+                where: { id: other.id },
+                data: { status: "expired" },
+              });
+              console.log(`[WEBHOOK] Old subscription ${other.id} marked as expired`);
+            } catch (err) {
+              console.error(`[WEBHOOK] Failed to cancel old sub ${other.id}:`, err);
+            }
+          }
+
+          // Revalidate subscription-related pages to update UI
+          try {
+            revalidatePath("/profile/subscription");
+            revalidatePath("/profile");
+            revalidatePath("/pricing");
+            revalidatePath("/dashboard");
+            console.log(`[WEBHOOK] Revalidated subscription pages for user ${sub.userId}`);
+          } catch (err) {
+            console.error(`[WEBHOOK] Failed to revalidate paths:`, err);
           }
           break;
 
         case "BILLING.SUBSCRIPTION.CANCELLED":
-          await prisma.subscription.update({
+          const cancelledSub = await prisma.subscription.update({
             where: { id: customId },
             data: {
               status: "cancelled",
               cancelAtPeriodEnd: true,
             },
           });
+          
+          // Revalidate subscription-related pages
+          try {
+            revalidatePath("/profile/subscription");
+            revalidatePath("/profile");
+            console.log(`[WEBHOOK] Revalidated pages after cancellation for user ${cancelledSub.userId}`);
+          } catch (err) {
+            console.error(`[WEBHOOK] Failed to revalidate paths:`, err);
+          }
           break;
 
         case "BILLING.SUBSCRIPTION.EXPIRED":
