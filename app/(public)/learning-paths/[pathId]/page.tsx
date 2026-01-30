@@ -62,13 +62,13 @@ export default async function LearningPathDetailPage({
 
   const session = await getServerSession(authOptions);
   
-  // Check if user has access to learning paths (Elite subscription or guest)
+  // Check if user has access to learning paths (Pro or Elite subscription)
   let hasAccessToPath = false;
   let userSubscription = null;
   
   if (session?.user) {
     userSubscription = await getUserSubscription(session.user.id);
-    hasAccessToPath = userSubscription?.plan.tier === "elite" || false;
+    hasAccessToPath = userSubscription?.plan.tier === "pro" || userSubscription?.plan.tier === "elite" || false;
   }
 
   const isEnrolled = session?.user && hasAccessToPath
@@ -222,12 +222,12 @@ export default async function LearningPathDetailPage({
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              Learning Paths are an exclusive feature available to our Elite subscribers. These curated, structured paths guide you through a complete learning journey.
+              Learning Paths are curated, structured learning journeys available to Pro and Elite subscribers. These guide you through a complete learning path with carefully sequenced courses.
             </p>
             <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg p-4 space-y-3">
               <h3 className="font-semibold text-foreground flex items-center gap-2">
                 <Zap className="h-4 w-4 text-blue-600" />
-                Elite Subscription Includes:
+                Pro & Elite Plans Include:
               </h3>
               <ul className="space-y-2 text-sm text-foreground/80">
                 <li className="flex items-center gap-2">
@@ -256,7 +256,7 @@ export default async function LearningPathDetailPage({
               </Link>
               <Link href="/pricing">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                  Upgrade to Elite
+                  View Plans
                 </Button>
               </Link>
             </div>
@@ -267,7 +267,7 @@ export default async function LearningPathDetailPage({
   }
 
   if (!hasAccessToPath) {
-    // Logged in but not Elite - show upgrade prompt
+    // Logged in but not Pro or Elite - show upgrade prompt
     return (
       <section className="grid gap-8">
         <div>
@@ -295,47 +295,47 @@ export default async function LearningPathDetailPage({
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-foreground">
               <Lock className="h-5 w-5 text-amber-600" />
-              Upgrade Required
+              Upgrade Your Plan
             </CardTitle>
             <CardDescription className="text-foreground/60 mt-2">
-              This learning path is exclusively available for Elite subscribers
+              Learning Paths require a Pro or Elite subscription
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
-              <h3 className="font-semibold text-lg text-foreground mb-4">
+              <h3 className="font-semibold text-lg text-foreground mb-2">
                 Your Current Plan: <span className="text-amber-600">{userSubscription?.plan.name || 'Free'}</span>
               </h3>
               <p className="text-muted-foreground mb-4">
-                Unlock access to this learning path and all other premium features by upgrading to Elite.
+                Upgrade to Pro or Elite to unlock this learning path and access all structured learning journeys.
               </p>
             </div>
 
             <div className="space-y-3">
               <h4 className="font-semibold text-foreground flex items-center gap-2">
                 <Zap className="h-4 w-4 text-amber-600" />
-                What You'll Get with Elite:
+                Why Choose Pro or Elite?
               </h4>
               <div className="grid gap-2">
                 <div className="flex items-center gap-2 text-sm text-foreground/80">
                   <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  Unlimited access to all learning paths
+                  Access to all Learning Paths
                 </div>
                 <div className="flex items-center gap-2 text-sm text-foreground/80">
                   <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  Access to all premium and standard courses
+                  Premium and standard courses included
                 </div>
                 <div className="flex items-center gap-2 text-sm text-foreground/80">
                   <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  Unlimited certificates and achievements
+                  Generate certificates upon completion
                 </div>
                 <div className="flex items-center gap-2 text-sm text-foreground/80">
                   <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  Early access to new content
+                  Track progress and earn achievements
                 </div>
                 <div className="flex items-center gap-2 text-sm text-foreground/80">
                   <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
-                  Cancel anytime with no penalty
+                  Flexible subscription - cancel anytime
                 </div>
               </div>
             </div>

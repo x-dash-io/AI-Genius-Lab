@@ -36,9 +36,10 @@ export async function getAllPublishedLearningPaths() {
   });
 }
 
-export async function getLearningPathBySlug(slug: string) {
-  return prisma.learningPath.findUnique({
-    where: { slug },
+export async function getLearningPathBySlug(slugOrId: string) {
+  // Try to find by slug first, then by id (for backward compatibility)
+  let path = await prisma.learningPath.findUnique({
+    where: { slug: slugOrId },
     include: {
       courses: {
         where: {
@@ -61,6 +62,36 @@ export async function getLearningPathBySlug(slug: string) {
       },
     },
   });
+
+  // If not found by slug, try by id
+  if (!path) {
+    path = await prisma.learningPath.findUnique({
+      where: { id: slugOrId },
+      include: {
+        courses: {
+          where: {
+            Course: {
+              isPublished: true,
+            },
+          },
+          include: {
+            Course: {
+              select: {
+                id: true,
+                title: true,
+                slug: true,
+                description: true,
+                priceCents: true,
+              },
+            },
+          },
+          orderBy: { sortOrder: "asc" },
+        },
+      },
+    });
+  }
+
+  return path;
 }
 
 /**
@@ -130,9 +161,9 @@ export async function calculateLearningPathPrice(userId: string, pathId: string)
  * Check if user has enrolled in all courses in a learning path
  */
 export async function hasEnrolledInLearningPath(userId: string, pathId: string): Promise<boolean> {
-  // Elite subscribers get access to all learning paths
+  // Pro and Elite subscribers get access to all learning paths
   const subscription = await getUserSubscription(userId);
-  if (subscription && subscription.plan.tier === "elite") {
+  if (subscription && (subscription.plan.tier === "pro" || subscription.plan.tier === "elite")) {
     return true;
   }
 

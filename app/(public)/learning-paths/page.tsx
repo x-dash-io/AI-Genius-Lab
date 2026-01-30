@@ -140,7 +140,7 @@ async function LearningPathsContent({ searchParams }: LearningPathsPageProps) {
                       </div>
                     </div>
                   )}
-                  <Link href={`/learning-paths/${path.id}`}>
+                  <Link href={`/learning-paths/${path.slug}`}>
                     <Button className="w-full">View Learning Path</Button>
                   </Link>
                 </div>
