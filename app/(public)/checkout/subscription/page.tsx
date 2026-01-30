@@ -38,43 +38,47 @@ async function createSubscriptionAction(formData: FormData) {
 
   const appUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
-  // DON'T cancel the old subscription yet - wait for webhook confirmation
-  // Store the existing subscription ID to cancel it later when new one activates
+  let approvalUrl: string; // Declared here
 
-  // Create a new pending subscription record with reference to old subscription
-  const subscription = await prisma.subscription.create({
-    data: {
-      userId: session.user.id,
-      planId: plan.id,
-      interval: interval === "monthly" ? "monthly" : "annual",
-      status: "pending",
-      currentPeriodEnd: new Date(), // Initial value
-    }
-  });
-
-  // Store metadata about plan change (for webhook to handle old subscription)
-  // This ensures we know this is a plan change, not a new subscription
-
-  let approvalUrl: string;
-  try {
-    const result = await createPayPalSubscription({
+  // If user is switching plans, revise the existing subscription
+  if (existingSub && existingSub.paypalSubscriptionId) {
+    const result = await revisePayPalSubscription({
+      subscriptionId: existingSub.paypalSubscriptionId,
       planId: paypalPlanId,
-      customId: subscription.id,
-      returnUrl: `${appUrl}/checkout/subscription/success?subscriptionId=${subscription.id}`,
-      cancelUrl: `${appUrl}/pricing?subscription=cancelled`,
+      returnUrl: `${appUrl}/profile/subscription?planChanged=true`,
+      cancelUrl: `${appUrl}/profile/subscription`,
     });
     approvalUrl = result.approvalUrl;
-
-    // Save PayPal subscription ID immediately
-    await prisma.subscription.update({
-      where: { id: subscription.id },
-      data: { paypalSubscriptionId: result.subscriptionId }
+  } else {
+    // For new subscriptions, create a new one
+    const subscription = await prisma.subscription.create({
+      data: {
+        userId: session.user.id,
+        planId: plan.id,
+        interval: interval === "monthly" ? "monthly" : "annual",
+        status: "pending",
+        currentPeriodEnd: new Date(), // Initial value
+      },
     });
-  } catch (error) {
-    console.error("Failed to create PayPal subscription:", error);
-    // Cleanup pending subscription
-    await prisma.subscription.delete({ where: { id: subscription.id } });
-    throw error;
+
+    try {
+      const result = await createPayPalSubscription({
+        planId: paypalPlanId,
+        customId: subscription.id,
+        returnUrl: `${appUrl}/checkout/subscription/success?subscriptionId=${subscription.id}`,
+        cancelUrl: `${appUrl}/pricing?subscription=cancelled`,
+      });
+      approvalUrl = result.approvalUrl;
+
+      await prisma.subscription.update({
+        where: { id: subscription.id },
+        data: { paypalSubscriptionId: result.subscriptionId },
+      });
+    } catch (error) {
+      console.error("Failed to create PayPal subscription:", error);
+      await prisma.subscription.delete({ where: { id: subscription.id } });
+      throw error;
+    }
   }
 
   redirect(approvalUrl);
@@ -227,7 +231,7 @@ export default async function SubscriptionCheckoutPage({ searchParams }: Props) 
 
                 {isSwitching && existingSub && (
                   <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-900/30 dark:bg-blue-900/10 p-4">
-                    <p className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                    <p className="text-sm font-medium text-blue-600 dark:text-blue-400 flex items-center gap-2">
                       <Zap className="h-4 w-4" />
                       Your current plan ({existingSub.plan.name}) will be replaced. No refunds are issued.
                     </p>
