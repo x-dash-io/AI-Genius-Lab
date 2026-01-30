@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { SubscriptionSuccessToast } from "@/components/checkout/SubscriptionSuccessToast";
+import { CertificateViewButton } from "@/components/dashboard/CertificateViewButton";
 import { 
   BookOpen, 
   Activity, 
@@ -305,69 +306,69 @@ export default async function DashboardPage({
       {/* Learning Analytics */}
       {totalCourses > 0 && (
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="bg-orange-600 dark:bg-orange-950/20 border-orange-500 dark:border-orange-900">
+          <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-orange-500 dark:border-l-orange-400">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-white dark:text-orange-100">
+              <CardTitle className="text-xs sm:text-sm font-semibold text-foreground">
                 Learning Streak
               </CardTitle>
-              <Flame className="h-4 w-4 text-white dark:text-orange-400" />
+              <Flame className="h-4 w-4 text-orange-600 dark:text-orange-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold text-white dark:text-orange-300">
+              <div className="text-2xl sm:text-3xl font-bold text-foreground">
                 {learningStreak}
               </div>
-              <p className="text-xs text-white/80 dark:text-orange-400/80 mt-1">
+              <p className="text-xs text-foreground/60 dark:text-muted-foreground mt-1 font-medium">
                 Active days (30d)
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-blue-600 dark:bg-blue-950/20 border-blue-500 dark:border-blue-900">
+          <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500 dark:border-l-blue-400">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-white dark:text-blue-100">
+              <CardTitle className="text-xs sm:text-sm font-semibold text-foreground">
                 This Week
               </CardTitle>
-              <Calendar className="h-4 w-4 text-white dark:text-blue-400" />
+              <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold text-white dark:text-blue-300">
+              <div className="text-2xl sm:text-3xl font-bold text-foreground">
                 {weekProgress}
               </div>
-              <p className="text-xs text-white/80 dark:text-blue-400/80 mt-1">
+              <p className="text-xs text-foreground/60 dark:text-muted-foreground mt-1 font-medium">
                 Lessons accessed
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-green-600 dark:bg-green-950/20 border-green-500 dark:border-green-900">
+          <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-green-500 dark:border-l-green-400">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-white dark:text-green-100">
+              <CardTitle className="text-xs sm:text-sm font-semibold text-foreground">
                 Avg Progress
               </CardTitle>
-              <BarChart3 className="h-4 w-4 text-white dark:text-green-400" />
+              <BarChart3 className="h-4 w-4 text-green-600 dark:text-green-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold text-white dark:text-green-300">
+              <div className="text-2xl sm:text-3xl font-bold text-foreground">
                 {avgCompletionRate}%
               </div>
-              <p className="text-xs text-white/80 dark:text-green-400/80 mt-1">
+              <p className="text-xs text-foreground/60 dark:text-muted-foreground mt-1 font-medium">
                 Course completion
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-purple-600 dark:bg-purple-950/20 border-purple-500 dark:border-purple-900">
+          <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-purple-500 dark:border-l-purple-400">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium text-white dark:text-purple-100">
+              <CardTitle className="text-xs sm:text-sm font-semibold text-foreground">
                 Learning Time
               </CardTitle>
-              <Clock className="h-4 w-4 text-white dark:text-purple-400" />
+              <Clock className="h-4 w-4 text-purple-600 dark:text-purple-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl sm:text-3xl font-bold text-white dark:text-purple-300">
+              <div className="text-2xl sm:text-3xl font-bold text-foreground">
                 {learningHours}h {learningMinutes}m
               </div>
-              <p className="text-xs text-white/80 dark:text-purple-400/80 mt-1">
+              <p className="text-xs text-foreground/60 dark:text-muted-foreground mt-1 font-medium">
                 Estimated total
               </p>
             </CardContent>
@@ -439,81 +440,81 @@ export default async function DashboardPage({
           </Card>
 
           {/* Quick Achievements */}
-          <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-l-4 border-l-amber-500 dark:border-l-amber-400 border-amber-200 dark:border-amber-900">
+          <Card className="border-l-4 border-l-amber-500 dark:border-l-amber-400">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-foreground font-semibold">
                 <Trophy className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                 Achievements
               </CardTitle>
-              <CardDescription className="text-foreground/60 dark:text-amber-300/80 font-medium">
+              <CardDescription className="text-foreground/60 dark:text-muted-foreground font-medium">
                 Your milestones
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {completedCourses > 0 && (
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-white/50 dark:bg-black/20">
-                  <div className="h-10 w-10 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0">
+                <div className="flex items-start gap-3 p-4 rounded-lg border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/10 hover:bg-amber-100/50 dark:hover:bg-amber-900/20 transition-colors">
+                  <div className="h-10 w-10 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0 shadow-md">
                     <Trophy className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-foreground">
                       Course Completer
                     </p>
-                    <p className="text-xs text-foreground/60 dark:text-amber-300/80 font-medium">
+                    <p className="text-xs text-foreground/70 dark:text-muted-foreground font-medium mt-1">
                       Completed {completedCourses} {completedCourses === 1 ? 'course' : 'courses'}
                     </p>
                   </div>
                 </div>
               )}
               {learningStreak >= 7 && (
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-white/50 dark:bg-black/20">
-                  <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                <div className="flex items-start gap-3 p-4 rounded-lg border border-orange-200 dark:border-orange-900/50 bg-orange-50/50 dark:bg-orange-950/10 hover:bg-orange-100/50 dark:hover:bg-orange-900/20 transition-colors">
+                  <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0 shadow-md">
                     <Flame className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-foreground">
                       On Fire!
                     </p>
-                    <p className="text-xs text-foreground/60 dark:text-amber-300/80 font-medium">
+                    <p className="text-xs text-foreground/70 dark:text-muted-foreground font-medium mt-1">
                       {learningStreak} day learning streak
                     </p>
                   </div>
                 </div>
               )}
               {totalLessonsCompleted >= 10 && (
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-white/50 dark:bg-black/20">
-                  <div className="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                <div className="flex items-start gap-3 p-4 rounded-lg border border-green-200 dark:border-green-900/50 bg-green-50/50 dark:bg-green-950/10 hover:bg-green-100/50 dark:hover:bg-green-900/20 transition-colors">
+                  <div className="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 shadow-md">
                     <CheckCircle2 className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-foreground">
                       Dedicated Learner
                     </p>
-                    <p className="text-xs text-foreground/60 dark:text-amber-300/80 font-medium">
+                    <p className="text-xs text-foreground/70 dark:text-muted-foreground font-medium mt-1">
                       {totalLessonsCompleted} lessons completed
                     </p>
                   </div>
                 </div>
               )}
               {certificates.length > 0 && (
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-white/50 dark:bg-black/20">
-                  <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                <div className="flex items-start gap-3 p-4 rounded-lg border border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-950/10 hover:bg-blue-100/50 dark:hover:bg-blue-900/20 transition-colors">
+                  <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 shadow-md">
                     <Award className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-foreground">
                       Certified
                     </p>
-                    <p className="text-xs text-foreground/60 dark:text-amber-300/80 font-medium">
+                    <p className="text-xs text-foreground/70 dark:text-muted-foreground font-medium mt-1">
                       Earned {certificates.length} {certificates.length === 1 ? 'certificate' : 'certificates'}
                     </p>
                   </div>
                 </div>
               )}
               {totalCourses > 0 && completedCourses === 0 && learningStreak < 7 && totalLessonsCompleted < 10 && certificates.length === 0 && (
-                <div className="text-center py-4">
-                  <Sparkles className="h-8 w-8 mx-auto text-amber-600 dark:text-amber-500 mb-2" />
-                  <p className="text-sm text-zinc-900 dark:text-amber-300">
+                <div className="text-center py-6 px-4 rounded-lg border border-dashed border-foreground/20">
+                  <Sparkles className="h-8 w-8 mx-auto text-amber-600 dark:text-amber-400 mb-2" />
+                  <p className="text-sm font-medium text-foreground">
                     Keep learning to unlock achievements!
                   </p>
                 </div>
@@ -600,11 +601,7 @@ export default async function DashboardPage({
                   <p className="text-xs text-foreground/60 dark:text-muted-foreground mb-3 font-medium">
                     Issued {new Date(cert.issuedAt).toLocaleDateString()}
                   </p>
-                  <Link href={`/certificates/${cert.id}`}>
-                    <Button variant="outline" size="sm" className="w-full">
-                      View Certificate
-                    </Button>
-                  </Link>
+                  <CertificateViewButton certificateId={cert.id} />
                 </div>
               ))}
             </div>
