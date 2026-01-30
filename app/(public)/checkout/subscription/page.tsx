@@ -2,9 +2,9 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createPayPalSubscription, revisePayPalSubscription, cancelPayPalSubscription } from "@/lib/paypal";
+import { createPayPalSubscription, revisePayPalSubscription } from "@/lib/paypal";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, AlertCircle, TrendingDown, Shield, Lock, Zap } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckoutIntervalToggle } from "@/components/subscriptions/CheckoutIntervalToggle";
@@ -27,7 +27,7 @@ async function createSubscriptionAction(formData: FormData) {
   const paypalPlanId = interval === "annual" ? plan.paypalAnnualPlanId : plan.paypalMonthlyPlanId;
   if (!paypalPlanId) throw new Error("Plan not synced with PayPal");
 
-  // Check for existing active subscription
+  // Check for existing active subscription locally
   const existingSub = await prisma.subscription.findFirst({
     where: {
       userId: session.user.id,
@@ -37,20 +37,43 @@ async function createSubscriptionAction(formData: FormData) {
   });
 
   const appUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  let approvalUrl: string | undefined;
+  
+  // Flag: Default to creating a new subscription unless revision succeeds
+  let shouldCreateNew = true; 
 
-  let approvalUrl: string; // Declared here
-
-  // If user is switching plans, revise the existing subscription
+  // --- ATTEMPT 1: REVISE EXISTING SUBSCRIPTION ---
   if (existingSub && existingSub.paypalSubscriptionId) {
-    const result = await revisePayPalSubscription({
-      subscriptionId: existingSub.paypalSubscriptionId,
-      planId: paypalPlanId,
-      returnUrl: `${appUrl}/profile/subscription?planChanged=true`,
-      cancelUrl: `${appUrl}/profile/subscription`,
-    });
-    approvalUrl = result.approvalUrl;
-  } else {
-    // For new subscriptions, create a new one
+    try {
+      console.log(`Attempting to revise subscription: ${existingSub.paypalSubscriptionId}`);
+      
+      const result = await revisePayPalSubscription({
+        subscriptionId: existingSub.paypalSubscriptionId,
+        planId: paypalPlanId,
+        returnUrl: `${appUrl}/profile/subscription?planChanged=true`,
+        cancelUrl: `${appUrl}/profile/subscription`,
+      });
+      
+      approvalUrl = result.approvalUrl;
+      shouldCreateNew = false; // Success! No need to create a new one.
+
+    } catch (error: any) {
+      // If revision fails (e.g. status invalid/cancelled), log it and fall through to Create New
+      console.warn("Failed to revise PayPal subscription. Falling back to new subscription creation.", error?.message);
+      
+      // Optional: Update local DB to mark old sub as cancelled so we don't try this again
+      await prisma.subscription.update({
+        where: { id: existingSub.id },
+        data: { status: 'cancelled' } 
+      });
+      
+      // We leave shouldCreateNew = true to proceed to step 2
+    }
+  }
+
+  // --- ATTEMPT 2: CREATE NEW SUBSCRIPTION (Fallback) ---
+  if (shouldCreateNew) {
+    // 1. Create pending record in DB
     const subscription = await prisma.subscription.create({
       data: {
         userId: session.user.id,
@@ -62,6 +85,7 @@ async function createSubscriptionAction(formData: FormData) {
     });
 
     try {
+      // 2. Call PayPal to create new sub
       const result = await createPayPalSubscription({
         planId: paypalPlanId,
         customId: subscription.id,
@@ -70,18 +94,24 @@ async function createSubscriptionAction(formData: FormData) {
       });
       approvalUrl = result.approvalUrl;
 
+      // 3. Update DB with PayPal ID
       await prisma.subscription.update({
         where: { id: subscription.id },
         data: { paypalSubscriptionId: result.subscriptionId },
       });
     } catch (error) {
       console.error("Failed to create PayPal subscription:", error);
+      // Clean up the pending subscription if PayPal fails
       await prisma.subscription.delete({ where: { id: subscription.id } });
       throw error;
     }
   }
 
-  redirect(approvalUrl);
+  if (approvalUrl) {
+    redirect(approvalUrl);
+  } else {
+    throw new Error("Failed to generate PayPal approval URL");
+  }
 }
 
 export default async function SubscriptionCheckoutPage({ searchParams }: Props) {

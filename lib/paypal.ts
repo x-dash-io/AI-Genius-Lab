@@ -163,7 +163,10 @@ export async function revisePayPalSubscription({
   if (!response.ok) {
     const error = await response.json();
     console.error("PayPal Revise Subscription Error:", error);
-    throw new Error("Failed to revise PayPal subscription.");
+    
+    // Improved error throwing: Pass the specific issue code
+    const errorMessage = error.details?.[0]?.issue || error.message || "Failed to revise PayPal subscription";
+    throw new Error(errorMessage);
   }
 
   const data = await response.json();
