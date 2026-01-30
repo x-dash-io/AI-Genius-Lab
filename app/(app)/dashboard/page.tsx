@@ -241,61 +241,61 @@ export default async function DashboardPage({
 
       {/* Stats Grid */}
       <div className="grid gap-4 sm:gap-6 grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500 dark:border-l-blue-400">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-semibold text-foreground">
               Total Courses
             </CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <BookOpen className="h-4 w-4 text-blue-600 dark:text-blue-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl sm:text-3xl font-bold">{totalCourses}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div className="text-2xl sm:text-3xl font-bold text-foreground">{totalCourses}</div>
+            <p className="text-xs text-foreground/60 dark:text-muted-foreground mt-1 font-medium">
               {completedCourses} completed
             </p>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-amber-500 dark:border-l-amber-400">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-semibold text-foreground">
               In Progress
             </CardTitle>
-            <PlayCircle className="h-4 w-4 text-muted-foreground" />
+            <PlayCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl sm:text-3xl font-bold">{inProgressCourses}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div className="text-2xl sm:text-3xl font-bold text-foreground">{inProgressCourses}</div>
+            <p className="text-xs text-foreground/60 dark:text-muted-foreground mt-1 font-medium">
               Active courses
             </p>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-green-500 dark:border-l-green-400">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-semibold text-foreground">
               Lessons Done
             </CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+            <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl sm:text-3xl font-bold">{totalLessonsCompleted}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div className="text-2xl sm:text-3xl font-bold text-foreground">{totalLessonsCompleted}</div>
+            <p className="text-xs text-foreground/60 dark:text-muted-foreground mt-1 font-medium">
               Total completed
             </p>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
+        <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-purple-500 dark:border-l-purple-400">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">
+            <CardTitle className="text-xs sm:text-sm font-semibold text-foreground">
               Certificates
             </CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
+            <Award className="h-4 w-4 text-purple-600 dark:text-purple-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl sm:text-3xl font-bold">{certificates.length}</div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <div className="text-2xl sm:text-3xl font-bold text-foreground">{certificates.length}</div>
+            <p className="text-xs text-foreground/60 dark:text-muted-foreground mt-1 font-medium">
               Earned
             </p>
           </CardContent>
@@ -382,11 +382,11 @@ export default async function DashboardPage({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-foreground">
+                    <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     Continue Learning
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-foreground/60 dark:text-muted-foreground font-medium">
                     Pick up where you left off
                   </CardDescription>
                 </div>
@@ -402,19 +402,19 @@ export default async function DashboardPage({
                 {sortedCourses.slice(0, 3).map((course) => (
                   <div
                     key={course.id}
-                    className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border hover:bg-accent/50 transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <h3 className="font-semibold text-sm sm:text-base truncate">
+                        <h3 className="font-semibold text-sm sm:text-base truncate text-foreground">
                           {course.Course.title}
                         </h3>
-                        <Badge variant={course.completionPercent === 100 ? "default" : "secondary"} className="flex-shrink-0">
+                        <Badge variant={course.completionPercent === 100 ? "default" : "secondary"} className="flex-shrink-0 font-semibold">
                           {course.completionPercent}%
                         </Badge>
                       </div>
                       <Progress value={course.completionPercent} className="h-2 mb-2" />
-                      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-foreground/70 dark:text-muted-foreground font-medium">
                         <span>{course.completedLessons} / {course.totalLessons} lessons</span>
                         {course.lastAccessed && (
                           <>
@@ -439,13 +439,13 @@ export default async function DashboardPage({
           </Card>
 
           {/* Quick Achievements */}
-          <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-amber-200 dark:border-amber-900">
+          <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-l-4 border-l-amber-500 dark:border-l-amber-400 border-amber-200 dark:border-amber-900">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-zinc-900 dark:text-amber-100">
-                <Trophy className="h-5 w-5 text-amber-700 dark:text-amber-400" />
+              <CardTitle className="flex items-center gap-2 text-foreground font-semibold">
+                <Trophy className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                 Achievements
               </CardTitle>
-              <CardDescription className="text-zinc-700 dark:text-amber-300/80">
+              <CardDescription className="text-foreground/60 dark:text-amber-300/80 font-medium">
                 Your milestones
               </CardDescription>
             </CardHeader>
@@ -456,10 +456,10 @@ export default async function DashboardPage({
                     <Trophy className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-zinc-900 dark:text-amber-100">
+                    <p className="font-semibold text-sm text-foreground">
                       Course Completer
                     </p>
-                    <p className="text-xs text-zinc-700 dark:text-amber-300/80">
+                    <p className="text-xs text-foreground/60 dark:text-amber-300/80 font-medium">
                       Completed {completedCourses} {completedCourses === 1 ? 'course' : 'courses'}
                     </p>
                   </div>
@@ -471,10 +471,10 @@ export default async function DashboardPage({
                     <Flame className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-zinc-900 dark:text-amber-100">
+                    <p className="font-semibold text-sm text-foreground">
                       On Fire!
                     </p>
-                    <p className="text-xs text-zinc-700 dark:text-amber-300/80">
+                    <p className="text-xs text-foreground/60 dark:text-amber-300/80 font-medium">
                       {learningStreak} day learning streak
                     </p>
                   </div>
@@ -486,10 +486,10 @@ export default async function DashboardPage({
                     <CheckCircle2 className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-zinc-900 dark:text-amber-100">
+                    <p className="font-semibold text-sm text-foreground">
                       Dedicated Learner
                     </p>
-                    <p className="text-xs text-zinc-700 dark:text-amber-300/80">
+                    <p className="text-xs text-foreground/60 dark:text-amber-300/80 font-medium">
                       {totalLessonsCompleted} lessons completed
                     </p>
                   </div>
@@ -501,10 +501,10 @@ export default async function DashboardPage({
                     <Award className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-zinc-900 dark:text-amber-100">
+                    <p className="font-semibold text-sm text-foreground">
                       Certified
                     </p>
-                    <p className="text-xs text-zinc-700 dark:text-amber-300/80">
+                    <p className="text-xs text-foreground/60 dark:text-amber-300/80 font-medium">
                       Earned {certificates.length} {certificates.length === 1 ? 'certificate' : 'certificates'}
                     </p>
                   </div>
@@ -525,13 +525,13 @@ export default async function DashboardPage({
 
       {/* Recent Activity */}
       {recentProgress.length > 0 && (
-        <Card>
+        <Card className="border-l-4 border-l-purple-500 dark:border-l-purple-400">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-foreground font-semibold">
+              <Activity className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               Recent Activity
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-foreground/60 dark:text-muted-foreground font-medium">
               Your latest learning sessions
             </CardDescription>
           </CardHeader>
@@ -553,13 +553,13 @@ export default async function DashboardPage({
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">
+                    <p className="font-medium text-sm truncate text-foreground">
                       {progress.Lesson.title}
                     </p>
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p className="text-xs text-foreground/60 dark:text-muted-foreground truncate font-medium">
                       {progress.Lesson.Section.Course.title}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-foreground/60 dark:text-muted-foreground mt-1 font-medium">
                       {progress.completedAt ? "Completed" : `${progress.completionPercent}% complete`} • {new Date(progress.updatedAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -572,15 +572,15 @@ export default async function DashboardPage({
 
       {/* Certificates */}
       {certificates.length > 0 && (
-        <Card>
+        <Card className="border-l-4 border-l-green-500 dark:border-l-green-400">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-foreground font-semibold">
+                  <Award className="h-5 w-5 text-green-600 dark:text-green-400" />
                   Your Certificates
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-foreground/60 dark:text-muted-foreground font-medium">
                   Achievements you've earned
                 </CardDescription>
               </div>
@@ -594,10 +594,10 @@ export default async function DashboardPage({
                   className="p-4 rounded-lg border bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20"
                 >
                   <Award className="h-8 w-8 text-amber-600 dark:text-amber-400 mb-2" />
-                  <h3 className="font-semibold text-sm mb-1 line-clamp-2">
+                  <h3 className="font-semibold text-sm mb-1 line-clamp-2 text-foreground">
                     {cert.Course?.title || 'Certificate'}
                   </h3>
-                  <p className="text-xs text-muted-foreground mb-3">
+                  <p className="text-xs text-foreground/60 dark:text-muted-foreground mb-3 font-medium">
                     Issued {new Date(cert.issuedAt).toLocaleDateString()}
                   </p>
                   <Link href={`/certificates/${cert.id}`}>
@@ -617,8 +617,8 @@ export default async function DashboardPage({
         <Card>
           <CardContent className="py-12 text-center">
             <Sparkles className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Start Your Learning Journey</h3>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            <h3 className="text-lg font-semibold text-foreground mb-2">Start Your Learning Journey</h3>
+            <p className="text-foreground/60 dark:text-muted-foreground mb-6 max-w-md mx-auto font-medium">
               You haven't enrolled in any courses yet. Browse our catalog to find the perfect course for you.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">

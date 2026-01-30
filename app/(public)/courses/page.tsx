@@ -6,6 +6,8 @@ import { CourseFilters } from "@/components/courses/CourseFilters";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookOpen } from "lucide-react";
+
+export const metadata: Metadata = generateSEOMetadata({
   title: "Course Catalog",
   description:
     "Browse curated AI courses with previews and structured learning paths. Learn AI for business, content, apps, and productivity.",

@@ -4,12 +4,13 @@ import { redirect, notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getLearningPathBySlug, createLearningPathPurchases, hasEnrolledInLearningPath, calculateLearningPathPrice } from "@/lib/learning-paths";
+import { getUserSubscription } from "@/lib/subscriptions";
 import { createPayPalOrder } from "@/lib/paypal";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, BookOpen, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle2, Lock, Zap } from "lucide-react";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateLearningPathSchema } from "@/lib/seo/schemas";
 import { LearningPathEnrollment } from "@/components/learning-paths/LearningPathEnrollment";
@@ -60,7 +61,17 @@ export default async function LearningPathDetailPage({
   };
 
   const session = await getServerSession(authOptions);
-  const isEnrolled = session?.user
+  
+  // Check if user has access to learning paths (Elite subscription or guest)
+  let hasAccessToPath = false;
+  let userSubscription = null;
+  
+  if (session?.user) {
+    userSubscription = await getUserSubscription(session.user.id);
+    hasAccessToPath = userSubscription?.plan.tier === "elite" || false;
+  }
+
+  const isEnrolled = session?.user && hasAccessToPath
     ? await hasEnrolledInLearningPath(session.user.id, path.id)
     : false;
 
@@ -175,6 +186,178 @@ export default async function LearningPathDetailPage({
       url: `/courses/${pc.course.slug}`,
     })),
   });
+
+  // Access restriction section for non-Elite users
+  if (!session?.user) {
+    // Not logged in - show sign in prompt
+    return (
+      <section className="grid gap-8">
+        <div>
+          <Link
+            href="/learning-paths"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Learning Paths
+          </Link>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Learning Path
+          </p>
+          <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
+            {path.title}
+          </h1>
+          {path.description && (
+            <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
+              {path.description}
+            </p>
+          )}
+        </div>
+
+        <Card className="border-l-4 border-l-blue-500">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-foreground">
+              <Lock className="h-5 w-5 text-blue-600" />
+              Learning Paths Require Premium Access
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground">
+              Learning Paths are an exclusive feature available to our Elite subscribers. These curated, structured paths guide you through a complete learning journey.
+            </p>
+            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg p-4 space-y-3">
+              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                <Zap className="h-4 w-4 text-blue-600" />
+                Elite Subscription Includes:
+              </h3>
+              <ul className="space-y-2 text-sm text-foreground/80">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  Access to all Learning Paths
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  All premium courses included
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  Unlimited certificates
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  Priority support
+                </li>
+              </ul>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link href={`/sign-in?callbackUrl=${encodeURIComponent(`/learning-paths/${pathId}`)}`}>
+                <Button size="lg" className="w-full sm:w-auto">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/pricing">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                  Upgrade to Elite
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+    );
+  }
+
+  if (!hasAccessToPath) {
+    // Logged in but not Elite - show upgrade prompt
+    return (
+      <section className="grid gap-8">
+        <div>
+          <Link
+            href="/learning-paths"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Learning Paths
+          </Link>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Learning Path
+          </p>
+          <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
+            {path.title}
+          </h1>
+          {path.description && (
+            <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
+              {path.description}
+            </p>
+          )}
+        </div>
+
+        <Card className="border-l-4 border-l-amber-500">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-foreground">
+              <Lock className="h-5 w-5 text-amber-600" />
+              Upgrade Required
+            </CardTitle>
+            <CardDescription className="text-foreground/60 mt-2">
+              This learning path is exclusively available for Elite subscribers
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <h3 className="font-semibold text-lg text-foreground mb-4">
+                Your Current Plan: <span className="text-amber-600">{userSubscription?.plan.name || 'Free'}</span>
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                Unlock access to this learning path and all other premium features by upgrading to Elite.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="font-semibold text-foreground flex items-center gap-2">
+                <Zap className="h-4 w-4 text-amber-600" />
+                What You'll Get with Elite:
+              </h4>
+              <div className="grid gap-2">
+                <div className="flex items-center gap-2 text-sm text-foreground/80">
+                  <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  Unlimited access to all learning paths
+                </div>
+                <div className="flex items-center gap-2 text-sm text-foreground/80">
+                  <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  Access to all premium and standard courses
+                </div>
+                <div className="flex items-center gap-2 text-sm text-foreground/80">
+                  <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  Unlimited certificates and achievements
+                </div>
+                <div className="flex items-center gap-2 text-sm text-foreground/80">
+                  <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  Early access to new content
+                </div>
+                <div className="flex items-center gap-2 text-sm text-foreground/80">
+                  <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0" />
+                  Cancel anytime with no penalty
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 flex flex-col sm:flex-row gap-3">
+              <Link href="/pricing">
+                <Button size="lg" className="w-full sm:w-auto">
+                  <Zap className="h-4 w-4 mr-2" />
+                  Upgrade to Elite
+                </Button>
+              </Link>
+              <Link href="/learning-paths">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto">
+                  View Other Paths
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+    );
+  }
 
   return (
     <section className="grid gap-8">
