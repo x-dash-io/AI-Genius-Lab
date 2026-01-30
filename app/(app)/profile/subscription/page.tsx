@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getUserSubscription, cancelSubscription, refreshSubscriptionStatus } from "@/lib/subscriptions";
+import { cancelSubscription, refreshSubscriptionStatus } from "@/lib/subscriptions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,14 +31,16 @@ export default async function UserSubscriptionPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/sign-in");
 
-  let subscriptionData = await getUserSubscription(session.user.id);
-
-  if (subscriptionData?.status === "pending") {
-    subscriptionData = await refreshSubscriptionStatus(subscriptionData.id);
-  }
-
-  const subscription = subscriptionData ? await prisma.subscription.findUnique({
-    where: { id: subscriptionData.id },
+  // FIX: We query Prisma directly here to ensure we get the NEWEST subscription.
+  // We use `orderBy: { createdAt: 'desc' }` so the Elite plan (created today)
+  // appears before the Pro plan (created previously).
+  let subscription = await prisma.subscription.findFirst({
+    where: { 
+      userId: session.user.id 
+    },
+    orderBy: { 
+      createdAt: 'desc' // <--- THIS IS THE KEY FIX
+    },
     include: {
       plan: true,
       payments: {
@@ -46,7 +48,23 @@ export default async function UserSubscriptionPage() {
         take: 10
       }
     }
-  }) : null;
+  });
+
+  // Keep your logic for checking pending status
+  if (subscription?.status === "pending") {
+    const updatedStatus = await refreshSubscriptionStatus(subscription.id);
+    
+    // If the status changed during refresh, update the local variable
+    if (updatedStatus && updatedStatus.status !== "pending") {
+        subscription = await prisma.subscription.findUnique({
+            where: { id: subscription.id },
+            include: {
+                plan: true,
+                payments: { orderBy: { paidAt: "desc" }, take: 10 }
+            }
+        });
+    }
+  }
 
   return (
     <div className="space-y-8 pb-8">
@@ -148,7 +166,8 @@ export default async function UserSubscriptionPage() {
                       PayPal
                     </span>
                   </div>
-                  {subscription.cancelAtPeriodEnd && (
+                  {/* FIX: Check explicitly for 'cancelled' status OR cancelAtPeriodEnd */}
+                  {(subscription.cancelAtPeriodEnd || subscription.status === 'cancelled') && (
                     <div className="bg-amber-100 dark:bg-amber-950/30 p-3 rounded text-xs text-zinc-900 dark:text-amber-300 flex items-start gap-2">
                       <RefreshCw className="h-4 w-4 mt-0.5 flex-shrink-0" />
                       <span>Your subscription will end on {format(new Date(subscription.currentPeriodEnd), "PPP")} and will not renew.</span>
@@ -158,7 +177,7 @@ export default async function UserSubscriptionPage() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col sm:flex-row justify-between gap-4 border-t pt-6">
-              {!subscription.cancelAtPeriodEnd ? (
+              {(!subscription.cancelAtPeriodEnd && subscription.status === 'active') ? (
                 <form action={cancelAction} className="w-full sm:w-auto">
                   <input type="hidden" name="subId" value={subscription.id} />
                   <Button variant="outline" className="w-full sm:w-auto text-destructive hover:bg-destructive/10">
@@ -167,7 +186,10 @@ export default async function UserSubscriptionPage() {
                 </form>
               ) : (
                 <Link href="/pricing" className="w-full sm:w-auto">
-                  <Button className="w-full">Re-activate Subscription</Button>
+                   {/* If it's cancelled, we essentially ask them to buy again (Re-activate) */}
+                  <Button className="w-full">
+                    {subscription.status === 'active' ? "Re-activate Subscription" : "Renew Subscription"}
+                  </Button>
                 </Link>
               )}
               <Link href="/pricing" className="w-full sm:w-auto">
