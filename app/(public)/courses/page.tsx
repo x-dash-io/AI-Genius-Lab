@@ -6,8 +6,6 @@ import { CourseFilters } from "@/components/courses/CourseFilters";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookOpen } from "lucide-react";
-
-export const metadata: Metadata = generateSEOMetadata({
   title: "Course Catalog",
   description:
     "Browse curated AI courses with previews and structured learning paths. Learn AI for business, content, apps, and productivity.",
@@ -124,8 +122,9 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
       <section className="container mx-auto py-12 px-4 grid gap-8">
         {/* Header */}
         <div className="space-y-4">
-          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm font-medium text-primary">
-            📚 Course Library
+          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm font-medium text-primary gap-2">
+            <BookOpen className="h-4 w-4" />
+            Course Library
           </div>
           <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight">
             Discover AI Courses

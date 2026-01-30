@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { createPayPalSubscription, revisePayPalSubscription } from "@/lib/paypal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Check, AlertCircle } from "lucide-react";
+import { Check, AlertCircle, TrendingDown, Shield, Lock, Zap } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckoutIntervalToggle } from "@/components/subscriptions/CheckoutIntervalToggle";
 
@@ -193,8 +193,9 @@ export default async function SubscriptionCheckoutPage({ searchParams }: Props) 
                     <span className="text-muted-foreground">/{interval === "annual" ? "year" : "month"}</span>
                   </div>
                   {interval === "annual" && (
-                    <p className="mt-3 text-sm text-green-600 dark:text-green-400 font-medium">
-                      💰 Save ${(price / 100 * 0.2).toFixed(2)}/year vs. monthly
+                    <p className="mt-3 text-sm text-green-600 dark:text-green-400 font-medium flex items-center gap-2">
+                      <TrendingDown className="h-4 w-4" />
+                      Save ${(price / 100 * 0.2).toFixed(2)}/year vs. monthly
                     </p>
                   )}
                 </div>
@@ -242,8 +243,9 @@ export default async function SubscriptionCheckoutPage({ searchParams }: Props) 
 
                 {isSwitching && existingSub && (
                   <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900/30 dark:bg-amber-900/10 p-4">
-                    <p className="text-sm font-medium text-amber-900 dark:text-amber-300">
-                      💡 Your current plan ({existingSub.plan.name}) will be replaced. No refunds are issued.
+                    <p className="text-sm font-medium text-amber-900 dark:text-amber-300 flex items-center gap-2">
+                      <Zap className="h-4 w-4" />
+                      Your current plan ({existingSub.plan.name}) will be replaced. No refunds are issued.
                     </p>
                   </div>
                 )}
@@ -291,9 +293,9 @@ export default async function SubscriptionCheckoutPage({ searchParams }: Props) 
 
             {/* Terms */}
             <div className="space-y-2 text-xs text-muted-foreground">
-              <p>✓ Cancel anytime</p>
-              <p>✓ No hidden fees</p>
-              <p>✓ Instant access</p>
+              <p className="flex items-center gap-2"><Check className="h-3 w-3 text-green-500" /> Cancel anytime</p>
+              <p className="flex items-center gap-2"><Shield className="h-3 w-3 text-green-500" /> No hidden fees</p>
+              <p className="flex items-center gap-2"><Lock className="h-3 w-3 text-green-500" /> Instant access</p>
               <p className="!mt-4 text-xs text-muted-foreground/70">
                 By clicking "Subscribe", you agree to our <a href="/terms" className="underline hover:text-foreground">Terms of Service</a> and <a href="/privacy" className="underline hover:text-foreground">Privacy Policy</a>
               </p>

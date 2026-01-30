@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { PricingGrid } from "@/components/subscriptions/PricingGrid";
 import { Button } from "@/components/ui/button";
+import { Zap, Award } from "lucide-react";
 
 export default async function PricingPage() {
   // await connection(); // Not available in Next.js 14
@@ -16,8 +17,9 @@ export default async function PricingPage() {
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-20 sm:py-28">
         <div className="text-center max-w-3xl mx-auto mb-4">
-          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary mb-4">
-            🎓 Flexible Learning Plans
+          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary mb-4 gap-2">
+            <Award className="h-4 w-4" />
+            Flexible Learning Plans
           </div>
           <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tight mb-4">
             Invest in Your AI Future

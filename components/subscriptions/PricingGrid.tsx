@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check } from "lucide-react";
+import { Check, Zap, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { SubscriptionPlan } from "@prisma/client";
@@ -50,9 +50,10 @@ export function PricingGrid({ plans }: PricingGridProps) {
           const perMonthPrice = interval === "annual" ? (priceCents / 12 / 100).toFixed(2) : displayPrice;
 
           return (
-            <Card key={plan.id} className={plan.tier === "pro" ? "border-primary shadow-xl relative md:scale-105 ring-2 ring-primary/20 z-10" : ""}>
+            <Card key={plan.id} className={plan.tier === "pro" ? "border-2 border-primary shadow-2xl relative md:scale-105 ring-2 ring-primary/30 z-10" : ""}>
               {plan.tier === "pro" && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-lg border border-primary-foreground/20 z-20">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-primary to-primary/90 text-primary-foreground text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wider shadow-lg border-2 border-primary flex items-center gap-2 z-20">
+                  <Zap className="h-3 w-3" />
                   Most Popular
                 </div>
               )}
@@ -67,7 +68,8 @@ export function PricingGrid({ plans }: PricingGridProps) {
                     <span className="text-muted-foreground">/mo</span>
                   </div>
                   {interval === "annual" && (
-                    <div className="text-sm text-green-600 font-medium mt-1">
+                    <div className="text-sm text-green-600 dark:text-green-400 font-medium mt-1 flex items-center gap-1">
+                      <Check className="h-3 w-3" />
                       Billed annually (${displayPrice}/year)
                     </div>
                   )}
