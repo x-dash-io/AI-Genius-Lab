@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createPayPalSubscription, revisePayPalSubscription } from "@/lib/paypal";
+import { createPayPalSubscription, revisePayPalSubscription, cancelPayPalSubscription } from "@/lib/paypal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Check, AlertCircle, TrendingDown, Shield, Lock, Zap } from "lucide-react";
@@ -28,7 +28,7 @@ async function createSubscriptionAction(formData: FormData) {
   if (!paypalPlanId) throw new Error("Plan not synced with PayPal");
 
   // Check for existing active subscription to revise
-  const existingSub = await prisma.subscription.findFirst({
+  let existingSub = await prisma.subscription.findFirst({
     where: {
       userId: session.user.id,
       status: { in: ["active", "past_due", "cancelled"] },
@@ -40,24 +40,23 @@ async function createSubscriptionAction(formData: FormData) {
 
   if (existingSub?.paypalSubscriptionId) {
     try {
-      const result = await revisePayPalSubscription({
-        subscriptionId: existingSub.paypalSubscriptionId,
-        planId: paypalPlanId,
-        returnUrl: `${appUrl}/checkout/subscription/success?subscriptionId=${existingSub.id}&targetPlanId=${planId}&targetInterval=${interval}`,
-        cancelUrl: `${appUrl}/pricing?subscription=cancelled`,
+      // Cancel the existing PayPal subscription instead of revising
+      // (Revise fails when switching between different products)
+      await cancelPayPalSubscription(existingSub.paypalSubscriptionId);
+      
+      // Mark the old subscription as cancelled
+      await prisma.subscription.update({
+        where: { id: existingSub.id },
+        data: { 
+          status: "cancelled",
+          cancelAtPeriodEnd: false
+        },
       });
-
-      if (result.approvalUrl) {
-        redirect(result.approvalUrl);
-      } else {
-        // Some revisions don't need approval (e.g. same price or immediate change)
-        // But usually they do. If not, we redirect to success.
-        redirect(`${appUrl}/checkout/subscription/success?subscriptionId=${existingSub.id}&targetPlanId=${planId}&targetInterval=${interval}`);
-      }
     } catch (error) {
-      console.error("Failed to revise PayPal subscription:", error);
-      throw error;
+      console.error("Failed to cancel existing PayPal subscription:", error);
+      // Continue anyway - we'll create a new subscription
     }
+    existingSub = null; // Clear for new creation
   }
 
   // Create a new pending subscription record
@@ -243,7 +242,7 @@ export default async function SubscriptionCheckoutPage({ searchParams }: Props) 
 
                 {isSwitching && existingSub && (
                   <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900/30 dark:bg-amber-900/10 p-4">
-                    <p className="text-sm font-medium text-amber-900 dark:text-amber-300 flex items-center gap-2">
+                    <p className="text-sm font-medium text-amber-700 dark:text-amber-300 flex items-center gap-2">
                       <Zap className="h-4 w-4" />
                       Your current plan ({existingSub.plan.name}) will be replaced. No refunds are issued.
                     </p>
