@@ -31,6 +31,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast";
 import { useAdminPreview } from "@/components/admin/PreviewBanner";
 
+export const dynamic = "force-dynamic";
+
 interface ActivityEntry {
   id: string;
   type: string;

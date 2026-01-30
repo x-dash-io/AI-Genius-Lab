@@ -9,6 +9,8 @@ import { ShoppingCart, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { PurchaseFilters } from "@/components/admin/PurchaseFilters";
 
+export const dynamic = "force-dynamic";
+
 function formatCurrency(cents: number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",

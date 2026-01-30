@@ -18,6 +18,8 @@ import { LearningPathEnrollment } from "@/components/learning-paths/LearningPath
 import { PathProgressSection } from "@/components/learning-paths/PathProgressSection";
 import { PathObjectivesSection } from "@/components/learning-paths/PathObjectivesSection";
 
+export const dynamic = "force-dynamic";
+
 type LearningPathDetailPageProps = {
   params: Promise<{ pathId: string }>;
 };

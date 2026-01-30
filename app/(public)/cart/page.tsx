@@ -5,6 +5,8 @@ import { getCartFromCookies } from "@/lib/cart/utils";
 import { CartClient } from "@/components/cart/CartClient";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = generateSEOMetadata({
   title: "Shopping Cart",
   description: "Review your selected courses before checkout",

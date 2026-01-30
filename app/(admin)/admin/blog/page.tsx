@@ -8,6 +8,8 @@ import Link from "next/link";
 import { Newspaper, Plus, Edit, Trash2, Eye, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
+export const dynamic = "force-dynamic";
+
 async function BlogPostsList() {
   const posts = await getAllPosts();
 

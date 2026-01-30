@@ -13,6 +13,8 @@ import { revalidatePath } from "next/cache";
 import { Suspense } from "react";
 import { SubscriptionSuccessToast } from "@/components/checkout/SubscriptionSuccessToast";
 
+export const dynamic = "force-dynamic";
+
 async function cancelAction(formData: FormData) {
   "use server";
   const session = await getServerSession(authOptions);

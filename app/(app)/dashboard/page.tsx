@@ -29,6 +29,8 @@ import {
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = generateSEOMetadata({
   title: "Dashboard",
   description: "Your learning dashboard",

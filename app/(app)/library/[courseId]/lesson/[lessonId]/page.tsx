@@ -16,6 +16,8 @@ import {
   BookOpen
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 type LessonPageProps = {
   params: { courseId: string; lessonId: string };
 };

@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2 } from "lucide-react";
 import { CategoryList } from "@/components/admin/CategoryList";
 
+export const dynamic = "force-dynamic";
+
 async function CategoriesContent() {
   const categories = await getAllCategories();
 

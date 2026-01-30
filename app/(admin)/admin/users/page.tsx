@@ -12,6 +12,8 @@ import { Users as UsersIcon, User, Shield, Loader2 } from "lucide-react";
 import { UserFilters } from "@/components/admin/UserFilters";
 import { FilterSkeleton } from "@/components/ui/filter-skeleton";
 
+export const dynamic = "force-dynamic";
+
 interface AdminUsersPageProps {
   searchParams: Promise<{ search?: string; role?: string }>;
 }

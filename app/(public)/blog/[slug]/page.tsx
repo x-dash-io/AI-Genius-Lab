@@ -11,6 +11,8 @@ import { getSignedCloudinaryUrl } from "@/lib/cloudinary";
 import { BlogReviewSection } from "@/components/blog/BlogReviewSection";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
 }

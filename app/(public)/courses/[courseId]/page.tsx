@@ -9,6 +9,8 @@ import { CourseActions } from "@/components/courses/CourseActions";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateCourseSchema } from "@/lib/seo/schemas";
 
+export const dynamic = "force-dynamic";
+
 type CourseDetailPageProps = {
   params: Promise<{ courseId: string }>;
 };

@@ -16,6 +16,8 @@ import { BookOpen, DollarSign, GraduationCap, Calendar, ShieldCheck, Zap, Rocket
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+export const dynamic = "force-dynamic";
+
 async function updateProfileAction(userId: string, formData: FormData) {
   "use server";
   const name = formData.get("name") as string;

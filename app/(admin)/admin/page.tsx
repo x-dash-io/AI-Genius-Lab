@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { AnalyticsSection } from "@/components/admin/AnalyticsSection";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = generateSEOMetadata({
   title: "Admin Dashboard",
   description: "Administrative dashboard",

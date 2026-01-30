@@ -29,6 +29,8 @@ import { CartClearer } from "@/components/cart/CartClearer";
 
 import { InvoiceDownloadButton } from "@/components/purchase/InvoiceDownloadButton";
 
+export const dynamic = "force-dynamic";
+
 type CheckoutSuccessPageProps = {
   searchParams: Promise<{ purchase?: string; purchases?: string }>;
 };

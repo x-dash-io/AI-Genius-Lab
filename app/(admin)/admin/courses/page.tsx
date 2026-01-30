@@ -10,6 +10,8 @@ import { BookOpen, Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import { CourseFilters } from "@/components/admin/CourseFilters";
 import { BulkImport } from "@/components/admin/BulkImport";
 
+export const dynamic = "force-dynamic";
+
 interface AdminCoursesPageProps {
   searchParams: Promise<{ search?: string; status?: string; category?: string }>;
 }

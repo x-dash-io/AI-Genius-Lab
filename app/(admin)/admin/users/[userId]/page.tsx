@@ -11,6 +11,8 @@ import { ArrowLeft, Shield, User, ShoppingCart, GraduationCap, Activity } from "
 import { RoleSelectForm } from "@/components/admin/RoleSelectForm";
 import type { Role } from "@/lib/rbac";
 
+export const dynamic = "force-dynamic";
+
 function formatCurrency(cents: number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",

@@ -18,6 +18,8 @@ import {
   Award
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 type CourseAppPageProps = {
   params: { courseId: string };
 };
