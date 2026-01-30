@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { connection } from "next/server";
+// import { connection } from "next/server"; // Not available in Next.js 14
 import { LandingHero } from "@/components/layout/LandingHero";
 import { TrustSection } from "@/components/home/TrustSection";
 import { LaunchCurriculum } from "@/components/home/LaunchCurriculum";
@@ -24,7 +24,7 @@ export const metadata: Metadata = generateSEOMetadata({
 });
 
 export default async function LandingPage() {
-  await connection();
+  // await connection(); // Not available in Next.js 14
   // Fetch stats with error handling - page will still render if DB is unavailable
   let stats;
   try {

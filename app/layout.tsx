@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Montserrat } from "next/font/google";
+// import { Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -12,12 +12,12 @@ import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateOrganizationSchema } from "@/lib/seo/schemas";
 import "./globals.css";
 
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  variable: "--font-montserrat",
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
+// const montserrat = Montserrat({
+//   subsets: ["latin"],
+//   variable: "--font-montserrat",
+//   weight: ["400", "500", "600", "700"],
+//   display: "swap",
+// });
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "AI Genius Lab",
@@ -52,7 +52,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${montserrat.variable} font-sans antialiased`}
+        className="font-sans antialiased"
         style={{
           fontFamily: [
             "-apple-system",

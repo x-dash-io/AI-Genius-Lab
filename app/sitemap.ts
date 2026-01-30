@@ -1,33 +1,37 @@
 import { MetadataRoute } from "next";
-import { getPublishedCourses } from "@/lib/courses";
-import { getAllPublishedLearningPaths } from "@/lib/learning-paths";
+// import { getPublishedCourses } from "@/lib/courses";
+// import { getAllPublishedLearningPaths } from "@/lib/learning-paths";
 
 const siteUrl = process.env.NEXTAUTH_URL || "https://synapze.dev";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  let courses: any[] = [];
-  let learningPaths: any[] = [];
+  // Disabled DB queries during build
+  // let courses: any[] = [];
+  // let learningPaths: any[] = [];
 
-  try {
-    courses = await getPublishedCourses();
-    learningPaths = await getAllPublishedLearningPaths();
-  } catch (error) {
-    console.error("Error generating sitemap entries from database:", error);
-  }
+  // try {
+  //   courses = await getPublishedCourses();
+  //   learningPaths = await getAllPublishedLearningPaths();
+  // } catch (error) {
+  //   console.error("Error generating sitemap entries from database:", error);
+  // }
 
-  const courseEntries: MetadataRoute.Sitemap = courses.map((course) => ({
-    url: `${siteUrl}/courses/${course.slug}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly",
-    priority: 0.8,
-  }));
+  // const courseEntries: MetadataRoute.Sitemap = courses.map((course) => ({
+  //   url: `${siteUrl}/courses/${course.slug}`,
+  //   lastModified: new Date(),
+  //   changeFrequency: "weekly",
+  //   priority: 0.8,
+  // }));
 
-  const learningPathEntries: MetadataRoute.Sitemap = learningPaths.map((path) => ({
-    url: `${siteUrl}/learning-paths/${path.id}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly",
-    priority: 0.7,
-  }));
+  // const learningPathEntries: MetadataRoute.Sitemap = learningPaths.map((path) => ({
+  //   url: `${siteUrl}/learning-paths/${path.id}`,
+  //   lastModified: new Date(),
+  //   changeFrequency: "monthly",
+  //   priority: 0.7,
+  // }));
+
+  const courseEntries: MetadataRoute.Sitemap = [];
+  const learningPathEntries: MetadataRoute.Sitemap = [];
 
   const staticPages: MetadataRoute.Sitemap = [
     {

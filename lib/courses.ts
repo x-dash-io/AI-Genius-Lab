@@ -2,7 +2,6 @@ import { prisma, withRetry } from "@/lib/prisma";
 import { getCached, cacheKeys } from "@/lib/cache";
 
 export async function getPublishedCourses() {
-  "use cache";
   return withRetry(async () => {
     return prisma.course.findMany({
       where: { isPublished: true },
@@ -22,7 +21,6 @@ export async function getPublishedCourses() {
 }
 
 export async function getPublishedCoursesByCategory(category: string) {
-  "use cache";
   return withRetry(async () => {
     return prisma.course.findMany({
       where: { isPublished: true, category },
@@ -42,7 +40,6 @@ export async function getPublishedCoursesByCategory(category: string) {
 }
 
 export async function getCoursePreviewBySlug(slug: string) {
-  "use cache";
   const course = await withRetry(async () => {
     return prisma.course.findFirst({
           where: { slug, isPublished: true },

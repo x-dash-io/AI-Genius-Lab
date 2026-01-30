@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/prisma";
-import { connection } from "next/server";
+// import { connection } from "next/server"; // Not available in Next.js 14
 import { PricingGrid } from "@/components/subscriptions/PricingGrid";
 
 export default async function PricingPage() {
-  await connection();
+  // await connection(); // Not available in Next.js 14
   const plans = await prisma.subscriptionPlan.findMany({
     where: { isActive: true },
     orderBy: { tier: "asc" }

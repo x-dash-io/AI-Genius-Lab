@@ -1,7 +1,6 @@
 import { prisma, withRetry } from "@/lib/prisma";
 
 export async function getPublishedPosts(options: { tag?: string; search?: string } = {}) {
-  "use cache";
   const { tag, search } = options;
 
   return withRetry(async () => {
@@ -31,7 +30,6 @@ export async function getPublishedPosts(options: { tag?: string; search?: string
 }
 
 export async function getPostBySlug(slug: string) {
-  "use cache";
   return withRetry(async () => {
     return prisma.blogPost.findUnique({
       where: { slug },
@@ -54,7 +52,6 @@ export async function getPostBySlug(slug: string) {
 }
 
 export async function getBlogTags() {
-  "use cache";
   return withRetry(async () => {
     return prisma.blogTag.findMany({
       orderBy: { name: "asc" },

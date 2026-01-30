@@ -1,6 +1,5 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
     remotePatterns: [
       {
@@ -9,13 +8,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  cacheComponents: true,
   experimental: {
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
   },
-  // Disable React strict mode warnings in dev (optional, helps reduce noise)
   reactStrictMode: true,
-  // Speed up builds by skipping type checking (Vercel runs it separately)
   typescript: {
     ignoreBuildErrors: false,
   },
