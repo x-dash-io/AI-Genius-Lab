@@ -10,6 +10,8 @@ import Image from "next/image";
 import { getSignedCloudinaryUrl } from "@/lib/cloudinary";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = generateSEOMetadata({
   title: "Blog",
   description: "Explore the latest in AI, education, and technology with the AI Genius Lab blog.",

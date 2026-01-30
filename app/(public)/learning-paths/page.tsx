@@ -9,6 +9,8 @@ import { Route, BookOpen } from "lucide-react";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { LearningPathFilters } from "@/components/learning-paths/LearningPathFilters";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = generateSEOMetadata({
   title: "Learning Paths",
   description:

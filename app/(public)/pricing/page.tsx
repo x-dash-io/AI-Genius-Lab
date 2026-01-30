@@ -5,6 +5,8 @@ import { PricingGrid } from "@/components/subscriptions/PricingGrid";
 import { Button } from "@/components/ui/button";
 import { Zap, Award } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function PricingPage() {
   // await connection(); // Not available in Next.js 14
   const plans = await prisma.subscriptionPlan.findMany({
