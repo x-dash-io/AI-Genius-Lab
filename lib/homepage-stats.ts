@@ -85,6 +85,9 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
       },
       include: {
         courses: {
+          where: {
+            isPublished: true,
+          },
           select: {
             id: true,
             title: true,
