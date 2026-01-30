@@ -241,8 +241,8 @@ export default async function SubscriptionCheckoutPage({ searchParams }: Props) 
                 </div>
 
                 {isSwitching && existingSub && (
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900/30 dark:bg-amber-900/10 p-4">
-                    <p className="text-sm font-medium text-amber-700 dark:text-amber-300 flex items-center gap-2">
+                  <div className="rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-900/30 dark:bg-blue-900/10 p-4">
+                    <p className="text-sm font-medium text-blue-700 dark:text-blue-300 flex items-center gap-2">
                       <Zap className="h-4 w-4" />
                       Your current plan ({existingSub.plan.name}) will be replaced. No refunds are issued.
                     </p>
