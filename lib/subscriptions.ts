@@ -9,7 +9,6 @@ import { SubscriptionTier, SubscriptionStatus, SubscriptionInterval } from "@pri
 
 /**
  * Sync all active subscription plans from the database to PayPal.
- * This ensures that each plan has a corresponding Product and Billing Plans (Monthly/Annual) in PayPal.
  */
 export async function syncSubscriptionPlansToPayPal() {
   const plans = await prisma.subscriptionPlan.findMany({
@@ -89,40 +88,41 @@ export async function syncSubscriptionPlansToPayPal() {
 
 /**
  * Get the current active subscription for a user.
- * Returns the subscription if it's active or cancelled but still within the paid period.
- * Also includes pending subscriptions created in the last 24 hours to handle webhook delays.
- * IMPORTANT: Prioritizes active subscriptions over pending ones to prevent showing incorrect data during plan changes.
+ * FIXED: Prioritizes the most recently created subscription, regardless of whether 
+ * it is Active, Cancelled, or Pending. This ensures upgrades are detected immediately.
  */
 export async function getUserSubscription(userId: string) {
-  // First try to get an active subscription (including cancelled but still in period)
-  const activeSubscription = await prisma.subscription.findFirst({
+  // Query for ANY valid or potentially valid subscription
+  const subscription = await prisma.subscription.findFirst({
     where: {
       userId,
-      status: { in: ["active", "cancelled", "past_due"] },
-      currentPeriodEnd: { gt: new Date() }
+      OR: [
+        // Case 1: Active, Cancelled, or Past Due (must have future end date)
+        {
+          status: { in: ["active", "cancelled", "past_due"] },
+          currentPeriodEnd: { gt: new Date() }
+        },
+        // Case 2: Pending (created in last 24h)
+        {
+          status: "pending",
+          createdAt: { gt: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+        }
+      ]
     },
     include: { plan: true },
-    orderBy: { createdAt: "desc" }
+    // Crucial: Get the NEWEST one first. 
+    // This ensures a new Pending/Active plan overrides an old Cancelled one.
+    orderBy: { createdAt: "desc" } 
   });
 
-  // If we have an active subscription, return it
-  if (activeSubscription) {
-    return activeSubscription;
+  if (!subscription) return null;
+
+  // If the newest subscription is pending, try to auto-refresh it
+  if (subscription.status === "pending") {
+    return await refreshSubscriptionStatus(subscription.id);
   }
 
-  // Otherwise, check for recent pending subscriptions (within 24 hours)
-  // This handles the case where a new subscription is being processed
-  const pendingSubscription = await prisma.subscription.findFirst({
-    where: {
-      userId,
-      status: "pending",
-      createdAt: { gt: new Date(Date.now() - 24 * 60 * 60 * 1000) }
-    },
-    include: { plan: true },
-    orderBy: { createdAt: "desc" }
-  });
-
-  return pendingSubscription;
+  return subscription;
 }
 
 /**
@@ -146,9 +146,9 @@ export async function refreshSubscriptionStatus(subscriptionId: string) {
       const startTime = new Date(paypalSub.start_time || Date.now());
       const endTime = paypalSub.billing_info?.next_billing_time
         ? new Date(paypalSub.billing_info.next_billing_time)
-        : new Date(Date.now() + 31 * 24 * 60 * 60 * 1000);
+        : new Date(Date.now() + 31 * 24 * 60 * 60 * 1000); // Fallback to 31 days
 
-      return await prisma.subscription.update({
+      const updatedSub = await prisma.subscription.update({
         where: { id: subscriptionId },
         data: {
           status: "active",
@@ -157,6 +157,7 @@ export async function refreshSubscriptionStatus(subscriptionId: string) {
         },
         include: { plan: true }
       });
+      return updatedSub;
     }
   } catch (error) {
     console.error(`Failed to refresh subscription ${subscriptionId}:`, error);
@@ -170,7 +171,9 @@ export async function refreshSubscriptionStatus(subscriptionId: string) {
  */
 export async function hasSubscriptionTier(userId: string, requiredTier: SubscriptionTier) {
   const subscription = await getUserSubscription(userId);
-  if (!subscription) return false;
+  if (!subscription || (subscription.status !== 'active' && subscription.status !== 'cancelled' && subscription.status !== 'past_due')) {
+     return false;
+  }
 
   const tiers: SubscriptionTier[] = ["starter", "pro", "elite"];
   const userTierIndex = tiers.indexOf(subscription.plan.tier);
@@ -197,8 +200,7 @@ export async function cancelSubscription(subscriptionId: string) {
       await cancelPayPalSubscription(subscription.paypalSubscriptionId);
     } catch (error) {
       console.error("Failed to cancel PayPal subscription:", error);
-      // We continue to update our DB even if PayPal fails,
-      // though ideally we should handle this better.
+      // We continue to update our DB even if PayPal fails
     }
   }
 
@@ -243,8 +245,6 @@ export async function grantSubscriptionManually({
 
 /**
  * Clean up abandoned pending subscriptions that are older than 24 hours.
- * This handles cases where users abandoned the checkout flow.
- * Returns the number of subscriptions cleaned up.
  */
 export async function cleanupAbandonedPendingSubscriptions() {
   const cutoffDate = new Date(Date.now() - 24 * 60 * 60 * 1000);
