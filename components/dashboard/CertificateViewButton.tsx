@@ -21,7 +21,7 @@ export function CertificateViewButton({ certificateId }: CertificateViewButtonPr
       <Button 
         variant="outline" 
         size="sm" 
-        className="w-full" 
+        className="w-full border-green-200 hover:bg-green-50 hover:border-green-300 dark:border-green-800 dark:hover:bg-green-950/20" 
         disabled={isLoading}
       >
         {isLoading ? (

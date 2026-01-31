@@ -590,24 +590,25 @@ export default async function DashboardPage({
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {certificates.map((cert: any) => (
-                <div
-                  key={cert.id}
-                  className="p-4 rounded-lg border bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20"
-                >
-                  <Award className="h-8 w-8 text-amber-600 dark:text-amber-400 mb-2" />
-                  <h3 className="font-semibold text-sm mb-1 line-clamp-2 text-foreground">
+          <CardContent className="space-y-3">
+            {certificates.map((cert: any) => (
+              <div key={cert.id} className="flex items-start gap-3 p-4 rounded-lg border border-green-200 dark:border-green-900/50 bg-green-50/50 dark:bg-green-950/10 hover:bg-green-100/50 dark:hover:bg-green-900/20 transition-colors">
+                <div className="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 shadow-md">
+                  <Award className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm text-foreground line-clamp-2">
                     {cert.Course?.title || 'Certificate'}
-                  </h3>
-                  <p className="text-xs text-foreground/60 dark:text-muted-foreground mb-3 font-medium">
+                  </p>
+                  <p className="text-xs text-foreground/70 dark:text-muted-foreground font-medium mt-1">
                     Issued {new Date(cert.issuedAt).toLocaleDateString()}
                   </p>
-                  <CertificateViewButton certificateId={cert.id} />
+                  <div className="mt-2">
+                    <CertificateViewButton certificateId={cert.id} />
+                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
       )}
