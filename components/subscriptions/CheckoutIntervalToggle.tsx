@@ -19,56 +19,51 @@ export function CheckoutIntervalToggle() {
 
   const options = [
     { value: "monthly", label: "Monthly Billing" },
-    { value: "annual", label: "Annual Billing", badge: "Save 20%" },
+    { value: "annual", label: "Annual Billing", badge: "SAVE 20%" },
   ];
 
   return (
     <div className="flex justify-center mb-6">
-      <div className="grid grid-cols-2 p-1.5 rounded-2xl bg-muted/40 border border-border/40 relative w-full max-w-[450px] shadow-sm backdrop-blur-sm">
+      <div className="relative grid grid-cols-2 p-1 rounded-full bg-zinc-900/80 border border-zinc-700/50 w-full max-w-[420px] backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.05)]">
+        {/* Animated background pill */}
+        <motion.div
+          className="absolute top-1 bottom-1 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+          initial={false}
+          animate={{
+            left: interval === "monthly" ? "4px" : "50%",
+            right: interval === "monthly" ? "50%" : "4px",
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 500,
+            damping: 35,
+            mass: 0.8
+          }}
+        />
+        
         {options.map((option) => {
           const isActive = interval === option.value;
           return (
             <button
               key={option.value}
               onClick={() => handleIntervalChange(option.value)}
-              className={cn(
-                "relative flex items-center justify-center gap-2.5 py-3 px-4 text-sm font-bold outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-xl flex-1 group transition-colors duration-500",
-                isActive
-                  ? "text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
+              className="relative flex items-center justify-center gap-2 py-3.5 px-5 text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 rounded-full z-10 transition-colors duration-200"
+              data-testid={`interval-toggle-${option.value}`}
             >
-              <span className="relative z-10 flex items-center gap-2">
+              <motion.span 
+                className="flex items-center gap-2"
+                animate={{ 
+                  color: isActive ? "#ffffff" : "rgba(161, 161, 170, 1)" 
+                }}
+                transition={{ duration: 0.2 }}
+              >
                 {option.label}
                 {option.badge && (
-                  <span className={cn(
-                    "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-tight transition-all duration-500",
-                     isActive
-                      ? "bg-primary-foreground/15 text-primary-foreground ring-1 ring-primary-foreground/20"
-                      : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 ring-1 ring-emerald-200/50 dark:ring-emerald-800/50"
-                  )}>
+                  <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
                     {option.badge}
                   </span>
                 )}
-              </span>
-
-              {isActive && (
-                <motion.div
-                  layoutId="active-pill"
-                  className="absolute inset-0 rounded-xl bg-blue-600 shadow-md ring-1 ring-blue-500/20 z-0"
-                  initial={false}
-                  transition={{
-                    type: "spring",
-                    stiffness: 400,
-                    damping: 30,
-                    mass: 1
-                  }}
-                />
-              )}
-
-              {!isActive && (
-                <div className="absolute inset-0 rounded-xl bg-foreground/0 group-hover:bg-foreground/[0.03] transition-colors duration-300 z-0" />
-              )}
+              </motion.span>
             </button>
           );
         })}
