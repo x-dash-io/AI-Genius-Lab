@@ -5,6 +5,8 @@ import { getCategoryBySlug } from "@/lib/categories";
 import { CourseList } from "@/components/courses/CourseList";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 type CategoryPageProps = {
   params: Promise<{ category: string }>;
 };

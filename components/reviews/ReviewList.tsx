@@ -16,7 +16,7 @@ interface Review {
   rating: number;
   text: string | null;
   createdAt: Date;
-  user: {
+  User: {
     id: string;
     name: string | null;
     email: string;
@@ -137,7 +137,7 @@ export function ReviewList({ courseId, currentUserId }: ReviewListProps) {
     <div className="space-y-4">
       {reviews.map((review) => {
         const isEditing = editingReviewId === review.id;
-        const isOwnReview = currentUserId === review.user.id;
+        const isOwnReview = currentUserId === review.User.id;
         const isDeleting = deletingReviewId === review.id;
 
         if (isEditing) {
@@ -165,14 +165,14 @@ export function ReviewList({ courseId, currentUserId }: ReviewListProps) {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <Avatar>
-                      <AvatarImage src={review.user.image || undefined} />
+                      <AvatarImage src={review.User.image || undefined} />
                       <AvatarFallback>
-                        {review.user.name?.[0] || review.user.email[0].toUpperCase()}
+                        {review.User.name?.[0] || review.User.email[0].toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="font-medium">
-                        {review.user.name || review.user.email}
+                        {review.User.name || review.User.email}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(review.createdAt), {

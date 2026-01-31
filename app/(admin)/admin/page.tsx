@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { AnalyticsSection } from "@/components/admin/AnalyticsSection";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = generateSEOMetadata({
   title: "Admin Dashboard",
   description: "Administrative dashboard",
@@ -124,7 +126,7 @@ async function AdminDashboardContent() {
             </p>
           ) : (
             <div className="space-y-4">
-              {stats.recentPurchases.map((purchase) => (
+              {stats.recentPurchases.map((purchase: any) => (
                 <div
                   key={purchase.id}
                   className="flex items-center justify-between rounded-lg border p-4"

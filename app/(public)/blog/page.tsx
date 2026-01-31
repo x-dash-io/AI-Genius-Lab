@@ -10,6 +10,8 @@ import Image from "next/image";
 import { getSignedCloudinaryUrl } from "@/lib/cloudinary";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = generateSEOMetadata({
   title: "Blog",
   description: "Explore the latest in AI, education, and technology with the AI Genius Lab blog.",
@@ -53,7 +55,7 @@ async function BlogContent({ searchParams }: BlogPageProps) {
                 All
               </Badge>
             </Link>
-            {tags.map((tag) => (
+            {tags.map((tag: any) => (
               <Link key={tag.id} href={`/blog?tag=${tag.slug}`}>
                 <Badge 
                   variant={params.tag === tag.slug ? "default" : "outline"}
@@ -80,7 +82,7 @@ async function BlogContent({ searchParams }: BlogPageProps) {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {posts.map((post) => (
+            {posts.map((post: any) => (
               <Link key={post.id} href={`/blog/${post.slug}`}>
                 <Card className="h-full overflow-hidden hover:shadow-lg transition-all group flex flex-col">
                   <div className="aspect-video relative bg-muted overflow-hidden">
@@ -99,7 +101,7 @@ async function BlogContent({ searchParams }: BlogPageProps) {
                   </div>
                   <CardHeader className="flex-none">
                     <div className="flex gap-2 mb-2 flex-wrap">
-                      {post.tags.slice(0, 3).map(tag => (
+                      {post.tags.slice(0, 3).map((tag: any) => (
                         <Badge key={tag.id} variant="secondary" className="text-[10px]">
                           {tag.name}
                         </Badge>

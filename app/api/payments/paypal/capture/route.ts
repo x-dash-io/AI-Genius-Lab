@@ -88,7 +88,7 @@ export async function GET(request: Request) {
 
     // Process all purchases
     await Promise.all(
-      purchases.map(async (purchase) => {
+      purchases.map(async (purchase: any) => {
         if (purchase.status !== "paid") {
           await prisma.purchase.update({
             where: { id: purchase.id },
@@ -175,20 +175,20 @@ export async function GET(request: Request) {
     if (user) {
       try {
         const { sendPurchaseConfirmationEmail, sendEnrollmentEmail, sendInvoiceEmail } = await import("@/lib/email");
-        const courseTitles = purchases.map((p) => p.Course.title).join(", ");
-        const totalAmount = purchases.reduce((sum, p) => sum + p.amountCents, 0);
+        const courseTitles = purchases.map((p: any) => p.Course.title).join(", ");
+        const totalAmount = purchases.reduce((sum: number, p: any) => sum + p.amountCents, 0);
         const invoiceNumber = generateInvoiceNumber(purchases[0].id);
         const purchaseDate = payment?.createdAt || purchases[0].createdAt;
         
         await Promise.all([
           sendPurchaseConfirmationEmail(user.email, courseTitles, totalAmount),
-          ...purchases.map((p) => sendEnrollmentEmail(user.email, p.Course.title)),
+          ...purchases.map((p: any) => sendEnrollmentEmail(user.email, p.Course.title)),
           sendInvoiceEmail(
             user.email,
             user.name || "Customer",
             invoiceNumber,
             purchaseDate,
-            purchases.map((p) => ({
+            purchases.map((p: any) => ({
               title: p.Course.title,
               description: p.Course.description || undefined,
               amountCents: p.amountCents,

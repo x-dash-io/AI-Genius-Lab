@@ -74,7 +74,20 @@ export async function GET(
     }
 
     const headers = new Headers(upstreamResponse.headers);
-    const filename = (publicId || "content").split("/").pop() || "content";
+    let filename = (publicId || "content").split("/").pop() || "content";
+
+    // Ensure filename has appropriate extension based on contentType
+    const extensionMap: Record<string, string> = {
+      video: ".mp4",
+      audio: ".mp3",
+      pdf: ".pdf",
+    };
+
+    const expectedExt = extensionMap[lesson.contentType];
+    if (expectedExt && !filename.toLowerCase().endsWith(expectedExt)) {
+      filename += expectedExt;
+    }
+
     const dispositionType = isDownload ? "attachment" : "inline";
 
     headers.set(

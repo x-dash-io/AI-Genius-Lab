@@ -25,7 +25,7 @@ export async function GET() {
         select: { courseId: true },
       });
       
-      const purchasedIds = new Set(purchases.map((p) => p.courseId));
+      const purchasedIds = new Set(purchases.map((p: any) => p.courseId));
       
       // Filter out purchased items
       if (purchasedIds.size > 0) {

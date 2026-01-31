@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateReview, deleteReview } from "@/lib/reviews";
+import { reviewSchema, safeParse } from "@/lib/validation";
 
 export async function PATCH(
   request: NextRequest,
@@ -10,7 +11,16 @@ export async function PATCH(
     const body = await request.json();
     const { rating, text } = body;
 
-    const review = await updateReview(reviewId, { rating, text });
+    // Validate input
+    const validation = safeParse(reviewSchema, { rating, text });
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: validation.error },
+        { status: 400 }
+      );
+    }
+
+    const review = await updateReview(reviewId, validation.data);
     return NextResponse.json({ review });
   } catch (error) {
     console.error("Error updating review:", error);

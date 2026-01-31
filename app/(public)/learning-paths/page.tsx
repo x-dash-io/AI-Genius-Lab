@@ -9,6 +9,8 @@ import { Route, BookOpen } from "lucide-react";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { LearningPathFilters } from "@/components/learning-paths/LearningPathFilters";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = generateSEOMetadata({
   title: "Learning Paths",
   description:
@@ -25,9 +27,9 @@ async function LearningPathsContent({ searchParams }: LearningPathsPageProps) {
   const allPathsData = await getAllPublishedLearningPaths();
   
   // Transform the data to match expected format
-  const allPaths = allPathsData.map(pathData => ({
+  const allPaths = allPathsData.map((pathData: any) => ({
     ...pathData,
-    courses: pathData.courses.map(lpc => ({
+    courses: pathData.courses.map((lpc: any) => ({
       ...lpc,
       course: lpc.Course,
     })),
@@ -55,10 +57,10 @@ async function LearningPathsContent({ searchParams }: LearningPathsPageProps) {
         paths = paths.reverse();
         break;
       case "courses":
-        paths = paths.sort((a, b) => b._count.courses - a._count.courses);
+        paths = paths.sort((a: any, b: any) => b._count.courses - a._count.courses);
         break;
       case "title":
-        paths = paths.sort((a, b) => a.title.localeCompare(b.title));
+        paths = paths.sort((a: any, b: any) => a.title.localeCompare(b.title));
         break;
       // "newest" is the default
     }
@@ -102,7 +104,7 @@ async function LearningPathsContent({ searchParams }: LearningPathsPageProps) {
         </Card>
       ) : (
         <div className="grid gap-6 md:grid-cols-2">
-          {paths.map((path) => (
+          {paths.map((path: any) => (
             <Card key={path.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -127,7 +129,7 @@ async function LearningPathsContent({ searchParams }: LearningPathsPageProps) {
                     <div className="space-y-2">
                       <p className="text-sm font-medium">Courses in this path:</p>
                       <div className="flex flex-wrap gap-2">
-                        {path.courses.slice(0, 3).map((pathCourse) => (
+                        {path.courses.slice(0, 3).map((pathCourse: any) => (
                           <Badge key={pathCourse.id} variant="secondary">
                             {pathCourse.course.title}
                           </Badge>

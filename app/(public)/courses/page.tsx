@@ -7,6 +7,8 @@ import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookOpen } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = generateSEOMetadata({
   title: "Course Catalog",
   description:

@@ -10,6 +10,8 @@ import { FinalCTA } from "@/components/home/FinalCTA";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { getHomepageStats } from "@/lib/homepage-stats";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = generateSEOMetadata({
   title: "Master AI With Curated Learning Paths",
   description:

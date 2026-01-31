@@ -8,6 +8,8 @@ import Link from "next/link";
 import { Newspaper, Plus, Edit, Trash2, Eye, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 
+export const dynamic = "force-dynamic";
+
 async function BlogPostsList() {
   const posts = await getAllPosts();
 
@@ -29,7 +31,7 @@ async function BlogPostsList() {
 
   return (
     <div className="grid gap-4">
-      {posts.map((post) => (
+      {posts.map((post: any) => (
         <Card key={post.id}>
           <CardHeader className="p-4 sm:p-6">
             <div className="flex items-start justify-between gap-4">
@@ -55,7 +57,7 @@ async function BlogPostsList() {
                   <span>{post.readTimeMinutes} min read</span>
                 </div>
                 <div className="flex gap-1 mt-2 flex-wrap">
-                  {post.tags.map(tag => (
+                  {post.tags.map((tag: any) => (
                     <Badge key={tag.id} variant="outline" className="text-[10px]">
                       {tag.name}
                     </Badge>

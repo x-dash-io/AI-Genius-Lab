@@ -138,7 +138,14 @@ export function LessonViewer({
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = "";
+
+      // Try to determine a good filename
+      const extension = contentType === 'pdf' ? '.pdf' :
+                       contentType === 'audio' ? '.mp3' :
+                       contentType === 'video' ? '.mp4' : '';
+      const baseName = contentMetadata?.title || "lesson-content";
+      link.download = baseName.toLowerCase().endsWith(extension) ? baseName : `${baseName}${extension}`;
+
       document.body.appendChild(link);
       link.click();
       link.remove();

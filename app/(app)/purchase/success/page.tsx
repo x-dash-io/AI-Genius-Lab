@@ -29,6 +29,8 @@ import { CartClearer } from "@/components/cart/CartClearer";
 
 import { InvoiceDownloadButton } from "@/components/purchase/InvoiceDownloadButton";
 
+export const dynamic = "force-dynamic";
+
 type CheckoutSuccessPageProps = {
   searchParams: Promise<{ purchase?: string; purchases?: string }>;
 };
@@ -443,13 +445,13 @@ export default async function CheckoutSuccessPage({
     }
 
     // Multiple purchases
-    const totalAmount = purchases.reduce((sum, p) => sum + p.amountCents, 0);
+    const totalAmount = purchases.reduce((sum: number, p: any) => sum + p.amountCents, 0);
     const payment = purchases[0].Payment?.[0];
     const purchaseDate = payment?.createdAt || purchases[0].createdAt;
     const invoiceNumber = generateInvoiceNumber(purchases[0].id);
 
     // Get course IDs for cart clearing
-    const purchasedCourseIds = purchases.map(p => p.Course.id);
+    const purchasedCourseIds = purchases.map((p: any) => p.Course.id);
 
     return (
       <section className="grid gap-8 max-w-4xl mx-auto px-4 py-8">
@@ -462,7 +464,7 @@ export default async function CheckoutSuccessPage({
           customerEmail={session.user.email!}
           paymentMethod={formatPaymentMethod(payment?.provider)}
           transactionId={payment?.providerRef || undefined}
-          items={purchases.map(p => ({
+          items={purchases.map((p: any) => ({
             id: p.Course.id,
             title: p.Course.title,
             description: p.Course.description,

@@ -275,7 +275,7 @@ export async function generateCertificatePDF(
   const { secureUrl } = await uploadToCloudinary(Buffer.from(pdfBytes), {
     folder: "certificates",
     resourceType: "raw",
-    publicId: `certificate-${data.certificateId}`,
+    publicId: `certificate-${data.certificateId}.pdf`,
   });
 
   return secureUrl;
