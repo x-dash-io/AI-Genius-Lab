@@ -49,7 +49,9 @@ export default async function UserDetailPage({
   const { userId } = await params;
   const user = await getUserById(userId);
   
-  const isCurrentUser = session?.user?.id === userId;
+  // Type assertion to ensure user has id property
+  const currentUserId = (session?.user as any)?.id;
+  const isCurrentUser = currentUserId === userId;
 
   if (!user) {
     notFound();

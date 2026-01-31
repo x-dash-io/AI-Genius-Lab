@@ -57,21 +57,27 @@ export default async function AdminProfilePage() {
     redirect("/sign-in");
   }
 
+  // Type assertion to ensure user has id property
+  const userId = (session.user as any).id;
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
   const [profile, adminStats, userWithPassword] = await Promise.all([
-    getUserProfile(session.user.id),
+    getUserProfile(userId),
     // Get admin-specific stats
     prisma.$transaction([
       prisma.user.count(),
       prisma.course.count(),
       prisma.purchase.count({ where: { status: "paid" } }),
       prisma.activityLog.findFirst({
-        where: { userId: session.user.id },
+        where: { userId },
         orderBy: { createdAt: "desc" },
       }),
     ]),
     // Check if user has a password
     prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: userId },
       select: { passwordHash: true },
     }),
   ]);
@@ -112,7 +118,7 @@ export default async function AdminProfilePage() {
                 currentImage={profile.image}
                 userEmail={profile.email}
                 userName={profile.name}
-                onAvatarUpdate={updateAvatarAction.bind(null, session.user.id)}
+                onAvatarUpdate={updateAvatarAction.bind(null, userId)}
               />
               <div>
                 <div className="flex items-center gap-2">
@@ -155,7 +161,7 @@ export default async function AdminProfilePage() {
                 name: profile.name,
                 bio: profile.bio,
               }}
-              updateProfileAction={updateProfileAction.bind(null, session.user.id)}
+              updateProfileAction={updateProfileAction.bind(null, userId)}
             />
           </CardContent>
         </Card>
@@ -238,7 +244,7 @@ export default async function AdminProfilePage() {
           <CardContent>
             <div className="max-w-md">
               <PasswordChangeForm
-                changePasswordAction={changePasswordAction.bind(null, session.user.id)}
+                changePasswordAction={changePasswordAction.bind(null, userId)}
               />
             </div>
           </CardContent>
