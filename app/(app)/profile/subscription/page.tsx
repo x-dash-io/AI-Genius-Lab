@@ -13,6 +13,8 @@ import { revalidatePath } from "next/cache";
 import { Suspense } from "react";
 import { SubscriptionSuccessToast } from "@/components/checkout/SubscriptionSuccessToast";
 
+export const dynamic = "force-dynamic";
+
 async function cancelAction(formData: FormData) {
   "use server";
   const session = await getServerSession(authOptions);
@@ -206,7 +208,7 @@ export default async function UserSubscriptionPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {subscription.payments.map((payment) => (
+                {subscription.payments.map((payment: any) => (
                     <div key={payment.id} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
                       <div>
                         <p className="font-medium">{format(new Date(payment.paidAt), "PPP")}</p>

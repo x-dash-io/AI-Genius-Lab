@@ -13,6 +13,8 @@ import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { CheckoutCartForm } from "@/components/checkout/CheckoutCartForm";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+export const dynamic = "force-dynamic";
+
 type CheckoutPageProps = {
   searchParams: Promise<{ course?: string; items?: string; checkout?: string }>;
 };

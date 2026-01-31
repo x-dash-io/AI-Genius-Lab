@@ -11,6 +11,8 @@ import { ArrowLeft, Shield, User, ShoppingCart, GraduationCap, Activity } from "
 import { RoleSelectForm } from "@/components/admin/RoleSelectForm";
 import type { Role } from "@/lib/rbac";
 
+export const dynamic = "force-dynamic";
+
 function formatCurrency(cents: number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -54,8 +56,8 @@ export default async function UserDetailPage({
   }
 
   const totalSpent = user.purchases
-    .filter((p) => p.status === "paid")
-    .reduce((sum, p) => sum + p.amountCents, 0);
+    .filter((p: any) => p.status === "paid")
+    .reduce((sum: number, p: any) => sum + p.amountCents, 0);
 
   return (
     <div className="space-y-8">
@@ -152,7 +154,7 @@ export default async function UserDetailPage({
             <p className="text-sm text-muted-foreground">No purchases yet.</p>
           ) : (
             <div className="space-y-4">
-              {user.purchases.map((purchase) => (
+              {user.purchases.map((purchase: any) => (
                 <div
                   key={purchase.id}
                   className="flex items-center justify-between rounded-lg border p-4"
@@ -194,7 +196,7 @@ export default async function UserDetailPage({
             <p className="text-sm text-muted-foreground">No enrollments yet.</p>
           ) : (
             <div className="space-y-4">
-              {user.enrollments.map((enrollment) => (
+              {user.enrollments.map((enrollment: any) => (
                 <div
                   key={enrollment.id}
                   className="flex items-center justify-between rounded-lg border p-4"
@@ -230,7 +232,7 @@ export default async function UserDetailPage({
             <p className="text-sm text-muted-foreground">No recent activity.</p>
           ) : (
             <div className="space-y-2">
-              {user.activityLogs.map((log) => (
+              {user.activityLogs.map((log: any) => (
                 <div
                   key={log.id}
                   className="flex items-center justify-between rounded-lg border p-3"

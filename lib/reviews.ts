@@ -87,7 +87,7 @@ export async function getUserReview(courseId: string, userId: string) {
 
 export async function createReview(
   courseId: string,
-  data: { rating: number; text?: string }
+  data: { rating: number; text?: string | null }
 ) {
   const user = await requireCustomer();
 
@@ -179,7 +179,7 @@ export async function createReview(
 
 export async function updateReview(
   reviewId: string,
-  data: { rating?: number; text?: string }
+  data: { rating?: number; text?: string | null }
 ) {
   const user = await requireCustomer();
 

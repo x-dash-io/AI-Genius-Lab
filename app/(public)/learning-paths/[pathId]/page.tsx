@@ -18,6 +18,8 @@ import { LearningPathEnrollment } from "@/components/learning-paths/LearningPath
 import { PathProgressSection } from "@/components/learning-paths/PathProgressSection";
 import { PathObjectivesSection } from "@/components/learning-paths/PathObjectivesSection";
 
+export const dynamic = "force-dynamic";
+
 type LearningPathDetailPageProps = {
   params: Promise<{ pathId: string }>;
 };
@@ -57,7 +59,7 @@ export default async function LearningPathDetailPage({
   // Transform the data to match expected format
   const path = {
     ...pathData,
-    courses: (pathData.courses || []).map(lpc => ({
+    courses: (pathData.courses || []).map((lpc: any) => ({
       ...lpc,
       course: lpc.Course,
     })),
@@ -87,7 +89,7 @@ export default async function LearningPathDetailPage({
   }
 
   const totalPrice = path.courses.reduce(
-    (sum, pc) => sum + pc.course.priceCents,
+    (sum: number, pc: any) => sum + pc.course.priceCents,
     0
   );
 
@@ -109,12 +111,12 @@ export default async function LearningPathDetailPage({
           await prisma.purchase.findMany({
             where: {
               userId: session.user.id,
-              courseId: { in: path.courses.map((pc) => pc.course.id) },
+              courseId: { in: path.courses.map((pc: any) => pc.course.id) },
               status: "paid",
             },
             select: { courseId: true },
           })
-        ).map((p) => p.courseId)
+        ).map((p: any) => p.courseId)
       )
     : new Set<string>();
 
@@ -142,7 +144,7 @@ export default async function LearningPathDetailPage({
     }
 
     // Create PayPal order for all purchases
-    const purchaseIds = purchases.map((p) => p.id).join(",");
+    const purchaseIds = purchases.map((p: any) => p.id).join(",");
     const appUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
     
     // For multiple purchases, pass them as query parameter
@@ -175,7 +177,7 @@ export default async function LearningPathDetailPage({
     // Update all purchases with the order ID
     await prisma.purchase.updateMany({
       where: {
-        id: { in: purchases.map((p) => p.id) },
+        id: { in: purchases.map((p: any) => p.id) },
       },
       data: {
         providerRef: orderId,
@@ -192,7 +194,7 @@ export default async function LearningPathDetailPage({
     name: path.title,
     description: path.description || `Follow this structured learning path to master ${path.title}.`,
     url: `/learning-paths/${pathId}`,
-    courses: path.courses.map((pc) => ({
+    courses: path.courses.map((pc: any) => ({
       name: pc.course.title,
       url: `/courses/${pc.course.slug}`,
     })),
@@ -477,7 +479,7 @@ export default async function LearningPathDetailPage({
           <div className="space-y-4">
             <h2 className="text-2xl font-semibold">Courses in This Path</h2>
             <div className="space-y-4">
-              {path.courses.map((pathCourse, index) => (
+              {path.courses.map((pathCourse: any, index: number) => (
                 <Card key={pathCourse.id}>
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between">

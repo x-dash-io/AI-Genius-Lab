@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 
+export const dynamic = "force-dynamic";
+
 interface CertificatePageProps {
   params: Promise<{ certificateId: string }>;
 }

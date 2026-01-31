@@ -50,7 +50,7 @@ async function SubscriptionsList() {
 
   return (
     <div className="space-y-4">
-      {subscriptions.map((sub) => (
+      {subscriptions.map((sub: any) => (
         <Card key={sub.id}>
           <CardHeader>
             <div className="flex items-start justify-between">
@@ -131,7 +131,7 @@ async function GrantSubscriptionForm() {
                 <SelectValue placeholder="Select Plan" />
               </SelectTrigger>
               <SelectContent>
-                {plans.map(p => (
+                {plans.map((p: any) => (
                   <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                 ))}
               </SelectContent>

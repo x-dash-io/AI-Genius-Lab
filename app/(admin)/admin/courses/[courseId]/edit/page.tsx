@@ -49,7 +49,7 @@ async function addSectionAction(courseId: string, formData: FormData) {
     const course = await getCourseForEdit(courseId);
     if (!course) throw new Error("Course not found");
 
-    const maxSortOrder = Math.max(...(course.sections || []).map(s => s.sortOrder), -1);
+    const maxSortOrder = Math.max(...(course.sections || []).map((s: any) => s.sortOrder), -1);
     const section = await createSection(courseId, title, maxSortOrder + 1);
 
     return { ...section, lessons: [] };
@@ -85,10 +85,10 @@ async function addLessonAction(sectionId: string, formData: FormData) {
     const course = await getCourseForEdit(formData.get("courseId") as string);
     if (!course) throw new Error("Course not found");
 
-    const section = (course.sections || []).find(s => s.id === sectionId);
+    const section = (course.sections || []).find((s: any) => s.id === sectionId);
     if (!section) throw new Error("Section not found");
 
-    const maxSortOrder = Math.max(...(section.lessons || []).map(l => l.sortOrder), -1);
+    const maxSortOrder = Math.max(...(section.lessons || []).map((l: any) => l.sortOrder), -1);
 
     const lesson = await createLesson({
       sectionId,
@@ -208,9 +208,9 @@ async function updateLessonAction(lessonId: string, formData: FormData) {
 
     const existingContent: Array<{ id: string }> = [];
     for (const section of (course.sections || [])) {
-      const foundLesson = (section.lessons || []).find(l => l.id === lessonId);
+      const foundLesson = (section.lessons || []).find((l: any) => l.id === lessonId);
       if (foundLesson) {
-        existingContent.push(...(foundLesson.contents || []).map(c => ({ id: c.id })));
+        existingContent.push(...(foundLesson.contents || []).map((c: any) => ({ id: c.id })));
         break;
       }
     }

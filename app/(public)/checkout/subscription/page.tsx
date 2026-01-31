@@ -9,6 +9,8 @@ import { Check, AlertCircle, TrendingDown, Shield, Lock, Zap } from "lucide-reac
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckoutIntervalToggle } from "@/components/subscriptions/CheckoutIntervalToggle";
 
+export const dynamic = "force-dynamic";
+
 type Props = {
   searchParams: Promise<{ planId?: string; interval?: string }>;
 };

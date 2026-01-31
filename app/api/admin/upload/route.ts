@@ -110,10 +110,15 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   // Determine resource type - ensure PDFs and documents are uploaded as raw
   const resourceType = getResourceTypeFromFile(file.name, file.type);
 
+  // Use a clean version of the filename as publicId to preserve extension for raw files
+  const cleanFileName = file.name.replace(/[^\w.-]/g, '_');
+  const publicId = `${Date.now()}-${cleanFileName}`;
+
   // Upload to Cloudinary - remove restrictive allowedFormats that cause issues
   const result = await uploadToCloudinary(buffer, {
     folder,
     resourceType,
+    publicId,
     // allowedFormats removed to prevent upload failures
   });
 

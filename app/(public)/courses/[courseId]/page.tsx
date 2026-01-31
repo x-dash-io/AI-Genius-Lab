@@ -9,6 +9,8 @@ import { CourseActions } from "@/components/courses/CourseActions";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateCourseSchema } from "@/lib/seo/schemas";
 
+export const dynamic = "force-dynamic";
+
 type CourseDetailPageProps = {
   params: Promise<{ courseId: string }>;
 };
@@ -46,8 +48,8 @@ export default async function CourseDetailPage({
   }
 
   const reviewStats = await getCourseReviewStats(course.id);
-  const lessons = course.sections.flatMap((section) =>
-    section.lessons.map(lesson => ({
+  const lessons = course.sections.flatMap((section: any) =>
+    section.lessons.map((lesson: any) => ({
       ...lesson,
       contents: lesson.contents,
     }))
@@ -88,7 +90,7 @@ export default async function CourseDetailPage({
             </p>
           ) : (
             <ul className="grid gap-3">
-              {lessons.slice(0, 5).map((lesson) => (
+              {lessons.slice(0, 5).map((lesson: any) => (
                 <li
                   key={lesson.id}
                   className="flex items-center justify-between rounded-lg border p-3"

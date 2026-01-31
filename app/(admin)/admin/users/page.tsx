@@ -12,6 +12,8 @@ import { Users as UsersIcon, User, Shield, Loader2 } from "lucide-react";
 import { UserFilters } from "@/components/admin/UserFilters";
 import { FilterSkeleton } from "@/components/ui/filter-skeleton";
 
+export const dynamic = "force-dynamic";
+
 interface AdminUsersPageProps {
   searchParams: Promise<{ search?: string; role?: string }>;
 }
@@ -22,13 +24,13 @@ async function UserList({ searchParams }: AdminUsersPageProps) {
   const allUsers = await getAllUsers();
   
   // Filter out current admin's account
-  let users = allUsers.filter((user) => user.id !== session?.user?.id);
+  let users = allUsers.filter((user: any) => user.id !== session?.user?.id);
 
   // Apply search filter
   if (params.search) {
     const searchLower = params.search.toLowerCase();
     users = users.filter(
-      (user) =>
+      (user: any) =>
         user.email.toLowerCase().includes(searchLower) ||
         user.name?.toLowerCase().includes(searchLower)
     );
@@ -36,10 +38,10 @@ async function UserList({ searchParams }: AdminUsersPageProps) {
 
   // Apply role filter
   if (params.role) {
-    users = users.filter((user) => user.role === params.role);
+    users = users.filter((user: any) => user.role === params.role);
   }
 
-  const totalUsers = allUsers.filter((u) => u.id !== session?.user?.id).length;
+  const totalUsers = allUsers.filter((u: any) => u.id !== session?.user?.id).length;
   const filteredCount = users.length;
   const hasFilters = params.search || params.role;
 
@@ -82,7 +84,7 @@ async function UserList({ searchParams }: AdminUsersPageProps) {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {users.map((user) => (
+          {users.map((user: any) => (
             <Card key={user.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">

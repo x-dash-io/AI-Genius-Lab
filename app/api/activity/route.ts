@@ -28,7 +28,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
 
     // Fetch course information for purchase activities
     const enrichedActivity = await Promise.all(
-      activity.map(async (entry) => {
+      activity.map(async (entry: any) => {
         if (entry.type === "purchase_completed" && entry.metadata) {
           const metadata = entry.metadata as any;
           if (metadata.courseId) {

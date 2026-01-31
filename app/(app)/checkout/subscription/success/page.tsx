@@ -20,6 +20,8 @@ import {
 import Link from "next/link";
 import { format } from "date-fns";
 
+export const dynamic = "force-dynamic";
+
 type SuccessPageProps = {
   searchParams: Promise<{
     subscriptionId?: string;

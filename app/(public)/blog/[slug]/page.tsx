@@ -11,6 +11,8 @@ import { getSignedCloudinaryUrl } from "@/lib/cloudinary";
 import { BlogReviewSection } from "@/components/blog/BlogReviewSection";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
 }
@@ -53,7 +55,7 @@ async function BlogPostContent({ slug }: { slug: string }) {
 
       <div className="space-y-4 mb-8">
         <div className="flex gap-2 flex-wrap">
-          {post.tags.map(tag => (
+          {post.tags.map((tag: any) => (
             <Badge key={tag.id} variant="secondary">{tag.name}</Badge>
           ))}
         </div>
