@@ -390,9 +390,10 @@ export async function sendCertificateEmail(
   recipientName: string,
   itemName: string,
   certificateId: string,
-  pdfUrl: string
+  pdfUrl: string | null
 ) {
   const verifyUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/certificates/verify/${certificateId}`;
+  const downloadUrl = pdfUrl || `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/certificates/${certificateId}/download`;
   
   await sendEmail({
     to: email,
@@ -415,7 +416,7 @@ export async function sendCertificateEmail(
             <div style="font-size: 18px; font-weight: bold; color: #78350f; font-family: monospace;">${certificateId}</div>
           </div>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${pdfUrl}" style="display: inline-block; padding: 14px 28px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin-right: 10px;">
+            <a href="${downloadUrl}" style="display: inline-block; padding: 14px 28px; background-color: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; margin-right: 10px;">
               Download Certificate
             </a>
           </div>
@@ -441,6 +442,6 @@ export async function sendCertificateEmail(
         </div>
       </div>
     `,
-    text: `Congratulations ${recipientName}!\n\nYou have successfully completed ${itemName} and earned a certificate!\n\nCertificate ID: ${certificateId}\n\nDownload your certificate: ${pdfUrl}\n\nVerify your certificate: ${verifyUrl}\n\nShare your achievement on LinkedIn or add it to your resume to showcase your new skills!\n\nCongratulations on your achievement!\n\nAI Genius Lab`,
+    text: `Congratulations ${recipientName}!\n\nYou have successfully completed ${itemName} and earned a certificate!\n\nCertificate ID: ${certificateId}\n\nDownload your certificate: ${downloadUrl}\n\nVerify your certificate: ${verifyUrl}\n\nShare your achievement on LinkedIn or add it to your resume to showcase your new skills!\n\nCongratulations on your achievement!\n\nAI Genius Lab`,
   });
 }

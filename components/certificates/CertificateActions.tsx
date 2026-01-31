@@ -7,7 +7,7 @@ import { toast } from "@/lib/toast";
 
 interface CertificateActionsProps {
   certificateId: string;
-  pdfUrl?: string | null;
+  pdfUrl?: string | null; // Keep for backward compatibility but not used
   isCourse: boolean;
   itemSlug?: string | null;
 }
@@ -22,13 +22,7 @@ export function CertificateActions({
   const [isCopying, setIsCopying] = useState(false);
 
   const handleDownload = async () => {
-    // If PDF URL exists, download it directly
-    if (pdfUrl) {
-      window.open(pdfUrl, '_blank');
-      return;
-    }
-
-    // Otherwise, generate and download PDF
+    // Always generate and download PDF from API to ensure consistency
     setIsDownloading(true);
     try {
       const response = await fetch(`/api/certificates/${certificateId}/download`, {

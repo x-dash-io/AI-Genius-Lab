@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCustomer, hasCourseAccess, hasPurchasedCourse } from "@/lib/access";
 import { hasEnrolledInLearningPath } from "./learning-paths";
 import { getUserSubscription } from "@/lib/subscriptions";
-import { generateCertificatePDF } from "./certificate-pdf";
+import { generateCertificatePDFBytes } from "./certificate-pdf";
 import { sendCertificateEmail } from "./email";
 
 /**
@@ -187,35 +187,22 @@ export async function generateCourseCertificate(courseId: string) {
     return newCert;
   });
 
-  // Generate PDF and upload to Cloudinary
+  // PDF is now generated on-demand during download, no need to store URL
+  // This ensures all certificates work consistently
   try {
-    const pdfUrl = await generateCertificatePDF({
-      certificateId: certificate.certificateId,
-      recipientName: certificate.User.name || "Student",
-      courseName: certificate.Course?.title,
-      issuedAt: certificate.issuedAt,
-      type: "course",
-    });
-
-    // Update certificate with PDF URL
-    await prisma.certificate.update({
-      where: { id: certificate.id },
-      data: { pdfUrl },
-    });
-
-    // Send certificate email
+    // Send certificate email without PDF URL (user will download from API)
     if (certificate.User.email) {
       await sendCertificateEmail(
         certificate.User.email,
         certificate.User.name || "Student",
         certificate.Course?.title || "Course",
         certificate.certificateId,
-        pdfUrl
+        null // No PDF URL - user downloads from API
       );
     }
   } catch (error) {
-    console.error("Failed to generate certificate PDF or send email:", error);
-    // Don't fail the certificate generation if PDF/email fails
+    console.error("Failed to send certificate email:", error);
+    // Don't fail the certificate generation if email fails
   }
 
   return certificate;
@@ -363,35 +350,22 @@ export async function generatePathCertificate(pathId: string) {
     return newCert;
   });
 
-  // Generate PDF and upload to Cloudinary
+  // PDF is now generated on-demand during download, no need to store URL
+  // This ensures all certificates work consistently
   try {
-    const pdfUrl = await generateCertificatePDF({
-      certificateId: certificate.certificateId,
-      recipientName: certificate.User.name || "Student",
-      pathName: certificate.LearningPath?.title,
-      issuedAt: certificate.issuedAt,
-      type: "learning_path",
-    });
-
-    // Update certificate with PDF URL
-    await prisma.certificate.update({
-      where: { id: certificate.id },
-      data: { pdfUrl },
-    });
-
-    // Send certificate email
+    // Send certificate email without PDF URL (user will download from API)
     if (certificate.User.email) {
       await sendCertificateEmail(
         certificate.User.email,
         certificate.User.name || "Student",
         certificate.LearningPath?.title || "Learning Path",
         certificate.certificateId,
-        pdfUrl
+        null // No PDF URL - user downloads from API
       );
     }
   } catch (error) {
-    console.error("Failed to generate certificate PDF or send email:", error);
-    // Don't fail the certificate generation if PDF/email fails
+    console.error("Failed to send certificate email:", error);
+    // Don't fail the certificate generation if email fails
   }
 
   return certificate;
@@ -598,16 +572,8 @@ export async function generateLearningPathCertificate(userId: string, pathId: st
   const certificateId = generateCertificateId();
   const issuedAt = new Date();
 
-  // Create PDF
-  const pdfUrl = await generateCertificatePDF({
-    recipientName: user.name || "Student",
-    pathName: path.title,
-    certificateId,
-    issuedAt,
-    type: "learning_path",
-  });
-
-  // Save certificate to database
+  // PDF is now generated on-demand during download, no need to store URL
+  // This ensures all certificates work consistently
   const certificate = await prisma.certificate.create({
     data: {
       id: `cert-${Date.now()}-${Math.random().toString(36).substring(7)}`,
@@ -616,7 +582,7 @@ export async function generateLearningPathCertificate(userId: string, pathId: st
       type: "learning_path",
       certificateId,
       issuedAt,
-      pdfUrl,
+      // No pdfUrl - generated on-demand
       metadata: {
         courses: courseIds,
         completedAt: issuedAt.toISOString(),
@@ -644,7 +610,7 @@ export async function generateLearningPathCertificate(userId: string, pathId: st
       user.name || "Student",
       path.title,
       certificate.certificateId,
-      pdfUrl
+      null // No PDF URL - user downloads from API
     );
   }
 
