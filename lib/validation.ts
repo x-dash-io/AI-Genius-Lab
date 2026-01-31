@@ -34,14 +34,14 @@ export const fileUploadSchema = z.object({
 
 // Progress validation schemas
 export const progressUpdateSchema = z.object({
-  lessonId: z.string().uuid("Invalid lesson ID format"),
+  lessonId: z.string().min(1, "Lesson ID is required"), // Accept CUID format
   lastPosition: z.number().min(0).max(24 * 60 * 60).optional(), // Max 24 hours in seconds
   completionPercent: z.number().min(0).max(100).optional(),
   completed: z.boolean().optional(),
 });
 
 export const progressQuerySchema = z.object({
-  lessonId: z.string().uuid("Invalid lesson ID format"),
+  lessonId: z.string().min(1, "Lesson ID is required"), // Accept CUID format
 });
 
 // Certificate validation schemas

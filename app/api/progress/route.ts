@@ -11,9 +11,17 @@ import { progressUpdateSchema, progressQuerySchema, validateRequestBody, validat
 export const POST = withErrorHandler(async (request: NextRequest) => {
   const body = await request.json();
   
+  logger.info("Progress update request", { body });
+  
   // Validate input
   const validation = validateRequestBody(progressUpdateSchema, body);
   if (!validation.success) {
+    // Parse the error directly for logging
+    const parseResult = progressUpdateSchema.safeParse(body);
+    logger.error("Progress validation failed", { 
+      body, 
+      errors: parseResult.success ? null : parseResult.error.flatten()
+    });
     return validation.response;
   }
   
