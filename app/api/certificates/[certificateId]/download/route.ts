@@ -30,12 +30,7 @@ export async function GET(
     });
 
     // Return PDF as downloadable file
-    return new NextResponse(new ReadableStream({
-      start(controller) {
-        controller.enqueue(pdfBuffer);
-        controller.close();
-      }
-    }), {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="certificate-${certificateId}.pdf"`,

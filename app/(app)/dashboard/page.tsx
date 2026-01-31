@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { SubscriptionSuccessToast } from "@/components/checkout/SubscriptionSuccessToast";
 import { CertificateViewButton } from "@/components/dashboard/CertificateViewButton";
+import { CertificateSyncButton } from "@/components/dashboard/CertificateSyncButton";
 import { 
   BookOpen, 
   Activity, 
@@ -606,6 +607,28 @@ export default async function DashboardPage({
                   <CertificateViewButton certificateId={cert.id} />
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Certificate Sync - for users who might have completed courses but no certificates */}
+      {(completedCourses > 0 || totalLessonsCompleted > 0) && (
+        <Card className="border-dashed border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/10">
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-amber-500 flex items-center justify-center">
+                  <Award className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground">Missing Certificates?</h4>
+                  <p className="text-sm text-foreground/60 dark:text-muted-foreground">
+                    If you've completed courses but don't see certificates, sync them now.
+                  </p>
+                </div>
+              </div>
+              <CertificateSyncButton />
             </div>
           </CardContent>
         </Card>

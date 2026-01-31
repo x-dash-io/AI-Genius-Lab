@@ -35,15 +35,29 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
           const { hasCompletedCourse, generateCourseCertificate } = await import("@/lib/certificates");
           const courseCompleted = await hasCompletedCourse(user.id, lesson.Section.courseId);
           
+          logger.info(`Course completion check: userId=${user.id}, courseId=${lesson.Section.courseId}, completed=${courseCompleted}`);
+          
           if (courseCompleted) {
             // Generate certificate asynchronously (don't block the response)
-            generateCourseCertificate(lesson.Section.courseId).catch((error) => {
-              logger.error("Failed to generate certificate", error);
-              // Don't fail the progress update if certificate generation fails
-            });
+            generateCourseCertificate(lesson.Section.courseId)
+              .then((certificate) => {
+                logger.info(`Certificate generated successfully: userId=${user.id}, courseId=${lesson.Section.courseId}, certificateId=${certificate.certificateId}`);
+              })
+              .catch((error) => {
+                logger.error("Failed to generate certificate", {
+                  error: error.message,
+                  userId: user.id,
+                  courseId: lesson.Section.courseId,
+                });
+                // Don't fail the progress update if certificate generation fails
+              });
           }
         } catch (error) {
-          logger.error("Failed to check course completion", error);
+          logger.error("Failed to check course completion", {
+            error: error.message,
+            userId: user.id,
+            courseId: lesson.Section.courseId,
+          });
           // Don't fail the progress update if certificate check fails
         }
       }
