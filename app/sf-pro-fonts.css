@@ -1,0 +1,408 @@
+/* ========================================
+   SF PRO FONT LOADING AND ENFORCEMENT
+   Ensures SF Pro fonts work on every device
+   ======================================== */
+
+/* Font Face Declarations for SF Pro */
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 100;
+  src: local('SF Pro Display Ultralight'), 
+       local('SFProDisplay-Ultralight'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 200;
+  src: local('SF Pro Display Thin'), 
+       local('SFProDisplay-Thin'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 300;
+  src: local('SF Pro Display Light'), 
+       local('SFProDisplay-Light'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 400;
+  src: local('SF Pro Display Regular'), 
+       local('SFProDisplay-Regular'),
+       local('SF Pro Display'),
+       local('SFProDisplay'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 500;
+  src: local('SF Pro Display Medium'), 
+       local('SFProDisplay-Medium'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 600;
+  src: local('SF Pro Display Semibold'), 
+       local('SFProDisplay-Semibold'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 700;
+  src: local('SF Pro Display Bold'), 
+       local('SFProDisplay-Bold'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 800;
+  src: local('SF Pro Display Heavy'), 
+       local('SFProDisplay-Heavy'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  font-style: normal;
+  font-weight: 900;
+  src: local('SF Pro Display Black'), 
+       local('SFProDisplay-Black'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+/* SF Pro Text */
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 100;
+  src: local('SF Pro Text Ultralight'), 
+       local('SFProText-Ultralight'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 200;
+  src: local('SF Pro Text Thin'), 
+       local('SFProText-Thin'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 300;
+  src: local('SF Pro Text Light'), 
+       local('SFProText-Light'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 400;
+  src: local('SF Pro Text Regular'), 
+       local('SFProText-Regular'),
+       local('SF Pro Text'),
+       local('SFProText'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 500;
+  src: local('SF Pro Text Medium'), 
+       local('SFProText-Medium'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 600;
+  src: local('SF Pro Text Semibold'), 
+       local('SFProText-Semibold'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 700;
+  src: local('SF Pro Text Bold'), 
+       local('SFProText-Bold'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 800;
+  src: local('SF Pro Text Heavy'), 
+       local('SFProText-Heavy'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Text';
+  font-style: normal;
+  font-weight: 900;
+  src: local('SF Pro Text Black'), 
+       local('SFProText-Black'),
+       url('data:font/woff2;base64,') format('woff2');
+  font-display: swap;
+}
+
+/* CSS Variables for SF Pro */
+:root {
+  --font-sf-pro-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  --font-sf-pro-text: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  --font-sf-pro: 'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Global font enforcement */
+html {
+  font-family: var(--font-sf-pro) !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "dlig" 1, "hlig" 1 !important;
+}
+
+body {
+  font-family: var(--font-sf-pro) !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "dlig" 1, "hlig" 1 !important;
+}
+
+/* Force SF Pro on all elements */
+*,
+*::before,
+*::after {
+  font-family: inherit !important;
+}
+
+/* Specific element enforcement */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sf-pro-display) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.025em !important;
+}
+
+p, span, div, li, td, th, a, button, input, textarea, select {
+  font-family: var(--font-sf-pro-text) !important;
+}
+
+/* Code elements should use monospace */
+code, pre, kbd, samp {
+  font-family: 'SF Mono', 'Monaco', 'Menlo', 'Consolas', 'Liberation Mono', 'Courier New', monospace !important;
+}
+
+/* Prevent font override on all devices */
+@supports (-webkit-appearance: none) {
+  * {
+    font-family: var(--font-sf-pro) !important;
+  }
+}
+
+@supports (-moz-appearance: none) {
+  * {
+    font-family: var(--font-sf-pro) !important;
+  }
+}
+
+/* Mobile specific enforcement */
+@media screen and (max-width: 768px) {
+  * {
+    font-family: var(--font-sf-pro) !important;
+    -webkit-text-size-adjust: 100% !important;
+    -moz-text-size-adjust: 100% !important;
+    -ms-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+  }
+}
+
+/* Tablet specific enforcement */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  * {
+    font-family: var(--font-sf-pro) !important;
+    -webkit-text-size-adjust: 100% !important;
+    -moz-text-size-adjust: 100% !important;
+    -ms-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+  }
+}
+
+/* Desktop enforcement */
+@media screen and (min-width: 1025px) {
+  * {
+    font-family: var(--font-sf-pro) !important;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  * {
+    font-family: var(--font-sf-pro) !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+  }
+}
+
+/* Retina displays */
+@media (-webkit-min-device-pixel-ratio: 3), (min-resolution: 288dpi) {
+  * {
+    font-family: var(--font-sf-pro) !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+  }
+}
+
+/* Force font loading */
+@font-face {
+  font-family: 'SF Pro Display';
+  src: local('SF Pro Display Regular'), local('SFProDisplay-Regular');
+  unicode-range: U+000-5FF, U+20A0-20CF;
+}
+
+@font-face {
+  font-family: 'SF Pro Text';
+  src: local('SF Pro Text Regular'), local('SFProText-Regular');
+  unicode-range: U+000-5FF, U+20A0-20CF;
+}
+
+/* Prevent system font fallback */
+::selection {
+  font-family: var(--font-sf-pro) !important;
+}
+
+::-moz-selection {
+  font-family: var(--font-sf-pro) !important;
+}
+
+/* Focus states */
+:focus {
+  font-family: var(--font-sf-pro) !important;
+}
+
+::placeholder {
+  font-family: var(--font-sf-pro) !important;
+}
+
+::-webkit-input-placeholder {
+  font-family: var(--font-sf-pro) !important;
+}
+
+::-moz-placeholder {
+  font-family: var(--font-sf-pro) !important;
+}
+
+:-ms-input-placeholder {
+  font-family: var(--font-sf-pro) !important;
+}
+
+/* Form elements */
+input, textarea, select, button, optgroup, option {
+  font-family: var(--font-sf-pro) !important;
+}
+
+/* WebKit browsers */
+@supports (-webkit-appearance: none) {
+  input, textarea, select, button {
+    font-family: var(--font-sf-pro) !important;
+    -webkit-font-smoothing: antialiased !important;
+  }
+}
+
+/* Mozilla browsers */
+@supports (-moz-appearance: none) {
+  input, textarea, select, button {
+    font-family: var(--font-sf-pro) !important;
+    -moz-osx-font-smoothing: grayscale !important;
+  }
+}
+
+/* Edge/IE */
+@supports (-ms-ime-align: auto) {
+  input, textarea, select, button {
+    font-family: var(--font-sf-pro) !important;
+  }
+}
+
+/* Chrome specific */
+@media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
+  * {
+    font-family: var(--font-sf-pro) !important;
+  }
+}
+
+/* Safari specific */
+@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
+  * {
+    font-family: var(--font-sf-pro) !important;
+  }
+}
+
+/* Firefox specific */
+@supports (-moz-appearance: none) {
+  * {
+    font-family: var(--font-sf-pro) !important;
+  }
+}
+
+/* Dynamic font loading script integration */
+.sf-pro-loaded * {
+  font-family: var(--font-sf-pro) !important;
+}
+
+/* Fallback for when fonts fail to load */
+@supports not (font-family: 'SF Pro Display') {
+  * {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif !important;
+  }
+}
+
+/* Print media with SF Pro */
+@media print {
+  * {
+    font-family: var(--font-sf-pro) !important;
+  }
+}

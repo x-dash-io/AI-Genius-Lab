@@ -30,6 +30,18 @@ import {
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
+interface SessionUser {
+  id: string;
+  role: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
+interface Session {
+  user: SessionUser;
+}
+
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = generateSEOMetadata({
@@ -44,7 +56,7 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<{ preview?: string }>;
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions) as Session;
   if (!session?.user) {
     redirect("/sign-in");
   }
@@ -576,55 +588,31 @@ export default async function DashboardPage({
 
       {/* Certificates */}
       {certificates.length > 0 && (
-        <Card className="border-0 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-950/20 dark:to-indigo-950/20 shadow-lg">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
-                  <Award className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <CardTitle className="text-xl font-bold text-foreground">
-                    Your Certificates
-                  </CardTitle>
-                  <CardDescription className="text-sm text-muted-foreground font-medium mt-1">
-                    Professional achievements you've earned
-                  </CardDescription>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{certificates.length}</div>
-                <div className="text-xs text-muted-foreground font-medium">Total Earned</div>
-              </div>
-            </div>
+        <Card className="border-l-4 border-l-blue-500 dark:border-l-blue-400">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-foreground font-semibold">
+              <Award className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              Your Certificates
+            </CardTitle>
+            <CardDescription className="text-foreground/60 dark:text-muted-foreground font-medium">
+              Achievements you've earned
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             {certificates.map((cert: any) => (
-              <div key={cert.id} className="group relative overflow-hidden rounded-xl border border-blue-200/50 dark:border-blue-800/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm hover:shadow-lg transition-all duration-300 hover:border-blue-300/50 dark:hover:border-blue-700/50">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-lg group-hover:scale-105 transition-transform duration-300">
-                      <Award className="h-7 w-7 text-white" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-lg text-foreground mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
-                        {cert.Course?.title || 'Certificate'}
-                      </h3>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground font-medium mb-4">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          Issued {new Date(cert.issuedAt).toLocaleDateString()}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
-                          Verified
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <CertificateViewButton certificateId={cert.id} />
-                      </div>
-                    </div>
+              <div key={cert.id} className="flex items-start gap-3 p-4 rounded-lg border border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-950/10 hover:bg-blue-100/50 dark:hover:bg-blue-900/20 transition-colors">
+                <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 shadow-md">
+                  <Award className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm text-foreground line-clamp-2">
+                    {cert.Course?.title || 'Certificate'}
+                  </p>
+                  <p className="text-xs text-foreground/70 dark:text-muted-foreground font-medium mt-1">
+                    Issued {new Date(cert.issuedAt).toLocaleDateString()}
+                  </p>
+                  <div className="mt-2">
+                    <CertificateViewButton certificateId={cert.id} />
                   </div>
                 </div>
               </div>

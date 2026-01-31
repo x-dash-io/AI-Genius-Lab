@@ -5,14 +5,19 @@ import { trackLessonComplete } from "@/lib/analytics";
 import { withErrorHandler } from "../error-handler";
 import { AppError } from "@/lib/errors";
 import { logger } from "@/lib/logger";
+import { checkAndGenerateCertificate } from "@/lib/certificate-service";
+import { progressUpdateSchema, progressQuerySchema, validateRequestBody, validateQueryParams } from "@/lib/validation";
 
 export const POST = withErrorHandler(async (request: NextRequest) => {
   const body = await request.json();
-  const { lessonId, lastPosition, completionPercent, completed } = body;
-
-  if (!lessonId) {
-    throw AppError.badRequest("lessonId is required");
+  
+  // Validate input
+  const validation = validateRequestBody(progressUpdateSchema, body);
+  if (!validation.success) {
+    return validation.response;
   }
+  
+  const { lessonId, lastPosition, completionPercent, completed } = validation.data;
 
   const user = await requireUser();
   const progress = await updateLessonProgress(lessonId, {
@@ -30,28 +35,12 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       if (lesson) {
         trackLessonComplete(lessonId, lesson.Section.courseId, user.id);
 
-        // Check if course is now complete and generate certificate
+        // Use centralized certificate service for course completion check
         try {
-          const { hasCompletedCourse, generateCourseCertificate } = await import("@/lib/certificates");
-          const courseCompleted = await hasCompletedCourse(user.id, lesson.Section.courseId);
+          const result = await checkAndGenerateCertificate(user.id, lesson.Section.courseId);
           
-          logger.info(`Course completion check: userId=${user.id}, courseId=${lesson.Section.courseId}, completed=${courseCompleted}`);
+          logger.info(`Certificate check completed: userId=${user.id}, courseId=${lesson.Section.courseId}, success=${result.success}`);
           
-          if (courseCompleted) {
-            // Generate certificate asynchronously (don't block the response)
-            generateCourseCertificate(lesson.Section.courseId)
-              .then((certificate) => {
-                logger.info(`Certificate generated successfully: userId=${user.id}, courseId=${lesson.Section.courseId}, certificateId=${certificate.certificateId}`);
-              })
-              .catch((error) => {
-                logger.error("Failed to generate certificate", {
-                  error: error instanceof Error ? error.message : 'Unknown error',
-                  userId: user.id,
-                  courseId: lesson.Section.courseId,
-                });
-                // Don't fail the progress update if certificate generation fails
-              });
-          }
         } catch (error) {
           logger.error("Failed to check course completion", {
             error: error instanceof Error ? error.message : 'Unknown error',
@@ -71,11 +60,14 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
 
 export const GET = withErrorHandler(async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
-  const lessonId = searchParams.get("lessonId");
-
-  if (!lessonId) {
-    throw AppError.badRequest("lessonId is required");
+  
+  // Validate query parameters
+  const validation = validateQueryParams(progressQuerySchema, searchParams);
+  if (!validation.success) {
+    return validation.response;
   }
+  
+  const { lessonId } = validation.data;
 
   const progress = await getLessonProgress(lessonId);
   return NextResponse.json({ progress });

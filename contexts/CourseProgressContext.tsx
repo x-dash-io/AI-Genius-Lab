@@ -36,32 +36,39 @@ export function CourseProgressProvider({ children }: { children: ReactNode }) {
     
     try {
       // Update local state immediately for responsiveness
-      setProgress(prev => {
-        const newMap = new Map(prev);
-        const courseProgress = newMap.get(courseId);
-        
-        if (courseProgress) {
-          const updatedLessons = courseProgress.lessons.map(lesson => 
-            lesson.lessonId === lessonId 
-              ? { ...lesson, ...progressUpdate }
-              : lesson
-          );
+      const updatedCourseProgress = await new Promise<CourseProgress | null>((resolve) => {
+        setProgress(prev => {
+          const newMap = new Map(prev);
+          const courseProgress = newMap.get(courseId);
           
-          const completedLessons = updatedLessons.filter(l => l.completedAt !== null).length;
-          const overallProgress = courseProgress.totalLessons > 0 
-            ? Math.round((completedLessons / courseProgress.totalLessons) * 100) 
-            : 0;
+          if (courseProgress) {
+            const updatedLessons = courseProgress.lessons.map(lesson => 
+              lesson.lessonId === lessonId 
+                ? { ...lesson, ...progressUpdate }
+                : lesson
+            );
+            
+            const completedLessons = updatedLessons.filter(l => l.completedAt !== null).length;
+            const overallProgress = courseProgress.totalLessons > 0 
+              ? Math.round((completedLessons / courseProgress.totalLessons) * 100) 
+              : 0;
+            
+            const updatedProgress = {
+              ...courseProgress,
+              lessons: updatedLessons,
+              completedLessons,
+              overallProgress,
+              isCompleted: overallProgress === 100
+            };
+            
+            newMap.set(courseId, updatedProgress);
+            resolve(updatedProgress);
+          } else {
+            resolve(null);
+          }
           
-          newMap.set(courseId, {
-            ...courseProgress,
-            lessons: updatedLessons,
-            completedLessons,
-            overallProgress,
-            isCompleted: overallProgress === 100
-          });
-        }
-        
-        return newMap;
+          return newMap;
+        });
       });
 
       // Send progress update to server
@@ -80,8 +87,8 @@ export function CourseProgressProvider({ children }: { children: ReactNode }) {
       }
 
       // Check if course was completed and trigger certificate generation
-      const courseProgress = progress.get(courseId);
-      if (courseProgress && courseProgress.isCompleted) {
+      // Use the updatedCourseProgress from the state update above
+      if (updatedCourseProgress && updatedCourseProgress.isCompleted) {
         // Trigger certificate check
         await fetch('/api/certificates/check', {
           method: 'POST',

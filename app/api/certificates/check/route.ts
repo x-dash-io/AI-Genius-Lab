@@ -1,69 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireCustomer } from "@/lib/access";
-import { hasCompletedCourse, generateCourseCertificate } from "@/lib/certificates";
-import { prisma } from "@/lib/prisma";
+import { checkAndGenerateCertificate } from "@/lib/certificate-service";
 import { logger } from "@/lib/logger";
+import { certificateCheckSchema, validateRequestBody } from "@/lib/validation";
 
 export async function POST(request: NextRequest) {
   try {
     const user = await requireCustomer();
-    const { courseId } = await request.json();
-
-    if (!courseId) {
-      return NextResponse.json({ error: "courseId is required" }, { status: 400 });
-    }
-
-    // Check if certificate already exists
-    const existingCertificate = await prisma.certificate.findFirst({
-      where: {
-        userId: user.id,
-        courseId,
-        type: "course",
-      },
-    });
-
-    if (existingCertificate) {
-      return NextResponse.json({
-        success: true,
-        message: "Certificate already exists",
-        certificateId: existingCertificate.certificateId,
-      });
-    }
-
-    // Check if course is completed
-    const isCompleted = await hasCompletedCourse(user.id, courseId);
+    const body = await request.json();
     
-    if (isCompleted) {
-      try {
-        const certificate = await generateCourseCertificate(courseId);
-        logger.info(`Certificate generated on completion check: userId=${user.id}, courseId=${courseId}`);
-        
-        return NextResponse.json({
-          success: true,
-          message: "Certificate generated successfully",
-          certificateId: certificate.certificateId,
-          newlyGenerated: true,
-        });
-      } catch (error) {
-        logger.error("Failed to generate certificate on completion check", {
-          error,
-          userId: user.id,
-          courseId,
-        });
-        
-        return NextResponse.json({
-          success: false,
-          message: "Course completed but certificate generation failed",
-          error: error instanceof Error ? error.message : "Unknown error",
-        });
-      }
+    // Validate input
+    const validation = validateRequestBody(certificateCheckSchema, body);
+    if (!validation.success) {
+      return validation.response;
     }
+    
+    const { courseId } = validation.data;
 
-    return NextResponse.json({
-      success: true,
-      message: "Course not yet completed",
-      isCompleted: false,
-    });
+    // Use centralized certificate service
+    const result = await checkAndGenerateCertificate(user.id, courseId);
+    
+    return NextResponse.json(result);
 
   } catch (error) {
     logger.error("Certificate check failed", { error });

@@ -13,6 +13,9 @@ const customJestConfig = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(jose|openid-client|@vercel/analytics|.*\\.mjs$))',
+  ],
   testMatch: [
     '**/__tests__/**/*.[jt]s?(x)',
     '**/?(*.)+(spec|test).[jt]s?(x)',

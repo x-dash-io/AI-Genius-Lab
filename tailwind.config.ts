@@ -57,8 +57,9 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-sf-pro)", "system-ui", "sans-serif"],
-        display: ["var(--font-montserrat)", "system-ui", "sans-serif"],
+        sans: ["var(--font-sf-pro-text)", "system-ui", "sans-serif"],
+        display: ["var(--font-sf-pro-display)", "var(--font-sf-pro-text)", "system-ui", "sans-serif"],
+        sfPro: ["var(--font-sf-pro)", "system-ui", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {

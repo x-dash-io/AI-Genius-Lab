@@ -3,6 +3,8 @@ import { requireUser } from "@/lib/access";
 import { getCourseForLibraryBySlug } from "@/lib/courses";
 import { hasCourseAccess } from "@/lib/access";
 import { prisma } from "@/lib/prisma";
+import { courseProgressSchema, validateRequestBody } from "@/lib/validation";
+import { getCachedProgress, setCachedProgress, updateCachedLessonProgress } from "@/lib/progress-cache";
 
 export async function GET(
   request: NextRequest,
@@ -10,7 +12,23 @@ export async function GET(
 ) {
   try {
     const { courseId } = await params;
+    
+    // Validate input
+    const validation = validateRequestBody(courseProgressSchema, { courseId });
+    if (!validation.success) {
+      return validation.response;
+    }
+    
     const user = await requireUser();
+
+    // Check cache first
+    const cachedProgress = getCachedProgress(user.id, courseId);
+    if (cachedProgress) {
+      return NextResponse.json({
+        courseId,
+        ...cachedProgress,
+      });
+    }
 
     // Get course by slug or ID
     const course = await getCourseForLibraryBySlug(courseId);
@@ -57,14 +75,20 @@ export async function GET(
       };
     });
 
-    return NextResponse.json({
+    const progressData = {
       courseId: course.id,
       totalLessons,
       completedLessons,
       overallProgress,
       lessons,
-      isCompleted: overallProgress === 100
-    });
+      isCompleted: overallProgress === 100,
+      lastUpdated: Date.now(),
+    };
+
+    // Cache the result
+    setCachedProgress(user.id, courseId, progressData);
+
+    return NextResponse.json(progressData);
 
   } catch (error) {
     console.error("Error fetching course progress:", error);
