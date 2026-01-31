@@ -7,6 +7,7 @@ import { HowItWorks } from "@/components/home/HowItWorks";
 import { SocialProof } from "@/components/home/SocialProof";
 import { SecuritySection } from "@/components/home/SecuritySection";
 import { FinalCTA } from "@/components/home/FinalCTA";
+import { HeroBackgroundBlobs } from "@/components/ui/hero-background-blobs";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { getHomepageStats } from "@/lib/homepage-stats";
 
@@ -45,14 +46,17 @@ export default async function LandingPage() {
   }
 
   return (
-    <div className="grid gap-16 md:gap-24">
-      <LandingHero stats={stats} />
-      <TrustSection stats={stats} />
+    <div className="relative">
+      <HeroBackgroundBlobs />
+      <div className="grid gap-16 md:gap-24 relative z-10">
+        <LandingHero stats={stats} />
+        <TrustSection stats={stats} />
       <LaunchCurriculum stats={stats} />
       <HowItWorks />
       <SocialProof stats={stats} />
       <SecuritySection />
       <FinalCTA />
+      </div>
     </div>
   );
 }

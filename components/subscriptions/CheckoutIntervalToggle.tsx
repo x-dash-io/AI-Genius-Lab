@@ -34,7 +34,7 @@ export function CheckoutIntervalToggle() {
               className={cn(
                 "relative flex items-center justify-center gap-2.5 py-3 px-4 text-sm font-bold outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-xl flex-1 group transition-colors duration-500",
                 isActive
-                  ? "text-white"
+                  ? "text-primary-foreground"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -44,7 +44,7 @@ export function CheckoutIntervalToggle() {
                   <span className={cn(
                     "inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-tight transition-all duration-500",
                      isActive
-                      ? "bg-white/15 text-white ring-1 ring-white/20"
+                      ? "bg-primary-foreground/15 text-primary-foreground ring-1 ring-primary-foreground/20"
                       : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 ring-1 ring-emerald-200/50 dark:ring-emerald-800/50"
                   )}>
                     {option.badge}
