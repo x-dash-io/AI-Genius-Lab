@@ -24,14 +24,14 @@ export function CheckoutIntervalToggle() {
 
   return (
     <div className="flex justify-center mb-6">
-      <div className="relative grid grid-cols-2 p-1 rounded-full bg-zinc-900/80 border border-zinc-700/50 w-full max-w-[420px] backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.05)]">
+      <div className="relative grid grid-cols-2 p-1 rounded-xl bg-secondary/50 border border-border w-full max-w-[420px]">
         {/* Animated background pill */}
         <motion.div
-          className="absolute top-1 bottom-1 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+          className="absolute top-1 bottom-1 rounded-lg bg-primary shadow-sm"
           initial={false}
           animate={{
-            left: interval === "monthly" ? "4px" : "50%",
-            right: interval === "monthly" ? "50%" : "4px",
+            left: interval === "monthly" ? "4px" : "calc(50%)",
+            right: interval === "monthly" ? "calc(50%)" : "4px",
           }}
           transition={{
             type: "spring",
@@ -47,19 +47,19 @@ export function CheckoutIntervalToggle() {
             <button
               key={option.value}
               onClick={() => handleIntervalChange(option.value)}
-              className="relative flex items-center justify-center gap-2 py-3.5 px-5 text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 rounded-full z-10 transition-colors duration-200"
+              className="relative flex items-center justify-center gap-2 py-3 px-4 text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg z-10 transition-colors duration-200"
               data-testid={`interval-toggle-${option.value}`}
             >
               <motion.span 
                 className="flex items-center gap-2"
                 animate={{ 
-                  color: isActive ? "#ffffff" : "rgba(161, 161, 170, 1)" 
+                  color: isActive ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))" 
                 }}
                 transition={{ duration: 0.2 }}
               >
                 {option.label}
                 {option.badge && (
-                  <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                  <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide bg-green-500/20 text-green-400 border border-green-500/30">
                     {option.badge}
                   </span>
                 )}
