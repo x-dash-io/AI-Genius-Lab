@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireCustomer } from "@/lib/access";
-import { hasCompletedCourse, generateCourseCertificate, getUserCertificates } from "@/lib/certificates";
+import { hasCompletedCourse, generateCourseCertificateForUser, getUserCertificates } from "@/lib/certificates";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 
@@ -97,10 +97,14 @@ export async function POST(request: NextRequest) {
       errors: [] as string[],
     };
 
+    logger.info(`Starting certificate sync: userId=${user.id}, totalAccessibleCourses=${allAccessibleCourses.length}`);
+
     // Check each accessible course for completion
     for (const course of allAccessibleCourses) {
       try {
         results.processed++;
+        
+        logger.info(`Processing course for sync: userId=${user.id}, courseId=${course.id}, title=${course.title}`);
         
         // Check if already has certificate
         const existingCertificate = await prisma.certificate.findFirst({
@@ -112,16 +116,18 @@ export async function POST(request: NextRequest) {
         });
 
         if (existingCertificate) {
+          logger.info(`Certificate already exists: userId=${user.id}, courseId=${course.id}`);
           results.alreadyCompleted++;
           continue;
         }
 
         // Check if course is completed
         const isCompleted = await hasCompletedCourse(user.id, course.id);
+        logger.info(`Course completion check: userId=${user.id}, courseId=${course.id}, completed=${isCompleted}`);
         
         if (isCompleted) {
           try {
-            await generateCourseCertificate(course.id);
+            await generateCourseCertificateForUser(user.id, course.id);
             results.certificatesGenerated++;
             logger.info(`Retroactively generated certificate: userId=${user.id}, courseId=${course.id}`);
           } catch (certError) {
@@ -135,6 +141,7 @@ export async function POST(request: NextRequest) {
           }
         } else {
           results.notCompleted++;
+          logger.info(`Course not completed: userId=${user.id}, courseId=${course.id}`);
         }
       } catch (error) {
         const errorMsg = `Error processing course ${course.title}: ${error instanceof Error ? error.message : 'Unknown error'}`;

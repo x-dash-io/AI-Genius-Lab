@@ -6,6 +6,7 @@ import { hasEnrolledInLearningPath } from "./learning-paths";
 import { getUserSubscription } from "@/lib/subscriptions";
 import { generateCertificatePDFBytes } from "./certificate-pdf";
 import { sendCertificateEmail } from "./email";
+import { logger } from "@/lib/logger";
 
 /**
  * Generate a unique certificate ID
@@ -34,10 +35,16 @@ export async function hasCompletedCourse(userId: string, courseId: string): Prom
     },
   });
 
-  if (!course) return false;
+  if (!course) {
+    logger.warn(`Course not found for completion check: courseId=${courseId}`);
+    return false;
+  }
 
   const lessonIds = course.sections.flatMap((s) => s.lessons.map((l) => l.id));
-  if (lessonIds.length === 0) return false;
+  if (lessonIds.length === 0) {
+    logger.warn(`No lessons found in course: courseId=${courseId}`);
+    return false;
+  }
 
   // Get progress for all lessons
   const progressRecords = await prisma.progress.findMany({
@@ -49,7 +56,11 @@ export async function hasCompletedCourse(userId: string, courseId: string): Prom
 
   // Check if all lessons are completed
   const completedLessons = progressRecords.filter((p) => p.completedAt != null).length;
-  return completedLessons === lessonIds.length;
+  const isCompleted = completedLessons === lessonIds.length;
+  
+  logger.info(`Course completion check: userId=${userId}, courseId=${courseId}, totalLessons=${lessonIds.length}, completedLessons=${completedLessons}, isCompleted=${isCompleted}`);
+  
+  return isCompleted;
 }
 
 /**
@@ -85,7 +96,7 @@ export async function hasCompletedLearningPath(userId: string, pathId: string): 
 }
 
 /**
- * Generate certificate for course completion
+ * Generate certificate for course completion (user-initiated)
  * Uses transaction to prevent race conditions
  */
 export async function generateCourseCertificate(courseId: string) {
@@ -114,12 +125,43 @@ export async function generateCourseCertificate(courseId: string) {
     throw new Error("Course not completed");
   }
 
+  return await generateCourseCertificateForUser(user.id, courseId);
+}
+
+/**
+ * Generate certificate for course completion for any user (admin/sync function)
+ * Uses transaction to prevent race conditions
+ */
+export async function generateCourseCertificateForUser(userId: string, courseId: string) {
+  // Verify access (either purchase OR subscription)
+  const hasAccess = await hasCourseAccess(userId, "customer", courseId);
+  if (!hasAccess) {
+    throw new Error("Course access required");
+  }
+
+  // Verify certificate inclusion
+  const purchased = await hasPurchasedCourse(userId, courseId);
+  if (!purchased) {
+    const subscription = await getUserSubscription(userId);
+    if (!subscription || subscription.plan.tier === "starter") {
+      throw new Error(
+        "User's current subscription does not include certificates. Upgrade to Pro to earn certificates."
+      );
+    }
+  }
+
+  // Verify course completion
+  const completed = await hasCompletedCourse(userId, courseId);
+  if (!completed) {
+    throw new Error("Course not completed");
+  }
+
   // Use transaction to prevent race condition (check-then-create)
   const certificate = await prisma.$transaction(async (tx) => {
     // Check if certificate already exists within transaction
     const existing = await tx.certificate.findFirst({
       where: {
-        userId: user.id,
+        userId: userId,
         courseId,
         type: "course",
       },
@@ -148,7 +190,7 @@ export async function generateCourseCertificate(courseId: string) {
     const newCert = await tx.certificate.create({
       data: {
         id: `cert_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        userId: user.id,
+        userId: userId,
         courseId,
         type: "course",
         certificateId,
@@ -173,7 +215,7 @@ export async function generateCourseCertificate(courseId: string) {
     await tx.activityLog.create({
       data: {
         id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-        userId: user.id,
+        userId: userId,
         type: "certificate_earned",
         metadata: {
           certificateId: newCert.certificateId,
