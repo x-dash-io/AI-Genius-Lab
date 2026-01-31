@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     console.error("Error creating review:", error);
 
     if (error instanceof Error) {
-      if (error.message.includes("FORBIDDEN")) {
+      if (error.message.includes("FORBIDDEN") || error.message.includes("complete at least")) {
         return NextResponse.json({ error: error.message }, { status: 403 });
       }
       if (error.message.includes("already reviewed")) {
