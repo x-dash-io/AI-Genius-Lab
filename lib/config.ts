@@ -6,8 +6,8 @@
 export const siteConfig = {
   name: "AI Genius Lab",
   description: "Learn AI for business, content, apps, and productivity through structured courses, tracked progress, and instant access after purchase.",
-  url: process.env.NEXTAUTH_URL || "https://aigeniuslab.com",
-  ogImage: "/og-image.jpg",
+  url: process.env.NEXTAUTH_URL || "https://ai-genius-lab.vercel.app",
+  ogImage: "/api/og",
   links: {
     email: process.env.SUPPORT_EMAIL || "support@aigeniuslab.com",
     github: "https://github.com/SingasonSimon/AI-Genius-Lab",
@@ -24,6 +24,8 @@ export const siteConfig = {
     "content creation AI",
     "AI productivity tools",
     "app development with AI",
+    "AI learning platform",
+    "digital product marketplace",
   ],
 };
 

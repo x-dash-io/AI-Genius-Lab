@@ -10,6 +10,9 @@ export interface SEOConfig {
   type?: "website" | "article";
   noindex?: boolean;
   nofollow?: boolean;
+  authors?: { name: string }[];
+  applicationName?: string;
+  metadataBase?: string;
 }
 
 const defaultTitle = `${siteConfig.name} - Master AI With Curated Learning Paths`;
@@ -30,6 +33,9 @@ export function generateMetadata(config: SEOConfig = {}): Metadata {
     type = "website",
     noindex = false,
     nofollow = false,
+    authors = [],
+    applicationName = siteConfig.name,
+    metadataBase = siteConfig.url,
   } = config;
 
   const fullTitle = title
@@ -55,7 +61,10 @@ export function generateMetadata(config: SEOConfig = {}): Metadata {
     title: fullTitle,
     description,
     keywords: keywords.length > 0 ? keywords.join(", ") : undefined,
+    authors: authors.length > 0 ? authors : [{ name: "AI Genius Lab" }],
     robots: robots.join(", "),
+    applicationName,
+    metadataBase: new URL(metadataBase),
     openGraph: {
       title: fullTitle,
       description,
@@ -77,6 +86,8 @@ export function generateMetadata(config: SEOConfig = {}): Metadata {
       title: fullTitle,
       description,
       images: [fullImage],
+      creator: "@aigeniuslab",
+      site: "@aigeniuslab",
     },
     alternates: {
       canonical: fullUrl,

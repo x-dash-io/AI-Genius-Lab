@@ -64,7 +64,48 @@ export interface BreadcrumbListSchema {
   }>;
 }
 
-const siteUrl = process.env.NEXTAUTH_URL || "https://aigeniuslab.com";
+export interface WebSiteSchema {
+  "@context": string;
+  "@type": string;
+  name: string;
+  url: string;
+  description: string;
+  publisher: {
+    "@type": string;
+    name: string;
+    url: string;
+  };
+  potentialAction?: {
+    "@type": string;
+    target: string;
+    "query-input": string;
+  };
+}
+
+const siteUrl = process.env.NEXTAUTH_URL || "https://ai-genius-lab.vercel.app";
+
+/**
+ * Generate WebSite schema
+ */
+export function generateWebSiteSchema(): WebSiteSchema {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "AI Genius Lab",
+    url: siteUrl,
+    description: "AI learning platform and digital product marketplace offering online courses, AI tools, and digital learning content.",
+    publisher: {
+      "@type": "Organization",
+      name: "AI Genius Lab",
+      url: siteUrl,
+    },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${siteUrl}/search?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
 
 /**
  * Generate Organization schema
@@ -75,8 +116,12 @@ export function generateOrganizationSchema(): OrganizationSchema {
     "@type": "Organization",
     name: "AI Genius Lab",
     url: siteUrl,
-    description:
-      "Premium AI learning platform with structured courses and secure commerce.",
+    description: "AI learning platform and digital product marketplace offering online courses, AI tools, and digital learning content.",
+    logo: `${siteUrl}/logo.png`,
+    sameAs: [
+      "https://github.com/SingasonSimon/AI-Genius-Lab",
+      "https://twitter.com/aigeniuslab",
+    ],
   };
 }
 

@@ -8,6 +8,7 @@ import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { CourseActions } from "@/components/courses/CourseActions";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateCourseSchema } from "@/lib/seo/schemas";
+import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,7 @@ export async function generateMetadata({
     keywords: ["AI course", course.title, "online learning"],
     url: `/courses/${course.slug}`,
     type: "website",
+    image: `/api/og?title=${encodeURIComponent(course.title)}&description=${encodeURIComponent(course.description || `Learn ${course.title} with structured lessons and progress tracking.`)}`,
   });
 }
 
@@ -63,7 +65,22 @@ export default async function CourseDetailPage({
   });
 
   return (
-    <section className="grid gap-8">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(courseSchema),
+        }}
+      />
+      <div className="space-y-8">
+        <Breadcrumbs
+          items={[
+            { name: "Home", url: "/" },
+            { name: "Courses", url: "/courses" },
+            { name: course.title },
+          ]}
+        />
+        <section className="grid gap-8">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Course Preview
@@ -116,6 +133,8 @@ export default async function CourseDetailPage({
 
       {/* Reviews Section */}
       <ReviewSection courseId={course.id} initialStats={reviewStats} />
-    </section>
+      </section>
+      </div>
+    </>
   );
 }

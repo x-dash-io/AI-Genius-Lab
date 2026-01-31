@@ -9,7 +9,7 @@ import { CartProvider } from "@/components/cart/CartProvider";
 import { ConfirmDialogProvider } from "@/components/ui/confirm-dialog";
 import { DevIndicatorRemover } from "@/components/DevIndicatorRemover";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
-import { generateOrganizationSchema } from "@/lib/seo/schemas";
+import { generateOrganizationSchema, generateWebSiteSchema } from "@/lib/seo/schemas";
 import "./globals.css";
 
 // const montserrat = Montserrat({
@@ -31,6 +31,8 @@ export const metadata: Metadata = generateSEOMetadata({
     "AI education",
     "machine learning courses",
     "AI training",
+    "AI learning platform",
+    "digital product marketplace",
   ],
 });
 
@@ -40,6 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const organizationSchema = generateOrganizationSchema();
+  const webSiteSchema = generateWebSiteSchema();
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -48,6 +51,12 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(organizationSchema),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(webSiteSchema),
           }}
         />
       </head>

@@ -6,6 +6,7 @@ import { CourseFilters } from "@/components/courses/CourseFilters";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookOpen } from "lucide-react";
+import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
 
@@ -124,6 +125,14 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
       <section className="container mx-auto py-12 px-4 grid gap-8">
+        {/* Breadcrumbs */}
+        <Breadcrumbs
+          items={[
+            { name: "Home", url: "/" },
+            { name: "Courses" },
+          ]}
+        />
+        
         {/* Header */}
         <div className="space-y-4">
           <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm font-medium text-primary gap-2">
