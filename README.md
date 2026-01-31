@@ -155,7 +155,6 @@ CLOUDINARY_API_SECRET="<from-cloudinary-dashboard>"
 RESEND_API_KEY="<from-resend-dashboard>"
 FROM_EMAIL="noreply@yourdomain.com"
 SUPPORT_EMAIL="support@yourdomain.com"  # Override default support email
-SUPPORT_PHONE="+1 (555) 123-4567"  # Optional: Support phone number
 
 # Address Configuration (Optional)
 ADDRESS_LINE_1="123 Learning Street"

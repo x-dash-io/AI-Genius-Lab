@@ -45,7 +45,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
               })
               .catch((error) => {
                 logger.error("Failed to generate certificate", {
-                  error: error.message,
+                  error: error instanceof Error ? error.message : 'Unknown error',
                   userId: user.id,
                   courseId: lesson.Section.courseId,
                 });
@@ -54,7 +54,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
           }
         } catch (error) {
           logger.error("Failed to check course completion", {
-            error: error.message,
+            error: error instanceof Error ? error.message : 'Unknown error',
             userId: user.id,
             courseId: lesson.Section.courseId,
           });

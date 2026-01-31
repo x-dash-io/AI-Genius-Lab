@@ -26,6 +26,7 @@ import { SignOutButton } from "@/components/auth/SignOutButton";
 import { BackgroundBlobs } from "@/components/ui/background-blobs";
 import { useCart } from "@/components/cart/CartProvider";
 import { ConfirmDialogProvider } from "@/components/ui/confirm-dialog";
+import { CourseProgressProvider } from "@/contexts/CourseProgressContext";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 import { PreviewBanner } from "@/components/admin/PreviewBanner";
@@ -142,8 +143,9 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
 
   return (
     <ConfirmDialogProvider>
-      <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
-        <BackgroundBlobs />
+      <CourseProgressProvider>
+        <div className="min-h-screen bg-background font-sans antialiased">
+          <BackgroundBlobs />
       
       {/* Desktop Layout */}
       <div className="hidden md:flex min-h-screen" suppressHydrationWarning>
@@ -452,6 +454,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
         <Footer />
       </div>
       </div>
+      </CourseProgressProvider>
     </ConfirmDialogProvider>
   );
 }

@@ -99,9 +99,19 @@ export function LessonViewer({
           completedAt: new Date(),
           completionPercent: 100,
         }));
+
+        // Emit custom event for real-time updates
+        window.dispatchEvent(new CustomEvent('lessonProgressUpdate', {
+          detail: {
+            lessonId,
+            progress: 100,
+            completed: true
+          }
+        }));
+
         toast({
           title: "Lesson Completed!",
-          description: "Great job completing this lesson.",
+          description: "Great job! You've completed this lesson.",
           variant: "success",
         });
       } else {
@@ -123,7 +133,16 @@ export function LessonViewer({
       ...prev!,
       completionPercent: percent,
     }));
-  }, []);
+
+    // Emit custom event for real-time updates
+    window.dispatchEvent(new CustomEvent('lessonProgressUpdate', {
+      detail: {
+        lessonId,
+        progress: percent,
+        completed: false
+      }
+    }));
+  }, [lessonId]);
 
   const handleDownload = async () => {
     const targetUrl = downloadUrl || `/api/content/${lessonId}?download=true`;
