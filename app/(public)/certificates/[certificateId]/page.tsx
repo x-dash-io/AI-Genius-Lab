@@ -1,13 +1,14 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Award, CheckCircle2, Download, ExternalLink, Share2, Calendar, User, BookOpen } from "lucide-react";
+import { Award, CheckCircle2, Download, ExternalLink, Share2, Calendar, User, BookOpen, Copy } from "lucide-react";
 import { getCertificate } from "@/lib/certificates";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
+import { CertificateActions, ShareAchievement } from "@/components/certificates/CertificateActions";
 
 export const dynamic = "force-dynamic";
 
@@ -156,22 +157,12 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
 
               <Separator />
 
-              <div className="space-y-3 pt-2">
-                {certificate.pdfUrl && (
-                  <a href={certificate.pdfUrl} target="_blank" rel="noopener noreferrer">
-                    <Button className="w-full" variant="outline">
-                      <Download className="mr-2 h-4 w-4" />
-                      Download PDF
-                    </Button>
-                  </a>
-                )}
-                <Link href={isCourse ? `/courses/${item?.slug}` : `/learning-paths/${item?.slug}`} className="block">
-                  <Button className="w-full" variant="ghost">
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    View {isCourse ? "Course" : "Path"}
-                  </Button>
-                </Link>
-              </div>
+              <CertificateActions
+                certificateId={certificate.certificateId}
+                pdfUrl={certificate.pdfUrl}
+                isCourse={isCourse}
+                itemSlug={item?.slug}
+              />
             </CardContent>
           </Card>
 
@@ -183,10 +174,7 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
                 <p className="text-xs text-muted-foreground">
                   Showcase your hard work to your professional network.
                 </p>
-                <div className="flex gap-2 w-full">
-                   {/* Share buttons would go here - simplified for now */}
-                   <Button variant="outline" size="sm" className="flex-1 text-xs">Copy Link</Button>
-                </div>
+                <ShareAchievement certificateId={certificate.certificateId} />
               </div>
             </CardContent>
           </Card>
