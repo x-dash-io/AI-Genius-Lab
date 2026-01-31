@@ -255,18 +255,18 @@ export async function generateCertificatePDF(
     color: lightGray,
   });
 
-  // Verification URL
-  const verifyUrl = `Verify at: ${process.env.NEXTAUTH_URL || "https://aigeniuslab.com"}/certificates/verify/${data.certificateId}`;
-  const verifyFontSize = 8;
-  const verifyWidth = helveticaFont.widthOfTextAtSize(verifyUrl, verifyFontSize);
+  // Verification URL - commented out due to border overlap
+  // const verifyUrl = `Verify at: ${process.env.NEXTAUTH_URL || "https://aigeniuslab.com"}/certificates/verify/${data.certificateId}`;
+  // const verifyFontSize = 8;
+  // const verifyWidth = helveticaFont.widthOfTextAtSize(verifyUrl, verifyFontSize);
   
-  page.drawText(verifyUrl, {
-    x: (width - verifyWidth) / 2,
-    y: borderMargin + 8,
-    size: verifyFontSize,
-    font: helveticaFont,
-    color: lightGray,
-  });
+  // page.drawText(verifyUrl, {
+  //   x: (width - verifyWidth) / 2,
+  //   y: borderMargin + 8,
+  //   size: verifyFontSize,
+  //   font: helveticaFont,
+  //   color: lightGray,
+  // });
 
   // Serialize the PDF to bytes
   const pdfBytes = await pdfDoc.save();
@@ -521,18 +521,18 @@ export async function generateCertificatePDFBytes(
     color: lightGray,
   });
 
-  // Verification URL
-  const verifyUrl = `Verify at: ${process.env.NEXTAUTH_URL || "https://aigeniuslab.com"}/certificates/verify/${data.certificateId}`;
-  const verifyFontSize = 8;
-  const verifyWidth = helveticaFont.widthOfTextAtSize(verifyUrl, verifyFontSize);
+  // Verification URL - commented out due to border overlap
+  // const verifyUrl = `Verify at: ${process.env.NEXTAUTH_URL || "https://aigeniuslab.com"}/certificates/verify/${data.certificateId}`;
+  // const verifyFontSize = 8;
+  // const verifyWidth = helveticaFont.widthOfTextAtSize(verifyUrl, verifyFontSize);
   
-  page.drawText(verifyUrl, {
-    x: (width - verifyWidth) / 2,
-    y: borderMargin + 8,
-    size: verifyFontSize,
-    font: helveticaFont,
-    color: lightGray,
-  });
+  // page.drawText(verifyUrl, {
+  //   x: (width - verifyWidth) / 2,
+  //   y: borderMargin + 8,
+  //   size: verifyFontSize,
+  //   font: helveticaFont,
+  //   color: lightGray,
+  // });
 
   // Serialize the PDF to bytes and return as Buffer
   const pdfBytes = await pdfDoc.save();
