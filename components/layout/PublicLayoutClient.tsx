@@ -5,39 +5,60 @@ import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SignOutButton } from "@/components/auth/SignOutButton";
-import { BackgroundBlobs } from "@/components/ui/background-blobs";
+import { HeroBackgroundBlobs } from "@/components/ui/hero-background-blobs";
 import { Footer } from "@/components/layout/Footer";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/components/cart/CartProvider";
-import { 
-  Menu, 
-  X, 
-  BookOpen, 
-  Route, 
-  HelpCircle, 
-  Mail, 
+import {
+  Menu,
+  X,
+  BookOpen,
+  Route,
+  HelpCircle,
+  Mail,
   Home,
   GraduationCap,
   ShoppingCart,
   LogIn,
   UserPlus,
   Newspaper,
+  ChevronDown,
+  Info,
+  MessageSquare,
+  Users,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 
-const publicNavigation = [
+// Primary navigation - core conversion paths
+const primaryNavigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "Courses", href: "/courses", icon: BookOpen },
   { name: "Learning Paths", href: "/learning-paths", icon: Route },
   { name: "Blog", href: "/blog", icon: Newspaper },
   { name: "Cart", href: "/cart", icon: ShoppingCart },
+];
+
+// Secondary navigation - resources dropdown
+const resourcesNavigation = [
+  { name: "About Us", href: "/about", icon: Info },
+  { name: "Testimonials", href: "/testimonials", icon: Users },
   { name: "FAQ", href: "/faq", icon: HelpCircle },
   { name: "Contact Us", href: "/contact", icon: Mail },
 ];
+
+// All navigation for mobile
+const publicNavigation = [...primaryNavigation, ...resourcesNavigation];
 
 export function PublicLayoutClient({
   children,
@@ -47,6 +68,7 @@ export function PublicLayoutClient({
   const { data: session } = useSession();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [resourcesOpen, setResourcesOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const menuRef = useRef<HTMLElement>(null);
   const { cart } = useCart();
@@ -96,7 +118,7 @@ export function PublicLayoutClient({
       document.removeEventListener("keydown", handleEscape);
     };
   }, [mobileMenuOpen]);
-  
+
   // Hide dashboard button on sign-in/sign-up pages to avoid conflicts during redirect
   const isAuthPage = pathname === "/sign-in" || pathname === "/sign-up";
 
@@ -104,15 +126,15 @@ export function PublicLayoutClient({
   if (!mounted) {
     return (
       <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
-        <BackgroundBlobs />
+        <HeroBackgroundBlobs />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
-      
-      {/* Desktop Layout - Top Navigation Bar */}
+      {/* Hero Background Blobs - more vibrant for all pages */}
+      <HeroBackgroundBlobs />
       <div className="hidden md:flex flex-col min-h-screen" suppressHydrationWarning>
         {/* Desktop Top Navigation Bar - Fixed */}
         <motion.header
@@ -124,39 +146,43 @@ export function PublicLayoutClient({
           <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 h-full">
             <div className="flex items-center justify-between h-full">
               {/* Logo */}
-              <Link href="/" className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-                  <GraduationCap className="h-5 w-5 text-primary-foreground" />
+              <Link href="/" className="flex items-center h-full">
+                <div className="relative h-10 w-auto flex-shrink-0">
+                  <Image
+                    src="/logo.png"
+                    alt="AI Genius Lab"
+                    width={180}
+                    height={40}
+                    className="object-contain h-10 w-auto"
+                    priority
+                  />
                 </div>
-                <span className="font-display text-lg font-bold tracking-tight">
-                  AI GENIUS LAB
-                </span>
               </Link>
 
               {/* Desktop Navigation */}
-              <nav className="flex items-center gap-1">
-                {publicNavigation.map((item) => {
+              <nav className="flex items-center gap-1 h-full">
+                {primaryNavigation.map((item) => {
                   const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/"));
                   const Icon = item.icon;
                   const isCart = item.href === "/cart";
                   const cartCount = cart?.itemCount || 0;
-                  
+
                   return (
                     <Link
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all",
+                        "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all whitespace-nowrap h-10",
                         isActive
                           ? "bg-primary text-primary-foreground"
                           : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                       )}
                     >
-                      <Icon className="h-4 w-4" />
-                      <span>{item.name}</span>
+                      <Icon className="h-4 w-4 flex-shrink-0" />
+                      <span className="leading-none">{item.name}</span>
                       {isCart && cartCount > 0 && (
-                        <Badge 
-                          variant="destructive" 
+                        <Badge
+                          variant="destructive"
                           className="h-5 min-w-[20px] flex items-center justify-center rounded-full px-1.5 text-[10px] font-bold"
                         >
                           {cartCount > 9 ? "9+" : cartCount}
@@ -165,10 +191,52 @@ export function PublicLayoutClient({
                     </Link>
                   );
                 })}
+
+                {/* Resources Dropdown */}
+                <DropdownMenu open={resourcesOpen} onOpenChange={setResourcesOpen}>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className={cn(
+                        "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all whitespace-nowrap h-10",
+                        resourcesNavigation.some(item => pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/")))
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      )}
+                    >
+                      <Info className="h-4 w-4 flex-shrink-0" />
+                      <span className="leading-none">Resources</span>
+                      <ChevronDown className={cn(
+                        "h-4 w-4 transition-transform",
+                        resourcesOpen && "rotate-180"
+                      )} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    {resourcesNavigation.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = pathname === item.href;
+                      return (
+                        <DropdownMenuItem key={item.href} asChild>
+                          <Link
+                            href={item.href}
+                            className={cn(
+                              "flex items-center gap-2 cursor-pointer",
+                              isActive && "bg-accent"
+                            )}
+                          >
+                            <Icon className="h-4 w-4" />
+                            {item.name}
+                          </Link>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </nav>
 
               {/* User Section */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 h-full">
                 <ThemeToggle />
                 {session?.user ? (
                   <div className="flex items-center gap-2">
@@ -187,7 +255,7 @@ export function PublicLayoutClient({
                             })()}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="text-sm">{session.user.name || session.user.email}</span>
+                        <span className="text-sm leading-none">{session.user.name || session.user.email}</span>
                       </Button>
                     </Link>
                     <SignOutButton />
@@ -195,12 +263,15 @@ export function PublicLayoutClient({
                 ) : (
                   <div className="flex items-center gap-2">
                     <Link href="/sign-in">
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" className="h-10">
                         Sign In
                       </Button>
                     </Link>
                     <Link href="/sign-up">
-                      <Button size="sm">
+                      <Button
+                        size="lg"
+                        className="h-11 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all shadow-lg hover:shadow-xl"
+                      >
                         Sign Up
                       </Button>
                     </Link>
@@ -233,21 +304,28 @@ export function PublicLayoutClient({
       <div className="flex md:hidden flex-col min-h-screen" suppressHydrationWarning>
         <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 h-16">
           <div className="flex items-center justify-between px-4 h-full">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-                <GraduationCap className="h-5 w-5 text-primary-foreground" />
+            <Link href="/" className="flex items-center">
+              <div className="relative h-8 w-auto flex-shrink-0">
+                <Image
+                  src="/logo.png"
+                  alt="AI Genius Lab"
+                  width={150}
+                  height={32}
+                  className="object-contain h-8 w-auto"
+                  priority
+                />
               </div>
-              <span className="font-display text-lg font-bold tracking-tight">
-                AI GENIUS LAB
-              </span>
             </Link>
             <div className="flex items-center gap-2 flex-shrink-0">
-              <ThemeToggle />
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMobileMenuOpen(!mobileMenuOpen);
+                }}
                 className="h-10 w-10"
+                aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
               >
                 {mobileMenuOpen ? (
                   <X className="h-5 w-5" />
@@ -273,7 +351,7 @@ export function PublicLayoutClient({
                 className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
                 onClick={() => setMobileMenuOpen(false)}
               />
-              
+
               {/* Menu Panel - Slides from Left */}
               <motion.nav
                 key="menu"
@@ -281,7 +359,7 @@ export function PublicLayoutClient({
                 initial={{ x: "-100%" }}
                 animate={{ x: 0 }}
                 exit={{ x: "-100%" }}
-                transition={{ 
+                transition={{
                   type: "spring",
                   damping: 30,
                   stiffness: 300
@@ -290,13 +368,17 @@ export function PublicLayoutClient({
               >
                 {/* Menu Header */}
                 <div className="border-b p-4 flex items-center justify-between bg-card/95 backdrop-blur-md z-10 h-16 flex-shrink-0">
-                  <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-                      <GraduationCap className="h-5 w-5 text-primary-foreground" />
+                  <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center">
+                    <div className="relative h-10 w-auto flex-shrink-0">
+                      <Image
+                        src="/logo.png"
+                        alt="AI Genius Lab"
+                        width={180}
+                        height={40}
+                        className="object-contain h-10 w-auto"
+                        priority
+                      />
                     </div>
-                    <span className="font-display text-lg font-bold">
-                      AI GENIUS LAB
-                    </span>
                   </Link>
                 </div>
 
@@ -307,7 +389,7 @@ export function PublicLayoutClient({
                     const Icon = item.icon;
                     const isCart = item.href === "/cart";
                     const cartCount = cart?.itemCount || 0;
-                    
+
                     return (
                       <motion.div
                         key={item.href}
@@ -328,8 +410,8 @@ export function PublicLayoutClient({
                           <Icon className="h-5 w-5 flex-shrink-0" />
                           <span className="flex-1">{item.name}</span>
                           {isCart && cartCount > 0 && (
-                            <Badge 
-                              variant="destructive" 
+                            <Badge
+                              variant="destructive"
                               className="h-5 min-w-[20px] flex items-center justify-center rounded-full px-1.5 text-[10px] font-bold"
                             >
                               {cartCount > 9 ? "9+" : cartCount}
@@ -389,6 +471,10 @@ export function PublicLayoutClient({
                     className="border-t px-4 py-5 flex-shrink-0 bg-background/95 backdrop-blur-md"
                   >
                     <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between px-3 py-2">
+                        <span className="text-sm font-medium">Theme</span>
+                        <ThemeToggle />
+                      </div>
                       <Link href="/sign-in" onClick={() => setMobileMenuOpen(false)}>
                         <Button variant="outline" className="w-full justify-start gap-2">
                           <LogIn className="h-4 w-4" />
@@ -408,7 +494,7 @@ export function PublicLayoutClient({
             </>
           )}
         </AnimatePresence>
-        
+
         {/* Main Content */}
         <main className="flex-1 px-3 sm:px-4 py-4 pt-20 pb-12 overflow-y-auto">
           <motion.div
