@@ -28,10 +28,14 @@ export function LandingHero({ stats }: LandingHeroProps) {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center overflow-x-hidden">
           {/* Left Column - Main Content */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
             className="relative z-10 space-y-6 sm:space-y-8 w-full min-w-0"
+            style={{
+              willChange: "opacity, transform",
+              transform: "translateZ(0)",
+            }}
           >
             {/* Heading */}
             <div className="space-y-4">
@@ -49,10 +53,11 @@ export function LandingHero({ stats }: LandingHeroProps) {
               </h1>
 
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
                 className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 text-lg sm:text-xl font-semibold text-muted-foreground"
+                style={{ willChange: "opacity" }}
               >
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-primary flex-shrink-0" />
@@ -65,20 +70,22 @@ export function LandingHero({ stats }: LandingHeroProps) {
 
             {/* Description */}
             <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
               className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-full lg:max-w-2xl break-words"
+              style={{ willChange: "opacity" }}
             >
               Learn AI for business, content, apps, and productivity through structured courses, tracked progress, and instant access after purchase.
             </motion.p>
 
             {/* Tagline Badge */}
             <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
               className="inline-flex items-center gap-2 sm:gap-3 text-sm sm:text-base font-medium text-primary bg-primary/5 dark:bg-primary/10 px-4 sm:px-6 py-2 sm:py-3 rounded-full border border-primary/20 max-w-full"
+              style={{ willChange: "opacity" }}
             >
               <Zap className="h-4 w-4 sm:h-5 sm:w-5" />
               <span className="tracking-wide break-words">The future belongs to those who master AI</span>
