@@ -22,20 +22,20 @@ export function LandingHero({ stats }: LandingHeroProps) {
   ];
 
   return (
-    <section className="relative py-12 sm:py-16 lg:py-20">
+    <section className="relative py-12 sm:py-16 lg:py-20 overflow-x-hidden">
       {/* Main Hero Grid - Split Layout */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-x-hidden">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center overflow-x-hidden">
           {/* Left Column - Main Content */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="relative z-10 space-y-6 sm:space-y-8"
+            className="relative z-10 space-y-6 sm:space-y-8 w-full min-w-0"
           >
             {/* Heading */}
             <div className="space-y-4">
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1]">
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] max-w-full">
                 <span className="block">Master AI With</span>
                 <div className="block mt-2">
                   <TypingAnimation
@@ -68,7 +68,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-2xl"
+              className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-full lg:max-w-2xl break-words"
             >
               Learn AI for business, content, apps, and productivity through structured courses, tracked progress, and instant access after purchase.
             </motion.p>
@@ -78,10 +78,10 @@ export function LandingHero({ stats }: LandingHeroProps) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="inline-flex items-center gap-2 sm:gap-3 text-sm sm:text-base font-medium text-primary bg-primary/5 dark:bg-primary/10 px-4 sm:px-6 py-2 sm:py-3 rounded-full border border-primary/20"
+              className="inline-flex items-center gap-2 sm:gap-3 text-sm sm:text-base font-medium text-primary bg-primary/5 dark:bg-primary/10 px-4 sm:px-6 py-2 sm:py-3 rounded-full border border-primary/20 max-w-full"
             >
               <Zap className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="tracking-wide">The future belongs to those who master AI</span>
+              <span className="tracking-wide break-words">The future belongs to those who master AI</span>
             </motion.div>
 
             {/* CTA Buttons */}
@@ -102,9 +102,8 @@ export function LandingHero({ stats }: LandingHeroProps) {
               </Link>
               <Link href="/learning-paths" className="inline-block w-full sm:w-auto">
                 <Button
-                  variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto border-2 hover:bg-accent/50 transition-all duration-300"
+                  className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto bg-gradient-to-r from-primary/80 to-primary/60 hover:from-primary/70 hover:to-primary/50 shadow-md hover:shadow-lg transition-all duration-300"
                 >
                   View Learning Paths
                 </Button>
@@ -240,7 +239,7 @@ export function LandingHero({ stats }: LandingHeroProps) {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="lg:hidden mt-8 sm:mt-10"
           >
-            <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {/* Mobile Stat Card 1 */}
               <div className="flex-shrink-0 w-44 sm:w-48 snap-center bg-card/60 dark:bg-card/40 backdrop-blur-xl border border-border/50 rounded-2xl p-5 sm:p-6">
                 <div className="flex flex-col items-center text-center space-y-3">

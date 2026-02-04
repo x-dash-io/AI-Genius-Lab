@@ -61,8 +61,8 @@
 
 html {
   overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: hsl(var(--muted)) hsl(var(--background));
+  scrollbar-width: none;
+  scrollbar-color: transparent transparent;
   scroll-behavior: smooth;
   width: 100%;
   max-width: 100vw;
@@ -197,6 +197,7 @@ body * {
 
 /* Prevent font changes on Android Chrome */
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
+
   select,
   textarea,
   input,
@@ -254,7 +255,7 @@ button:focus {
     -ms-text-size-adjust: none !important;
     text-size-adjust: none !important;
   }
-  
+
   body,
   body * {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
@@ -269,7 +270,7 @@ button:focus {
     -ms-text-size-adjust: 100% !important;
     text-size-adjust: 100% !important;
   }
-  
+
   body,
   body * {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
@@ -278,6 +279,7 @@ button:focus {
 
 /* iOS Safari specific */
 @supports (-webkit-touch-callout: none) {
+
   body,
   body *,
   input,
@@ -291,6 +293,7 @@ button:focus {
 
 /* Samsung Internet Browser */
 @supports (-webkit-appearance: none) {
+
   body,
   body * {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
@@ -305,39 +308,35 @@ button:focus {
   }
 }
 
-/* Custom Scrollbar Styling */
+/* Custom Scrollbar Styling - Hidden */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 0px;
+  height: 0px;
 }
 
 ::-webkit-scrollbar-track {
-  background: hsl(var(--background));
-  border-radius: 10px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted));
-  border-radius: 10px;
-  border: 2px solid hsl(var(--background));
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
+  background: transparent;
 }
 
 /* Dark mode scrollbar */
 .dark ::-webkit-scrollbar-track {
-  background: hsl(var(--background));
+  background: transparent;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted));
-  border: 2px solid hsl(var(--background));
+  background: transparent;
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.6);
+  background: transparent;
 }
 
 /* Hide Next.js development indicator in production and development */
@@ -375,6 +374,7 @@ button[data-nextjs-toast-close] {
    ======================================== */
 
 @media print {
+
   /* Page Setup */
   @page {
     size: A4;
@@ -388,7 +388,8 @@ button[data-nextjs-toast-close] {
   }
 
   /* Base Styles */
-  html, body {
+  html,
+  body {
     background: #ffffff !important;
     color: #1a1a1a !important;
     font-size: 11pt !important;
@@ -401,8 +402,12 @@ button[data-nextjs-toast-close] {
   }
 
   /* Hide Non-Essential Elements */
-  header, nav, aside, footer,
-  button, [role="button"],
+  header,
+  nav,
+  aside,
+  footer,
+  button,
+  [role="button"],
   [class*="print:hidden"],
   .animate-ping,
   a[href^="/library"],
@@ -412,7 +417,9 @@ button[data-nextjs-toast-close] {
   }
 
   /* Main Content Container */
-  main, section, article {
+  main,
+  section,
+  article {
     display: block !important;
     max-width: 100% !important;
     width: 100% !important;
@@ -436,7 +443,7 @@ button[data-nextjs-toast-close] {
   }
 
   /* Invoice Header - Keep gradient-like appearance */
-  #invoice > div:first-child,
+  #invoice>div:first-child,
   [class*="bg-gradient-to-br"][class*="from-primary"] {
     background: linear-gradient(135deg, #1a365d 0%, #2b4a7a 100%) !important;
     color: #ffffff !important;
@@ -444,12 +451,12 @@ button[data-nextjs-toast-close] {
     border-radius: 0 !important;
   }
 
-  #invoice > div:first-child *,
+  #invoice>div:first-child *,
   [class*="bg-gradient-to-br"][class*="from-primary"] * {
     color: #ffffff !important;
   }
 
-  #invoice > div:first-child [class*="text-white/70"] {
+  #invoice>div:first-child [class*="text-white/70"] {
     color: rgba(255, 255, 255, 0.8) !important;
   }
 
@@ -462,11 +469,11 @@ button[data-nextjs-toast-close] {
   }
 
   /* Spacing Adjustments */
-  [class*="space-y-8"] > * + * {
+  [class*="space-y-8"]>*+* {
     margin-top: 12pt !important;
   }
 
-  [class*="space-y-4"] > * + * {
+  [class*="space-y-4"]>*+* {
     margin-top: 8pt !important;
   }
 
@@ -519,7 +526,8 @@ button[data-nextjs-toast-close] {
     page-break-inside: avoid !important;
   }
 
-  th, td {
+  th,
+  td {
     display: table-cell !important;
     border: 1px solid #e5e5e5 !important;
     padding: 10pt 12pt !important;
@@ -548,12 +556,19 @@ button[data-nextjs-toast-close] {
   }
 
   /* Text Colors */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     color: #1a1a1a !important;
     page-break-after: avoid !important;
   }
 
-  p, span, div {
+  p,
+  span,
+  div {
     color: #1a1a1a !important;
   }
 
@@ -617,7 +632,8 @@ button[data-nextjs-toast-close] {
   }
 
   /* Small icons */
-  [class*="h-3"], [class*="h-4"] {
+  [class*="h-3"],
+  [class*="h-4"] {
     width: 10pt !important;
     height: 10pt !important;
   }
@@ -630,17 +646,42 @@ button[data-nextjs-toast-close] {
   }
 
   /* Font Sizes */
-  .text-xs { font-size: 8pt !important; }
-  .text-sm { font-size: 9pt !important; }
-  .text-base { font-size: 10pt !important; }
-  .text-lg { font-size: 12pt !important; }
-  .text-xl { font-size: 14pt !important; }
-  .text-2xl { font-size: 16pt !important; }
+  .text-xs {
+    font-size: 8pt !important;
+  }
+
+  .text-sm {
+    font-size: 9pt !important;
+  }
+
+  .text-base {
+    font-size: 10pt !important;
+  }
+
+  .text-lg {
+    font-size: 12pt !important;
+  }
+
+  .text-xl {
+    font-size: 14pt !important;
+  }
+
+  .text-2xl {
+    font-size: 16pt !important;
+  }
 
   /* Font Weight */
-  .font-bold { font-weight: 700 !important; }
-  .font-semibold { font-weight: 600 !important; }
-  .font-medium { font-weight: 500 !important; }
+  .font-bold {
+    font-weight: 700 !important;
+  }
+
+  .font-semibold {
+    font-weight: 600 !important;
+  }
+
+  .font-medium {
+    font-weight: 500 !important;
+  }
 
   /* Monospace */
   .font-mono {

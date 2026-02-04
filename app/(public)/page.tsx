@@ -46,16 +46,16 @@ export default async function LandingPage() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative overflow-x-hidden">
       <HeroBackgroundBlobs />
-      <div className="grid gap-16 md:gap-24 relative z-10">
+      <div className="grid gap-16 md:gap-24 relative z-10 overflow-x-hidden">
         <LandingHero stats={stats} />
         <TrustSection stats={stats} />
-      <LaunchCurriculum stats={stats} />
-      <HowItWorks />
-      <SocialProof stats={stats} />
-      <SecuritySection />
-      <FinalCTA />
+        <LaunchCurriculum stats={stats} />
+        <HowItWorks />
+        <SocialProof stats={stats} />
+        <SecuritySection />
+        <FinalCTA />
       </div>
     </div>
   );
