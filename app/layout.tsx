@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-// import { Montserrat } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -11,8 +11,13 @@ import { DevIndicatorRemover } from "@/components/DevIndicatorRemover";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateOrganizationSchema, generateWebSiteSchema } from "@/lib/seo/schemas";
 import "./globals.css";
-import "./sf-pro-fonts.css";
-import "@/lib/font-loader";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  weight: ["300", "400", "500", "600", "700", "800"],
+  display: "swap",
+});
 
 // const montserrat = Montserrat({
 //   subsets: ["latin"],
@@ -63,13 +68,13 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="font-sans antialiased sf-pro-loaded"
+        className={`${inter.variable} font-sans antialiased`}
         style={{
-          fontFamily: 'var(--font-sf-pro)',
+          fontFamily: 'var(--font-inter), -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
           textRendering: 'optimizeLegibility',
-          fontFeatureSettings: '"kern" 1, "liga" 1, "calt" 1, "dlig" 1, "hlig" 1',
+          fontFeatureSettings: '"liga" 0, "calt" 0',
         }}
       >
         <ThemeProvider>
@@ -87,91 +92,18 @@ export default function RootLayout({
           </SessionProvider>
         </ThemeProvider>
         <Analytics />
-        
-        {/* SF Pro Font Enforcement Script */}
-        <script dangerouslySetInnerHTML={{
+
+        {/* Disable ligatures globally */}
+        <style dangerouslySetInnerHTML={{
           __html: `
-            (function() {
-              // Force SF Pro fonts on all devices
-              function enforceSFProFonts() {
-                const elements = document.querySelectorAll('*');
-                elements.forEach(el => {
-                  if (el.nodeType === Node.ELEMENT_NODE) {
-                    const computedStyle = window.getComputedStyle(el);
-                    const currentFont = computedStyle.fontFamily;
-                    
-                    // Only override if not already SF Pro
-                    if (!currentFont.includes('SF Pro') && !currentFont.includes('monospace')) {
-                      el.style.fontFamily = 'var(--font-sf-pro)';
-                    }
-                    
-                    // Ensure font smoothing
-                    el.style.WebkitFontSmoothing = 'antialiased';
-                    el.style.MozOsxFontSmoothing = 'grayscale';
-                    el.style.textRendering = 'optimizeLegibility';
-                  }
-                });
-                
-                // Add sf-pro-loaded class to body
-                document.body.classList.add('sf-pro-loaded');
-              }
-              
-              // Run immediately
-              enforceSFProFonts();
-              
-              // Run on DOM content loaded
-              if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', enforceSFProFonts);
-              }
-              
-              // Run periodically to catch dynamic content
-              setInterval(enforceSFProFonts, 1000);
-              
-              // Run on any DOM changes
-              const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                  if (mutation.type === 'childList') {
-                    enforceSFProFonts();
-                  }
-                });
-              });
-              
-              observer.observe(document.body, {
-                childList: true,
-                subtree: true
-              });
-              
-              // Prevent font size adjustments on mobile
-              function preventTextSizeAdjust() {
-                const style = document.createElement('style');
-                style.innerHTML = \`
-                  * {
-                    -webkit-text-size-adjust: 100% !important;
-                    -moz-text-size-adjust: 100% !important;
-                    -ms-text-size-adjust: 100% !important;
-                    text-size-adjust: 100% !important;
-                  }
-                \`;
-                document.head.appendChild(style);
-              }
-              
-              preventTextSizeAdjust();
-              
-              // Font loading detection
-              if ('fonts' in document) {
-                Promise.all([
-                  document.fonts.load('16px SF Pro Display'),
-                  document.fonts.load('16px SF Pro Text')
-                ]).then(() => {
-                  enforceSFProFonts();
-                }).catch(() => {
-                  console.log('SF Pro fonts not available, using system fonts');
-                });
-              }
-            })();
+            * {
+              font-feature-settings: "liga" 0, "calt" 0 !important;
+              -webkit-font-feature-settings: "liga" 0, "calt" 0 !important;
+              -moz-font-feature-settings: "liga" 0, "calt" 0 !important;
+            }
           `
         }} />
-        
+
         {/* Hide Next.js development indicator - works in both dev and production */}
         <style dangerouslySetInnerHTML={{
           __html: `
