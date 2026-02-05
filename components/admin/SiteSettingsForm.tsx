@@ -5,14 +5,13 @@ import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toastSuccess, toastError } from "@/lib/toast";
 import { Loader2, Plus, Trash2, GripVertical, Info, Save } from "lucide-react";
 import { updateSiteSettings } from "@/lib/actions/settings";
-import { Switch } from "@/components/ui/switch";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -49,10 +48,10 @@ interface SiteSettingsFormProps {
 
 export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteSettingsFormProps) {
     const [isPending, startTransition] = useTransition();
-    const [lastSaved, setLastSaved] = React.useState<{ socialLinks: any; heroLogos: any } | null>(null);
+    const [lastSaved, setLastSaved] = React.useState<{ socialLinks: SettingsFormValues['socialLinks']; heroLogos: SettingsFormValues['heroLogos'] } | null>(null);
 
     // Migration helper: if initialHeroLogos come from old structure (without type), default them
-    const migratedHeroLogos: SettingsFormValues['heroLogos'] = (initialHeroLogos || []).map((logo: any) => ({
+    const migratedHeroLogos: SettingsFormValues['heroLogos'] = (initialHeroLogos || []).map((logo: { id: string; name?: string; type?: string; value?: string; url?: string; visible?: boolean }) => ({
         id: logo.id,
         name: logo.name || "",
         type: (logo.type === "icon" || logo.type === "image") ? logo.type : "image",
@@ -68,32 +67,44 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
         },
     });
 
-    const { fields, append, remove, move } = useFieldArray({
+    const { fields, append, remove } = useFieldArray({
         control: form.control,
         name: "heroLogos",
     });
 
     // Auto-save functionality
     useEffect(() => {
-        const timer = setTimeout(() => {
-            const currentValues = form.getValues();
-            if (JSON.stringify(currentValues) !== JSON.stringify(lastSaved)) {
-                startTransition(async () => {
-                    try {
-                        await Promise.all([
-                            updateSiteSettings("social_links", currentValues.socialLinks),
-                            updateSiteSettings("hero_logos", currentValues.heroLogos)
-                        ]);
-                        setLastSaved(currentValues);
-                    } catch (error: any) {
-                        console.error("Auto-save failed:", error);
-                    }
-                });
-            }
-        }, 2000); // Auto-save after 2 seconds of inactivity
+        const subscription = form.watch((value) => {
+            const timer = setTimeout(() => {
+                if (JSON.stringify(value) !== JSON.stringify(lastSaved)) {
+                    startTransition(async () => {
+                        try {
+                            await Promise.all([
+                                updateSiteSettings("social_links", value.socialLinks),
+                                updateSiteSettings("hero_logos", (value.heroLogos || []).filter(Boolean))
+                            ]);
+                            setLastSaved({ 
+                                socialLinks: value.socialLinks || {}, 
+                                heroLogos: (value.heroLogos || []).filter((logo): logo is NonNullable<typeof logo> => Boolean(logo)).map(logo => ({
+                                    id: logo.id || `logo-${Date.now()}`,
+                                    name: logo.name || "",
+                                    type: logo.type || "image",
+                                    value: logo.value || "",
+                                    visible: logo.visible !== undefined ? logo.visible : true
+                                }))
+                            });
+                        } catch (error: unknown) {
+                            console.error("Auto-save failed:", error);
+                        }
+                    });
+                }
+            }, 2000); // Auto-save after 2 seconds of inactivity
 
-        return () => clearTimeout(timer);
-    }, [form.watch(), lastSaved]);
+            return () => clearTimeout(timer);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [lastSaved, form]);
 
     function onSubmit(data: SettingsFormValues) {
         startTransition(async () => {
@@ -103,8 +114,9 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                     updateSiteSettings("hero_logos", data.heroLogos)
                 ]);
                 toastSuccess("Settings saved", "Your changes have been updated.");
-            } catch (error: any) {
-                toastError("Something went wrong", error.message);
+            } catch (error: unknown) {
+                const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+                toastError("Something went wrong", errorMessage);
             }
         });
     }
@@ -252,14 +264,14 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                         control={form.control}
                                         name={`heroLogos.${index}.value`}
                                         render={({ field }) => {
-                                            const type = form.watch(`heroLogos.${index}.type`);
+                                            const logoType = form.getValues(`heroLogos.${index}.type`);
                                             return (
                                                 <FormItem className="md:col-span-5">
                                                     <div className="flex items-center gap-2">
                                                         <FormLabel className="text-xs">
-                                                            {type === "image" ? "Image" : "Icon Name"}
+                                                            {logoType === "image" ? "Image" : "Icon Name"}
                                                         </FormLabel>
-                                                        {type === "icon" && (
+                                                        {logoType === "icon" && (
                                                             <TooltipProvider>
                                                                 <Tooltip>
                                                                     <TooltipTrigger asChild>
@@ -273,7 +285,7 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                                         )}
                                                     </div>
                                                     <FormControl>
-                                                        {type === "image" ? (
+                                                        {logoType === "image" ? (
                                                             <LogoImageUpload
                                                                 value={field.value}
                                                                 onChange={field.onChange}
