@@ -25,21 +25,21 @@ export function Footer({ socialLinks }: FooterProps) {
   return (
     <footer className="border-t bg-card/10 backdrop-blur-md mt-20">
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid gap-12 md:grid-cols-4 lg:gap-16">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4 xl:gap-16">
           <div className="space-y-6">
             <Link href="/" className="inline-block transition-transform hover:scale-105">
               <div className="relative h-8 w-auto">
                 <Image
                   src="/logo.png"
                   alt="AI Genius Lab"
-                  width={140}
-                  height={32}
-                  className="object-contain h-8 w-auto dark:brightness-125"
+                  width={120}
+                  height={28}
+                  className="object-contain h-8 w-auto dark:brightness-125 sm:h-10 sm:w-auto"
                   priority
                 />
               </div>
             </Link>
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs font-medium">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs sm:max-w-sm font-medium">
               Empowering the next generation of AI professionals through structured, outcome-driven learning.
             </p>
             <div className="flex gap-3">
@@ -64,12 +64,12 @@ export function Footer({ socialLinks }: FooterProps) {
 
           <div className="grid gap-6">
             <h4 className="text-sm font-bold uppercase tracking-widest text-foreground/80">Platform</h4>
-            <nav className="grid gap-3">
+            <nav className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
               {["Courses", "Learning Paths", "Blog", "Dashboard"].map((item) => (
                 <Link
                   key={item}
                   href={`/${item.toLowerCase().replace(" ", "-")}`}
-                  className="text-sm text-muted-foreground transition-colors hover:text-primary hover:translate-x-1 duration-200 inline-block"
+                  className="text-sm text-muted-foreground transition-colors hover:text-primary hover:translate-x-1 duration-200 block"
                 >
                   {item}
                 </Link>
@@ -79,12 +79,12 @@ export function Footer({ socialLinks }: FooterProps) {
 
           <div className="grid gap-6">
             <h4 className="text-sm font-bold uppercase tracking-widest text-foreground/80">Company</h4>
-            <nav className="grid gap-3">
+            <nav className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
               {["About Us", "Testimonials", "Contact Us", "FAQ"].map((item) => (
                 <Link
                   key={item}
                   href={`/${item.toLowerCase().replace(" ", "-")}`}
-                  className="text-sm text-muted-foreground transition-colors hover:text-primary hover:translate-x-1 duration-200 inline-block"
+                  className="text-sm text-muted-foreground transition-colors hover:text-primary hover:translate-x-1 duration-200 block"
                 >
                   {item}
                 </Link>
@@ -97,13 +97,13 @@ export function Footer({ socialLinks }: FooterProps) {
             <p className="text-sm text-muted-foreground">
               Get the latest AI insights and course updates.
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
               <input
                 type="email"
                 placeholder="Email address"
-                className="flex-1 rounded-xl bg-accent/20 border border-border/50 px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:bg-background outline-none transition-all placeholder:text-muted-foreground/50"
+                className="flex-1 rounded-xl bg-accent/20 border border-border/50 px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:bg-background outline-none transition-all placeholder:text-muted-foreground/50 sm:text-base"
               />
-              <Button size="sm" className="rounded-xl px-4 font-bold">Join</Button>
+              <Button size="sm" className="rounded-xl px-4 font-bold sm:w-auto w-full sm:w-fit">Join</Button>
             </div>
             <nav className="flex flex-wrap gap-x-6 gap-y-2 pt-2">
               <Link href="/privacy" className="text-xs text-muted-foreground hover:text-primary transition-colors">Privacy</Link>

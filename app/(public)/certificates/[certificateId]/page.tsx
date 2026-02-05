@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { CertificateActions, ShareAchievement } from "@/components/certificates/CertificateActions";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -99,13 +100,20 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
 
             <div className="pt-8 space-y-4">
               <div className="flex items-center justify-center gap-8 flex-wrap">
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Date Issued</p>
-                  <p className="font-medium">{format(new Date(certificate.issuedAt), "MMMM d, yyyy")}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Organization</p>
-                  <p className="font-medium text-primary">AI Genius Lab</p>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <Image
+                      src="/logo.png"
+                      alt="AI Genius Lab"
+                      width={24}
+                      height={24}
+                      className="h-6 w-6"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Organization</p>
+                    <p className="font-medium text-primary">AI Genius Lab</p>
+                  </div>
                 </div>
               </div>
 

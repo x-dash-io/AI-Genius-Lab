@@ -26,8 +26,8 @@ import {
 import Link from "next/link";
 import { format } from "date-fns";
 import { CartClearer } from "@/components/cart/CartClearer";
-
 import { InvoiceDownloadButton } from "@/components/purchase/InvoiceDownloadButton";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -129,7 +129,13 @@ function ProfessionalInvoice({
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                      <Sparkles className="h-7 w-7 text-primary-foreground" />
+                      <Image
+                        src="/logo.png"
+                        alt="AI Genius Lab"
+                        width={28}
+                        height={28}
+                        className="h-7 w-7"
+                      />
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold text-primary-foreground font-display tracking-tight">
