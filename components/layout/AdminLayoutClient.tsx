@@ -650,8 +650,8 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
           </AnimatePresence>
 
           {/* Main Content */}
-          <main className="flex-1 px-4 sm:px-6 py-4 pt-20 pb-12">
-            <div className="mx-auto w-full max-w-7xl">
+          <main className="flex-1 px-4 sm:px-6 py-4 pt-20 pb-12 relative z-10">
+            <div className="mx-auto w-full max-w-none sm:max-w-7xl">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

@@ -57,7 +57,7 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
   return (
     <section className="relative py-12 sm:py-16 lg:py-20 min-h-0 overflow-y-visible">
       {/* Main Hero Grid - Split Layout */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-x-hidden">
+      <div className="w-full max-w-7xl mx-auto px-0 sm:px-2 lg:px-4 overflow-x-hidden">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Column - Main Content */}
           <motion.div

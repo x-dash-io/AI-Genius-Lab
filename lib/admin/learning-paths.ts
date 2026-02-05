@@ -68,7 +68,7 @@ export async function createLearningPath(data: {
   slug?: string;
 }) {
   await requireRole("admin");
-  
+
   const pathId = `path_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   const slug = data.slug || generateSlug(data.title);
   const now = new Date();
@@ -86,18 +86,20 @@ export async function createLearningPath(data: {
 
 export async function updateLearningPath(
   pathId: string,
-  data: {
-    title?: string;
-    description?: string;
-  }
+  formData: FormData
 ) {
   await requireRole("admin");
+
+  const title = formData.get("title") as string;
+  const description = formData.get("description") as string;
+  const imageUrl = formData.get("imageUrl") as string;
 
   return prisma.learningPath.update({
     where: { id: pathId },
     data: {
-      title: data.title,
-      description: data.description,
+      title,
+      description,
+      imageUrl,
     },
   });
 }

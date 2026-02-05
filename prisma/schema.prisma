@@ -114,6 +114,7 @@ model LearningPath {
   slug               String               @unique
   title              String
   description        String?
+  imageUrl           String?
   objectives         String[]             @default([])
   skills             String[]             @default([])
   targetAudience     String?

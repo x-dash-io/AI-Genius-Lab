@@ -25,7 +25,7 @@ interface LearningPathsPageProps {
 async function LearningPathsContent({ searchParams }: LearningPathsPageProps) {
   const params = await searchParams;
   const allPathsData = await getAllPublishedLearningPaths();
-  
+
   // Transform the data to match expected format
   const allPaths = allPathsData.map((pathData: any) => ({
     ...pathData,
@@ -37,7 +37,7 @@ async function LearningPathsContent({ searchParams }: LearningPathsPageProps) {
       courses: pathData._count.courses,
     },
   }));
-  
+
   let paths = [...allPaths];
 
   // Apply search filter
@@ -111,15 +111,28 @@ async function LearningPathsContent({ searchParams }: LearningPathsPageProps) {
                   <div className="flex-1">
                     <CardTitle className="text-xl">{path.title}</CardTitle>
                     {path.description && (
-                      <CardDescription className="mt-2">
+                      <CardDescription className="mt-2 line-clamp-2">
                         {path.description}
                       </CardDescription>
                     )}
                   </div>
-                  <Route className="h-5 w-5 text-muted-foreground" />
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
+                {/* Image */}
+                <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
+                  {path.imageUrl ? (
+                    <div
+                      className="absolute inset-0 bg-cover bg-center transition-transform hover:scale-105 duration-500"
+                      style={{ backgroundImage: `url(${path.imageUrl})` }}
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
+                      <Route className="h-12 w-12 text-primary/20" />
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <BookOpen className="h-4 w-4" />
@@ -143,7 +156,9 @@ async function LearningPathsContent({ searchParams }: LearningPathsPageProps) {
                     </div>
                   )}
                   <Link href={`/learning-paths/${path.slug}`}>
-                    <Button className="w-full">View Learning Path</Button>
+                    <Button variant="outline" className="w-full border-primary/20 hover:border-primary hover:bg-primary/5 transition-colors">
+                      View Learning Path
+                    </Button>
                   </Link>
                 </div>
               </CardContent>

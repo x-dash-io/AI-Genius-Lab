@@ -30,11 +30,11 @@ export type HeroLogo = {
 };
 
 export const defaultHeroLogos: HeroLogo[] = [
-    { id: "openai", name: "OpenAI", type: "image", value: "/logos/openai.png", visible: true },
-    { id: "microsoft", name: "Microsoft", type: "image", value: "/logos/microsoft.svg", visible: true },
-    { id: "meta", name: "Meta", type: "image", value: "/logos/meta.png", visible: true },
-    { id: "midjourney", name: "Midjourney", type: "image", value: "/logos/midjourney.svg", visible: true },
-    { id: "google", name: "Google", type: "image", value: "/logos/google.png", visible: true },
+    { id: "openai", name: "OpenAI", type: "image", value: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/openai/openai-original.svg", visible: true },
+    { id: "microsoft", name: "Microsoft", type: "image", value: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/microsoft/microsoft-original.svg", visible: true },
+    { id: "meta", name: "Meta", type: "image", value: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/facebook/facebook-original.svg", visible: true },
+    { id: "midjourney", name: "Midjourney", type: "icon", value: "Sparkles", visible: true },
+    { id: "google", name: "Google", type: "image", value: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg", visible: true },
 ];
 
 export async function getSiteSettings<T>(key: string, defaultValue: T): Promise<T> {

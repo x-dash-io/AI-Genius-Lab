@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Facebook, Linkedin, Twitter } from "lucide-react";
+import { Facebook, Linkedin, Twitter, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SocialLinks } from "@/lib/settings";
 
@@ -20,6 +20,7 @@ export function Footer({ socialLinks }: FooterProps) {
     linkedin: "#",
     twitter: "#",
     tiktok: "#",
+    instagram: "#",
   };
 
   return (
@@ -45,8 +46,9 @@ export function Footer({ socialLinks }: FooterProps) {
             <div className="flex gap-3">
               {[
                 { icon: Facebook, href: links.facebook, label: "Facebook" },
+                { icon: Twitter, href: links.twitter, label: "Twitter" },
                 { icon: Linkedin, href: links.linkedin, label: "LinkedIn" },
-                { icon: Twitter, href: links.twitter, label: "Twitter" }
+                { icon: Instagram, href: links.instagram, label: "Instagram" }
               ].map((social) => (
                 <Link
                   key={social.label}

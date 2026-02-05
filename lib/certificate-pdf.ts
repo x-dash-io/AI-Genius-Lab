@@ -42,7 +42,7 @@ export async function generateCertificatePDF(
   // Draw decorative border
   const borderMargin = 30;
   const borderWidth = 3;
-  
+
   // Outer border
   page.drawRectangle({
     x: borderMargin,
@@ -81,14 +81,38 @@ export async function generateCertificatePDF(
     });
   });
 
+  // Organization logo
+  try {
+    const logoUrl = "https://res.cloudinary.com/synapze/image/upload/v1707504381/synapze-content/hero-logos/logo_p4j4wz.png"; // Fallback/Default logo
+    const logoImageBytes = await fetch(logoUrl).then((res) => res.arrayBuffer());
+
+    let logoImage;
+    if (logoUrl.endsWith(".png")) {
+      logoImage = await pdfDoc.embedPng(logoImageBytes);
+    } else {
+      logoImage = await pdfDoc.embedJpg(logoImageBytes);
+    }
+
+    const logoDims = logoImage.scale(0.2); // Adjust scale as needed
+
+    page.drawImage(logoImage, {
+      x: width / 2 - logoDims.width / 2,
+      y: height - 90,
+      width: logoDims.width,
+      height: logoDims.height,
+    });
+  } catch (error) {
+    console.warn("Failed to load certificate logo:", error);
+  }
+
   // Header: "CERTIFICATE OF COMPLETION"
   const headerText = "CERTIFICATE OF COMPLETION";
   const headerFontSize = 28;
   const headerWidth = timesRomanBoldFont.widthOfTextAtSize(headerText, headerFontSize);
-  
+
   page.drawText(headerText, {
     x: (width - headerWidth) / 2,
-    y: height - 100,
+    y: height - 130, // Adjusted Y position to make room for logo
     size: headerFontSize,
     font: timesRomanBoldFont,
     color: primaryColor,
@@ -96,8 +120,8 @@ export async function generateCertificatePDF(
 
   // Decorative line under header
   page.drawLine({
-    start: { x: width / 2 - 150, y: height - 115 },
-    end: { x: width / 2 + 150, y: height - 115 },
+    start: { x: width / 2 - 150, y: height - 145 },
+    end: { x: width / 2 + 150, y: height - 145 },
     thickness: 2,
     color: goldColor,
   });
@@ -106,7 +130,7 @@ export async function generateCertificatePDF(
   const certifyText = "This is to certify that";
   const certifyFontSize = 14;
   const certifyWidth = timesRomanFont.widthOfTextAtSize(certifyText, certifyFontSize);
-  
+
   page.drawText(certifyText, {
     x: (width - certifyWidth) / 2,
     y: height - 170,
@@ -118,7 +142,7 @@ export async function generateCertificatePDF(
   // Recipient name
   const nameFontSize = 36;
   const nameWidth = timesRomanBoldFont.widthOfTextAtSize(data.recipientName, nameFontSize);
-  
+
   page.drawText(data.recipientName, {
     x: (width - nameWidth) / 2,
     y: height - 220,
@@ -139,7 +163,7 @@ export async function generateCertificatePDF(
   const completedText = "has successfully completed the";
   const completedFontSize = 14;
   const completedWidth = timesRomanFont.widthOfTextAtSize(completedText, completedFontSize);
-  
+
   page.drawText(completedText, {
     x: (width - completedWidth) / 2,
     y: height - 280,
@@ -152,7 +176,7 @@ export async function generateCertificatePDF(
   const typeText = data.type === "course" ? "Course" : "Learning Path";
   const typeFontSize = 16;
   const typeWidth = timesRomanBoldFont.widthOfTextAtSize(typeText, typeFontSize);
-  
+
   page.drawText(typeText, {
     x: (width - typeWidth) / 2,
     y: height - 310,
@@ -165,7 +189,7 @@ export async function generateCertificatePDF(
   const itemName = data.courseName || data.pathName || "Unknown";
   const itemFontSize = 24;
   const itemWidth = timesRomanBoldFont.widthOfTextAtSize(itemName, itemFontSize);
-  
+
   // Handle long names by reducing font size
   let adjustedItemFontSize = itemFontSize;
   let adjustedItemWidth = itemWidth;
@@ -173,7 +197,7 @@ export async function generateCertificatePDF(
     adjustedItemFontSize -= 2;
     adjustedItemWidth = timesRomanBoldFont.widthOfTextAtSize(itemName, adjustedItemFontSize);
   }
-  
+
   page.drawText(itemName, {
     x: (width - adjustedItemWidth) / 2,
     y: height - 350,
@@ -199,7 +223,7 @@ export async function generateCertificatePDF(
   const issuedText = `Issued on ${dateStr}`;
   const issuedFontSize = 12;
   const issuedWidth = helveticaFont.widthOfTextAtSize(issuedText, issuedFontSize);
-  
+
   page.drawText(issuedText, {
     x: (width - issuedWidth) / 2,
     y: height - 420,
@@ -212,7 +236,7 @@ export async function generateCertificatePDF(
   const orgText = "AI Genius Lab";
   const orgFontSize = 20;
   const orgWidth = timesRomanBoldFont.widthOfTextAtSize(orgText, orgFontSize);
-  
+
   page.drawText(orgText, {
     x: (width - orgWidth) / 2,
     y: height - 470,
@@ -233,7 +257,7 @@ export async function generateCertificatePDF(
   const sigText = "Authorized Signature";
   const sigFontSize = 10;
   const sigWidth = helveticaFont.widthOfTextAtSize(sigText, sigFontSize);
-  
+
   page.drawText(sigText, {
     x: (width - sigWidth) / 2,
     y: height - 505,
@@ -246,7 +270,7 @@ export async function generateCertificatePDF(
   const certIdText = `Certificate ID: ${data.certificateId}`;
   const certIdFontSize = 9;
   const certIdWidth = helveticaFont.widthOfTextAtSize(certIdText, certIdFontSize);
-  
+
   page.drawText(certIdText, {
     x: (width - certIdWidth) / 2,
     y: borderMargin + 20,
@@ -259,7 +283,7 @@ export async function generateCertificatePDF(
   // const verifyUrl = `Verify at: ${process.env.NEXTAUTH_URL || "https://aigeniuslab.com"}/certificates/verify/${data.certificateId}`;
   // const verifyFontSize = 8;
   // const verifyWidth = helveticaFont.widthOfTextAtSize(verifyUrl, verifyFontSize);
-  
+
   // page.drawText(verifyUrl, {
   //   x: (width - verifyWidth) / 2,
   //   y: borderMargin + 8,
@@ -308,7 +332,7 @@ export async function generateCertificatePDFBytes(
   // Draw decorative border
   const borderMargin = 30;
   const borderWidth = 3;
-  
+
   // Outer border
   page.drawRectangle({
     x: borderMargin,
@@ -347,14 +371,38 @@ export async function generateCertificatePDFBytes(
     });
   });
 
+  // Organization logo
+  try {
+    const logoUrl = "https://res.cloudinary.com/synapze/image/upload/v1707504381/synapze-content/hero-logos/logo_p4j4wz.png"; // Fallback/Default logo
+    const logoImageBytes = await fetch(logoUrl).then((res) => res.arrayBuffer());
+
+    let logoImage;
+    if (logoUrl.endsWith(".png")) {
+      logoImage = await pdfDoc.embedPng(logoImageBytes);
+    } else {
+      logoImage = await pdfDoc.embedJpg(logoImageBytes);
+    }
+
+    const logoDims = logoImage.scale(0.2); // Adjust scale as needed
+
+    page.drawImage(logoImage, {
+      x: width / 2 - logoDims.width / 2,
+      y: height - 90,
+      width: logoDims.width,
+      height: logoDims.height,
+    });
+  } catch (error) {
+    console.warn("Failed to load certificate logo:", error);
+  }
+
   // Header: "CERTIFICATE OF COMPLETION"
   const headerText = "CERTIFICATE OF COMPLETION";
   const headerFontSize = 28;
   const headerWidth = timesRomanBoldFont.widthOfTextAtSize(headerText, headerFontSize);
-  
+
   page.drawText(headerText, {
     x: (width - headerWidth) / 2,
-    y: height - 100,
+    y: height - 130, // Adjusted Y position
     size: headerFontSize,
     font: timesRomanBoldFont,
     color: primaryColor,
@@ -362,8 +410,8 @@ export async function generateCertificatePDFBytes(
 
   // Decorative line under header
   page.drawLine({
-    start: { x: width / 2 - 150, y: height - 115 },
-    end: { x: width / 2 + 150, y: height - 115 },
+    start: { x: width / 2 - 150, y: height - 145 },
+    end: { x: width / 2 + 150, y: height - 145 },
     thickness: 2,
     color: goldColor,
   });
@@ -372,7 +420,7 @@ export async function generateCertificatePDFBytes(
   const certifyText = "This is to certify that";
   const certifyFontSize = 14;
   const certifyWidth = timesRomanFont.widthOfTextAtSize(certifyText, certifyFontSize);
-  
+
   page.drawText(certifyText, {
     x: (width - certifyWidth) / 2,
     y: height - 170,
@@ -384,7 +432,7 @@ export async function generateCertificatePDFBytes(
   // Recipient name
   const nameFontSize = 36;
   const nameWidth = timesRomanBoldFont.widthOfTextAtSize(data.recipientName, nameFontSize);
-  
+
   page.drawText(data.recipientName, {
     x: (width - nameWidth) / 2,
     y: height - 220,
@@ -405,7 +453,7 @@ export async function generateCertificatePDFBytes(
   const completedText = "has successfully completed the";
   const completedFontSize = 14;
   const completedWidth = timesRomanFont.widthOfTextAtSize(completedText, completedFontSize);
-  
+
   page.drawText(completedText, {
     x: (width - completedWidth) / 2,
     y: height - 280,
@@ -418,7 +466,7 @@ export async function generateCertificatePDFBytes(
   const typeText = data.type === "course" ? "Course" : "Learning Path";
   const typeFontSize = 16;
   const typeWidth = timesRomanBoldFont.widthOfTextAtSize(typeText, typeFontSize);
-  
+
   page.drawText(typeText, {
     x: (width - typeWidth) / 2,
     y: height - 310,
@@ -431,7 +479,7 @@ export async function generateCertificatePDFBytes(
   const itemName = data.courseName || data.pathName || "Unknown";
   const itemFontSize = 24;
   const itemWidth = timesRomanBoldFont.widthOfTextAtSize(itemName, itemFontSize);
-  
+
   // Handle long names by reducing font size
   let adjustedItemFontSize = itemFontSize;
   let adjustedItemWidth = itemWidth;
@@ -439,7 +487,7 @@ export async function generateCertificatePDFBytes(
     adjustedItemFontSize -= 2;
     adjustedItemWidth = timesRomanBoldFont.widthOfTextAtSize(itemName, adjustedItemFontSize);
   }
-  
+
   page.drawText(itemName, {
     x: (width - adjustedItemWidth) / 2,
     y: height - 350,
@@ -465,7 +513,7 @@ export async function generateCertificatePDFBytes(
   const issuedText = `Issued on ${dateStr}`;
   const issuedFontSize = 12;
   const issuedWidth = helveticaFont.widthOfTextAtSize(issuedText, issuedFontSize);
-  
+
   page.drawText(issuedText, {
     x: (width - issuedWidth) / 2,
     y: height - 420,
@@ -478,7 +526,7 @@ export async function generateCertificatePDFBytes(
   const orgText = "AI Genius Lab";
   const orgFontSize = 20;
   const orgWidth = timesRomanBoldFont.widthOfTextAtSize(orgText, orgFontSize);
-  
+
   page.drawText(orgText, {
     x: (width - orgWidth) / 2,
     y: height - 470,
@@ -499,7 +547,7 @@ export async function generateCertificatePDFBytes(
   const sigText = "Authorized Signature";
   const sigFontSize = 10;
   const sigWidth = helveticaFont.widthOfTextAtSize(sigText, sigFontSize);
-  
+
   page.drawText(sigText, {
     x: (width - sigWidth) / 2,
     y: height - 505,
@@ -512,7 +560,7 @@ export async function generateCertificatePDFBytes(
   const certIdText = `Certificate ID: ${data.certificateId}`;
   const certIdFontSize = 9;
   const certIdWidth = helveticaFont.widthOfTextAtSize(certIdText, certIdFontSize);
-  
+
   page.drawText(certIdText, {
     x: (width - certIdWidth) / 2,
     y: borderMargin + 20,
@@ -525,7 +573,7 @@ export async function generateCertificatePDFBytes(
   // const verifyUrl = `Verify at: ${process.env.NEXTAUTH_URL || "https://aigeniuslab.com"}/certificates/verify/${data.certificateId}`;
   // const verifyFontSize = 8;
   // const verifyWidth = helveticaFont.widthOfTextAtSize(verifyUrl, verifyFontSize);
-  
+
   // page.drawText(verifyUrl, {
   //   x: (width - verifyWidth) / 2,
   //   y: borderMargin + 8,

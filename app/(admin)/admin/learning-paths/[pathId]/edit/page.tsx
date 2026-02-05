@@ -24,13 +24,7 @@ async function updateLearningPathAction(pathId: string, formData: FormData) {
   "use server";
   await requireRole("admin");
 
-  const title = formData.get("title") as string;
-  const description = formData.get("description") as string;
-
-  await updateLearningPath(pathId, {
-    title,
-    description: description || undefined,
-  });
+  await updateLearningPath(pathId, formData);
 
   redirect(`/admin/learning-paths/${pathId}/edit`);
 }

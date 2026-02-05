@@ -18,6 +18,7 @@ import {
 import { X, GripVertical, Loader2, Plus } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { SortableCourseList } from "@/components/admin/SortableCourseList";
+import { LogoImageUpload } from "@/components/admin/LogoImageUpload";
 
 interface Course {
   id: string;
@@ -43,6 +44,7 @@ interface LearningPath {
   id: string;
   title: string;
   description: string | null;
+  imageUrl: string | null;
   courses: PathCourse[];
 }
 
@@ -72,6 +74,7 @@ export function LearningPathEditForm({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isAddingCourse, setIsAddingCourse] = useState(false);
   const [isRemovingCourse, setIsRemovingCourse] = useState<Record<string, boolean>>({});
+  const [imageUrl, setImageUrl] = useState(path.imageUrl || "");
 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -201,6 +204,17 @@ export function LearningPathEditForm({
         </CardHeader>
         <CardContent>
           <form onSubmit={handleUpdate} className="space-y-4">
+            {/* Image Upload */}
+            <div className="space-y-2">
+              <Label>Cover Image</Label>
+              <input type="hidden" name="imageUrl" value={imageUrl} />
+              <LogoImageUpload
+                value={imageUrl}
+                onChange={setImageUrl}
+                className="w-full"
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="title">Title *</Label>
               <Input
