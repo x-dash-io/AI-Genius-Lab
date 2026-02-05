@@ -138,7 +138,7 @@ export function PublicLayoutClient({
     <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
       {/* Hero Background Blobs - more vibrant for all pages */}
       <HeroBackgroundBlobs />
-      <div className="hidden md:flex flex-col min-h-screen" suppressHydrationWarning>
+      <div className="hidden lg:flex flex-col min-h-screen" suppressHydrationWarning>
         {/* Desktop Top Navigation Bar - Floating Glass */}
         <motion.header
           initial={{ y: -100, opacity: 0 }}
@@ -305,7 +305,7 @@ export function PublicLayoutClient({
       </div>
 
       {/* Mobile Layout */}
-      <div className="flex md:hidden flex-col min-h-screen" suppressHydrationWarning>
+      <div className="flex lg:hidden flex-col min-h-screen" suppressHydrationWarning>
         <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 h-16">
           <div className="flex items-center justify-between px-4 h-full">
             <Link href="/" className="flex items-center">
@@ -352,7 +352,7 @@ export function PublicLayoutClient({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
                 onClick={() => setMobileMenuOpen(false)}
               />
 
@@ -368,7 +368,7 @@ export function PublicLayoutClient({
                   damping: 30,
                   stiffness: 300
                 }}
-                className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-card/95 backdrop-blur-md border-r shadow-2xl flex flex-col md:hidden"
+                className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-card/95 backdrop-blur-md border-r shadow-2xl flex flex-col lg:hidden"
               >
                 {/* Menu Header */}
                 <div className="border-b p-4 flex items-center justify-between bg-card/95 backdrop-blur-md z-10 h-16 flex-shrink-0">
