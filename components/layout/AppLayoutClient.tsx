@@ -220,43 +220,45 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
               </div>
 
               {/* Sidebar Footer - Fixed at bottom */}
-              <div className="flex-shrink-0 border-t p-4 mt-auto">
+              <div className="flex-shrink-0 p-4 mt-auto border-t border-border/50">
                 {session?.user && (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <Link href={getHref("/profile")}>
                       <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer"
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                        className="group flex items-center gap-3 p-3 rounded-2xl bg-accent/30 border border-transparent hover:border-primary/20 hover:bg-accent/50 transition-all cursor-pointer shadow-sm hover:shadow-md"
                       >
-                        <Avatar className="h-10 w-10 ring-2 ring-primary/20">
+                        <Avatar className="h-10 w-10 ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all">
                           <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "User"} />
-                          <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
+                          <AvatarFallback className="bg-primary text-primary-foreground text-xs font-black">
                             {(() => {
                               const name = session.user.name;
                               const email = session.user.email || "";
                               if (name && name.trim()) {
-                                const nameParts = name.trim().split(/\s+/);
-                                return nameParts[0][0].toUpperCase();
+                                return name.trim()[0].toUpperCase();
                               }
                               return email.charAt(0).toUpperCase();
                             })()}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 overflow-hidden min-w-0">
-                          <p className="truncate text-sm font-medium">
+                          <p className="truncate text-xs font-bold tracking-tight text-foreground/90 uppercase">
                             {session.user.name || session.user.email}
                           </p>
-                          {session.user.name && (
-                            <p className="truncate text-xs text-muted-foreground">
-                              {session.user.email}
-                            </p>
-                          )}
+                          <p className="truncate text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground/60">
+                            {session.user.email}
+                          </p>
                         </div>
                       </motion.div>
                     </Link>
-                    <div className="flex items-center gap-2 px-1">
-                      <ThemeToggle />
-                      <SignOutButton />
+
+                    {/* Scientific Action Bar */}
+                    <div className="flex items-center gap-1.5 p-1 rounded-xl bg-accent/20 border border-border/40">
+                      <div className="flex-1 flex items-center gap-1 pl-1">
+                        <ThemeToggle />
+                      </div>
+                      <SignOutButton className="h-9 px-3 text-[10px] font-bold uppercase tracking-widest bg-background/50 hover:bg-destructive hover:text-white border-none shadow-none rounded-lg" />
                     </div>
                   </div>
                 )}

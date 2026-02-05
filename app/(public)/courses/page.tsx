@@ -5,7 +5,7 @@ import { CourseList } from "@/components/courses/CourseList";
 import { CourseFilters } from "@/components/courses/CourseFilters";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Zap } from "lucide-react";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +24,7 @@ interface CoursesPageProps {
 async function CourseCatalogContent({ searchParams }: CoursesPageProps) {
   const params = await searchParams;
   const allCourses = await getPublishedCourses();
-  
+
   let courses = [...allCourses];
 
   // Apply search filter
@@ -95,7 +95,7 @@ async function CourseCatalogContent({ searchParams }: CoursesPageProps) {
           </p>
         </div>
       </div>
-      
+
       {/* Filters */}
       <Suspense fallback={<div className="h-12 animate-pulse bg-muted rounded" />}>
         <CourseFilters />
@@ -123,8 +123,8 @@ async function CourseCatalogContent({ searchParams }: CoursesPageProps) {
 
 export default async function CoursesPage({ searchParams }: CoursesPageProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
-      <section className="container mx-auto py-12 px-4 grid gap-8">
+    <div className="min-h-screen">
+      <section className="container mx-auto py-20 px-4 grid gap-12">
         {/* Breadcrumbs */}
         <Breadcrumbs
           items={[
@@ -132,22 +132,28 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
             { name: "Courses" },
           ]}
         />
-        
-        {/* Header */}
-        <div className="space-y-4">
-          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm font-medium text-primary gap-2">
-            <BookOpen className="h-4 w-4" />
-            Course Library
+
+        {/* Header - Premium High-End Aesthetic */}
+        <div className="space-y-6">
+          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-bold text-primary gap-2 shadow-[0_0_20px_rgba(var(--primary),0.1)]">
+            <Zap className="h-4 w-4" />
+            <span className="tracking-widest uppercase">Expert-Led Modules</span>
           </div>
-          <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight">
-            Discover AI Courses
+          <h1 className="font-display text-5xl sm:text-6xl font-black tracking-tight leading-tight">
+            Curated <span className="text-primary italic drop-shadow-sm">AI Learning</span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl">
-            Learn from our curated collection of AI courses. Filter by category, price, and more to find the perfect course for you.
+          <p className="text-xl text-muted-foreground/80 max-w-2xl font-medium leading-relaxed">
+            Step into the future of engineering. Our structured learning paths are designed by practitioners to take you from fundamentals to advanced AI deployment.
           </p>
         </div>
 
-        <Suspense fallback={<div className="h-96 animate-pulse bg-muted rounded" />}>
+        <Suspense fallback={
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-96 animate-pulse bg-muted rounded-2xl" />
+            ))}
+          </div>
+        }>
           <CourseCatalogContent searchParams={searchParams} />
         </Suspense>
       </section>

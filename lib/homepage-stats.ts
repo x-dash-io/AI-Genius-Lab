@@ -96,7 +96,7 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
             priceCents: true,
             imageUrl: true,
           },
-          take: 5, // Limit to 5 courses per category for homepage
+          take: 6,
           orderBy: {
             createdAt: "desc",
           },
@@ -104,7 +104,7 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
       },
     });
 
-    const categoriesWithCourses = categories.map((category) => ({
+    let categoriesWithCourses = categories.map((category) => ({
       id: category.id,
       name: category.name,
       slug: category.slug,
@@ -114,6 +114,36 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
       courseCount: category.courses.length,
       courses: category.courses,
     }));
+
+    // If no courses found via categories but they exist, fetch them directly
+    const allPublishedCourses = categoriesWithCourses.flatMap(c => c.courses);
+    if (allPublishedCourses.length === 0 && totalCourses > 0) {
+      const topCourses = await prisma.course.findMany({
+        where: { isPublished: true },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          priceCents: true,
+          imageUrl: true,
+        },
+        take: 6,
+        orderBy: { createdAt: "desc" },
+      });
+
+      if (topCourses.length > 0) {
+        categoriesWithCourses = [{
+          id: "featured",
+          name: "Featured Courses",
+          slug: "featured",
+          description: "Our top curated AI modules",
+          icon: "Sparkles",
+          color: null,
+          courseCount: topCourses.length,
+          courses: topCourses,
+        }];
+      }
+    }
 
     return {
       totalCourses,

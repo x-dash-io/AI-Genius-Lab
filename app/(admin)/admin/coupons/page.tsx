@@ -19,8 +19,8 @@ export default async function CouponsPage() {
                     </p>
                 </div>
                 <Link href="/admin/coupons/new">
-                    <Button>
-                        <Plus className="mr-2 h-4 w-4" />
+                    <Button variant="premium" className="h-12 px-8 rounded-xl shadow-2xl shadow-primary/20">
+                        <Plus className="mr-2 h-5 w-5" />
                         Create Coupon
                     </Button>
                 </Link>

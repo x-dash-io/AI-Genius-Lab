@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Facebook, Linkedin, Twitter } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { SocialLinks } from "@/lib/settings";
+
+import Image from "next/image";
 
 interface FooterProps {
   socialLinks?: SocialLinks;
@@ -20,137 +23,99 @@ export function Footer({ socialLinks }: FooterProps) {
   };
 
   return (
-    <footer className="border-t bg-background/50 backdrop-blur-sm">
-      <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-8 md:grid-cols-4">
-          <div className="grid gap-4">
-            <h3 className="font-display text-lg font-bold">AI Genius Lab</h3>
-            <p className="text-sm text-muted-foreground">
-              Premium AI learning platform with structured courses and secure commerce.
+    <footer className="border-t bg-card/10 backdrop-blur-md mt-20">
+      <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="grid gap-12 md:grid-cols-4 lg:gap-16">
+          <div className="space-y-6">
+            <Link href="/" className="inline-block transition-transform hover:scale-105">
+              <div className="relative h-8 w-auto">
+                <Image
+                  src="/logo.png"
+                  alt="AI Genius Lab"
+                  width={140}
+                  height={32}
+                  className="object-contain h-8 w-auto dark:brightness-125"
+                  priority
+                />
+              </div>
+            </Link>
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs font-medium">
+              Empowering the next generation of AI professionals through structured, outcome-driven learning.
             </p>
-            <div className="flex gap-4">
-              <Link href={links.facebook} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Facebook className="h-5 w-5" />
-                <span className="sr-only">Facebook</span>
-              </Link>
-              <Link href={links.linkedin} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Linkedin className="h-5 w-5" />
-                <span className="sr-only">LinkedIn</span>
-              </Link>
-              <Link href={links.twitter} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Twitter className="h-5 w-5" />
-                <span className="sr-only">X (Twitter)</span>
-              </Link>
-              <Link href={links.tiktok} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-5 w-5"
+            <div className="flex gap-3">
+              {[
+                { icon: Facebook, href: links.facebook, label: "Facebook" },
+                { icon: Linkedin, href: links.linkedin, label: "LinkedIn" },
+                { icon: Twitter, href: links.twitter, label: "Twitter" }
+              ].map((social) => (
+                <Link
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="h-10 w-10 flex items-center justify-center rounded-xl bg-accent/50 text-muted-foreground hover:bg-primary hover:text-white transition-all duration-300"
                 >
-                  <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
-                </svg>
-                <span className="sr-only">TikTok</span>
-              </Link>
+                  <social.icon className="h-5 w-5" />
+                  <span className="sr-only">{social.label}</span>
+                </Link>
+              ))}
             </div>
           </div>
-          <div className="grid gap-4">
-            <h4 className="text-sm font-semibold">Learn</h4>
-            <nav className="grid gap-2">
-              <Link
-                href="/courses"
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Courses
-              </Link>
-              <Link
-                href="/learning-paths"
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Learning Paths
-              </Link>
-              <Link
-                href="/blog"
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Blog
-              </Link>
-              {session?.user && (
+
+          <div className="grid gap-6">
+            <h4 className="text-sm font-bold uppercase tracking-widest text-foreground/80">Platform</h4>
+            <nav className="grid gap-3">
+              {["Courses", "Learning Paths", "Blog", "Dashboard"].map((item) => (
                 <Link
-                  href="/dashboard"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  key={item}
+                  href={`/${item.toLowerCase().replace(" ", "-")}`}
+                  className="text-sm text-muted-foreground transition-colors hover:text-primary hover:translate-x-1 duration-200 inline-block"
                 >
-                  Dashboard
+                  {item}
                 </Link>
-              )}
+              ))}
             </nav>
           </div>
-          <div className="grid gap-4">
-            <h4 className="text-sm font-semibold">Legal</h4>
-            <nav className="grid gap-2">
-              <Link
-                href="/privacy"
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Privacy Policy
-              </Link>
-              <Link
-                href="/terms"
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Terms of Service
-              </Link>
+
+          <div className="grid gap-6">
+            <h4 className="text-sm font-bold uppercase tracking-widest text-foreground/80">Company</h4>
+            <nav className="grid gap-3">
+              {["About Us", "Testimonials", "Contact Us", "FAQ"].map((item) => (
+                <Link
+                  key={item}
+                  href={`/${item.toLowerCase().replace(" ", "-")}`}
+                  className="text-sm text-muted-foreground transition-colors hover:text-primary hover:translate-x-1 duration-200 inline-block"
+                >
+                  {item}
+                </Link>
+              ))}
             </nav>
           </div>
-          <div className="grid gap-4">
-            <h4 className="text-sm font-semibold">Support</h4>
-            <nav className="grid gap-2">
-              <Link
-                href="/faq"
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                FAQ
-              </Link>
-              <Link
-                href="/contact"
-                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Contact Us
-              </Link>
-              {session?.user ? (
-                <Link
-                  href="/dashboard"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  Dashboard
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    href="/sign-in"
-                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/sign-up"
-                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
+
+          <div className="grid gap-6">
+            <h4 className="text-sm font-bold uppercase tracking-widest text-foreground/80">Newsletter</h4>
+            <p className="text-sm text-muted-foreground">
+              Get the latest AI insights and course updates.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="email"
+                placeholder="Email address"
+                className="flex-1 rounded-xl bg-accent/20 border border-border/50 px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:bg-background outline-none transition-all placeholder:text-muted-foreground/50"
+              />
+              <Button size="sm" className="rounded-xl px-4 font-bold">Join</Button>
+            </div>
+            <nav className="flex flex-wrap gap-x-6 gap-y-2 pt-2">
+              <Link href="/privacy" className="text-xs text-muted-foreground hover:text-primary transition-colors">Privacy</Link>
+              <Link href="/terms" className="text-xs text-muted-foreground hover:text-primary transition-colors">Terms</Link>
             </nav>
           </div>
         </div>
-        <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} AI Genius Lab. All rights reserved.</p>
+
+        <div className="mt-16 pt-8 border-t border-border/50 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-muted-foreground/80 font-medium">
+            &copy; {new Date().getFullYear()} <span className="text-foreground font-bold">AI Genius Lab</span>. Designed for professionals.
+          </p>
         </div>
       </div>
     </footer>

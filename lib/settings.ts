@@ -35,7 +35,6 @@ export const defaultHeroLogos: HeroLogo[] = [
     { id: "meta", name: "Meta", type: "image", value: "/logos/meta.png", visible: true },
     { id: "midjourney", name: "Midjourney", type: "image", value: "/logos/midjourney.svg", visible: true },
     { id: "google", name: "Google", type: "image", value: "/logos/google.png", visible: true },
-    { id: "vercel", name: "Vercel", type: "image", value: "/logos/vercel.svg", visible: true },
 ];
 
 export async function getSiteSettings<T>(key: string, defaultValue: T): Promise<T> {
@@ -54,7 +53,16 @@ export const getSocialLinks = unstable_cache(
 );
 
 export const getHeroLogos = unstable_cache(
-    async () => getSiteSettings<HeroLogo[]>("hero_logos", defaultHeroLogos),
+    async () => {
+        const logos = await getSiteSettings<any[]>("hero_logos", defaultHeroLogos);
+        return logos.map(logo => ({
+            ...logo,
+            id: logo.id || `logo-${Math.random()}`,
+            type: logo.type || "image",
+            value: logo.value || logo.url || "",
+            visible: logo.visible === true || logo.visible === "true" || logo.visible === undefined,
+        })) as HeroLogo[];
+    },
     ["site_settings", "hero_logos"],
     { tags: ["site_settings"] }
 );

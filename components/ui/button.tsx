@@ -5,39 +5,34 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold ring-offset-background transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.97]",
   {
-      variants: {
-        variant: {
-          default: "bg-blue-600 text-white hover:bg-blue-600/90 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-600/90 shadow-sm hover:shadow-md",
-          destructive:
-            "bg-red-600 text-white hover:bg-red-600/90 dark:bg-red-600 dark:text-white dark:hover:bg-red-600/90 shadow-sm hover:shadow-md",
-          outline:
-            "border-2 border-gray-400 dark:border-gray-500 bg-blue-50/80 dark:bg-transparent hover:bg-blue-100/80 dark:hover:bg-gray-800/70 hover:border-gray-500 dark:hover:border-gray-400 shadow-sm hover:shadow-md font-semibold text-foreground transition-all",
-          secondary:
-            "bg-gray-200 text-foreground hover:bg-gray-200/80 dark:bg-gray-700 dark:hover:bg-gray-700/80 shadow-sm hover:shadow-md font-semibold",
-          // Use theme tokens (foreground) so buttons remain readable even if
-          // a parent accidentally toggles the `dark` class without updating CSS vars.
-          ghost: "bg-blue-50/60 dark:bg-transparent hover:bg-blue-200/80 dark:hover:bg-gray-700/70 font-medium text-foreground transition-all",
-          link: "text-blue-600 dark:text-blue-400 underline-offset-4 hover:underline font-medium",
-        },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground shadow-[0_1px_0_0_rgba(255,255,255,0.1)_inset,0_2px_4px_0_rgba(0,0,0,0.05)] hover:bg-primary/90 border border-primary/20",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm",
+        outline:
+          "border border-border bg-background hover:bg-accent/50 hover:text-foreground hover:border-primary/30 shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]",
+        secondary:
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm",
+        ghost: "text-muted-foreground hover:bg-accent/80 hover:text-foreground transition-colors",
+        link: "text-primary underline-offset-4 hover:underline",
+        premium: "bg-premium-gradient text-white shadow-[0_0_0_1px_rgba(255,255,255,0.1)_inset,0_10px_20px_-10px_rgba(var(--primary-rgb),0.3)] hover:brightness-110 transition-all duration-300 border border-primary/20",
       },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
+      size: {
+        default: "h-11 px-5 py-2.5",
+        sm: "h-9 rounded-lg px-3",
+        lg: "h-14 rounded-2xl px-10 text-base",
+        icon: "h-11 w-11",
+      },
+    }
   }
 );
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 

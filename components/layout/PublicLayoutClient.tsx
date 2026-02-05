@@ -139,31 +139,31 @@ export function PublicLayoutClient({
       {/* Hero Background Blobs - more vibrant for all pages */}
       <HeroBackgroundBlobs />
       <div className="hidden md:flex flex-col min-h-screen" suppressHydrationWarning>
-        {/* Desktop Top Navigation Bar - Fixed */}
+        {/* Desktop Top Navigation Bar - Floating Glass */}
         <motion.header
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="fixed top-0 left-0 right-0 z-50 border-b bg-card/80 backdrop-blur-md h-16"
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="fixed top-4 left-0 right-0 z-50 px-4 pointer-events-none"
         >
-          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 h-full">
-            <div className="flex items-center justify-between h-full">
+          <div className="mx-auto w-full max-w-7xl pointer-events-auto">
+            <div className="glass rounded-2xl h-16 px-6 flex items-center justify-between shadow-2xl shadow-primary/5">
               {/* Logo */}
-              <Link href="/" className="flex items-center h-full">
-                <div className="relative h-10 w-auto flex-shrink-0">
+              <Link href="/" className="flex items-center group transition-transform hover:scale-105">
+                <div className="relative h-9 w-auto flex-shrink-0">
                   <Image
                     src="/logo.png"
                     alt="AI Genius Lab"
-                    width={180}
-                    height={40}
-                    className="object-contain h-10 w-auto"
+                    width={160}
+                    height={36}
+                    className="object-contain h-9 w-auto"
                     priority
                   />
                 </div>
               </Link>
 
               {/* Desktop Navigation */}
-              <nav className="flex items-center gap-1 h-full">
+              <nav className="flex items-center gap-1.5 h-full">
                 {primaryNavigation.map((item) => {
                   const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/"));
                   const Icon = item.icon;
@@ -175,18 +175,18 @@ export function PublicLayoutClient({
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all whitespace-nowrap h-10",
+                        "flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap h-10 relative overflow-hidden group border-2 border-transparent",
                         isActive
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                          ? "border-primary/50 text-primary shadow-sm bg-primary/5"
+                          : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                       )}
                     >
-                      <Icon className="h-4 w-4 flex-shrink-0" />
+                      <Icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", isActive ? "text-primary" : "text-primary")} />
                       <span className="leading-none">{item.name}</span>
                       {isCart && cartCount > 0 && (
                         <Badge
                           variant="destructive"
-                          className="h-5 min-w-[20px] flex items-center justify-center rounded-full px-1.5 text-[10px] font-bold"
+                          className="h-5 min-w-[20px] flex items-center justify-center rounded-full px-1.5 text-[10px] font-bold ring-2 ring-background shadow-lg"
                         >
                           {cartCount > 9 ? "9+" : cartCount}
                         </Badge>
@@ -201,21 +201,21 @@ export function PublicLayoutClient({
                     <Button
                       variant="ghost"
                       className={cn(
-                        "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all whitespace-nowrap h-10",
+                        "flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap h-10 group border-2 border-transparent",
                         resourcesNavigation.some(item => pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/")))
-                          ? "bg-primary text-primary-foreground"
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                          ? "border-primary/50 text-primary shadow-sm bg-primary/5"
+                          : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                       )}
                     >
-                      <Info className="h-4 w-4 flex-shrink-0" />
+                      <Info className={cn("h-4 w-4 transition-transform group-hover:scale-110", resourcesNavigation.some(item => pathname === item.href) ? "text-primary" : "text-primary")} />
                       <span className="leading-none">Resources</span>
                       <ChevronDown className={cn(
-                        "h-4 w-4 transition-transform",
-                        resourcesOpen && "rotate-180"
+                        "h-4 w-4 transition-transform duration-300 opacity-60",
+                        resourcesOpen && "rotate-180 opacity-100"
                       )} />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl glass border-white/20">
                     {resourcesNavigation.map((item) => {
                       const Icon = item.icon;
                       const isActive = pathname === item.href;
@@ -224,12 +224,12 @@ export function PublicLayoutClient({
                           <Link
                             href={item.href}
                             className={cn(
-                              "flex items-center gap-2 cursor-pointer",
-                              isActive && "bg-accent"
+                              "flex items-center gap-3 cursor-pointer px-3 py-2.5 rounded-xl transition-colors",
+                              isActive ? "bg-primary text-primary-foreground" : "hover:bg-accent"
                             )}
                           >
-                            <Icon className="h-4 w-4" />
-                            {item.name}
+                            <Icon className={cn("h-4 w-4", isActive ? "text-white" : "text-primary")} />
+                            <span className="font-medium">{item.name}</span>
                           </Link>
                         </DropdownMenuItem>
                       );
@@ -239,15 +239,15 @@ export function PublicLayoutClient({
               </nav>
 
               {/* User Section */}
-              <div className="flex items-center gap-3 h-full">
+              <div className="flex items-center gap-4 h-full">
                 <ThemeToggle />
                 {session?.user ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <Link href="/dashboard">
-                      <Button variant="ghost" size="sm" className="gap-2">
-                        <Avatar className="h-6 w-6">
+                      <Button variant="ghost" size="sm" className="gap-2.5 rounded-xl hover:bg-accent/50 px-3">
+                        <Avatar className="h-7 w-7 ring-2 ring-primary/20 transition-transform group-hover:scale-105">
                           <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "User"} />
-                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                          <AvatarFallback className="bg-premium-gradient text-white text-[10px] font-bold">
                             {(() => {
                               const name = session.user.name;
                               const email = session.user.email || "";
@@ -258,24 +258,25 @@ export function PublicLayoutClient({
                             })()}
                           </AvatarFallback>
                         </Avatar>
-                        <span className="text-sm leading-none">{session.user.name || session.user.email}</span>
+                        <span className="text-sm font-semibold leading-none">{session.user.name || "My Account"}</span>
                       </Button>
                     </Link>
                     <SignOutButton />
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <Link href="/sign-in">
-                      <Button variant="ghost" size="sm" className="h-10">
+                      <Button variant="outline" size="sm" className="h-10 px-6 border-2 font-bold transition-all hover:bg-primary/5 hover:text-primary hover:border-primary active:scale-95">
                         Sign In
                       </Button>
                     </Link>
                     <Link href="/sign-up">
                       <Button
-                        size="lg"
-                        className="h-11 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all shadow-lg hover:shadow-xl"
+                        size="default"
+                        variant="premium"
+                        className="h-10 px-6 shadow-2xl shadow-primary/20"
                       >
-                        Sign Up
+                        Join Now
                       </Button>
                     </Link>
                   </div>

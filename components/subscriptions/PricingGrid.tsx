@@ -24,13 +24,13 @@ export function PricingGrid({ plans }: PricingGridProps) {
           className="w-[300px]"
         >
           <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1 rounded-lg">
-            <TabsTrigger 
-              value="monthly" 
+            <TabsTrigger
+              value="monthly"
               className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border rounded-md transition-all"
             >
               Monthly
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="annual"
               className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border rounded-md transition-all"
             >
@@ -107,14 +107,14 @@ export function PricingGrid({ plans }: PricingGridProps) {
               <CardFooter>
                 <Link href={`/checkout/subscription?planId=${plan.id}&interval=${interval}`} className="w-full">
                   {plan.tier === "pro" ? (
-                    <Button 
+                    <Button
                       className="w-full hover:scale-105 transition-transform bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold border-0"
                       variant="default"
                     >
                       Choose {plan.name}
                     </Button>
                   ) : (
-                    <Button 
+                    <Button
                       className="w-full hover:scale-105 transition-transform"
                       variant="outline"
                     >
@@ -129,7 +129,7 @@ export function PricingGrid({ plans }: PricingGridProps) {
 
         {plans.length === 0 && (
           <div className="col-span-full text-center py-12">
-            <p className="text-muted-foreground text-lg italic">No subscription plans available at the moment. Please check back later.</p>
+            <p className="text-muted-foreground text-lg">No subscription plans available at the moment. Please check back later.</p>
           </div>
         )}
       </div>

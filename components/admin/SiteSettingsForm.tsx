@@ -14,7 +14,7 @@ import { updateSiteSettings } from "@/lib/actions/settings";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ContentUpload } from "@/components/admin/ContentUpload";
+import { LogoImageUpload } from "@/components/admin/LogoImageUpload";
 
 const settingsSchema = z.object({
     socialLinks: z.object({
@@ -241,17 +241,10 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                                     </div>
                                                     <FormControl>
                                                         {type === "image" ? (
-                                                            <div className="border rounded-md p-2">
-                                                                <ContentUpload
-                                                                    sectionId="hero-logos"
-                                                                    contentType="image"
-                                                                    value={field.value}
-                                                                    onChange={field.onChange}
-                                                                    returnUrl={true}
-                                                                    onError={(err) => toastError("Image Error", err)}
-                                                                />
-                                                                <Input type="hidden" {...field} />
-                                                            </div>
+                                                            <LogoImageUpload
+                                                                value={field.value}
+                                                                onChange={field.onChange}
+                                                            />
                                                         ) : (
                                                             <Input
                                                                 placeholder="Zap"

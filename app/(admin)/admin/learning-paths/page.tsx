@@ -105,8 +105,8 @@ export default async function AdminLearningPathsPage() {
           </p>
         </div>
         <Link href="/admin/learning-paths/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button variant="premium" className="h-12 px-8 rounded-xl shadow-2xl shadow-primary/20">
+            <Plus className="h-5 w-5 mr-2" />
             New Learning Path
           </Button>
         </Link>

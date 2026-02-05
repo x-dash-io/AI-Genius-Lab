@@ -1,59 +1,73 @@
 @import "tailwindcss";
 
 :root {
+  /* Core Palette - Refined Slate/Indigo */
   --background: 0 0% 100%;
-  --foreground: 240 10% 4%;
+  --foreground: 224 71.4% 4.1%;
   --card: 0 0% 100%;
-  --card-foreground: 240 10% 4%;
+  --card-foreground: 224 71.4% 4.1%;
   --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 4%;
+  --popover-foreground: 224 71.4% 4.1%;
+
+  /* Vibrant & Professional Indigo */
   --primary: 246 80% 60%;
-  /* Vibrant Indigo */
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 5% 96%;
-  --secondary-foreground: 240 6% 10%;
-  --muted: 240 5% 96%;
-  --muted-foreground: 240 4% 46%;
-  --accent: 240 5% 96%;
-  --accent-foreground: 240 6% 10%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 240 6% 90%;
-  --input: 240 6% 90%;
+  --primary-foreground: 210 20% 98%;
+
+  --secondary: 220 14.3% 95.9%;
+  --secondary-foreground: 220.9 39.3% 11%;
+
+  --muted: 220 14.3% 95.9%;
+  --muted-foreground: 220 8.9% 46.1%;
+
+  --accent: 220 14.3% 95.9%;
+  --accent-foreground: 220.9 39.3% 11%;
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 20% 98%;
+
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
   --ring: 246 80% 60%;
+
   --radius: 0.75rem;
-  --chart-1: 12 76% 61%;
-  --chart-2: 173 58% 39%;
-  --chart-3: 197 37% 24%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 27 87% 67%;
+
+  /* Glassmorphism Tokens */
+  --glass-background: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(220, 230, 255, 0.5);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
 }
 
 .dark {
-  --background: 240 10% 4%;
-  --foreground: 0 0% 98%;
-  --card: 240 10% 4%;
-  --card-foreground: 0 0% 98%;
-  --popover: 240 10% 4%;
-  --popover-foreground: 0 0% 98%;
+  --background: 224 71.4% 4.1%;
+  --foreground: 210 20% 98%;
+  --card: 224 71.4% 6%;
+  --card-foreground: 210 20% 98%;
+  --popover: 224 71.4% 4.1%;
+  --popover-foreground: 210 20% 98%;
+
   --primary: 246 80% 60%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 4% 16%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 4% 16%;
-  --muted-foreground: 240 5% 65%;
-  --accent: 240 4% 16%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 63% 31%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 240 4% 16%;
-  --input: 240 4% 16%;
-  --ring: 240 5% 84%;
-  --chart-1: 220 70% 50%;
-  --chart-2: 160 60% 45%;
-  --chart-3: 30 80% 55%;
-  --chart-4: 280 65% 60%;
-  --chart-5: 340 75% 55%;
+  --primary-foreground: 210 20% 98%;
+
+  --secondary: 215 27.9% 16.9%;
+  --secondary-foreground: 210 20% 98%;
+
+  --muted: 215 27.9% 16.9%;
+  --muted-foreground: 217.9 10.6% 64.9%;
+
+  --accent: 215 27.9% 16.9%;
+  --accent-foreground: 210 20% 98%;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 20% 98%;
+
+  --border: 215 27.9% 16.9%;
+  --input: 215 27.9% 16.9%;
+  --ring: 246 80% 60%;
+
+  /* Glassmorphism Tokens - Dark */
+  --glass-background: rgba(15, 23, 42, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
 }
 
 * {
@@ -62,8 +76,6 @@
 
 html {
   overflow-x: hidden;
-  scrollbar-width: none;
-  scrollbar-color: transparent transparent;
   scroll-behavior: smooth;
   width: 100%;
   max-width: 100vw;
@@ -71,261 +83,63 @@ html {
 
 body {
   background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(at 0% 0%, hsl(var(--primary) / 0.05) 0px, transparent 40%),
+    radial-gradient(at 100% 0%, hsl(var(--accent) / 0.05) 0px, transparent 40%);
   color: hsl(var(--foreground));
   font-feature-settings: "rlig" 1, "calt" 1;
   overflow-x: hidden;
   width: 100%;
   max-width: 100vw;
   position: relative;
-
-  /* Performance optimizations */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeSpeed;
 }
 
-/* GPU acceleration for animations */
-@media (prefers-reduced-motion: no-preference) {
-  * {
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-  }
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: overlay;
 }
 
-/* ========================================
-   FONT OVERRIDE PREVENTION
-   Prevents browsers from overriding fonts
-   ======================================== */
-
-/* Prevent font boosting on mobile devices */
-* {
-  -webkit-text-size-adjust: 100% !important;
-  -moz-text-size-adjust: 100% !important;
-  -ms-text-size-adjust: 100% !important;
-  text-size-adjust: 100% !important;
+.dark body::before {
+  opacity: 0.05;
 }
 
-/* Force font family inheritance and prevent overrides */
-html,
-body,
-div,
-span,
-applet,
-object,
-iframe,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-blockquote,
-pre,
-a,
-abbr,
-acronym,
-address,
-big,
-cite,
-code,
-del,
-dfn,
-em,
-img,
-ins,
-kbd,
-q,
-s,
-samp,
-small,
-strike,
-strong,
-sub,
-sup,
-tt,
-var,
-b,
-u,
-i,
-center,
-dl,
-dt,
-dd,
-ol,
-ul,
-li,
-fieldset,
-form,
-label,
-legend,
-table,
-caption,
-tbody,
-tfoot,
-thead,
-tr,
-th,
-td,
-article,
-aside,
-canvas,
-details,
-embed,
-figure,
-figcaption,
-footer,
-header,
-hgroup,
-menu,
-nav,
-output,
-ruby,
-section,
-summary,
-time,
-mark,
-audio,
-video,
-button,
-input,
-select,
-textarea {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
+.dark body {
+  background-image: none;
 }
 
-/* Prevent Android and iOS from changing fonts */
-body,
-body * {
-  -webkit-font-smoothing: antialiased !important;
-  -moz-osx-font-smoothing: grayscale !important;
-  text-rendering: optimizeLegibility !important;
+/* Glassmorphism Utility */
+.glass {
+  background: var(--glass-background);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
-/* Prevent font inflation on Android */
-@supports (-webkit-touch-callout: none) {
-  body {
-    -webkit-text-size-adjust: 100% !important;
-  }
+/* Premium Gradients */
+.bg-premium-gradient {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(262 83% 58%) 100%);
 }
 
-/* Prevent font changes on Android Chrome */
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-
-  select,
-  textarea,
-  input,
-  button {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
-  }
+.text-gradient {
+  background: linear-gradient(to right, hsl(var(--primary)), hsl(262 83% 58%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-/* Force font on form elements (commonly overridden on mobile) */
-input,
-button,
-select,
-textarea,
-optgroup {
-  font-family: inherit !important;
-  font-size: inherit !important;
-  line-height: inherit !important;
-  -webkit-text-size-adjust: 100% !important;
-  -moz-text-size-adjust: 100% !important;
-  -ms-text-size-adjust: 100% !important;
-  text-size-adjust: 100% !important;
-}
-
-/* Prevent font changes in placeholders */
-::placeholder {
-  font-family: inherit !important;
-  opacity: 0.5;
-}
-
-::-webkit-input-placeholder {
-  font-family: inherit !important;
-}
-
-::-moz-placeholder {
-  font-family: inherit !important;
-}
-
-:-ms-input-placeholder {
-  font-family: inherit !important;
-}
-
-/* Prevent font changes on focus */
-input:focus,
-textarea:focus,
-select:focus,
-button:focus {
-  font-family: inherit !important;
-}
-
-/* Android-specific font override prevention */
-@media screen and (max-width: 767px) {
-  * {
-    -webkit-text-size-adjust: none !important;
-    -moz-text-size-adjust: none !important;
-    -ms-text-size-adjust: none !important;
-    text-size-adjust: none !important;
-  }
-
-  body,
-  body * {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
-  }
-}
-
-/* Tablet-specific (iPad, Android tablets) */
-@media screen and (min-width: 768px) and (max-width: 1024px) {
-  * {
-    -webkit-text-size-adjust: 100% !important;
-    -moz-text-size-adjust: 100% !important;
-    -ms-text-size-adjust: 100% !important;
-    text-size-adjust: 100% !important;
-  }
-
-  body,
-  body * {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
-  }
-}
-
-/* iOS Safari specific */
-@supports (-webkit-touch-callout: none) {
-
-  body,
-  body *,
-  input,
-  textarea,
-  select,
-  button {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
-    -webkit-text-size-adjust: 100% !important;
-  }
-}
-
-/* Samsung Internet Browser */
-@supports (-webkit-appearance: none) {
-
-  body,
-  body * {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
-  }
-}
-
-/* Prevent font changes in WebView (Android apps) */
-@media screen and (max-device-width: 1024px) {
-  * {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif !important;
-    -webkit-text-size-adjust: 100% !important;
-  }
-}
-
-/* Custom Scrollbar Styling - Hidden */
+/* Modern Scrollbar - Subtle & Professional */
 ::-webkit-scrollbar {
-  width: 0px;
-  height: 0px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -333,24 +147,20 @@ button:focus {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: transparent;
+  background: hsl(var(--muted-foreground) / 0.2);
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: transparent;
-}
-
-/* Dark mode scrollbar */
-.dark ::-webkit-scrollbar-track {
-  background: transparent;
+  background: hsl(var(--muted-foreground) / 0.4);
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: transparent;
+  background: hsl(var(--muted-foreground) / 0.3);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: transparent;
+  background: hsl(var(--muted-foreground) / 0.5);
 }
 
 /* Hide Next.js development indicator in production and development */

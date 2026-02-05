@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Lock, BarChart, GraduationCap, Sparkles, Zap, Users, BookOpen, Star, ArrowRight } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { TypingAnimation } from "@/components/ui/typing-animation";
@@ -27,239 +28,154 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
   const renderLogo = (logo: HeroLogo) => {
     if (logo.type === "icon") {
       // @ts-ignore - Dynamic access to Lucide icons
-      const IconComponent: any = LucideIcons[logo.value as keyof typeof LucideIcons] || Zap;
+      const IconComponent: any = LucideIcons[logo.value as keyof typeof LucideIcons] || LucideIcons.Zap;
       return (
-        <div key={logo.id} className="flex flex-col items-center gap-2 group cursor-pointer" title={logo.name}>
-          <IconComponent className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground group-hover:text-primary transition-colors duration-300" />
-          <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors opacity-0 group-hover:opacity-100 absolute translate-y-8">{logo.name}</span>
+        <div key={logo.id} className="flex flex-col items-center gap-2 group cursor-pointer relative" title={logo.name}>
+          <IconComponent className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground/60 group-hover:text-primary transition-colors duration-300" />
+          <span className="text-[10px] font-bold text-muted-foreground group-hover:text-foreground transition-all opacity-0 group-hover:opacity-100 absolute -bottom-6 whitespace-nowrap">{logo.name}</span>
         </div>
       );
     }
 
     return (
-      <motion.img
-        key={logo.id}
-        src={logo.value} // Use 'value' instead of 'url'
-        alt={logo.name}
-        title={logo.name}
-        whileHover={{ scale: 1.1, opacity: 1 }}
-        className="h-6 sm:h-8 w-auto object-contain opacity-40 grayscale hover:grayscale-0 transition-all duration-300"
-      />
+      <div key={logo.id} className="relative h-10 sm:h-14 flex items-center justify-center group">
+        <motion.img
+          src={logo.value}
+          alt={logo.name}
+          title={logo.name}
+          whileHover={{ scale: 1.1, opacity: 1 }}
+          className="h-full w-auto object-contain opacity-60 grayscale hover:grayscale-0 transition-all duration-300"
+          onError={(e) => {
+            // Fallback for missing images
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
+        />
+      </div>
     );
   };
 
   return (
-    <section className="relative py-12 sm:py-16 lg:py-20 overflow-x-hidden">
+    <section className="relative py-12 sm:py-16 lg:py-20 min-h-0 overflow-y-visible">
       {/* Main Hero Grid - Split Layout */}
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-x-hidden">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center overflow-x-hidden">
+        <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Column - Main Content */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="relative z-10 space-y-6 sm:space-y-8 w-full min-w-0"
-            style={{
-              willChange: "opacity, transform",
-              transform: "translateZ(0)",
-            }}
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+            className="lg:col-span-7 relative z-10 space-y-8 min-w-0"
           >
             {/* Heading */}
-            <div className="space-y-4">
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] max-w-full">
-                <span className="block">Master AI With</span>
-                <div className="block mt-2">
+            <div className="space-y-6">
+              <h1 className="font-display text-5xl md:text-6xl xl:text-7xl font-black tracking-tight leading-[1.1] max-w-full">
+                <span className="block text-foreground/90">Master AI With</span>
+                <span className="block mt-2">
                   <TypingAnimation
                     words={typingWords}
-                    className="text-primary"
-                    typingSpeed={80}
-                    deletingSpeed={40}
-                    pauseDuration={2500}
+                    className="text-primary drop-shadow-[0_4px_12px_hsl(var(--primary)/0.3)]"
+                    typingSpeed={60}
+                    deletingSpeed={30}
+                    pauseDuration={3000}
                   />
-                </div>
+                </span>
               </h1>
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4, delay: 0.1 }}
-                className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 text-lg sm:text-xl font-semibold text-muted-foreground"
-                style={{ willChange: "opacity" }}
-              >
+              <div className="flex flex-wrap items-center gap-6 text-xs font-black tracking-[0.3em] uppercase text-muted-foreground/40">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span className="italic">Not Random Tutorials</span>
+                  <Sparkles className="h-4 w-4 text-primary/60" />
+                  <span>Curated Curriculum</span>
                 </div>
-                <span className="text-primary hidden sm:inline">—</span>
-                <span className="text-foreground">Real Learning Paths</span>
-              </motion.div>
+                <div className="h-1.5 w-1.5 rounded-full bg-primary/20" />
+                <div className="flex items-center gap-2 text-foreground/60">
+                  <Users className="h-4 w-4" />
+                  <span>Elite Ecosystem</span>
+                </div>
+              </div>
             </div>
 
             {/* Description */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-              className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-full lg:max-w-2xl break-words"
-              style={{ willChange: "opacity" }}
-            >
-              Learn AI for business, content, apps, and productivity through structured courses, tracked progress, and instant access after purchase.
-            </motion.p>
-
-            {/* Tagline Badge */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
-              className="inline-flex items-center gap-2 sm:gap-3 text-sm sm:text-base font-medium text-primary bg-primary/5 dark:bg-primary/10 px-4 sm:px-6 py-2 sm:py-3 rounded-full border border-primary/20 max-w-full"
-              style={{ willChange: "opacity" }}
-            >
-              <Zap className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="tracking-wide break-words">The future belongs to those who master AI</span>
-            </motion.div>
+            <p className="text-xl text-muted-foreground/80 leading-relaxed max-w-2xl font-medium border-l-2 border-primary/20 pl-6">
+              Accelerate your engineering trajectory with practitioner-led AI modules. We provide the blueprint, the tools, and the terminal access you need to lead.
+            </p>
 
             {/* CTA Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 sm:pt-4"
-            >
-              <Link href="/courses" className="inline-block w-full sm:w-auto">
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-300 group"
-                >
-                  Browse Courses
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            <div className="flex flex-col sm:flex-row gap-5 pt-4">
+              <Link href="/courses" className="flex-1 sm:flex-none">
+                <Button size="lg" variant="premium" className="w-full sm:px-10 h-14 rounded-2xl text-lg shadow-2xl shadow-primary/20 group">
+                  Explore Mastery
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-2" />
                 </Button>
               </Link>
-              <Link href="/learning-paths" className="inline-block w-full sm:w-auto">
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 h-auto bg-gradient-to-r from-primary/80 to-primary/60 hover:from-primary/70 hover:to-primary/50 shadow-md hover:shadow-lg transition-all duration-300"
-                >
-                  View Learning Paths
+              <Link href="/learning-paths" className="flex-1 sm:flex-none">
+                <Button size="lg" variant="outline" className="w-full sm:px-10 h-14 rounded-2xl border-2 font-bold hover:bg-accent/50 transition-all">
+                  Learning Paths
                 </Button>
               </Link>
-            </motion.div>
+            </div>
 
-            {/* Trust Indicators */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="flex flex-wrap items-center gap-3 sm:gap-4 pt-4 sm:pt-6 text-xs sm:text-sm text-muted-foreground"
-            >
-              <div className="flex items-center gap-2 bg-card/50 dark:bg-card/30 px-3 sm:px-4 py-2 rounded-full border border-border/30">
-                <Lock className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-                <span>Secure checkout</span>
-              </div>
-              <div className="flex items-center gap-2 bg-card/50 dark:bg-card/30 px-3 sm:px-4 py-2 rounded-full border border-border/30">
-                <BarChart className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-                <span>Progress tracked</span>
-              </div>
-              <div className="flex items-center gap-2 bg-card/50 dark:bg-card/30 px-3 sm:px-4 py-2 rounded-full border border-border/30">
-                <GraduationCap className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-                <span>Lifetime access</span>
-              </div>
-            </motion.div>
+            {/* Trust Badges */}
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-10 border-t border-border/50">
+              {[
+                { icon: Lock, label: "Verified Access" },
+                { icon: BarChart, label: "Live Analytics" },
+                { icon: GraduationCap, label: "Lifetime Rights" },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 hover:text-primary/60 transition-colors cursor-default">
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </div>
+              ))}
+            </div>
           </motion.div>
 
-          {/* Right Column - Stats Cards */}
+          {/* Right Column - Artistic Stats Grid */}
           {stats.totalCourses > 0 && (
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
+              initial={{ opacity: 0, x: 40 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative z-10 hidden lg:block"
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.23, 1, 0.32, 1] }}
+              className="lg:col-span-5 relative hidden lg:block"
             >
-              <div className="grid grid-cols-2 gap-4 xl:gap-6">
-                {/* Stat Card 1 - Courses */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.7 }}
-                  className="bg-card/60 dark:bg-card/40 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:scale-105 hover:shadow-2xl transition-all duration-300"
-                >
-                  <div className="flex flex-col items-center text-center space-y-3">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
-                      <BookOpen className="h-7 w-7 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-4xl font-bold text-foreground">
-                        {stats.totalCourses}
-                      </p>
-                      <p className="text-sm text-muted-foreground font-medium">Courses Available</p>
-                    </div>
-                  </div>
-                </motion.div>
+              {/* Background Glows */}
+              <div className="absolute -inset-10 bg-primary/10 blur-[100px] rounded-full opacity-50 animate-pulse" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[120%] w-[120%] bg-premium-gradient opacity-[0.03] rounded-full blur-[80px]" />
 
-                {/* Stat Card 2 - Students */}
-                {stats.totalStudents >= 50 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.8 }}
-                    className="bg-card/60 dark:bg-card/40 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:scale-105 hover:shadow-2xl transition-all duration-300"
-                  >
-                    <div className="flex flex-col items-center text-center space-y-3">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
-                        <Users className="h-7 w-7 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-4xl font-bold text-foreground">
-                          {stats.totalStudents.toLocaleString()}
-                        </p>
-                        <p className="text-sm text-muted-foreground font-medium">Active Learners</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
+              <div className="grid grid-cols-2 gap-5 relative z-10">
+                {/* Stats Cards with deliberate artistic "off-grid" feel */}
+                <div className="space-y-5 pt-12">
+                  <Card glass className="p-8 border-white/10 hover:border-primary/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group">
+                    <BookOpen className="h-10 w-10 text-primary mb-6 group-hover:scale-110 transition-transform" />
+                    <p className="text-4xl font-black tracking-tighter mb-1">{stats.totalCourses}</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Expert Modules</p>
+                  </Card>
 
-                {/* Stat Card 3 - Lessons */}
-                {stats.totalLessons > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.9 }}
-                    className="bg-card/60 dark:bg-card/40 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:scale-105 hover:shadow-2xl transition-all duration-300"
-                  >
-                    <div className="flex flex-col items-center text-center space-y-3">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
-                        <GraduationCap className="h-7 w-7 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-4xl font-bold text-foreground">
-                          {stats.totalLessons.toLocaleString()}
-                        </p>
-                        <p className="text-sm text-muted-foreground font-medium">Lessons</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
+                  {stats.totalReviews > 0 && (
+                    <Card glass className="p-8 border-white/10 hover:border-amber-500/20 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group">
+                      <Star className="h-10 w-10 text-amber-500 fill-amber-500 mb-6 group-hover:rotate-12 transition-transform" />
+                      <p className="text-4xl font-black tracking-tighter mb-1">{stats.averageRating.toFixed(1)}</p>
+                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Average Rating</p>
+                    </Card>
+                  )}
+                </div>
 
-                {/* Stat Card 4 - Rating */}
-                {stats.totalReviews > 0 && stats.averageRating > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 1.0 }}
-                    className="bg-card/60 dark:bg-card/40 backdrop-blur-xl border border-border/50 rounded-2xl p-6 hover:scale-105 hover:shadow-2xl transition-all duration-300"
-                  >
-                    <div className="flex flex-col items-center text-center space-y-3">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
-                        <Star className="h-7 w-7 text-primary fill-primary" />
-                      </div>
-                      <div>
-                        <p className="text-4xl font-bold text-foreground">
-                          {stats.averageRating.toFixed(1)}
-                        </p>
-                        <p className="text-sm text-muted-foreground font-medium">{stats.totalReviews} Reviews</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
+                <div className="space-y-5">
+                  {stats.totalStudents >= 50 && (
+                    <Card glass className="p-8 border-white/10 hover:border-primary/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group">
+                      <Users className="h-10 w-10 text-primary mb-6 group-hover:scale-110 transition-transform" />
+                      <p className="text-4xl font-black tracking-tighter mb-1">{stats.totalStudents.toLocaleString()}+</p>
+                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Engineers Trained</p>
+                    </Card>
+                  )}
+
+                  {stats.totalLessons > 0 && (
+                    <Card glass className="p-8 border-white/10 hover:border-primary/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group">
+                      <Zap className="h-10 w-10 text-primary mb-6 group-hover:scale-110 transition-transform" />
+                      <p className="text-4xl font-black tracking-tighter mb-1">{stats.totalLessons.toLocaleString()}</p>
+                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Learning Units</p>
+                    </Card>
+                  )}
+                </div>
               </div>
             </motion.div>
           )}
@@ -337,7 +253,7 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="mt-16 sm:mt-24 pt-8 border-t border-border/50"
+            className="mt-24 sm:mt-32 pt-12 border-t border-border/50"
           >
             <p className="text-center text-sm font-semibold text-muted-foreground/60 mb-8 uppercase tracking-[0.2em]">
               Trusted by professionals at

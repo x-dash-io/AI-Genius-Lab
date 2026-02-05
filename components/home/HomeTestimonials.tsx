@@ -46,7 +46,7 @@ export function HomeTestimonials() {
                                         <Star key={i} className="h-4 w-4 text-amber-500 fill-amber-500" />
                                     ))}
                                 </div>
-                                <p className="text-muted-foreground leading-relaxed italic">
+                                <p className="text-muted-foreground leading-relaxed">
                                     &quot;{testimonial.text}&quot;
                                 </p>
                             </div>

@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useCallback, useState, useTransition, useEffect } from "react";
+import { motion } from "framer-motion";
 import { SearchInput } from "@/components/ui/search-input";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { X, SlidersHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 type Category = {
   id: string;
@@ -26,12 +28,12 @@ export function CourseFilters() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  
+
   const currentSearch = searchParams.get("search") || "";
   const currentCategory = searchParams.get("category") || "all";
   const currentPrice = searchParams.get("price") || "all";
   const currentSort = searchParams.get("sort") || "newest";
-  
+
   const [category, setCategory] = useState(currentCategory);
   const [price, setPrice] = useState(currentPrice);
   const [sortBy, setSortBy] = useState(currentSort);
@@ -140,121 +142,139 @@ export function CourseFilters() {
   const showLoading = isPending && isFiltering;
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
-          <SearchInput
-            placeholder="Search courses..."
-            value={currentSearch}
-            onSearch={handleSearch}
-            isLoading={showLoading}
-            debounceMs={400}
-          />
+    <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row gap-4">
+        {/* Search Container - Refined */}
+        <div className="flex-1 min-w-0">
+          <div className="relative group">
+            <SearchInput
+              placeholder="Search by keyword, topic, or instructor..."
+              value={currentSearch}
+              onSearch={handleSearch}
+              isLoading={showLoading}
+              debounceMs={400}
+              className="w-full h-12 bg-accent/20 border-border/50 rounded-xl focus:bg-accent/40 transition-all duration-300"
+            />
+          </div>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          <Select value={category} onValueChange={handleCategoryChange} disabled={isLoadingCategories}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={isLoadingCategories ? "Loading..." : "All Categories"} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categories.map((cat) => (
-                <SelectItem key={cat.slug} value={cat.slug}>
-                  {cat.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={price} onValueChange={handlePriceChange}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Price" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Prices</SelectItem>
-              <SelectItem value="free">Free</SelectItem>
-              <SelectItem value="paid">Paid</SelectItem>
-              <SelectItem value="under-50">Under $50</SelectItem>
-              <SelectItem value="over-50">Over $50</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={sortBy} onValueChange={handleSortChange}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="oldest">Oldest</SelectItem>
-              <SelectItem value="price-low">Price: Low to High</SelectItem>
-              <SelectItem value="price-high">Price: High to Low</SelectItem>
-              <SelectItem value="title">Title A-Z</SelectItem>
-            </SelectContent>
-          </Select>
+
+        {/* Filters Group - Glassmorphic Controls */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-3 p-1 rounded-2xl glass border-white/5 bg-accent/5">
+            <Select value={category} onValueChange={handleCategoryChange} disabled={isLoadingCategories}>
+              <SelectTrigger className="w-[180px] h-10 border-none bg-transparent hover:bg-accent/40 rounded-xl font-bold text-xs uppercase tracking-widest transition-colors">
+                <SelectValue placeholder={isLoadingCategories ? "Loading..." : "Category"} />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl glass border-white/10 p-1">
+                <SelectItem value="all" className="rounded-lg font-bold">All Categories</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.slug} value={cat.slug} className="rounded-lg font-medium">
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className="w-px h-6 bg-border/30 hidden sm:block" />
+
+            <Select value={price} onValueChange={handlePriceChange}>
+              <SelectTrigger className="w-[140px] h-10 border-none bg-transparent hover:bg-accent/40 rounded-xl font-bold text-xs uppercase tracking-widest transition-colors">
+                <SelectValue placeholder="Price" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl glass border-white/10 p-1">
+                <SelectItem value="all" className="rounded-lg font-bold">Any Price</SelectItem>
+                <SelectItem value="free" className="rounded-lg font-medium">Complimentary</SelectItem>
+                <SelectItem value="paid" className="rounded-lg font-medium">Premium Access</SelectItem>
+                <SelectItem value="under-50" className="rounded-lg font-medium">Under $50</SelectItem>
+                <SelectItem value="over-50" className="rounded-lg font-medium">$50 & Above</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <div className="w-px h-6 bg-border/30 hidden md:block" />
+
+            <Select value={sortBy} onValueChange={handleSortChange}>
+              <SelectTrigger className="w-[150px] h-10 border-none bg-transparent hover:bg-accent/40 rounded-xl font-bold text-xs uppercase tracking-widest transition-colors">
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl glass border-white/10 p-1">
+                <SelectItem value="newest" className="rounded-lg font-medium tracking-tight">Recently Added</SelectItem>
+                <SelectItem value="oldest" className="rounded-lg font-medium tracking-tight">Earliest First</SelectItem>
+                <SelectItem value="price-low" className="rounded-lg font-medium tracking-tight">Price: Low to High</SelectItem>
+                <SelectItem value="price-high" className="rounded-lg font-medium tracking-tight">Price: High to Low</SelectItem>
+                <SelectItem value="title" className="rounded-lg font-medium tracking-tight">Alphabetical: A-Z</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {hasFilters && (
             <Button
-              variant="outline"
+              variant="ghost"
               onClick={handleClearAll}
               disabled={showLoading}
-              size="icon"
-              title="Clear all filters"
+              className="h-12 w-12 rounded-xl bg-accent/20 hover:bg-destructive/10 hover:text-destructive border border-transparent hover:border-destructive/20 transition-all duration-300 group"
+              title="Reset everything"
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5 transition-transform group-hover:rotate-90" />
             </Button>
           )}
         </div>
       </div>
-      
-      {/* Active filters display */}
+
+      {/* Active filters display - Minimalist Pill System */}
       {hasFilters && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">Active filters:</span>
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-3 flex-wrap animate-in fade-in slide-in-from-top-2"
+        >
+          <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">
+            <SlidersHorizontal className="h-3 w-3" />
+            <span>Refined By</span>
+          </div>
+
           {currentSearch && (
-            <Badge variant="secondary" className="gap-1">
-              Search: "{currentSearch}"
+            <Badge variant="secondary" className="pl-3 pr-1 py-1 gap-2 rounded-full font-bold text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
+              <span className="opacity-60 font-medium">Search:</span>
+              <span>{currentSearch}</span>
               <button
                 onClick={() => handleSearch("")}
-                className="ml-1 hover:text-foreground"
+                className="p-1 rounded-full hover:bg-primary/20 transition-colors"
+                aria-label="Remove search filter"
               >
                 <X className="h-3 w-3" />
               </button>
             </Badge>
           )}
+
           {currentCategory !== "all" && (
-            <Badge variant="secondary" className="gap-1">
-              {categories.find((c) => c.slug === currentCategory)?.name || currentCategory}
+            <Badge variant="secondary" className="pl-3 pr-1 py-1 gap-2 rounded-full font-bold text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
+              <span className="opacity-60 font-medium">Topic:</span>
+              <span>{categories.find((c) => c.slug === currentCategory)?.name || currentCategory}</span>
               <button
                 onClick={() => handleCategoryChange("all")}
-                className="ml-1 hover:text-foreground"
+                className="p-1 rounded-full hover:bg-primary/20 transition-colors"
+                aria-label="Remove category filter"
               >
                 <X className="h-3 w-3" />
               </button>
             </Badge>
           )}
+
           {currentPrice !== "all" && (
-            <Badge variant="secondary" className="gap-1">
-              Price: {currentPrice}
+            <Badge variant="secondary" className="pl-3 pr-1 py-1 gap-2 rounded-full font-bold text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
+              <span className="opacity-60 font-medium">Pricing:</span>
+              <span className="capitalize">{currentPrice.replace("-", " ")}</span>
               <button
                 onClick={() => handlePriceChange("all")}
-                className="ml-1 hover:text-foreground"
+                className="p-1 rounded-full hover:bg-primary/20 transition-colors"
+                aria-label="Remove price filter"
               >
                 <X className="h-3 w-3" />
               </button>
             </Badge>
           )}
-          {currentSort !== "newest" && (
-            <Badge variant="secondary" className="gap-1">
-              Sort: {currentSort}
-              <button
-                onClick={() => handleSortChange("newest")}
-                className="ml-1 hover:text-foreground"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          )}
-        </div>
+        </motion.div>
       )}
-      
     </div>
   );
 }

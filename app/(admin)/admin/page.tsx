@@ -192,20 +192,20 @@ export default async function AdminDashboardPage() {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
               <Link href="/admin/courses/new">
-                <Button className="w-full" size="lg">
-                  <BookOpen className="mr-2 h-4 w-4" />
+                <Button variant="premium" className="w-full h-14 rounded-2xl shadow-xl shadow-primary/20 text-lg group border border-white/10" size="lg">
+                  <BookOpen className="mr-3 h-5 w-5 group-hover:scale-110 transition-transform" />
                   Create New Course
                 </Button>
               </Link>
               <Link href="/admin/learning-paths/new">
-                <Button variant="outline" className="w-full" size="lg">
-                  <GraduationCap className="mr-2 h-4 w-4" />
+                <Button variant="outline" className="w-full h-14 rounded-2xl border-2 font-bold hover:bg-accent/50 text-lg group" size="lg">
+                  <GraduationCap className="mr-3 h-5 w-5 group-hover:scale-110 transition-transform" />
                   Create Learning Path
                 </Button>
               </Link>
-              <Link href="/admin/coupons">
-                <Button variant="secondary" className="w-full" size="lg">
-                  <DollarSign className="mr-2 h-4 w-4" />
+              <Link href="/admin/coupons" className="md:col-span-2">
+                <Button variant="secondary" className="w-full h-14 rounded-2xl font-bold bg-accent/30 hover:bg-accent/50 text-lg group border border-border/50" size="lg">
+                  <DollarSign className="mr-3 h-5 w-5 group-hover:scale-110 transition-transform" />
                   Manage Coupons
                 </Button>
               </Link>
