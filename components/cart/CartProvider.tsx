@@ -8,19 +8,24 @@ import { safeJsonParse } from "@/lib/utils";
 interface CartContextType {
   cart: Cart;
   isLoading: boolean;
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
   addToCart: (courseId: string) => Promise<void>;
   removeFromCart: (courseId: string) => Promise<void>;
   updateQuantity: (courseId: string, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
   refreshCart: () => Promise<void>;
   removePurchasedItems: (courseIds: string[]) => Promise<void>;
+  applyCoupon: (code: string) => Promise<{ error?: string }>;
+  removeCoupon: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [cart, setCart] = useState<Cart>({ items: [], totalCents: 0, itemCount: 0 });
+  const [cart, setCart] = useState<Cart>({ items: [], totalCents: 0, itemCount: 0, couponCode: null, discountTotal: 0, finalTotal: 0 });
   const [isLoading, setIsLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   const fetchCart = useCallback(async () => {
     try {
@@ -60,6 +65,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         description: "Course added to your shopping cart",
         variant: "success",
       });
+      setIsOpen(true);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to add to cart";
       toast({
@@ -121,6 +127,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         description: "All items have been removed from your cart",
         variant: "success",
       });
+      setIsOpen(false);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to clear cart";
       toast({
@@ -182,17 +189,69 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [fetchCart]);
 
+  const applyCoupon = useCallback(async (code: string) => {
+    try {
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "applyCoupon", couponCode: code }),
+      });
+      const data = await safeJsonParse(response);
+
+      if (!response.ok) {
+        return { error: data.error || "Failed to apply coupon" };
+      }
+
+      setCart(data);
+      toast({
+        title: "Coupon applied!",
+        description: `Discount applied successfully`,
+        variant: "success",
+      });
+      return {};
+    } catch (error) {
+      return { error: "Failed to apply coupon" };
+    }
+  }, []);
+
+  const removeCoupon = useCallback(async () => {
+    try {
+      const response = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "removeCoupon" }),
+      });
+      const data = await safeJsonParse(response);
+      setCart(data);
+      toast({
+        title: "Coupon removed",
+        description: "Discount code has been removed",
+        variant: "success",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to remove coupon",
+        variant: "destructive",
+      });
+    }
+  }, []);
+
   return (
     <CartContext.Provider
       value={{
         cart,
         isLoading,
+        isOpen,
+        setIsOpen,
         addToCart,
         removeFromCart,
         updateQuantity,
         clearCart,
         refreshCart,
         removePurchasedItems,
+        applyCoupon,
+        removeCoupon,
       }}
     >
       {children}

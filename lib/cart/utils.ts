@@ -8,16 +8,35 @@ export async function getCartFromCookies(): Promise<Cart> {
   try {
     const cookieStore = await cookies();
     const cartCookie = cookieStore.get(CART_COOKIE_NAME);
-    
+
     if (!cartCookie?.value) {
-      return { items: [], totalCents: 0, itemCount: 0 };
+      return { items: [], totalCents: 0, itemCount: 0, couponCode: null, discountTotal: 0, finalTotal: 0 };
     }
 
     try {
       const parsed = JSON.parse(cartCookie.value);
-      // Ensure parsed value is an array
-      const items: CartItem[] = Array.isArray(parsed) ? parsed : [];
-      // Ensure each item has quantity (for backward compatibility)
+
+      // Handle legacy array format
+      if (Array.isArray(parsed)) {
+        const normalizedItems = parsed.map((item: any) => ({
+          ...item,
+          quantity: item.quantity || 1,
+          availableInventory: item.availableInventory ?? null,
+        }));
+        const totalCents = normalizedItems.reduce((sum: number, item: any) => sum + (item.priceCents || 0) * (item.quantity || 1), 0);
+        const itemCount = normalizedItems.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0);
+        return {
+          items: normalizedItems,
+          totalCents,
+          itemCount,
+          couponCode: null,
+          discountTotal: 0,
+          finalTotal: totalCents
+        };
+      }
+
+      // Handle new object format
+      const items: CartItem[] = Array.isArray(parsed.items) ? parsed.items : [];
       const normalizedItems = items.map(item => ({
         ...item,
         quantity: item.quantity || 1,
@@ -25,26 +44,49 @@ export async function getCartFromCookies(): Promise<Cart> {
       }));
       const totalCents = normalizedItems.reduce((sum, item) => sum + (item.priceCents || 0) * (item.quantity || 1), 0);
       const itemCount = normalizedItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+
       return {
         items: normalizedItems,
         totalCents,
         itemCount,
+        couponCode: parsed.couponCode || null,
+        discountTotal: parsed.discountTotal || 0, // Ensure discountTotal is read
+        finalTotal: parsed.finalTotal !== undefined ? parsed.finalTotal : (totalCents - (parsed.discountTotal || 0)),
       };
     } catch (parseError) {
       console.error("Error parsing cart cookie:", parseError);
-      return { items: [], totalCents: 0, itemCount: 0 };
+      return { items: [], totalCents: 0, itemCount: 0, couponCode: null, discountTotal: 0, finalTotal: 0 };
     }
   } catch (error) {
     console.error("Error getting cart from cookies:", error);
-    return { items: [], totalCents: 0, itemCount: 0 };
+    return { items: [], totalCents: 0, itemCount: 0, couponCode: null, discountTotal: 0, finalTotal: 0 };
   }
 }
 
-export async function setCartInCookies(items: CartItem[]): Promise<void> {
+export async function setCartInCookies(cartOrItems: Cart | CartItem[]): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.set(CART_COOKIE_NAME, JSON.stringify(items), {
+
+  let dataToStore;
+  if (Array.isArray(cartOrItems)) {
+    // Convert array to object format
+    const items = cartOrItems;
+    const totalCents = items.reduce((sum, item) => sum + item.priceCents * item.quantity, 0);
+    const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+    dataToStore = {
+      items,
+      totalCents,
+      itemCount,
+      couponCode: null,
+      discountTotal: 0,
+      finalTotal: totalCents
+    };
+  } else {
+    dataToStore = cartOrItems;
+  }
+
+  cookieStore.set(CART_COOKIE_NAME, JSON.stringify(dataToStore), {
     maxAge: CART_COOKIE_MAX_AGE,
-    httpOnly: false, // Allow client-side access for cart updates
+    httpOnly: false, // Allow client-side access
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
@@ -52,14 +94,12 @@ export async function setCartInCookies(items: CartItem[]): Promise<void> {
 }
 
 export function addItemToCart(currentItems: CartItem[], newItem: CartItem): CartItem[] {
-  // Check if item already exists - if so, increase quantity
   const existingIndex = currentItems.findIndex((item) => item.courseId === newItem.courseId);
   if (existingIndex >= 0) {
     const updated = [...currentItems];
     const existingItem = updated[existingIndex];
-    // Check inventory limits
     if (existingItem.availableInventory !== null && existingItem.quantity >= existingItem.availableInventory) {
-      return currentItems; // Can't add more, return unchanged
+      return currentItems;
     }
     updated[existingIndex] = {
       ...existingItem,
@@ -74,14 +114,13 @@ export function updateItemQuantity(currentItems: CartItem[], courseId: string, n
   if (newQuantity <= 0) {
     return removeItemFromCart(currentItems, courseId);
   }
-  
+
   const updated = [...currentItems];
   const itemIndex = updated.findIndex((item) => item.courseId === courseId);
   if (itemIndex >= 0) {
     const item = updated[itemIndex];
-    // Check inventory limits
     if (item.availableInventory !== null && newQuantity > item.availableInventory) {
-      return currentItems; // Can't exceed inventory, return unchanged
+      return currentItems;
     }
     updated[itemIndex] = {
       ...item,
@@ -95,7 +134,13 @@ export function removeItemFromCart(currentItems: CartItem[], courseId: string): 
   return currentItems.filter((item) => item.courseId !== courseId);
 }
 
-export function clearCart(): CartItem[] {
-  return [];
+export function clearCart(): Cart {
+  return {
+    items: [],
+    totalCents: 0,
+    itemCount: 0,
+    couponCode: null,
+    discountTotal: 0,
+    finalTotal: 0,
+  };
 }
-

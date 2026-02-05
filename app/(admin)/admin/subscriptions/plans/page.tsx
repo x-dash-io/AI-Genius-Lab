@@ -10,6 +10,8 @@ import { Loader2, RefreshCw, CreditCard, Edit } from "lucide-react";
 import { revalidatePath } from "next/cache";
 import { SubscriptionPlanForm } from "@/components/admin/SubscriptionPlanForm";
 import { SyncPlansButton } from "@/components/admin/SyncPlansButton";
+import { DeleteButton } from "@/components/admin/DeleteButton";
+import { deleteSubscriptionPlanAction } from "@/app/actions/delete-actions";
 
 async function syncPlansAction() {
   "use server";
@@ -76,6 +78,13 @@ async function PlansList() {
                     Edit
                   </Button>
                 </Link>
+                <DeleteButton
+                  id={plan.id}
+                  title={plan.name}
+                  description="This will permanently delete the subscription plan. Plans with active subscribers cannot be deleted."
+                  onDelete={deleteSubscriptionPlanAction}
+                  disabled={plan.isActive} // Optional: discourage deleting active plans, but let's just rely on the server check mostly. Actually, maybe better to NOT disable, so they can try and get the error message if it has subs.
+                />
               </div>
             </div>
           </CardHeader>

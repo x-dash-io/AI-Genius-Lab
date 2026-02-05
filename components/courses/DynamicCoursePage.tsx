@@ -5,10 +5,10 @@ import { useCourseProgress } from "@/contexts/CourseProgressContext";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  BookOpen, 
-  CheckCircle2, 
-  PlayCircle, 
+import {
+  BookOpen,
+  CheckCircle2,
+  PlayCircle,
   Clock,
   ChevronRight,
   Award,
@@ -20,6 +20,7 @@ interface Course {
   id: string;
   slug: string;
   title: string;
+  imageUrl: string | null;
   sections: Array<{
     id: string;
     title: string;
@@ -100,10 +101,19 @@ export function DynamicCoursePage({ course, initialProgress }: DynamicCoursePage
                 Course
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2">{course.title}</h1>
-            <p className="text-muted-foreground">
-              Continue your learning path with structured sections and lessons.
-            </p>
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              {course.imageUrl && (
+                <div className="w-full md:w-32 lg:w-40 aspect-video rounded-lg overflow-hidden border shadow-sm flex-shrink-0">
+                  <img src={course.imageUrl} alt={course.title} className="w-full h-full object-cover" />
+                </div>
+              )}
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold mb-2">{course.title}</h1>
+                <p className="text-muted-foreground">
+                  Continue your learning path with structured sections and lessons.
+                </p>
+              </div>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {localProgress.overallProgress === 100 && (
@@ -146,8 +156,8 @@ export function DynamicCoursePage({ course, initialProgress }: DynamicCoursePage
           const sectionCompleted = sectionLessons.filter(l =>
             progressMap.get(l.id)?.completedAt != null
           ).length;
-          const sectionProgress = sectionLessons.length > 0 
-            ? Math.round((sectionCompleted / sectionLessons.length) * 100) 
+          const sectionProgress = sectionLessons.length > 0
+            ? Math.round((sectionCompleted / sectionLessons.length) * 100)
             : 0;
 
           return (
@@ -253,7 +263,7 @@ export function DynamicCoursePage({ course, initialProgress }: DynamicCoursePage
             </div>
           );
         })}
-        
+
         {course.sections.length === 0 && (
           <div className="rounded-xl border bg-card p-8 text-center">
             <p className="text-muted-foreground">

@@ -175,6 +175,19 @@ export function CourseCreationForm({
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="imageUrl">Image URL</Label>
+                <Input
+                  id="imageUrl"
+                  name="imageUrl"
+                  placeholder="https://example.com/image.jpg"
+                  disabled={isCreatingCourse}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Provide a URL for the course preview image.
+                </p>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
                 <Select name="category" disabled={isCreatingCourse || isLoadingCategories}>
                   <SelectTrigger id="category">

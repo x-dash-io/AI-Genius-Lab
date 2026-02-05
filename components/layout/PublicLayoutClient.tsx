@@ -19,6 +19,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/components/cart/CartProvider";
+import { SocialLinks } from "@/lib/settings";
 import {
   Menu,
   X,
@@ -62,8 +63,10 @@ const publicNavigation = [...primaryNavigation, ...resourcesNavigation];
 
 export function PublicLayoutClient({
   children,
+  socialLinks,
 }: {
   children: React.ReactNode;
+  socialLinks?: SocialLinks;
 }) {
   const { data: session } = useSession();
   const pathname = usePathname();
@@ -296,7 +299,7 @@ export function PublicLayoutClient({
               </motion.div>
             </div>
           </main>
-          <Footer />
+          <Footer socialLinks={socialLinks} />
         </div>
       </div>
 
@@ -505,7 +508,7 @@ export function PublicLayoutClient({
             {children}
           </motion.div>
         </main>
-        <Footer />
+        <Footer socialLinks={socialLinks} />
       </div>
     </div>
   );

@@ -32,7 +32,7 @@ export async function getCourseReviewStats(courseId: string) {
     prisma.review.groupBy({
       by: ["rating"],
       where: { courseId },
-      _count: { _all: true },
+      _count: { id: true },
     }),
   ]);
 
@@ -51,7 +51,7 @@ export async function getCourseReviewStats(courseId: string) {
   distribution.forEach((group) => {
     const rating = group.rating as keyof typeof ratingDistribution;
     if (rating >= 1 && rating <= 5) {
-      ratingDistribution[rating] = group._count._all;
+      ratingDistribution[rating] = group._count.id;
     }
   });
 

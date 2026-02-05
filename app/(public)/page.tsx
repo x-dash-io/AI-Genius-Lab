@@ -6,10 +6,13 @@ import { LaunchCurriculum } from "@/components/home/LaunchCurriculum";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { SocialProof } from "@/components/home/SocialProof";
 import { SecuritySection } from "@/components/home/SecuritySection";
+import { HomeTestimonials } from "@/components/home/HomeTestimonials";
+import { HomeFeaturedCourses } from "@/components/home/HomeFeaturedCourses";
 import { FinalCTA } from "@/components/home/FinalCTA";
 import { HeroBackgroundBlobs } from "@/components/ui/hero-background-blobs";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { getHomepageStats } from "@/lib/homepage-stats";
+import { getHeroLogos } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -28,12 +31,19 @@ export const metadata: Metadata = generateSEOMetadata({
 
 export default async function LandingPage() {
   // await connection(); // Not available in Next.js 14
-  // Fetch stats with error handling - page will still render if DB is unavailable
+  // Fetch stats and logos
   let stats;
+  let heroLogos: any[] = [];
+
   try {
-    stats = await getHomepageStats();
+    const [statsResult, logosResult] = await Promise.all([
+      getHomepageStats(),
+      getHeroLogos().catch(() => []) // Fallback to empty if fails
+    ]);
+    stats = statsResult;
+    heroLogos = logosResult;
   } catch (error) {
-    console.error("Failed to fetch homepage stats:", error);
+    console.error("Failed to fetch homepage data:", error);
     // Use empty stats as fallback
     stats = {
       totalCourses: 0,
@@ -43,17 +53,20 @@ export default async function LandingPage() {
       totalReviews: 0,
       categoriesWithCourses: [],
     };
+    heroLogos = [];
   }
 
   return (
     <div className="relative overflow-x-hidden">
       <HeroBackgroundBlobs />
       <div className="grid gap-16 md:gap-24 relative z-10 overflow-x-hidden">
-        <LandingHero stats={stats} />
+        <LandingHero stats={stats} heroLogos={heroLogos} />
         <TrustSection stats={stats} />
+        <HomeFeaturedCourses courses={stats.categoriesWithCourses.flatMap(c => c.courses).slice(0, 6)} />
         <LaunchCurriculum stats={stats} />
         <HowItWorks />
         <SocialProof stats={stats} />
+        <HomeTestimonials />
         <SecuritySection />
         <FinalCTA />
       </div>

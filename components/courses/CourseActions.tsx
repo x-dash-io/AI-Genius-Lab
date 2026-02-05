@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
+import { useCart } from "@/components/cart/CartProvider";
 import { CheckCircle, BookOpen, Loader2 } from "lucide-react";
 
 interface CourseActionsProps {
@@ -22,6 +24,8 @@ export function CourseActions({
   tier,
   inventory,
 }: CourseActionsProps) {
+  const router = useRouter();
+  const { addToCart, cart } = useCart();
   const { data: session, status } = useSession();
   const [isOwned, setIsOwned] = useState(false);
   const [subscription, setSubscription] = useState<any>(null);
@@ -30,7 +34,7 @@ export function CourseActions({
   useEffect(() => {
     async function checkOwnership() {
       if (status === "loading") return;
-      
+
       if (!session?.user) {
         setIsChecking(false);
         setIsOwned(false);
@@ -142,11 +146,27 @@ export function CourseActions({
         inventory={inventory}
         size="lg"
       />
-      <Link href={`/checkout?course=${courseSlug}`}>
-        <Button size="lg" variant="outline">
-          Buy Now · ${(priceCents / 100).toFixed(2)}
-        </Button>
-      </Link>
+      <Button
+        size="lg"
+        variant="outline"
+        onClick={async () => {
+          try {
+            // Check if already in cart to avoid duplicate/quantity increase
+            const isInCart = cart.items.some((item) => item.courseId === courseId);
+
+            if (!isInCart) {
+              await addToCart(courseId);
+            }
+            // Then redirect to cart
+            router.push("/cart");
+          } catch (error) {
+            // Error already handled by toast in addToCart, but we might want to stay here
+          }
+        }}
+        disabled={isChecking}
+      >
+        Buy Now · ${(priceCents / 100).toFixed(2)}
+      </Button>
       <Link href="/courses">
         <Button variant="outline" size="lg">
           Back to catalog

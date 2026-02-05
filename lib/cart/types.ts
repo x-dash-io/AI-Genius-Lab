@@ -12,4 +12,7 @@ export interface Cart {
   items: CartItem[];
   totalCents: number;
   itemCount: number;
+  couponCode?: string | null;
+  discountTotal?: number;
+  finalTotal?: number;
 }

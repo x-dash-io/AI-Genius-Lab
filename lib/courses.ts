@@ -14,6 +14,7 @@ export async function getPublishedCourses() {
         priceCents: true,
         tier: true,
         inventory: true,
+        imageUrl: true,
       },
       orderBy: { createdAt: "desc" },
     });
@@ -33,6 +34,7 @@ export async function getPublishedCoursesByCategory(category: string) {
         priceCents: true,
         tier: true,
         inventory: true,
+        imageUrl: true,
       },
       orderBy: { createdAt: "desc" },
     });
@@ -42,38 +44,39 @@ export async function getPublishedCoursesByCategory(category: string) {
 export async function getCoursePreviewBySlug(slug: string) {
   const course = await withRetry(async () => {
     return prisma.course.findFirst({
-          where: { slug, isPublished: true },
+      where: { slug, isPublished: true },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        description: true,
+        priceCents: true,
+        tier: true,
+        imageUrl: true,
+        sections: {
+          orderBy: { sortOrder: "asc" },
           select: {
             id: true,
-            slug: true,
             title: true,
-            description: true,
-            priceCents: true,
-            tier: true,
-            sections: {
+            lessons: {
               orderBy: { sortOrder: "asc" },
               select: {
                 id: true,
                 title: true,
-                lessons: {
+                isLocked: true,
+                contents: {
                   orderBy: { sortOrder: "asc" },
+                  take: 1,
                   select: {
-                    id: true,
-                    title: true,
-                    isLocked: true,
-                    contents: {
-                      orderBy: { sortOrder: "asc" },
-                      take: 1,
-                      select: {
-                        contentType: true,
-                      },
-                    },
+                    contentType: true,
                   },
                 },
               },
             },
           },
-        });
+        },
+      },
+    });
   });
   return course;
 }

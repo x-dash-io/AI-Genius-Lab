@@ -2,9 +2,22 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { Facebook, Linkedin, Twitter } from "lucide-react";
+import { SocialLinks } from "@/lib/settings";
 
-export function Footer() {
+interface FooterProps {
+  socialLinks?: SocialLinks;
+}
+
+export function Footer({ socialLinks }: FooterProps) {
   const { data: session } = useSession();
+
+  const links = socialLinks || {
+    facebook: "#",
+    linkedin: "#",
+    twitter: "#",
+    tiktok: "#",
+  };
 
   return (
     <footer className="border-t bg-background/50 backdrop-blur-sm">
@@ -15,6 +28,37 @@ export function Footer() {
             <p className="text-sm text-muted-foreground">
               Premium AI learning platform with structured courses and secure commerce.
             </p>
+            <div className="flex gap-4">
+              <Link href={links.facebook} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Facebook className="h-5 w-5" />
+                <span className="sr-only">Facebook</span>
+              </Link>
+              <Link href={links.linkedin} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Linkedin className="h-5 w-5" />
+                <span className="sr-only">LinkedIn</span>
+              </Link>
+              <Link href={links.twitter} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Twitter className="h-5 w-5" />
+                <span className="sr-only">X (Twitter)</span>
+              </Link>
+              <Link href={links.tiktok} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5"
+                >
+                  <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+                </svg>
+                <span className="sr-only">TikTok</span>
+              </Link>
+            </div>
           </div>
           <div className="grid gap-4">
             <h4 className="text-sm font-semibold">Learn</h4>

@@ -20,6 +20,7 @@ export interface HomepageStats {
       title: string;
       slug: string;
       priceCents: number;
+      imageUrl: string | null;
     }>;
   }>;
 }
@@ -93,6 +94,7 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
             title: true,
             slug: true,
             priceCents: true,
+            imageUrl: true,
           },
           take: 5, // Limit to 5 courses per category for homepage
           orderBy: {

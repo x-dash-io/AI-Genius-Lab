@@ -56,7 +56,7 @@ export default async function CourseDetailPage({
       contents: lesson.contents,
     }))
   );
-  
+
   const courseSchema = generateCourseSchema({
     name: course.title,
     description: course.description || `Learn ${course.title}`,
@@ -81,59 +81,68 @@ export default async function CourseDetailPage({
           ]}
         />
         <section className="grid gap-8">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          Course Preview
-        </p>
-        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
-          {course.title}
-        </h1>
-        <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
-          {course.description ??
-            "Detailed course pages will include lesson previews, outcomes, and learning resources."}
-        </p>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Preview Lessons</CardTitle>
-          <CardDescription>
-            Get a preview of what you'll learn in this course
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {lessons.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No lessons yet. Add lessons in the admin panel.
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Course Preview
             </p>
-          ) : (
-            <ul className="grid gap-3">
-              {lessons.slice(0, 5).map((lesson: any) => (
-                <li
-                  key={lesson.id}
-                  className="flex items-center justify-between rounded-lg border p-3"
-                >
-                  <div>
-                    <p className="font-medium">{lesson.title}</p>
-                    <Badge variant="secondary" className="mt-1">
-                      {(lesson.contents?.[0]?.contentType?.toUpperCase()) || "LESSON"}
-                    </Badge>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
-      <CourseActions
-        courseId={course.id}
-        courseSlug={course.slug}
-        priceCents={course.priceCents}
-        tier={course.tier}
-      />
+            <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
+              {course.title}
+            </h1>
+            <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
+              {course.description ??
+                "Detailed course pages will include lesson previews, outcomes, and learning resources."}
+            </p>
+            {course.imageUrl && (
+              <div className="mt-8 aspect-video w-full overflow-hidden rounded-xl border bg-muted shadow-sm">
+                <img
+                  src={course.imageUrl}
+                  alt={course.title}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            )}
+          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Preview Lessons</CardTitle>
+              <CardDescription>
+                Get a preview of what you'll learn in this course
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {lessons.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No lessons yet. Add lessons in the admin panel.
+                </p>
+              ) : (
+                <ul className="grid gap-3">
+                  {lessons.slice(0, 5).map((lesson: any) => (
+                    <li
+                      key={lesson.id}
+                      className="flex items-center justify-between rounded-lg border p-3"
+                    >
+                      <div>
+                        <p className="font-medium">{lesson.title}</p>
+                        <Badge variant="secondary" className="mt-1">
+                          {(lesson.contents?.[0]?.contentType?.toUpperCase()) || "LESSON"}
+                        </Badge>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+          <CourseActions
+            courseId={course.id}
+            courseSlug={course.slug}
+            priceCents={course.priceCents}
+            tier={course.tier}
+          />
 
-      {/* Reviews Section */}
-      <ReviewSection courseId={course.id} initialStats={reviewStats} />
-      </section>
+          {/* Reviews Section */}
+          <ReviewSection courseId={course.id} initialStats={reviewStats} />
+        </section>
       </div>
     </>
   );

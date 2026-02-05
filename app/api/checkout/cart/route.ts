@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createPayPalOrder } from "@/lib/paypal";
 import { isAdmin } from "@/lib/access";
+import { getCartFromCookies } from "@/lib/cart/utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -55,6 +56,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get Cart for Coupon Info
+    const cart = await getCartFromCookies();
+    let coupon = null;
+    let discountTotal = 0;
+
+    if (cart.couponCode) {
+      coupon = await prisma.coupon.findUnique({
+        where: { code: cart.couponCode },
+      });
+
+      if (coupon && coupon.isActive) {
+        // Validate coupon again just to be safe
+        const now = new Date();
+        if ((coupon.startDate <= now) && (!coupon.endDate || coupon.endDate >= now)) {
+          if (!coupon.maxUses || coupon.usedCount < coupon.maxUses) {
+            // Calculate discount
+            const totalCents = coursesToPurchase.reduce((sum, c) => sum + c.priceCents, 0);
+            if (!coupon.minOrderAmount || totalCents >= coupon.minOrderAmount) {
+              if (coupon.discountType === "FIXED") {
+                discountTotal = Math.min(coupon.discountAmount, totalCents);
+              } else {
+                discountTotal = Math.round(totalCents * (coupon.discountAmount / 100));
+                if (coupon.maxDiscountAmount) {
+                  discountTotal = Math.min(discountTotal, coupon.maxDiscountAmount);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
     // Check inventory availability
     const outOfStockCourses = coursesToPurchase.filter(
       (course: any) => course.inventory !== null && course.inventory <= 0
@@ -62,7 +95,7 @@ export async function POST(request: NextRequest) {
 
     if (outOfStockCourses.length > 0) {
       return NextResponse.json(
-        { 
+        {
           error: `Some courses are out of stock: ${outOfStockCourses.map((c: any) => c.title).join(", ")}`,
           outOfStock: outOfStockCourses.map((c: any) => c.id),
         },
@@ -70,11 +103,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Calculate pro-rated discount per item
+    // Simplification: We will just deduct detailed amounts if possible, or just store the final amount paid per item
+    // Pro-rating: itemPrice - (itemPrice / totalOriginalPrice * totalDiscount)
+    const totalOriginalPrice = coursesToPurchase.reduce((sum, c) => sum + c.priceCents, 0);
+
     // Create purchases
     const purchases = await Promise.all(
       coursesToPurchase.map((course: any) => {
         const purchaseId = `purchase_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-        
+
+        let amountToPay = course.priceCents;
+        if (discountTotal > 0 && totalOriginalPrice > 0) {
+          const ratio = course.priceCents / totalOriginalPrice;
+          const itemDiscount = Math.round(discountTotal * ratio);
+          amountToPay = Math.max(0, course.priceCents - itemDiscount);
+        }
+
         return prisma.purchase.upsert({
           where: {
             userId_courseId: {
@@ -85,22 +130,35 @@ export async function POST(request: NextRequest) {
           update: {
             status: "pending",
             provider: "paypal",
-            amountCents: course.priceCents,
+            amountCents: amountToPay,
+            couponId: coupon?.id, // Link coupon
           },
           create: {
             id: purchaseId,
             userId: session.user.id,
             courseId: course.id,
-            amountCents: course.priceCents,
+            amountCents: amountToPay,
             currency: "usd",
             status: "pending",
             provider: "paypal",
+            couponId: coupon?.id,
           },
         });
       })
     );
 
+    // Increment coupon usage if used (optimistic usage count, finalized on webhook?)
+    // Actually, we should probably increment usage ONLY when paid. 
+    // But PayPal flow is async. We might link it now.
+    // If we increment now, and they cancel, it's bad.
+    // Better to increment in the webhook when 'paid'.
+    // However, validation 'usedCount' check earlier might fail if many pending. 
+    // For now, let's leave incrementing to the payment success handler (webhook).
+
     const totalAmountCents = purchases.reduce((sum: number, p: any) => sum + p.amountCents, 0);
+    // Sanity check against finalTotal
+    // Total might differ slightly due to rounding, but it's what we are charging.
+
     const purchaseIds = purchases.map((p: any) => p.id).join(",");
     const appUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
 

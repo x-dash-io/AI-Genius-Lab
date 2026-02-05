@@ -5,10 +5,13 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription } from "./alert";
 
+export type ToastActionElement = React.ReactElement;
+
 export interface ToastProps {
   id: string;
-  title?: string;
-  description?: string;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  action?: ToastActionElement;
   variant?: "default" | "destructive" | "success" | "warning";
   duration?: number;
   onClose?: () => void;

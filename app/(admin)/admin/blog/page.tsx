@@ -5,8 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Newspaper, Plus, Edit, Trash2, Eye, Loader2 } from "lucide-react";
+import { Newspaper, Plus, Edit, Eye, Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { DeleteButton } from "@/components/admin/DeleteButton";
+import { deleteBlogPostAction } from "@/app/actions/delete-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +78,11 @@ async function BlogPostsList() {
                     Edit
                   </Button>
                 </Link>
+                <DeleteButton
+                  id={post.id}
+                  title={post.title}
+                  onDelete={deleteBlogPostAction}
+                />
               </div>
             </div>
           </CardHeader>

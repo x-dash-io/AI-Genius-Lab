@@ -10,6 +10,7 @@ export async function getAdminStats() {
     monthlyRevenue,
     activeEnrollments,
     recentPurchases,
+    activeSubscriptions,
   ] = await Promise.all([
     prisma.course.count(),
     prisma.course.count({ where: { isPublished: true } }),
@@ -42,7 +43,67 @@ export async function getAdminStats() {
         },
       },
     }),
+    // New: Fetch active subscriptions for MRR and Breakdown
+    prisma.subscription.findMany({
+      where: {
+        status: "active",
+      },
+      include: {
+        plan: true,
+      },
+    }),
   ]);
+
+  // Calculate MRR from active subscriptions
+  let mrrCents = 0;
+  const subscriberBreakdown = {
+    free: 0,
+    starter: 0, // Assuming starter is a paid plan in DB, or if Free is strictly no-sub. 
+    // Request says "Free vs Professional vs Founder". 
+    // "The Starter" is Free in the table? 
+    // Table says: "1. The Starter | Free". So "Starter" users might not have a subscription record if it's default, OR they have a $0 subscription.
+    // If they have no subscription, they are Free/Starter.
+    // Logic: Total Users - (Professional + Founder + Other Paid).
+    professional: 0,
+    founder: 0,
+    other: 0,
+  };
+
+  // Count paid subscribers and calculate MRR
+  const activeSubscriberIds = new Set<string>();
+
+  activeSubscriptions.forEach((sub) => {
+    activeSubscriberIds.add(sub.userId);
+
+    // MRR Calculation
+    if (sub.plan.priceMonthlyCents > 0) { // Only count paid plans
+      if (sub.interval === "monthly") {
+        mrrCents += sub.plan.priceMonthlyCents;
+      } else if (sub.interval === "annual") {
+        mrrCents += Math.round(sub.plan.priceAnnualCents / 12);
+      }
+    }
+
+    // Breakdown
+    const tier = sub.plan.tier.toLowerCase();
+    if (tier === "pro" || sub.plan.name.toLowerCase().includes("professional")) {
+      subscriberBreakdown.professional++;
+    } else if (tier === "elite" || sub.plan.name.toLowerCase().includes("founder")) {
+      subscriberBreakdown.founder++;
+    } else if (tier === "starter" || sub.plan.priceMonthlyCents === 0) {
+      // If starter is tracked as a subscription but free
+      // We count it as starter/free but no MRR
+    } else {
+      subscriberBreakdown.other++;
+    }
+  });
+
+  // "Free" users are Total Users - Unique Paid Subscribers
+  // Note: This assumes "Starter" users don't necessarily have a subscription record. 
+  // If they do (free tier sub), they are in 'activeSubscriptions'.
+  // We'll assume Free = Total - (Professional + Founder + Other Paid)
+  const paidSubscribersCount = subscriberBreakdown.professional + subscriberBreakdown.founder + subscriberBreakdown.other;
+  subscriberBreakdown.free = totalUsers - paidSubscribersCount;
 
   return {
     courses: {
@@ -58,7 +119,9 @@ export async function getAdminStats() {
     revenue: {
       allTime: totalRevenue._sum.amountCents || 0,
       monthly: monthlyRevenue._sum.amountCents || 0,
+      mrr: mrrCents,
     },
+    subscribers: subscriberBreakdown,
     enrollments: {
       active: activeEnrollments,
     },

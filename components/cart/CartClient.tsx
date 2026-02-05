@@ -5,17 +5,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Cart, CartItem } from "@/lib/cart/types";
-import { isCartItemValid, canIncreaseQuantity } from "@/lib/cart/validation";
+import { isCartItemValid } from "@/lib/cart/validation";
 import { useCart } from "./CartProvider";
 import { useAdminPreview } from "@/components/admin/PreviewBanner";
 import { useConfirmDialog } from "@/components/ui/confirm-dialog";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Trash2, ArrowRight, BookOpen, Loader2, Plus, Minus, AlertCircle, ShieldAlert } from "lucide-react";
+import { ShoppingCart, Trash2, ArrowRight, BookOpen, Loader2, AlertCircle, ShieldAlert, Tag, X } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 
 interface CartClientProps {
   initialCart: Cart;
@@ -24,28 +25,30 @@ interface CartClientProps {
 
 export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
   const router = useRouter();
-  const { cart, removeFromCart, updateQuantity, clearCart, isLoading } = useCart();
+  const { cart, removeFromCart, updateQuantity, clearCart, applyCoupon, removeCoupon, isLoading } = useCart();
   const { isAdminPreview } = useAdminPreview();
   const { confirm } = useConfirmDialog();
   const [isRemoving, setIsRemoving] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
-  
+  const [couponCode, setCouponCode] = useState("");
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+
   // Track if the cart context has loaded - only use initialCart during initial load
   const hasCartLoaded = useRef(false);
   if (!isLoading && !hasCartLoaded.current) {
     hasCartLoaded.current = true;
   }
-  
+
   // Use cart from context once loaded, only fallback to initialCart during initial loading
   const displayCart = hasCartLoaded.current ? cart : (cart.items.length > 0 ? cart : initialCart);
-  
+
   // Validate all cart items
   const invalidItems = useMemo(() => {
     return displayCart.items.filter(item => !isCartItemValid(item));
   }, [displayCart.items]);
-  
+
   const hasInvalidItems = invalidItems.length > 0;
 
   const handleRemove = async (courseId: string) => {
@@ -56,18 +59,6 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
       setIsRemoving(null);
     }
   };
-
-  const handleQuantityChange = async (courseId: string, newQuantity: number) => {
-    setIsUpdating(courseId);
-    try {
-      await updateQuantity(courseId, newQuantity);
-    } catch (error) {
-      // Error toast is handled in CartProvider
-    } finally {
-      setIsUpdating(null);
-    }
-  };
-
 
   const handleCheckout = async () => {
     // Prevent admin checkout in preview mode
@@ -97,7 +88,7 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
 
     setIsCheckingOut(true);
     try {
-      // Redirect to checkout with cart items
+      // Redirect to checkout with cart items - coupon is saved in cookie/DB so it persists
       const courseIds = displayCart.items.map((item) => item.courseId).join(",");
       router.push(`/checkout?items=${encodeURIComponent(courseIds)}`);
     } catch (error) {
@@ -123,6 +114,7 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
       setIsClearing(true);
       try {
         await clearCart();
+        setCouponCode("");
         // Small delay to ensure state is updated before redirect
         setTimeout(() => {
           router.push("/courses");
@@ -133,6 +125,31 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
         setIsClearing(false);
       }
     }
+  };
+
+  const handleApplyCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponCode.trim()) return;
+
+    setIsApplyingCoupon(true);
+    try {
+      const result = await applyCoupon(couponCode);
+      if (result.error) {
+        toast({
+          title: "Invalid Coupon",
+          description: result.error,
+          variant: "destructive"
+        });
+      } else {
+        setCouponCode("");
+      }
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = async () => {
+    await removeCoupon();
   };
 
   // Show loading state
@@ -258,8 +275,8 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
                             </Badge>
                             {item.availableInventory !== null && (
                               <span className={`text-xs ${!isCartItemValid(item) ? "text-destructive font-medium" : "text-muted-foreground"}`}>
-                                {item.availableInventory === 0 
-                                  ? "Out of stock" 
+                                {item.availableInventory === 0
+                                  ? "Out of stock"
                                   : `${item.availableInventory} available`}
                               </span>
                             )}
@@ -271,12 +288,6 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          {/* Quantity Display - No controls for courses */}
-                          <div className="flex items-center gap-1 border rounded-md px-3 py-1">
-                            <span className="text-sm font-medium">
-                              Qty: 1
-                            </span>
-                          </div>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -312,28 +323,57 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              {displayCart.items.map((item) => (
-                <div key={item.courseId} className="flex justify-between text-sm">
-                  <div className="flex-1 mr-2 min-w-0">
-                    <div className="text-muted-foreground truncate">{item.title}</div>
-                    {item.quantity > 1 && (
-                      <div className="text-xs text-muted-foreground">
-                        Qty: {item.quantity} x ${(item.priceCents / 100).toFixed(2)}
-                      </div>
-                    )}
-                  </div>
-                  <span className="font-medium whitespace-nowrap">
-                    ${(((item.priceCents || 0) * (item.quantity || 1)) / 100).toFixed(2)}
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span>${(displayCart.totalCents / 100).toFixed(2)}</span>
+              </div>
+
+              {displayCart.couponCode && (
+                <div className="flex justify-between text-sm text-green-600 font-medium">
+                  <span className="flex items-center gap-1">
+                    <Tag className="h-3 w-3" />
+                    Discount ({displayCart.couponCode})
                   </span>
+                  <span>-${((displayCart.discountTotal || 0) / 100).toFixed(2)}</span>
                 </div>
-              ))}
+              )}
             </div>
+
+            <Separator />
+
+            {displayCart.couponCode ? (
+              <div className="bg-muted/50 p-2 rounded-md flex items-center justify-between text-sm">
+                <span className="flex items-center gap-2">
+                  <Tag className="h-4 w-4 text-primary" />
+                  <span className="font-medium bg-background px-1 rounded">{displayCart.couponCode}</span>
+                </span>
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleRemoveCoupon}>
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                <Input
+                  placeholder="Coupon code"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  className="h-9 uppercase"
+                />
+                <Button type="submit" size="sm" variant="outline" disabled={isApplyingCoupon || !couponCode.trim()}>
+                  {isApplyingCoupon ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Apply"
+                  )}
+                </Button>
+              </form>
+            )}
 
             <Separator />
 
             <div className="flex justify-between text-lg font-semibold">
               <span>Total</span>
-              <span>${(displayCart.totalCents / 100).toFixed(2)}</span>
+              <span>${((displayCart.finalTotal ?? displayCart.totalCents) / 100).toFixed(2)}</span>
             </div>
 
             {isAdminPreview && (

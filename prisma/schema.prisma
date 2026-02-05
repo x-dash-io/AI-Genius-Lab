@@ -76,6 +76,7 @@ model Course {
   slug               String               @unique
   title              String
   description        String?
+  imageUrl           String?
   category           String?
   categoryId         String?
   priceCents         Int
@@ -211,11 +212,14 @@ model Purchase {
   createdAt   DateTime        @default(now())
   Enrollment  Enrollment?
   Payment     Payment[]
+  couponId    String?
+  Coupon      Coupon?         @relation(fields: [couponId], references: [id])
   Course      Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
   User        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
   @@index([courseId])
+  @@index([couponId])
 }
 
 model Review {
@@ -428,5 +432,38 @@ model SubscriptionPayment {
   paidAt         DateTime     @default(now())
   subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 
+
   @@index([subscriptionId])
+}
+
+model Coupon {
+  id                String       @id @default(cuid())
+  code              String       @unique
+  description       String?
+  discountType      DiscountType
+  discountAmount    Int          // Percentage (1-100) or Fixed Amount in cents
+  minOrderAmount    Int?         // Minimum order value in cents
+  maxDiscountAmount Int?         // Max discount cap for percentage (optional)
+  startDate         DateTime     @default(now())
+  endDate           DateTime?
+  maxUses           Int?         // Global usage limit
+  usedCount         Int          @default(0)
+  isActive          Boolean      @default(true)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  purchases         Purchase[]
+}
+
+enum DiscountType {
+  PERCENT
+  FIXED
+}
+
+model SiteSettings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

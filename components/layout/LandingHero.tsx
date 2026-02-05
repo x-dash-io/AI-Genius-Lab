@@ -4,14 +4,17 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Lock, BarChart, GraduationCap, Sparkles, Zap, Users, BookOpen, Star, ArrowRight } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { TypingAnimation } from "@/components/ui/typing-animation";
 import type { HomepageStats } from "@/lib/homepage-stats";
+import type { HeroLogo } from "@/lib/settings";
 
 interface LandingHeroProps {
   stats: HomepageStats;
+  heroLogos: HeroLogo[];
 }
 
-export function LandingHero({ stats }: LandingHeroProps) {
+export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
   const typingWords = [
     "structured paths",
     "verified access",
@@ -20,6 +23,30 @@ export function LandingHero({ stats }: LandingHeroProps) {
     "secure commerce",
     "curated courses",
   ];
+
+  const renderLogo = (logo: HeroLogo) => {
+    if (logo.type === "icon") {
+      // @ts-ignore - Dynamic access to Lucide icons
+      const IconComponent = LucideIcons[logo.value as keyof typeof LucideIcons] || Zap;
+      return (
+        <div key={logo.id} className="flex flex-col items-center gap-2 group cursor-pointer" title={logo.name}>
+          <IconComponent className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground group-hover:text-primary transition-colors duration-300" />
+          <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors opacity-0 group-hover:opacity-100 absolute translate-y-8">{logo.name}</span>
+        </div>
+      );
+    }
+
+    return (
+      <motion.img
+        key={logo.id}
+        src={logo.value} // Use 'value' instead of 'url'
+        alt={logo.name}
+        title={logo.name}
+        whileHover={{ scale: 1.1, opacity: 1 }}
+        className="h-6 sm:h-8 w-auto object-contain opacity-40 grayscale hover:grayscale-0 transition-all duration-300"
+      />
+    );
+  };
 
   return (
     <section className="relative py-12 sm:py-16 lg:py-20 overflow-x-hidden">
@@ -301,6 +328,24 @@ export function LandingHero({ stats }: LandingHeroProps) {
                   </div>
                 </div>
               )}
+            </div>
+          </motion.div>
+        )}
+        {/* Trusted By Section - Dynamic Logos */}
+        {heroLogos.filter(l => l.visible).length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+            className="mt-16 sm:mt-24 pt-8 border-t border-border/50"
+          >
+            <p className="text-center text-sm font-semibold text-muted-foreground/60 mb-8 uppercase tracking-[0.2em]">
+              Trusted by professionals at
+            </p>
+            <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12 lg:gap-16">
+              {heroLogos
+                .filter((logo) => logo.visible)
+                .map((logo) => renderLogo(logo))}
             </div>
           </motion.div>
         )}

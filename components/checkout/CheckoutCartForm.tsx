@@ -7,19 +7,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, ShoppingCart } from "lucide-react";
+import { Loader2, ShoppingCart, Tag } from "lucide-react";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
 
 interface CheckoutCartFormProps {
   items: CartItem[];
+  couponCode?: string | null;
+  discountAmount?: number;
 }
 
-export function CheckoutCartForm({ items }: CheckoutCartFormProps) {
+export function CheckoutCartForm({ items, couponCode, discountAmount }: CheckoutCartFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const totalCents = items.reduce((sum, item) => sum + item.priceCents, 0);
+  const finalTotalCents = Math.max(0, totalCents - (discountAmount || 0));
 
   const handleCheckout = async () => {
     setIsSubmitting(true);
@@ -103,13 +106,23 @@ export function CheckoutCartForm({ items }: CheckoutCartFormProps) {
                   <span className="font-medium">${(item.priceCents / 100).toFixed(2)}</span>
                 </div>
               ))}
+
+              {couponCode && (
+                <div className="flex justify-between text-sm text-green-600 font-medium pt-2">
+                  <span className="flex items-center gap-1">
+                    <Tag className="h-3 w-3" />
+                    Discount ({couponCode})
+                  </span>
+                  <span>-${((discountAmount || 0) / 100).toFixed(2)}</span>
+                </div>
+              )}
             </div>
 
             <Separator />
 
             <div className="flex justify-between text-lg font-semibold">
               <span>Total</span>
-              <span>${(totalCents / 100).toFixed(2)}</span>
+              <span>${(finalTotalCents / 100).toFixed(2)}</span>
             </div>
 
             <Button
@@ -126,7 +139,7 @@ export function CheckoutCartForm({ items }: CheckoutCartFormProps) {
               ) : (
                 <>
                   <ShoppingCart className="h-4 w-4 mr-2" />
-                  Pay with PayPal · ${(totalCents / 100).toFixed(2)}
+                  Pay with PayPal · ${(finalTotalCents / 100).toFixed(2)}
                 </>
               )}
             </Button>

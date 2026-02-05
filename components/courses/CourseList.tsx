@@ -14,6 +14,7 @@ type Course = {
   slug: string;
   priceCents: number;
   tier: "STANDARD" | "PREMIUM";
+  imageUrl: string | null;
 };
 
 type CourseListProps = {
@@ -31,25 +32,48 @@ export function CourseList({ courses }: CourseListProps) {
           transition={{ duration: 0.3, delay: index * 0.1 }}
           whileHover={{ y: -4 }}
         >
-          <Card className="h-full transition-shadow hover:shadow-lg flex flex-col">
-            <CardHeader className="space-y-3">
-              <CardTitle className="line-clamp-2 text-xl leading-tight">
+          <Card className="h-full transition-shadow hover:shadow-lg flex flex-col overflow-hidden group">
+            {/* Course Image/Placeholder */}
+            <div className="relative aspect-video overflow-hidden border-b bg-muted">
+              {course.imageUrl ? (
+                <img
+                  src={course.imageUrl}
+                  alt={course.title}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 via-primary/10 to-background p-6">
+                  <div className="text-center space-y-2">
+                    <span className="text-4xl font-bold opacity-20 select-none">AI</span>
+                    <p className="text-xs font-medium text-primary/40 uppercase tracking-widest">Premium Content</p>
+                  </div>
+                </div>
+              )}
+              {course.tier === "PREMIUM" && (
+                <div className="absolute top-3 right-3">
+                  <Badge variant="default" className="bg-amber-500 hover:bg-amber-600 text-white font-bold border-none shadow-sm">
+                    PREMIUM
+                  </Badge>
+                </div>
+              )}
+            </div>
+
+            <CardHeader className="space-y-3 p-6 pb-2">
+              <CardTitle className="line-clamp-2 text-xl leading-tight group-hover:text-primary transition-colors">
                 {course.title}
               </CardTitle>
-              <CardDescription className="line-clamp-3 text-sm leading-relaxed">
+              <CardDescription className="line-clamp-2 text-sm leading-relaxed">
                 {course.description ?? "Course details coming soon."}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col justify-end space-y-4">
-              <div className="flex items-center justify-between">
-                <Badge variant="secondary" className="text-lg font-semibold px-3 py-1">
-                  ${(course.priceCents / 100).toFixed(2)}
-                </Badge>
-                {course.tier === "PREMIUM" && (
-                  <Badge variant="default" className="bg-amber-500 hover:bg-amber-600 text-white font-bold">
-                    PREMIUM
-                  </Badge>
-                )}
+            <CardContent className="p-6 pt-2 flex-1 flex flex-col justify-end space-y-4">
+              <div className="flex items-center justify-between pt-2 border-t border-border/40">
+                <div className="space-y-0.5">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Lifetime Access</p>
+                  <p className="text-xl font-bold text-foreground">
+                    ${(course.priceCents / 100).toFixed(2)}
+                  </p>
+                </div>
               </div>
               <div className="flex gap-2">
                 <AddToCartButton
@@ -58,7 +82,7 @@ export function CourseList({ courses }: CourseListProps) {
                   priceCents={course.priceCents}
                   tier={course.tier}
                   variant="default"
-                  className="flex-1"
+                  className="flex-1 shadow-md hover:shadow-lg transition-all"
                   checkOwnership
                 />
                 <Link href={`/courses/${course.slug}`} className="flex-1">

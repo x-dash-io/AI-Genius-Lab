@@ -49,6 +49,7 @@ export async function createCourse(data: {
   inventory?: number | null;
   isPublished?: boolean;
   tier?: "STANDARD" | "PREMIUM";
+  imageUrl?: string;
 }) {
   // Generate a unique ID for the course
   const courseId = `course_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -65,6 +66,7 @@ export async function createCourse(data: {
       inventory: data.inventory ?? null,
       isPublished: data.isPublished ?? false,
       tier: data.tier ?? "STANDARD",
+      imageUrl: data.imageUrl,
       updatedAt: now,
     },
   });
@@ -81,6 +83,7 @@ export async function updateCourse(
     inventory?: number | null;
     isPublished?: boolean;
     tier?: "STANDARD" | "PREMIUM";
+    imageUrl?: string;
   }
 ) {
   return prisma.course.update({
@@ -111,7 +114,7 @@ export async function deleteCourse(courseId: string) {
 export async function createSection(courseId: string, title: string, sortOrder: number) {
   const sectionId = `section_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   const now = new Date();
-  
+
   return prisma.section.create({
     data: {
       id: sectionId,
@@ -174,7 +177,7 @@ export async function createLesson(data: {
 }) {
   const lessonId = `lesson_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   const now = new Date();
-  
+
   return prisma.lesson.create({
     data: {
       id: lessonId,
@@ -198,7 +201,7 @@ export async function createLessonContent(data: {
 }) {
   const contentId = `content_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
   const now = new Date();
-  
+
   return prisma.lessonContent.create({
     data: {
       id: contentId,

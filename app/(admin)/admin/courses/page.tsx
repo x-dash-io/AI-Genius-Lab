@@ -6,9 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { BookOpen, Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { BookOpen, Plus, Edit, Loader2 } from "lucide-react";
 import { CourseFilters } from "@/components/admin/CourseFilters";
 import { BulkImport } from "@/components/admin/BulkImport";
+import { DeleteButton } from "@/components/admin/DeleteButton";
+import { deleteCourseAction } from "@/app/actions/delete-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +28,7 @@ function formatCurrency(cents: number) {
 async function CourseList({ searchParams }: AdminCoursesPageProps) {
   const params = await searchParams;
   const allCourses = await getAllCourses();
-  
+
   let courses = [...allCourses];
 
   // Apply search filter
@@ -137,6 +139,13 @@ async function CourseList({ searchParams }: AdminCoursesPageProps) {
                         Edit
                       </Button>
                     </Link>
+                    <DeleteButton
+                      id={course.id}
+                      title={course.title}
+                      onDelete={deleteCourseAction}
+                    // Disable delete if published or has purchases (implied by backend check, but UI feedback is nice)
+                    // Optionally we could pass a disabled prop if we pre-calculate this, but backend check is safer.
+                    />
                   </div>
                 </div>
               </CardHeader>

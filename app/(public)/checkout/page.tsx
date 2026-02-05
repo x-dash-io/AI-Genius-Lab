@@ -185,7 +185,11 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
           </Alert>
         )}
 
-        <CheckoutCartForm items={requestedItems} />
+        <CheckoutCartForm
+          items={requestedItems}
+          couponCode={cart.couponCode}
+          discountAmount={cart.discountTotal}
+        />
       </section>
     );
   }

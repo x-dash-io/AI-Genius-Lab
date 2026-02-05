@@ -164,10 +164,10 @@ export function CourseEditForm({
   const handleAddSection = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsAddingSection(true);
-    
+
     const formData = new FormData(e.currentTarget);
     const title = formData.get("title") as string;
-    
+
     // Optimistic update - add temporary section
     const tempId = `temp_${Date.now()}`;
     const tempSection = {
@@ -179,12 +179,12 @@ export function CourseEditForm({
       updatedAt: new Date(),
       lessons: [],
     };
-    
+
     setCourse(prev => ({
       ...prev,
       sections: [...prev.sections, tempSection],
     }));
-    
+
     try {
       const result = await addSectionAction(formData);
 
@@ -193,7 +193,7 @@ export function CourseEditForm({
       }
 
       const newSection = result;
-      
+
       // Transform newSection to match expected format
       const transformedSection = {
         ...newSection,
@@ -202,13 +202,13 @@ export function CourseEditForm({
           contents: [],
         })),
       };
-      
+
       // Replace temp section with real one
       setCourse(prev => ({
         ...prev,
         sections: prev.sections.map(s => s.id === tempId ? transformedSection : s),
       }));
-      
+
       toast({
         title: "Section added",
         description: "New section has been added successfully.",
@@ -222,7 +222,7 @@ export function CourseEditForm({
         ...prev,
         sections: prev.sections.filter(s => s.id !== tempId),
       }));
-      
+
       toast({
         title: "Failed to add section",
         description: error instanceof Error ? error.message : "Failed to add section",
@@ -245,16 +245,16 @@ export function CourseEditForm({
     if (!confirmed) {
       return;
     }
-    
+
     setIsDeletingSection((prev) => ({ ...prev, [sectionId]: true }));
-    
+
     // Optimistic update - remove section
     const previousCourse = course;
     setCourse(prev => ({
       ...prev,
       sections: prev.sections.filter(s => s.id !== sectionId),
     }));
-    
+
     try {
       const result = await deleteSectionAction(sectionId, course.id);
 
@@ -271,7 +271,7 @@ export function CourseEditForm({
     } catch (error) {
       // Revert on error
       setCourse(previousCourse);
-      
+
       toast({
         title: "Failed to delete section",
         description: error instanceof Error ? error.message : "Failed to delete section",
@@ -289,10 +289,10 @@ export function CourseEditForm({
   const handleAddLesson = async (sectionId: string, e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsAddingLesson((prev) => ({ ...prev, [sectionId]: true }));
-    
+
     const formData = new FormData(e.currentTarget);
     const title = formData.get("title") as string;
-    
+
     // Optimistic update - add temporary lesson
     const tempId = `temp_${Date.now()}`;
     const section = course.sections.find(s => s.id === sectionId);
@@ -308,16 +308,16 @@ export function CourseEditForm({
       updatedAt: new Date(),
       contents: [],
     };
-    
+
     setCourse(prev => ({
       ...prev,
-      sections: prev.sections.map(s => 
-        s.id === sectionId 
+      sections: prev.sections.map(s =>
+        s.id === sectionId
           ? { ...s, lessons: [...(s.lessons || []), tempLesson] }
           : s
       ),
     }));
-    
+
     try {
       const result = await addLessonAction(sectionId, formData);
 
@@ -326,17 +326,17 @@ export function CourseEditForm({
       }
 
       const newLesson = result;
-      
+
       // Replace temp lesson with real one
       setCourse(prev => ({
         ...prev,
-        sections: prev.sections.map(s => 
-          s.id === sectionId 
+        sections: prev.sections.map(s =>
+          s.id === sectionId
             ? { ...s, lessons: s.lessons.map(l => l.id === tempId ? { ...newLesson, contents: [] } : l) }
             : s
         ),
       }));
-      
+
       toast({
         title: "Lesson added",
         description: "New lesson has been added successfully.",
@@ -353,13 +353,13 @@ export function CourseEditForm({
       // Remove temp lesson on error
       setCourse(prev => ({
         ...prev,
-        sections: prev.sections.map(s => 
-          s.id === sectionId 
+        sections: prev.sections.map(s =>
+          s.id === sectionId
             ? { ...s, lessons: s.lessons.filter(l => l.id !== tempId) }
             : s
         ),
       }));
-      
+
       toast({
         title: "Failed to add lesson",
         description: error instanceof Error ? error.message : "Failed to add lesson",
@@ -386,9 +386,9 @@ export function CourseEditForm({
     if (!confirmed) {
       return;
     }
-    
+
     setIsDeletingLesson((prev) => ({ ...prev, [lessonId]: true }));
-    
+
     // Optimistic update - remove lesson
     const previousCourse = course;
     setCourse(prev => ({
@@ -398,7 +398,7 @@ export function CourseEditForm({
         lessons: s.lessons.filter(l => l.id !== lessonId),
       })),
     }));
-    
+
     try {
       const result = await deleteLessonAction(lessonId, course.id);
 
@@ -415,7 +415,7 @@ export function CourseEditForm({
     } catch (error) {
       // Revert on error
       setCourse(previousCourse);
-      
+
       toast({
         title: "Failed to delete lesson",
         description: error instanceof Error ? error.message : "Failed to delete lesson",
@@ -532,6 +532,19 @@ export function CourseEditForm({
                   className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   defaultValue={course.description || ""}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="imageUrl">Image URL</Label>
+                <Input
+                  id="imageUrl"
+                  name="imageUrl"
+                  placeholder="https://example.com/image.jpg"
+                  defaultValue={course.imageUrl || ""}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Provide a URL for the course preview image.
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -1361,7 +1374,7 @@ export function CourseEditForm({
                                       {(() => {
                                         const firstContent = lesson.contents?.[0];
                                         const contentType = firstContent?.contentType || 'video';
-                                        
+
                                         switch (contentType) {
                                           case 'pdf':
                                             return `${lesson.durationSeconds} pages`;
