@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
+import { HeroBackgroundBlobs } from "@/components/ui/hero-background-blobs";
 
 export default function SignInPage() {
   const { data: session, status } = useSession();
@@ -117,7 +118,9 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
+    <div className="relative min-h-[calc(100vh-200px)] overflow-x-hidden">
+      <HeroBackgroundBlobs />
+      <div className="flex min-h-[calc(100vh-200px)] items-center justify-center relative z-10">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -196,7 +199,7 @@ export default function SignInPage() {
                         </Alert>
                       </motion.div>
                     )}
-                    <Button type="submit" className="w-full h-12 text-base shadow-xl shadow-primary/10 border border-primary/20" disabled={isLoading || isGoogleLoading || isRedirecting}>
+                    <Button type="submit" className="w-full h-12 text-base shadow-xl shadow-primary/10 border border-primary/20 bg-primary hover:bg-primary/95 hover:shadow-[0_4px_12px_hsl(var(--primary)_/_0.4)] transition-all" disabled={isLoading || isGoogleLoading || isRedirecting}>
                       {isLoading ? (
                         <span className="flex items-center gap-2">
                           <Loader size="sm" inline />
@@ -220,7 +223,7 @@ export default function SignInPage() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full h-12 bg-card/50 hover:bg-accent/50 border-border/50 transition-all font-semibold"
+                    className="w-full h-12 bg-card hover:bg-accent hover:shadow-[0_4px_12px_hsl(var(--accent)_/_0.25)] hover:border-primary/30 hover:scale-[1.02] border-border/50 transition-all duration-300 font-semibold"
                     onClick={handleGoogleSignIn}
                     disabled={isLoading || isGoogleLoading || isRedirecting}
                   >
@@ -269,6 +272,7 @@ export default function SignInPage() {
           </CardContent>
         </Card>
       </motion.div>
+      </div>
     </div>
   );
 }

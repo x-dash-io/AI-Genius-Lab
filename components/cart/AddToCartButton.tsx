@@ -108,7 +108,7 @@ export function AddToCartButton({
   if (isPremium && !hasProAccess && !isOwned) {
     return (
       <Link href="/pricing" className={className}>
-        <Button variant="outline" size={size} className="w-full border-amber-500 text-amber-600 hover:bg-amber-50 rounded-xl font-bold">
+        <Button variant="outline" size={size} className="w-full border-amber-500 text-amber-600 hover:bg-amber-50 hover:shadow-[0_2px_8px_hsl(45_100%_50%_/_0.2)] rounded-xl font-bold transition-all">
           Unlock with Pro
         </Button>
       </Link>
@@ -128,7 +128,7 @@ export function AddToCartButton({
   if (isOwned) {
     return (
       <Link href={courseSlug ? `/library/${courseSlug}` : "/library"} className={className}>
-        <Button variant="secondary" size={size} className="w-full rounded-xl font-bold bg-green-500/10 text-green-600 hover:bg-green-500/20 shadow-none border border-green-500/20">
+        <Button variant="secondary" size={size} className="w-full rounded-xl font-bold bg-green-500/10 text-green-600 hover:bg-green-500/20 hover:shadow-[0_2px_8px_hsl(142_76%_36%_/_0.2)] shadow-none border border-green-500/20 transition-all">
           <BookOpen className="h-4 w-4 mr-2" />
           Continue Learning
         </Button>
@@ -148,7 +148,7 @@ export function AddToCartButton({
   if (isInCart) {
     return (
       <Link href="/cart" className={className}>
-        <Button variant="outline" size={size} className="w-full rounded-xl font-bold bg-primary/5 text-primary border-primary/20 hover:bg-primary/10">
+        <Button variant="outline" size={size} className="w-full rounded-xl font-bold bg-primary/5 text-primary border-primary/20 hover:bg-primary/10 hover:shadow-[0_2px_8px_hsl(var(--primary)_/_0.15)] transition-all">
           <Check className="h-4 w-4 mr-2" />
           In Cart
         </Button>

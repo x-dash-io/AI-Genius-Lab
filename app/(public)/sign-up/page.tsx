@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
 import { OTPInput } from "@/components/auth/OTPInput";
+import { HeroBackgroundBlobs } from "@/components/ui/hero-background-blobs";
 
 export default function SignUpPage() {
   const { data: session, status } = useSession();
@@ -226,7 +227,9 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-200px)] items-center justify-center">
+    <div className="relative min-h-[calc(100vh-200px)] overflow-x-hidden">
+      <HeroBackgroundBlobs />
+      <div className="flex min-h-[calc(100vh-200px)] items-center justify-center relative z-10">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -468,6 +471,7 @@ export default function SignUpPage() {
           </CardContent>
         </Card>
       </motion.div>
+      </div>
     </div>
   );
 }

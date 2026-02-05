@@ -57,7 +57,7 @@ export function DeleteButton({
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive" disabled={disabled || isDeleting}>
+                <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive hover:shadow-[0_2px_8px_hsl(var(--destructive)_/_0.15)] transition-all" disabled={disabled || isDeleting}>
                     {isDeleting ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
@@ -88,7 +88,7 @@ export function DeleteButton({
                             handleDelete();
                         }}
                         disabled={isDeleting}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90 h-11 px-8"
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/95 hover:shadow-[0_4px_12px_hsl(var(--destructive)_/_0.3)] h-11 px-8 transition-all"
                     >
                         {isDeleting ? (
                             <>

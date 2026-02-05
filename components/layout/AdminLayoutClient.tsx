@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SignOutButton } from "@/components/auth/SignOutButton";
-import { BackgroundBlobs } from "@/components/ui/background-blobs";
+import { HeroBackgroundBlobs } from "@/components/ui/hero-background-blobs";
 import { CartIcon } from "@/components/cart/CartIcon";
 import { ConfirmDialogProvider } from "@/components/ui/confirm-dialog";
 import { Footer } from "@/components/layout/Footer";
@@ -122,7 +122,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   return (
     <ConfirmDialogProvider>
       <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
-        <BackgroundBlobs />
+        <HeroBackgroundBlobs />
 
         {/* Desktop Layout */}
         <div className="hidden md:flex min-h-screen">
@@ -265,7 +265,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                         <ThemeToggle />
                       </div>
                     </div>
-                    <SignOutButton className="h-9 px-3 text-[10px] font-bold uppercase tracking-widest bg-background/50 hover:bg-destructive hover:text-white border-none shadow-none rounded-lg" />
+                    <SignOutButton className="h-9 px-3 text-[10px] font-bold uppercase tracking-widest bg-background/50 hover:bg-destructive hover:text-destructive-foreground hover:shadow-[0_2px_8px_hsl(var(--destructive)_/_0.3)] border-none shadow-none rounded-lg transition-all" />
                   </div>
                 </div>
               )}

@@ -23,7 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SignOutButton } from "@/components/auth/SignOutButton";
-import { BackgroundBlobs } from "@/components/ui/background-blobs";
+import { HeroBackgroundBlobs } from "@/components/ui/hero-background-blobs";
 import { useCart } from "@/components/cart/CartProvider";
 import { ConfirmDialogProvider } from "@/components/ui/confirm-dialog";
 import { CourseProgressProvider } from "@/contexts/CourseProgressContext";
@@ -137,7 +137,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
   if (!mounted) {
     return (
       <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
-        <BackgroundBlobs />
+        <HeroBackgroundBlobs />
       </div>
     );
   }
@@ -146,7 +146,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
     <ConfirmDialogProvider>
       <CourseProgressProvider>
         <div className="min-h-screen bg-background font-sans antialiased">
-          <BackgroundBlobs />
+          <HeroBackgroundBlobs />
 
           {/* Desktop Layout */}
           <div className="hidden md:flex min-h-screen" suppressHydrationWarning>
@@ -258,7 +258,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                       <div className="flex-1 flex items-center gap-1 pl-1">
                         <ThemeToggle />
                       </div>
-                      <SignOutButton className="h-9 px-3 text-[10px] font-bold uppercase tracking-widest bg-background/50 hover:bg-destructive hover:text-white border-none shadow-none rounded-lg" />
+                      <SignOutButton className="h-9 px-3 text-[10px] font-bold uppercase tracking-widest bg-background/50 hover:bg-destructive hover:text-destructive-foreground hover:shadow-[0_2px_8px_hsl(var(--destructive)_/_0.3)] border-none shadow-none rounded-lg transition-all" />
                     </div>
                   </div>
                 )}

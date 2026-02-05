@@ -244,7 +244,7 @@ export function PublicLayoutClient({
                 {session?.user ? (
                   <div className="flex items-center gap-3">
                     <Link href="/dashboard">
-                      <Button variant="ghost" size="sm" className="gap-2.5 rounded-xl hover:bg-accent/50 px-3">
+                      <Button variant="ghost" size="sm" className="gap-2.5 rounded-xl hover:bg-accent hover:shadow-[0_2px_8px_hsl(var(--accent)_/_0.15)] px-3 transition-all">
                         <Avatar className="h-7 w-7 ring-2 ring-primary/20 transition-transform group-hover:scale-105">
                           <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "User"} />
                           <AvatarFallback className="bg-premium-gradient text-white text-[10px] font-bold">
@@ -266,7 +266,7 @@ export function PublicLayoutClient({
                 ) : (
                   <div className="flex items-center gap-2.5">
                     <Link href="/sign-in">
-                      <Button variant="outline" size="sm" className="h-10 px-6 border-2 font-bold transition-all hover:bg-primary/5 hover:text-primary hover:border-primary active:scale-95">
+                      <Button variant="outline" size="sm" className="h-10 px-6 border-2 font-bold transition-all bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-[0_4px_12px_hsl(var(--primary)_/_0.3)] active:scale-95">
                         Sign In
                       </Button>
                     </Link>
@@ -274,7 +274,7 @@ export function PublicLayoutClient({
                       <Button
                         size="default"
                         variant="premium"
-                        className="h-10 px-6 shadow-2xl shadow-primary/20"
+                        className="h-10 px-6 shadow-2xl shadow-primary/20 hover:brightness-110 hover:shadow-[0_8px_24px_hsl(var(--primary)_/_0.4)] transition-all duration-300"
                       >
                         Join Now
                       </Button>

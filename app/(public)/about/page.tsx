@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { GraduationCap, Target, Eye, Heart, Users, Zap, Brain } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { HeroBackgroundBlobs } from "@/components/ui/hero-background-blobs";
 
 const values = [
   {
@@ -30,8 +31,10 @@ const values = [
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
+    <div className="relative min-h-screen overflow-x-hidden">
+      <HeroBackgroundBlobs />
+      <div className="relative z-10">
+        {/* Hero Section */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -221,6 +224,9 @@ export default function AboutPage() {
           </Link>
         </div>
       </motion.section>
+      
+      {/* Other sections would go here */}
+      </div>
     </div>
   );
 }

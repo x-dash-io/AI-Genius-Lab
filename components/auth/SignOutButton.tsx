@@ -29,7 +29,10 @@ export function SignOutButton({ className }: SignOutButtonProps) {
       disabled={isLoading}
       variant="destructive"
       size="sm"
-      className={cn("w-full", className)}
+      className={cn(
+        "hover:bg-destructive/95 hover:shadow-[0_4px_12px_hsl(var(--destructive)/0.3)] transition-all",
+        className
+      )}
     >
       <LogOut className="h-4 w-4" />
       {isLoading ? "Signing out..." : "Sign out"}
