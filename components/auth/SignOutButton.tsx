@@ -27,7 +27,7 @@ export function SignOutButton({ className }: SignOutButtonProps) {
     <Button
       onClick={handleSignOut}
       disabled={isLoading}
-      variant="outline"
+      variant="destructive"
       size="sm"
       className={cn("w-full", className)}
     >

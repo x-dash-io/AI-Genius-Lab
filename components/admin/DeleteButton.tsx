@@ -20,7 +20,7 @@ interface DeleteButtonProps {
     id: string;
     title: string;
     description?: string;
-    onDelete: (id: string) => Promise<void>;
+    onDelete: (id: string) => Promise<any>;
     disabled?: boolean;
 }
 

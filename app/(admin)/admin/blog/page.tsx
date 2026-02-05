@@ -81,7 +81,10 @@ async function BlogPostsList() {
                 <DeleteButton
                   id={post.id}
                   title={post.title}
-                  onDelete={deleteBlogPostAction}
+                  onDelete={async (id) => {
+                    "use server";
+                    await deleteBlogPostAction(id);
+                  }}
                 />
               </div>
             </div>

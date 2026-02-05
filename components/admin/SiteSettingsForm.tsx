@@ -14,6 +14,7 @@ import { updateSiteSettings } from "@/lib/actions/settings";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ContentUpload } from "@/components/admin/ContentUpload";
 
 const settingsSchema = z.object({
     socialLinks: z.object({
@@ -29,9 +30,9 @@ const settingsSchema = z.object({
         z.object({
             id: z.string(),
             name: z.string().min(1, "Name is required"),
-            type: z.enum(["image", "icon"]).default("image"),
+            type: z.enum(["image", "icon"]),
             value: z.string().min(1, "Value is required"),
-            visible: z.boolean().default(true),
+            visible: z.boolean(),
         })
     ),
 });
@@ -47,10 +48,12 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
     const [isPending, startTransition] = useTransition();
 
     // Migration helper: if initialHeroLogos come from old structure (without type), default them
-    const migratedHeroLogos = (initialHeroLogos || []).map((logo: any) => ({
-        ...logo,
-        type: logo.type || "image",
+    const migratedHeroLogos: SettingsFormValues['heroLogos'] = (initialHeroLogos || []).map((logo: any) => ({
+        id: logo.id,
+        name: logo.name || "",
+        type: (logo.type === "icon" || logo.type === "image") ? logo.type : "image",
         value: logo.value || logo.url || "", // migrate old 'url' to 'value'
+        visible: logo.visible !== undefined ? !!logo.visible : true,
     }));
 
     const form = useForm<SettingsFormValues>({
@@ -221,7 +224,7 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                                 <FormItem className="md:col-span-5">
                                                     <div className="flex items-center gap-2">
                                                         <FormLabel className="text-xs">
-                                                            {type === "image" ? "Image URL" : "Icon Name"}
+                                                            {type === "image" ? "Image" : "Icon Name"}
                                                         </FormLabel>
                                                         {type === "icon" && (
                                                             <TooltipProvider>
@@ -237,10 +240,24 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                                         )}
                                                     </div>
                                                     <FormControl>
-                                                        <Input
-                                                            placeholder={type === "image" ? "/logos/openai.svg" : "Zap"}
-                                                            {...field}
-                                                        />
+                                                        {type === "image" ? (
+                                                            <div className="border rounded-md p-2">
+                                                                <ContentUpload
+                                                                    sectionId="hero-logos"
+                                                                    contentType="image"
+                                                                    value={field.value}
+                                                                    onChange={field.onChange}
+                                                                    returnUrl={true}
+                                                                    onError={(err) => toastError("Image Error", err)}
+                                                                />
+                                                                <Input type="hidden" {...field} />
+                                                            </div>
+                                                        ) : (
+                                                            <Input
+                                                                placeholder="Zap"
+                                                                {...field}
+                                                            />
+                                                        )}
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>

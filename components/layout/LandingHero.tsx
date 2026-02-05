@@ -27,7 +27,7 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
   const renderLogo = (logo: HeroLogo) => {
     if (logo.type === "icon") {
       // @ts-ignore - Dynamic access to Lucide icons
-      const IconComponent = LucideIcons[logo.value as keyof typeof LucideIcons] || Zap;
+      const IconComponent: any = LucideIcons[logo.value as keyof typeof LucideIcons] || Zap;
       return (
         <div key={logo.id} className="flex flex-col items-center gap-2 group cursor-pointer" title={logo.name}>
           <IconComponent className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground group-hover:text-primary transition-colors duration-300" />

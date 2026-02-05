@@ -90,6 +90,7 @@ export async function getCourseForLibraryBySlug(slug: string) {
         slug: true,
         title: true,
         tier: true,
+        imageUrl: true,
         sections: {
           orderBy: { sortOrder: "asc" },
           select: {

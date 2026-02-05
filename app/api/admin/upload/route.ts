@@ -6,12 +6,7 @@ import { withErrorHandler } from "@/app/api/error-handler";
 import { AppError } from "@/lib/errors";
 
 // File size limits (in bytes) - much more generous for videos and large files
-const MAX_FILE_SIZES = {
-  video: 5 * 1024 * 1024 * 1024, // 5 GB for videos
-  audio: 500 * 1024 * 1024, // 500 MB for audio
-  pdf: 500 * 1024 * 1024, // 500 MB for PDFs
-  file: 2 * 1024 * 1024 * 1024, // 2 GB for other files
-};
+
 
 // Allowed MIME types - expanded to cover more formats
 const ALLOWED_MIME_TYPES = {
@@ -57,6 +52,21 @@ const ALLOWED_MIME_TYPES = {
     "image/webp",
     "image/svg+xml",
   ],
+  image: [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "image/svg+xml",
+  ],
+};
+
+const MAX_FILE_SIZES = {
+  video: 5 * 1024 * 1024 * 1024, // 5 GB
+  audio: 500 * 1024 * 1024, // 500 MB
+  pdf: 500 * 1024 * 1024, // 500 MB
+  file: 2 * 1024 * 1024 * 1024, // 2 GB
+  image: 10 * 1024 * 1024, // 10 MB
 };
 
 export const POST = withErrorHandler(async (request: NextRequest) => {
@@ -80,6 +90,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
     | "audio"
     | "pdf"
     | "file"
+    | "image"
     | null;
   const folder = (formData.get("folder") as string) || "synapze-content";
 

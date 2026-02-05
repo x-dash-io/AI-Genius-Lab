@@ -15,6 +15,7 @@ interface ContentUploadProps {
   value?: string;
   onChange: (publicId: string) => void;
   onError?: (error: string) => void;
+  returnUrl?: boolean;
 }
 
 export function ContentUpload({
@@ -23,6 +24,7 @@ export function ContentUpload({
   value,
   onChange,
   onError,
+  returnUrl = false,
 }: ContentUploadProps) {
   const [uploadMethod, setUploadMethod] = useState<"file" | "url" | "manual">("file");
   const [uploading, setUploading] = useState(false);
@@ -43,6 +45,7 @@ export function ContentUpload({
       audio: 500 * 1024 * 1024, // 500MB
       pdf: 500 * 1024 * 1024, // 500MB
       file: 2 * 1024 * 1024 * 1024, // 2GB
+      image: 10 * 1024 * 1024, // 10MB
     };
 
     const maxSize = maxSizes[contentType as keyof typeof maxSizes] || 100 * 1024 * 1024;
@@ -58,6 +61,9 @@ export function ContentUpload({
       formData.append("file", file);
       formData.append("contentType", contentType);
       formData.append("folder", `synapze-content/${sectionId}`);
+      if (returnUrl) {
+        formData.append("returnUrl", "true");
+      }
 
       const response = await fetch("/api/admin/upload", {
         method: "POST",
@@ -123,7 +129,7 @@ export function ContentUpload({
 
       onChange(data.publicId);
       setUrl("");
-      
+
       // Success toast
       toast({
         title: "URL uploaded successfully",
@@ -166,12 +172,13 @@ export function ContentUpload({
 
       // Validate file type
       const expectedTypes = contentType === "video" ? ["video/"] :
-                          contentType === "audio" ? ["audio/"] :
-                          contentType === "pdf" ? ["application/pdf"] : [];
+        contentType === "audio" ? ["audio/"] :
+          contentType === "pdf" ? ["application/pdf"] :
+            contentType === "image" ? ["image/"] : [];
 
       const isValidType = expectedTypes.some(type => droppedFile.type.startsWith(type)) ||
-                         contentType === "file" ||
-                         expectedTypes.length === 0;
+        contentType === "file" ||
+        expectedTypes.length === 0;
 
       if (!isValidType) {
         onError?.(`Invalid file type. Expected ${contentType} file.`);
@@ -212,10 +219,12 @@ export function ContentUpload({
                   contentType === "video"
                     ? "video/*"
                     : contentType === "audio"
-                    ? "audio/*"
-                    : contentType === "pdf"
-                    ? "application/pdf"
-                    : "*"
+                      ? "audio/*"
+                      : contentType === "pdf"
+                        ? "application/pdf"
+                        : contentType === "image"
+                          ? "image/*"
+                          : "*"
                 }
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
                 disabled={uploading}
@@ -225,11 +234,10 @@ export function ContentUpload({
 
               {!file ? (
                 <div
-                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                    isDragOver
-                      ? "border-primary bg-primary/5"
-                      : "border-muted-foreground/30 hover:border-primary/50 hover:bg-muted/20"
-                  }`}
+                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isDragOver
+                    ? "border-primary bg-primary/5"
+                    : "border-muted-foreground/30 hover:border-primary/50 hover:bg-muted/20"
+                    }`}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
@@ -242,6 +250,7 @@ export function ContentUpload({
                     {contentType === "video" && "Supports MP4, MOV, AVI, WebM, MKV and more"}
                     {contentType === "audio" && "Supports MP3, WAV, OGG, AAC, M4A and more"}
                     {contentType === "pdf" && "Supports PDF documents"}
+                    {contentType === "image" && "Supports JPG, PNG, GIF, WEBP, SVG"}
                     {contentType === "file" && "Supports various file types"}
                   </p>
                   <Button
@@ -335,15 +344,15 @@ export function ContentUpload({
 
         <TabsContent value="manual" className="space-y-4">
           <div className="space-y-2">
-            <Label>Cloudinary Public ID</Label>
+            <Label>{returnUrl ? "Image URL" : "Cloudinary Public ID"}</Label>
             <Input
               type="text"
-              placeholder="e.g., synapze-content/lesson-1-video"
+              placeholder={returnUrl ? "https://..." : "e.g., synapze-content/lesson-1-video"}
               value={manualId}
               onChange={handleManualChange}
             />
             <p className="text-xs text-muted-foreground">
-              Enter the Cloudinary public ID if you've already uploaded the file manually.
+              Enter the {returnUrl ? "full URL" : "Cloudinary public ID"} if you've already uploaded the file manually.
             </p>
           </div>
         </TabsContent>
@@ -351,7 +360,7 @@ export function ContentUpload({
 
       {value && (
         <div className="rounded-md bg-muted p-3">
-          <p className="text-sm font-medium">Current Public ID:</p>
+          <p className="text-sm font-medium">Current {returnUrl ? "URL" : "Public ID"}:</p>
           <p className="text-sm text-muted-foreground font-mono break-all">{value}</p>
         </div>
       )}

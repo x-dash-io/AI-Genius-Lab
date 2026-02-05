@@ -3,9 +3,22 @@ import { unstable_cache } from "next/cache";
 
 export type SocialLinks = {
     facebook: string;
-    linkedin: string;
     twitter: string;
+    instagram: string;
+    linkedin: string;
+    youtube: string;
     tiktok: string;
+    github: string;
+};
+
+export const defaultSocialLinks: SocialLinks = {
+    facebook: "#",
+    twitter: "#",
+    instagram: "#",
+    linkedin: "#",
+    youtube: "#",
+    tiktok: "#",
+    github: "#",
 };
 
 export type HeroLogo = {
@@ -16,18 +29,12 @@ export type HeroLogo = {
     visible: boolean;
 };
 
-export const defaultSocialLinks: SocialLinks = {
-    facebook: "#",
-    linkedin: "#",
-    twitter: "#",
-    tiktok: "#",
-};
-
 export const defaultHeroLogos: HeroLogo[] = [
-    { id: "openai", name: "OpenAI", type: "image", value: "/logos/openai.svg", visible: true },
+    { id: "openai", name: "OpenAI", type: "image", value: "/logos/openai.png", visible: true },
     { id: "microsoft", name: "Microsoft", type: "image", value: "/logos/microsoft.svg", visible: true },
-    { id: "meta", name: "Meta", type: "image", value: "/logos/meta.svg", visible: true },
+    { id: "meta", name: "Meta", type: "image", value: "/logos/meta.png", visible: true },
     { id: "midjourney", name: "Midjourney", type: "image", value: "/logos/midjourney.svg", visible: true },
+    { id: "google", name: "Google", type: "image", value: "/logos/google.png", visible: true },
     { id: "vercel", name: "Vercel", type: "image", value: "/logos/vercel.svg", visible: true },
 ];
 

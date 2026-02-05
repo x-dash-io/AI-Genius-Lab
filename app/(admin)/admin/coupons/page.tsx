@@ -73,7 +73,7 @@ export default async function CouponsPage() {
                                             )}
                                         </td>
                                         <td className="px-4 py-3">
-                                            <Badge variant={coupon.isActive ? "success" : "secondary"}>
+                                            <Badge variant={coupon.isActive ? "default" : "secondary"}>
                                                 {coupon.isActive ? "Active" : "Inactive"}
                                             </Badge>
                                         </td>

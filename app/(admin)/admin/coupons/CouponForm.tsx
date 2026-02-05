@@ -24,23 +24,40 @@ const formSchema = z.object({
     code: z.string().min(3, "Code must be at least 3 characters").max(20).toUpperCase(),
     description: z.string().optional(),
     discountType: z.enum(["PERCENT", "FIXED"]),
-    discountAmount: z.coerce.number().min(1, "Amount must be at least 1"),
-    minOrderAmount: z.coerce.number().nonnegative().optional(),
-    maxDiscountAmount: z.coerce.number().nonnegative().optional(),
+    discountAmount: z.number().min(1, "Amount must be at least 1"),
+    minOrderAmount: z.number().nonnegative().optional(),
+    maxDiscountAmount: z.number().nonnegative().optional(),
     startDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
         message: "Invalid date",
     }),
     endDate: z.string().optional().refine((val) => !val || !isNaN(Date.parse(val)), {
         message: "Invalid date",
     }),
-    maxUses: z.coerce.number().positive().optional(),
-    isActive: z.boolean().default(true),
+    maxUses: z.number().positive().optional(),
+    isActive: z.boolean(),
 });
 
 type CouponFormValues = z.infer<typeof formSchema>;
 
+interface CouponWithDates {
+    id: string;
+    code: string;
+    description: string | null;
+    discountType: "PERCENT" | "FIXED";
+    discountAmount: number;
+    minOrderAmount: number | null;
+    maxDiscountAmount: number | null;
+    startDate: Date;
+    endDate: Date | null;
+    maxUses: number | null;
+    isActive: boolean;
+    usedCount: number;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 interface CouponFormProps {
-    initialData?: any;
+    initialData?: Partial<CouponWithDates>;
     isEditing?: boolean;
 }
 

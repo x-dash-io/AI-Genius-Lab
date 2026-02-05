@@ -59,7 +59,7 @@ export async function createCoupon(formData: FormData) {
         return { success: true };
     } catch (error) {
         if (error instanceof z.ZodError) {
-            return { error: error.errors[0].message };
+            return { error: error.issues[0].message };
         }
         return { error: "Failed to create coupon. Code might already exist." };
     }

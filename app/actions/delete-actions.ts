@@ -28,7 +28,7 @@ export async function deleteSubscriptionPlanAction(id: string) {
         where: { id },
         include: {
             _count: {
-                select: { userSubscriptions: true },
+                select: { subscriptions: true },
             },
         },
     });
@@ -37,7 +37,7 @@ export async function deleteSubscriptionPlanAction(id: string) {
         throw new Error("Plan not found");
     }
 
-    if (plan._count.userSubscriptions > 0) {
+    if (plan._count.subscriptions > 0) {
         throw new Error("Cannot delete a plan with active subscribers. Disable it instead.");
     }
 

@@ -22,7 +22,7 @@ async function updateCourseAction(courseId: string, formData: FormData) {
     const isPublished = formData.get("isPublished") === "on";
     const tier = formData.get("tier") as "STANDARD" | "PREMIUM";
     const imageUrl = formData.get("imageUrl") as string;
-    const category = formData.get("category") as string;
+
 
     await updateCourse(courseId, {
       title,
