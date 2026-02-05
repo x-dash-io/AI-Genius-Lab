@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,12 +10,14 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toastSuccess, toastError } from "@/lib/toast";
-import { Loader2, Plus, Trash2, GripVertical, Info } from "lucide-react";
+import { Loader2, Plus, Trash2, GripVertical, Info, Save } from "lucide-react";
 import { updateSiteSettings } from "@/lib/actions/settings";
 import { Switch } from "@/components/ui/switch";
+import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { LogoImageUpload } from "@/components/admin/LogoImageUpload";
+import { useEffect } from "react";
 
 const settingsSchema = z.object({
     socialLinks: z.object({
@@ -46,6 +49,7 @@ interface SiteSettingsFormProps {
 
 export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteSettingsFormProps) {
     const [isPending, startTransition] = useTransition();
+    const [lastSaved, setLastSaved] = React.useState<{ socialLinks: any; heroLogos: any } | null>(null);
 
     // Migration helper: if initialHeroLogos come from old structure (without type), default them
     const migratedHeroLogos: SettingsFormValues['heroLogos'] = (initialHeroLogos || []).map((logo: any) => ({
@@ -69,6 +73,28 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
         name: "heroLogos",
     });
 
+    // Auto-save functionality
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const currentValues = form.getValues();
+            if (JSON.stringify(currentValues) !== JSON.stringify(lastSaved)) {
+                startTransition(async () => {
+                    try {
+                        await Promise.all([
+                            updateSiteSettings("social_links", currentValues.socialLinks),
+                            updateSiteSettings("hero_logos", currentValues.heroLogos)
+                        ]);
+                        setLastSaved(currentValues);
+                    } catch (error: any) {
+                        console.error("Auto-save failed:", error);
+                    }
+                });
+            }
+        }, 2000); // Auto-save after 2 seconds of inactivity
+
+        return () => clearTimeout(timer);
+    }, [form.watch(), lastSaved]);
+
     function onSubmit(data: SettingsFormValues) {
         startTransition(async () => {
             try {
@@ -86,6 +112,13 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                {/* Auto-save indicator */}
+                <div className="flex items-center justify-end mb-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Save className="h-4 w-4" />
+                        <span>Auto-saving enabled</span>
+                    </div>
+                </div>
 
                 {/* Social Media Links */}
                 <Card>
@@ -266,7 +299,7 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                             <FormItem className="md:col-span-2 flex flex-col items-center justify-center pt-2">
                                                 <FormLabel className="text-xs mb-2">Visible</FormLabel>
                                                 <FormControl>
-                                                    <Switch
+                                                    <ToggleSwitch
                                                         checked={field.value}
                                                         onCheckedChange={field.onChange}
                                                     />
