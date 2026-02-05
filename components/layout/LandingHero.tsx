@@ -57,7 +57,7 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
   return (
     <section className="relative py-12 sm:py-16 lg:py-20 min-h-0 overflow-y-visible">
       {/* Main Hero Grid - Split Layout */}
-      <div className="w-full max-w-7xl mx-auto px-0 sm:px-2 lg:px-4 overflow-x-hidden">
+      <div className="w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 overflow-x-hidden">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Column - Main Content */}
           <motion.div
@@ -68,12 +68,12 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
           >
             {/* Heading */}
             <div className="space-y-6">
-              <h1 className="font-display text-5xl md:text-6xl xl:text-7xl font-black tracking-tight leading-[1.1] max-w-full">
+              <h1 className="font-display text-3xl sm:text-5xl md:text-6xl xl:text-7xl font-black tracking-tight leading-[1.1] max-w-full break-words">
                 <span className="block text-foreground/90">Master AI With</span>
-                <span className="block mt-2">
+                <span className="block mt-2 w-full">
                   <TypingAnimation
                     words={typingWords}
-                    className="text-primary drop-shadow-[0_4px_12px_hsl(var(--primary)/0.3)]"
+                    className="text-primary drop-shadow-[0_4px_12px_hsl(var(--primary)/0.3)] break-words whitespace-pre-wrap"
                     typingSpeed={60}
                     deletingSpeed={30}
                     pauseDuration={3000}
@@ -100,29 +100,29 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-5 pt-4">
-              <Link href="/courses" className="flex-1 sm:flex-none">
-                <Button size="lg" variant="premium" className="w-full sm:px-10 h-14 rounded-2xl text-lg shadow-2xl shadow-primary/20 group">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 pt-4 w-full">
+              <Link href="/courses" className="w-full sm:w-auto sm:flex-1 sm:flex-none">
+                <Button size="lg" variant="premium" className="w-full sm:px-10 h-14 rounded-2xl text-lg shadow-2xl shadow-primary/20 group whitespace-nowrap">
                   Explore Mastery
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-2" />
                 </Button>
               </Link>
-              <Link href="/learning-paths" className="flex-1 sm:flex-none">
-                <Button size="lg" variant="outline" className="w-full sm:px-10 h-14 rounded-2xl border-2 font-bold hover:bg-accent/50 transition-all">
+              <Link href="/learning-paths" className="w-full sm:w-auto sm:flex-1 sm:flex-none">
+                <Button size="lg" variant="outline" className="w-full sm:px-10 h-14 rounded-2xl border-2 font-bold hover:bg-accent/50 transition-all whitespace-nowrap">
                   Learning Paths
                 </Button>
               </Link>
             </div>
 
             {/* Trust Badges */}
-            <div className="flex flex-wrap items-center gap-x-8 gap-y-4 pt-10 border-t border-border/50">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-3 sm:gap-x-8 sm:gap-y-4 pt-10 border-t border-border/50">
               {[
                 { icon: Lock, label: "Verified Access" },
                 { icon: BarChart, label: "Live Analytics" },
                 { icon: GraduationCap, label: "Lifetime Rights" },
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2.5 text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 hover:text-primary/60 transition-colors cursor-default">
-                  <item.icon className="h-4 w-4" />
+                <div key={i} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 hover:text-primary/60 transition-colors cursor-default whitespace-nowrap">
+                  <item.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span>{item.label}</span>
                 </div>
               ))}
@@ -189,7 +189,7 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="lg:hidden mt-8 sm:mt-10"
           >
-            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory -mx-5 px-5 sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {/* Mobile Stat Card 1 */}
               <div className="flex-shrink-0 w-44 sm:w-48 snap-center bg-card/60 dark:bg-card/40 backdrop-blur-xl border border-border/50 rounded-2xl p-5 sm:p-6">
                 <div className="flex flex-col items-center text-center space-y-3">

@@ -60,7 +60,7 @@ export function TypingAnimation({
   }, [currentText, isDeleting, isPaused, currentWordIndex, words, typingSpeed, deletingSpeed, pauseDuration]);
 
   return (
-    <span className="inline-block relative whitespace-nowrap">
+    <span className="inline-block relative break-words whitespace-normal max-w-full">
       {/* Invisible placeholder to reserve space - ensures layout doesn't shift */}
       <span className={`${className} invisible`} aria-hidden="true">
         {longestWord}

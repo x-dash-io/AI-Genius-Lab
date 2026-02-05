@@ -14,7 +14,7 @@ export function HomeFeaturedCourses({ courses }: HomeFeaturedCoursesProps) {
     if (courses.length === 0) return null;
 
     return (
-        <section className="relative py-12">
+        <section className="relative py-12 w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
                 <div className="space-y-4">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest">

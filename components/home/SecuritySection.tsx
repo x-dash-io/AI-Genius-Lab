@@ -13,7 +13,7 @@ const securityFeatures = [
 
 export function SecuritySection() {
   return (
-    <section className="grid gap-6">
+    <section className="w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
