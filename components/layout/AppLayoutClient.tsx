@@ -149,7 +149,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
           <HeroBackgroundBlobs />
 
           {/* Desktop Layout */}
-          <div className="hidden md:flex min-h-screen" suppressHydrationWarning>
+          <div className="hidden lg:flex min-h-screen" suppressHydrationWarning>
             {/* Desktop Sidebar - Fixed */}
             <motion.aside
               initial={{ x: -100, opacity: 0 }}
@@ -286,7 +286,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Mobile Layout */}
-          <div className="flex md:hidden flex-col min-h-screen" suppressHydrationWarning>
+          <div className="flex lg:hidden flex-col min-h-screen" suppressHydrationWarning>
             <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60 h-16">
               <div className="flex items-center justify-between px-4 h-full">
                 <Link href={getHref("/dashboard")} className="flex items-center">
@@ -330,7 +330,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
                     onClick={() => setMobileMenuOpen(false)}
                   />
 
@@ -346,7 +346,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                       damping: 30,
                       stiffness: 300
                     }}
-                    className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-card/95 backdrop-blur-md border-r shadow-2xl overflow-y-auto md:hidden"
+                    className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-card/95 backdrop-blur-md border-r shadow-2xl overflow-y-auto lg:hidden"
                   >
                     {/* Menu Header */}
                     <div className="border-b p-4 flex items-center justify-between sticky top-0 bg-card/95 backdrop-blur-md z-10 h-16">
