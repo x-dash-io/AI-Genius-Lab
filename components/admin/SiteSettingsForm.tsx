@@ -123,25 +123,25 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full max-w-full overflow-x-hidden">
                 {/* Auto-save indicator */}
-                <div className="flex items-center justify-end mb-4">
+                <div className="flex items-center justify-end mb-4 w-full">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Save className="h-4 w-4" />
-                        <span>Auto-saving enabled</span>
+                        <Save className="h-4 w-4 flex-shrink-0" />
+                        <span className="whitespace-nowrap">Auto-saving enabled</span>
                     </div>
                 </div>
 
                 {/* Social Media Links */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Social Media Links</CardTitle>
-                        <CardDescription>
+                <Card className="w-full">
+                    <CardHeader className="px-4 sm:px-6">
+                        <CardTitle className="text-lg sm:text-xl">Social Media Links</CardTitle>
+                        <CardDescription className="text-sm">
                             Manage social media links displayed in the footer.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid gap-4 md:grid-cols-2">
+                    <CardContent className="space-y-4 px-4 sm:px-6">
+                        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2">
                             <FormField
                                 control={form.control}
                                 name="socialLinks.facebook"
@@ -199,37 +199,43 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                 </Card>
 
                 {/* Hero Logos */}
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
+                <Card className="w-full">
+                    <CardHeader className="px-4 sm:px-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div>
-                                <CardTitle>Hero Section Logos</CardTitle>
-                                <CardDescription>
+                                <CardTitle className="text-lg sm:text-xl">Hero Section Logos</CardTitle>
+                                <CardDescription className="text-sm">
                                     Manage the trusted company logos displayed in the hero section.
                                 </CardDescription>
                             </div>
-                            <Button type="button" variant="outline" size="sm" onClick={() => append({ id: `logo-${Date.now()}`, name: "", type: "image", value: "", visible: true })}>
-                                <Plus className="mr-2 h-4 w-4" />
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => append({ id: `logo-${Date.now()}`, name: "", type: "image", value: "", visible: true })}
+                                className="w-full sm:w-auto whitespace-nowrap"
+                            >
+                                <Plus className="mr-2 h-4 w-4 flex-shrink-0" />
                                 Add Logo
                             </Button>
                         </div>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-4 px-4 sm:px-6">
                         {fields.map((field, index) => (
-                            <div key={field.id} className="flex items-start gap-4 p-4 border rounded-md">
-                                <div className="cursor-move mt-3 text-muted-foreground">
+                            <div key={field.id} className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 p-3 sm:p-4 border rounded-md w-full overflow-x-hidden">
+                                <div className="cursor-move mt-2 sm:mt-3 text-muted-foreground order-first sm:order-none">
                                     <GripVertical className="h-5 w-5" />
                                 </div>
-                                <div className="grid gap-4 flex-1 md:grid-cols-12">
+                                <div className="grid gap-3 sm:gap-4 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 w-full">
                                     {/* Name */}
                                     <FormField
                                         control={form.control}
                                         name={`heroLogos.${index}.name`}
                                         render={({ field }) => (
-                                            <FormItem className="md:col-span-3">
+                                            <FormItem className="sm:col-span-3 lg:col-span-3">
                                                 <FormLabel className="text-xs">Name</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="OpenAI" {...field} />
+                                                    <Input placeholder="OpenAI" {...field} className="w-full" />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -241,11 +247,11 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                         control={form.control}
                                         name={`heroLogos.${index}.type`}
                                         render={({ field }) => (
-                                            <FormItem className="md:col-span-2">
+                                            <FormItem className="sm:col-span-2 lg:col-span-2">
                                                 <FormLabel className="text-xs">Type</FormLabel>
                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                     <FormControl>
-                                                        <SelectTrigger>
+                                                        <SelectTrigger className="w-full">
                                                             <SelectValue placeholder="Type" />
                                                         </SelectTrigger>
                                                     </FormControl>
@@ -266,8 +272,8 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                         render={({ field }) => {
                                             const logoType = form.getValues(`heroLogos.${index}.type`);
                                             return (
-                                                <FormItem className="md:col-span-5">
-                                                    <div className="flex items-center gap-2">
+                                                <FormItem className="sm:col-span-2 lg:col-span-5">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                                                         <FormLabel className="text-xs">
                                                             {logoType === "image" ? "Image" : "Icon Name"}
                                                         </FormLabel>
@@ -275,10 +281,10 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                                             <TooltipProvider>
                                                                 <Tooltip>
                                                                     <TooltipTrigger asChild>
-                                                                        <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+                                                                        <Info className="h-3 w-3 text-muted-foreground cursor-help flex-shrink-0" />
                                                                     </TooltipTrigger>
                                                                     <TooltipContent>
-                                                                        <p>Enter exact Lucide icon name (e.g., Zap, Shield, Cloud).</p>
+                                                                        <p className="max-w-xs">Enter exact Lucide icon name (e.g., Zap, Shield, Cloud).</p>
                                                                     </TooltipContent>
                                                                 </Tooltip>
                                                             </TooltipProvider>
@@ -294,6 +300,7 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                                             <Input
                                                                 placeholder="Zap"
                                                                 {...field}
+                                                                className="w-full"
                                                             />
                                                         )}
                                                     </FormControl>
@@ -308,7 +315,7 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                         control={form.control}
                                         name={`heroLogos.${index}.visible`}
                                         render={({ field }) => (
-                                            <FormItem className="md:col-span-2 flex flex-col items-center justify-center pt-2">
+                                            <FormItem className="sm:col-span-2 lg:col-span-2 flex flex-col items-center justify-center pt-2">
                                                 <FormLabel className="text-xs mb-2">Visible</FormLabel>
                                                 <FormControl>
                                                     <ToggleSwitch
@@ -320,7 +327,13 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                         )}
                                     />
                                 </div>
-                                <Button type="button" variant="ghost" size="icon" className="mt-6 text-destructive" onClick={() => remove(index)}>
+                                <Button 
+                                    type="button" 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="mt-2 sm:mt-6 text-destructive flex-shrink-0" 
+                                    onClick={() => remove(index)}
+                                >
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
                             </div>
@@ -333,7 +346,7 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                     </CardContent>
                 </Card>
 
-                <Button type="submit" disabled={isPending}>
+                <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
                     {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Save Changes
                 </Button>

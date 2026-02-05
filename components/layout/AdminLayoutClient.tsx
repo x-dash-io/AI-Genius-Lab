@@ -59,24 +59,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLElement>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null | undefined>(session?.user?.image);
-
-  // Listen for avatar updates
-  useEffect(() => {
-    const handleAvatarUpdate = (event: CustomEvent) => {
-      setAvatarUrl(event.detail.imageUrl);
-    };
-
-    window.addEventListener('avatarUpdated', handleAvatarUpdate as EventListener);
-    return () => {
-      window.removeEventListener('avatarUpdated', handleAvatarUpdate as EventListener);
-    };
-  }, []);
-
-  // Update avatar when session changes
-  useEffect(() => {
-    setAvatarUrl(session?.user?.image);
-  }, [session?.user?.image]);
+  const avatarUrl = session?.user?.image;
 
   // Close menu on scroll
   useEffect(() => {
@@ -163,20 +146,52 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                       return (
                         <motion.div
                           key={item.href}
-                          whileHover={{ x: 4 }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
                           transition={{ type: "spring", stiffness: 400, damping: 17 }}
                         >
                           <Link
                             href={item.href}
                             className={cn(
-                              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                              "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 overflow-hidden",
+                              "hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5",
+                              "hover:shadow-sm hover:shadow-primary/10",
                               isActive
-                                ? "bg-primary text-primary-foreground shadow-sm"
-                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                ? "bg-gradient-to-r from-primary/90 to-primary text-primary-foreground shadow-sm"
+                                : "text-muted-foreground hover:text-accent-foreground"
                             )}
                           >
-                            <Icon className="h-5 w-5 flex-shrink-0" />
-                            {item.name}
+                            {/* Animated gradient background for active state */}
+                            {isActive && (
+                              <motion.div 
+                                className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary opacity-90"
+                                initial={false}
+                                animate={{
+                                  background: [
+                                    "linear-gradient(90deg, rgb(var(--color-primary) * 0.8) 0%, rgb(var(--color-primary)) 50%, rgb(var(--color-primary) * 0.8) 100%)",
+                                    "linear-gradient(90deg, rgb(var(--color-primary)) 0%, rgb(var(--color-primary) * 0.8) 50%, rgb(var(--color-primary)) 100%)",
+                                    "linear-gradient(90deg, rgb(var(--color-primary) * 0.8) 0%, rgb(var(--color-primary)) 50%, rgb(var(--color-primary) * 0.8) 100%)"
+                                  ]
+                                }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                              />
+                            )}
+                            {/* Hover overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            
+                            <Icon className="nav-icon h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-3 relative z-10" />
+                            <span className="relative z-10 transition-colors duration-200">{item.name}</span>
+                            
+                            {/* Active indicator */}
+                            {isActive && (
+                              <motion.div 
+                                className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-full shadow-sm shadow-primary/50"
+                                layoutId="activeIndicator"
+                                initial={{ opacity: 0, scale: 0 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                              />
+                            )}
                           </Link>
                         </motion.div>
                       );
@@ -201,17 +216,33 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                       return (
                         <motion.div
                           key={item.href}
-                          whileHover={{ x: 4 }}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
                           transition={{ type: "spring", stiffness: 400, damping: 17 }}
                         >
                           <Link
                             href={previewHref}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all text-muted-foreground hover:bg-amber-500/10 hover:text-amber-700 dark:hover:text-amber-300"
+                            className={cn(
+                              "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 overflow-hidden",
+                              "hover:bg-gradient-to-r hover:from-amber-500/10 hover:to-amber-400/5",
+                              "hover:shadow-sm hover:shadow-amber-500/10",
+                              "text-foreground hover:text-amber-700 dark:hover:text-amber-300"
+                            )}
                           >
-                            <Icon className="h-5 w-5 flex-shrink-0" />
-                            {item.name}
+                            {/* Hover overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            
+                            <Icon className="nav-icon h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-3 relative z-10" />
+                            <span className="relative z-10 transition-colors duration-200">{item.name}</span>
+                            
+                            {/* External link indicator */}
+                            <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                              <div className="h-3 w-3 rounded-full bg-amber-500/20 flex items-center justify-center">
+                                <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                              </div>
+                            </div>
                           </Link>
                         </motion.div>
                       );
@@ -227,46 +258,101 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                 <div className="space-y-4">
                   <Link href="/admin/profile">
                     <motion.div
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
-                      className="group flex items-center gap-3 p-3 rounded-2xl bg-accent/30 border border-transparent hover:border-primary/20 hover:bg-accent/50 transition-all cursor-pointer shadow-sm hover:shadow-md"
+                      whileHover={{ y: -2, boxShadow: "0 12px 40px rgba(0,0,0,0.15)" }}
+                      whileTap={{ scale: 0.98 }}
+                      className="group relative flex items-center gap-3 p-4 rounded-2xl backdrop-blur-md bg-white/10 border border-white/20 transition-all cursor-pointer shadow-lg hover:shadow-xl"
+                      style={{
+                        background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
+                        backdropFilter: "blur(10px)"
+                      }}
                     >
-                      <Avatar className="h-10 w-10 ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all">
-                        <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "Admin"} />
-                        <AvatarFallback className="bg-primary text-primary-foreground text-xs font-black">
-                          {(() => {
-                            const name = session.user.name;
-                            const email = session.user.email || "";
-                            if (name && name.trim()) {
-                              return name.trim()[0].toUpperCase();
-                            }
-                            return email.charAt(0).toUpperCase();
-                          })()}
-                        </AvatarFallback>
-                      </Avatar>
+                      {/* Animated gradient overlay */}
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      
+                      <div className="relative">
+                        <Avatar className="h-12 w-12 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
+                          <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "Admin"} />
+                          <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-sm font-bold">
+                            {(() => {
+                              const name = session.user.name;
+                              const email = session.user.email || "";
+                              if (name && name.trim()) {
+                                return name.trim()[0].toUpperCase();
+                              }
+                              return email.charAt(0).toUpperCase();
+                            })()}
+                          </AvatarFallback>
+                        </Avatar>
+                        {/* Animated avatar ring */}
+                        <motion.div 
+                          className="absolute -inset-1 rounded-full border-2 border-primary/30"
+                          animate={{
+                            scale: [1, 1.1, 1],
+                            opacity: [0.3, 0.6, 0.3]
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+                      </div>
+                      
                       <div className="flex-1 overflow-hidden min-w-0">
-                        <p className="truncate text-xs font-bold tracking-tight text-foreground/90 uppercase">
+                        <p className="truncate text-sm font-bold tracking-tight text-foreground/90 group-hover:text-foreground transition-colors duration-200">
                           {session.user.name || session.user.email}
                         </p>
-                        <p className="truncate text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground/60">
+                        <p className="truncate text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground/70 group-hover:text-muted-foreground transition-colors duration-200">
                           Administrator
                         </p>
                       </div>
+                      
+                      {/* Hover indicator */}
+                      <motion.div 
+                        className="absolute inset-0 rounded-2xl border border-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        initial={false}
+                        animate={{
+                          background: [
+                            "linear-gradient(45deg, transparent 30%, rgba(var(--color-primary), 0.1) 50%, transparent 70%)",
+                            "linear-gradient(45deg, transparent 30%, rgba(var(--color-primary), 0.05) 50%, transparent 70%)"
+                          ]
+                        }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      />
                     </motion.div>
                   </Link>
 
-                  {/* Scientific Action Bar */}
-                  <div className="flex items-center gap-1.5 p-1 rounded-xl bg-accent/20 border border-border/40">
-                    <div className="flex-1 flex items-center gap-1">
-                      <div className="p-1">
+                  {/* Modern Action Bar */}
+                  <motion.div 
+                    className="flex items-center gap-2 p-2 rounded-2xl backdrop-blur-md bg-white/5 border border-white/10 shadow-lg"
+                    whileHover={{ y: -1, boxShadow: "0 8px 32px rgba(0,0,0,0.12)" }}
+                    style={{
+                      background: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)"
+                    }}
+                  >
+                    <div className="flex items-center gap-1 flex-1">
+                      <motion.div 
+                        className="p-2 rounded-xl hover:bg-white/10 transition-colors duration-200 cursor-pointer"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
                         <CartIcon />
-                      </div>
-                      <div className="p-1">
+                      </motion.div>
+                      <motion.div 
+                        className="p-2 rounded-xl hover:bg-white/10 transition-colors duration-200 cursor-pointer"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
                         <ThemeToggle />
-                      </div>
+                      </motion.div>
                     </div>
-                    <SignOutButton className="h-9 px-3 text-[10px] font-bold uppercase tracking-widest bg-background/50 hover:bg-destructive hover:text-destructive-foreground hover:shadow-[0_2px_8px_hsl(var(--destructive)_/_0.3)] border-none shadow-none rounded-lg transition-all" />
-                  </div>
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <SignOutButton className="modern-btn h-10 px-4 text-[10px] font-bold uppercase tracking-widest bg-gradient-to-r from-destructive to-destructive/80 hover:from-destructive/90 hover:to-destructive text-white shadow-lg hover:shadow-xl hover:shadow-destructive/25 border-none rounded-xl transition-all duration-300" />
+                    </motion.div>
+                  </motion.div>
                 </div>
               )}
             </div>
@@ -379,19 +465,51 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.05 * (index + 1) }}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                               >
                                 <Link
                                   href={item.href}
                                   onClick={() => setMobileMenuOpen(false)}
                                   className={cn(
-                                    "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all active:scale-[0.98]",
+                                    "group relative flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200 overflow-hidden active:scale-[0.98]",
+                                    "hover:bg-gradient-to-r hover:from-primary/10 hover:to-primary/5",
+                                    "hover:shadow-sm hover:shadow-primary/10",
                                     isActive
-                                      ? "bg-primary text-primary-foreground shadow-sm"
-                                      : "text-foreground hover:bg-accent hover:text-accent-foreground"
+                                      ? "bg-gradient-to-r from-primary/90 to-primary text-primary-foreground shadow-sm"
+                                      : "text-foreground hover:text-accent-foreground"
                                   )}
                                 >
-                                  <Icon className="h-5 w-5 flex-shrink-0" />
-                                  <span>{item.name}</span>
+                                  {/* Animated gradient background for active state */}
+                                  {isActive && (
+                                    <motion.div 
+                                      className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary opacity-90"
+                                      initial={false}
+                                      animate={{
+                                        background: [
+                                          "linear-gradient(90deg, rgb(var(--color-primary) * 0.8) 0%, rgb(var(--color-primary)) 50%, rgb(var(--color-primary) * 0.8) 100%)",
+                                          "linear-gradient(90deg, rgb(var(--color-primary)) 0%, rgb(var(--color-primary) * 0.8) 50%, rgb(var(--color-primary)) 100%)",
+                                          "linear-gradient(90deg, rgb(var(--color-primary) * 0.8) 0%, rgb(var(--color-primary)) 50%, rgb(var(--color-primary) * 0.8) 100%)"
+                                        ]
+                                      }}
+                                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                    />
+                                  )}
+                                  {/* Hover overlay */}
+                                  <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                  
+                                  <Icon className="nav-icon h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-3 relative z-10" />
+                                  <span className="relative z-10 transition-colors duration-200">{item.name}</span>
+                                  
+                                  {/* Active indicator */}
+                                  {isActive && (
+                                    <motion.div 
+                                      className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-full shadow-sm shadow-primary/50"
+                                      initial={{ opacity: 0, scale: 0 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    />
+                                  )}
                                 </Link>
                               </motion.div>
                             );
@@ -419,16 +537,33 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.05 * (index + 4) }}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                               >
                                 <Link
                                   href={previewHref}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   onClick={() => setMobileMenuOpen(false)}
-                                  className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all text-foreground hover:bg-amber-500/10 hover:text-amber-700 dark:hover:text-amber-300 active:scale-[0.98]"
+                                  className={cn(
+                                    "group relative flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200 overflow-hidden active:scale-[0.98]",
+                                    "hover:bg-gradient-to-r hover:from-amber-500/10 hover:to-amber-400/5",
+                                    "hover:shadow-sm hover:shadow-amber-500/10",
+                                    "text-foreground hover:text-amber-700 dark:hover:text-amber-300"
+                                  )}
                                 >
-                                  <Icon className="h-5 w-5 flex-shrink-0" />
-                                  <span>{item.name}</span>
+                                  {/* Hover overlay */}
+                                  <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                  
+                                  <Icon className="nav-icon h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-3 relative z-10" />
+                                  <span className="relative z-10 transition-colors duration-200">{item.name}</span>
+                                  
+                                  {/* External link indicator */}
+                                  <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    <div className="h-3 w-3 rounded-full bg-amber-500/20 flex items-center justify-center">
+                                      <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                                    </div>
+                                  </div>
                                 </Link>
                               </motion.div>
                             );
@@ -447,33 +582,65 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                       className="border-t px-4 py-4 space-y-3 sticky bottom-0 bg-card/95 backdrop-blur-md"
                     >
                       <Link href="/admin/profile" onClick={() => setMobileMenuOpen(false)}>
-                        <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors active:scale-[0.98]">
-                          <Avatar className="h-10 w-10 ring-2 ring-primary/20">
-                            <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "Admin"} />
-                            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                              {(() => {
-                                const name = session.user.name;
-                                const email = session.user.email || "";
-                                if (name && name.trim()) {
-                                  const nameParts = name.trim().split(/\s+/);
-                                  return nameParts[0][0].toUpperCase();
-                                }
-                                return email.charAt(0).toUpperCase();
-                              })()}
-                            </AvatarFallback>
-                          </Avatar>
+                        <motion.div 
+                          className="group relative flex items-center gap-3 p-3 rounded-2xl backdrop-blur-md bg-white/10 border border-white/20 transition-all cursor-pointer shadow-lg hover:shadow-xl"
+                          whileHover={{ y: -1, scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          style={{
+                            background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)"
+                          }}
+                        >
+                          {/* Animated gradient overlay */}
+                          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                          
+                          <div className="relative">
+                            <Avatar className="h-10 w-10 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
+                              <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "Admin"} />
+                              <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-sm font-bold">
+                                {(() => {
+                                  const name = session.user.name;
+                                  const email = session.user.email || "";
+                                  if (name && name.trim()) {
+                                    const nameParts = name.trim().split(/\s+/);
+                                    return nameParts[0][0].toUpperCase();
+                                  }
+                                  return email.charAt(0).toUpperCase();
+                                })()}
+                              </AvatarFallback>
+                            </Avatar>
+                            {/* Animated avatar ring */}
+                            <motion.div 
+                              className="absolute -inset-1 rounded-full border-2 border-primary/30"
+                              animate={{
+                                scale: [1, 1.1, 1],
+                                opacity: [0.3, 0.6, 0.3]
+                              }}
+                              transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                              }}
+                            />
+                          </div>
+                          
                           <div className="flex-1 overflow-hidden min-w-0">
-                            <p className="truncate text-sm font-semibold">
+                            <p className="truncate text-sm font-semibold group-hover:text-foreground transition-colors duration-200">
                               {session.user.name || session.user.email}
                             </p>
-                            <p className="truncate text-xs text-muted-foreground">
+                            <p className="truncate text-xs text-muted-foreground group-hover:text-muted-foreground transition-colors duration-200">
                               Admin
                             </p>
                           </div>
-                        </div>
+                        </motion.div>
                       </Link>
                       <div className="flex items-center gap-2 px-1">
-                        <SignOutButton className="flex-1" />
+                        <motion.div
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="flex-1"
+                        >
+                          <SignOutButton className="modern-btn w-full h-10 text-[10px] font-bold uppercase tracking-widest bg-gradient-to-r from-destructive to-destructive/80 hover:from-destructive/90 hover:to-destructive text-white shadow-lg hover:shadow-xl hover:shadow-destructive/25 border-none rounded-xl transition-all duration-300" />
+                        </motion.div>
                       </div>
                     </motion.div>
                   )}
@@ -483,14 +650,16 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
           </AnimatePresence>
 
           {/* Main Content */}
-          <main className="flex-1 px-3 sm:px-4 py-4 pt-20 pb-12">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {children}
-            </motion.div>
+          <main className="flex-1 px-4 sm:px-6 py-4 pt-20 pb-12">
+            <div className="mx-auto w-full max-w-7xl">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {children}
+              </motion.div>
+            </div>
           </main>
           <Footer />
         </div>

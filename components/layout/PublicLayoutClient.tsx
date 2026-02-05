@@ -500,14 +500,16 @@ export function PublicLayoutClient({
         </AnimatePresence>
 
         {/* Main Content */}
-        <main className="flex-1 px-3 sm:px-4 py-4 pt-20 pb-12 overflow-y-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {children}
-          </motion.div>
+        <main className="flex-1 px-4 sm:px-6 py-4 pt-20 pb-12">
+          <div className="mx-auto w-full max-w-7xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {children}
+            </motion.div>
+          </div>
         </main>
         <Footer socialLinks={socialLinks} />
       </div>
