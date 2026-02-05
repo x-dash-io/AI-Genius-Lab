@@ -67,7 +67,7 @@ export function TypingAnimation({
       </span>
       {/* Visible animated text - absolutely positioned over the placeholder */}
       <span
-        className={`${className} absolute top-0 left-0`}
+        className={`${className} absolute top-0 left-0 w-full`}
         aria-label={currentText || longestWord}
       >
         {currentText}

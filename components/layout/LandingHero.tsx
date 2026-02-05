@@ -68,7 +68,7 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
           >
             {/* Heading */}
             <div className="space-y-6">
-              <h1 className="font-display text-3xl sm:text-5xl md:text-6xl xl:text-7xl font-black tracking-tight leading-[1.1] max-w-full break-words">
+              <h1 className="font-display text-2xl sm:text-5xl md:text-6xl xl:text-7xl font-black tracking-tight leading-[1.1] max-w-full break-words">
                 <span className="block text-foreground/90">Master AI With</span>
                 <span className="block mt-2 w-full">
                   <TypingAnimation
