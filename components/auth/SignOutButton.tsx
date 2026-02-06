@@ -30,7 +30,7 @@ export function SignOutButton({ className }: SignOutButtonProps) {
       variant="destructive"
       size="sm"
       className={cn(
-        "hover:bg-destructive/95 hover:shadow-[0_4px_12px_hsl(var(--destructive)/0.3)] transition-all",
+        "bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:shadow-[0_4px_12px_hsl(var(--destructive)/0.3)] transition-all",
         className
       )}
     >
