@@ -21,6 +21,8 @@ import {
   ShieldCheck,
   Ticket,
   Settings,
+  PanelLeftClose,
+  PanelLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -58,6 +60,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const menuRef = useRef<HTMLElement>(null);
   const avatarUrl = session?.user?.image;
 
@@ -163,7 +166,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                           >
                             {/* Animated gradient background for active state */}
                             {isActive && (
-                              <motion.div 
+                              <motion.div
                                 className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary opacity-90"
                                 initial={false}
                                 animate={{
@@ -178,13 +181,13 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                             )}
                             {/* Hover overlay */}
                             <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            
+
                             <Icon className="nav-icon h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-3 relative z-10" />
                             <span className="relative z-10 transition-colors duration-200">{item.name}</span>
-                            
+
                             {/* Active indicator */}
                             {isActive && (
-                              <motion.div 
+                              <motion.div
                                 className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-full shadow-sm shadow-primary/50"
                                 layoutId="activeIndicator"
                                 initial={{ opacity: 0, scale: 0 }}
@@ -233,10 +236,10 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                           >
                             {/* Hover overlay */}
                             <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            
+
                             <Icon className="nav-icon h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-3 relative z-10" />
                             <span className="relative z-10 transition-colors duration-200">{item.name}</span>
-                            
+
                             {/* External link indicator */}
                             <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                               <div className="h-3 w-3 rounded-full bg-amber-500/20 flex items-center justify-center">
@@ -268,7 +271,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                     >
                       {/* Animated gradient overlay */}
                       <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      
+
                       <div className="relative">
                         <Avatar className="h-12 w-12 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
                           <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "Admin"} />
@@ -284,7 +287,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                           </AvatarFallback>
                         </Avatar>
                         {/* Animated avatar ring */}
-                        <motion.div 
+                        <motion.div
                           className="absolute -inset-1 rounded-full border-2 border-primary/30"
                           animate={{
                             scale: [1, 1.1, 1],
@@ -297,7 +300,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                           }}
                         />
                       </div>
-                      
+
                       <div className="flex-1 overflow-hidden min-w-0">
                         <p className="truncate text-sm font-bold tracking-tight text-foreground/90 group-hover:text-foreground transition-colors duration-200">
                           {session.user.name || session.user.email}
@@ -306,9 +309,9 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                           Administrator
                         </p>
                       </div>
-                      
+
                       {/* Hover indicator */}
-                      <motion.div 
+                      <motion.div
                         className="absolute inset-0 rounded-2xl border border-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                         initial={false}
                         animate={{
@@ -323,7 +326,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                   </Link>
 
                   {/* Modern Action Bar */}
-                  <motion.div 
+                  <motion.div
                     className="flex items-center gap-2 p-2 rounded-2xl backdrop-blur-md bg-white/5 border border-white/10 shadow-lg"
                     whileHover={{ y: -1, boxShadow: "0 8px 32px rgba(0,0,0,0.12)" }}
                     style={{
@@ -331,14 +334,14 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                     }}
                   >
                     <div className="flex items-center gap-1 flex-1">
-                      <motion.div 
+                      <motion.div
                         className="p-2 rounded-xl hover:bg-white/10 transition-colors duration-200 cursor-pointer"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
                         <CartIcon />
                       </motion.div>
-                      <motion.div 
+                      <motion.div
                         className="p-2 rounded-xl hover:bg-white/10 transition-colors duration-200 cursor-pointer"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
@@ -482,7 +485,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                                 >
                                   {/* Animated gradient background for active state */}
                                   {isActive && (
-                                    <motion.div 
+                                    <motion.div
                                       className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary opacity-90"
                                       initial={false}
                                       animate={{
@@ -497,13 +500,13 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                                   )}
                                   {/* Hover overlay */}
                                   <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                  
+
                                   <Icon className="nav-icon h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-3 relative z-10" />
                                   <span className="relative z-10 transition-colors duration-200">{item.name}</span>
-                                  
+
                                   {/* Active indicator */}
                                   {isActive && (
-                                    <motion.div 
+                                    <motion.div
                                       className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-full shadow-sm shadow-primary/50"
                                       initial={{ opacity: 0, scale: 0 }}
                                       animate={{ opacity: 1, scale: 1 }}
@@ -554,10 +557,10 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                                 >
                                   {/* Hover overlay */}
                                   <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                  
+
                                   <Icon className="nav-icon h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 group-hover:rotate-3 relative z-10" />
                                   <span className="relative z-10 transition-colors duration-200">{item.name}</span>
-                                  
+
                                   {/* External link indicator */}
                                   <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                     <div className="h-3 w-3 rounded-full bg-amber-500/20 flex items-center justify-center">
@@ -582,7 +585,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                       className="border-t px-4 py-4 space-y-3 sticky bottom-0 bg-card/95 backdrop-blur-md"
                     >
                       <Link href="/admin/profile" onClick={() => setMobileMenuOpen(false)}>
-                        <motion.div 
+                        <motion.div
                           className="group relative flex items-center gap-3 p-3 rounded-2xl backdrop-blur-md bg-white/10 border border-white/20 transition-all cursor-pointer shadow-lg hover:shadow-xl"
                           whileHover={{ y: -1, scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
@@ -592,7 +595,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                         >
                           {/* Animated gradient overlay */}
                           <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                          
+
                           <div className="relative">
                             <Avatar className="h-10 w-10 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
                               <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "Admin"} />
@@ -609,7 +612,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                               </AvatarFallback>
                             </Avatar>
                             {/* Animated avatar ring */}
-                            <motion.div 
+                            <motion.div
                               className="absolute -inset-1 rounded-full border-2 border-primary/30"
                               animate={{
                                 scale: [1, 1.1, 1],
@@ -622,7 +625,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                               }}
                             />
                           </div>
-                          
+
                           <div className="flex-1 overflow-hidden min-w-0">
                             <p className="truncate text-sm font-semibold group-hover:text-foreground transition-colors duration-200">
                               {session.user.name || session.user.email}

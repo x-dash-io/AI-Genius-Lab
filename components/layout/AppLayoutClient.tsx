@@ -155,7 +155,11 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
               initial={{ x: -100, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3 }}
-              className="w-64 flex-col border-r bg-card/80 backdrop-blur-md flex fixed left-0 top-0 bottom-0 z-20"
+              className="w-64 flex-col border-r border-white/10 flex fixed left-0 top-0 bottom-0 z-20"
+              style={{
+                background: "linear-gradient(180deg, rgba(var(--card-rgb), 0.95) 0%, rgba(var(--card-rgb), 0.85) 100%)",
+                backdropFilter: "blur(20px)"
+              }}
             >
               {/* Sidebar Header - Fixed at top */}
               <div className="flex-shrink-0 border-b p-6">
@@ -180,6 +184,9 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
 
               {/* Scrollable Navigation */}
               <div className="flex-1 overflow-y-auto px-4 py-6">
+                <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-4">
+                  Navigation
+                </p>
                 <nav className="space-y-1">
                   {navigation.map((item) => {
                     const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
@@ -190,27 +197,48 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                     return (
                       <motion.div
                         key={item.href}
-                        whileHover={{ x: 4 }}
+                        whileHover={{ x: 4, scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         transition={{ type: "spring", stiffness: 400, damping: 17 }}
                       >
                         <Link
                           href={getHref(item.href)}
                           className={cn(
-                            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                            "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 overflow-hidden",
+                            "hover:bg-gradient-to-r hover:from-primary/15 hover:to-primary/5",
+                            "hover:shadow-sm hover:shadow-primary/10",
                             isActive
-                              ? "bg-primary text-primary-foreground shadow-sm"
-                              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                              ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/20"
+                              : "text-muted-foreground hover:text-foreground"
                           )}
                         >
-                          <Icon className="h-5 w-5 flex-shrink-0" />
-                          <span className="flex-1">{item.name}</span>
+                          {/* Active glow effect */}
+                          {isActive && (
+                            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent opacity-50 blur-xl" />
+                          )}
+                          {/* Hover overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                          <Icon className="h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-110 relative z-10" />
+                          <span className="flex-1 relative z-10">{item.name}</span>
                           {isCart && cartCount > 0 && (
                             <Badge
                               variant="destructive"
-                              className="h-5 min-w-[20px] flex items-center justify-center rounded-full px-1.5 text-[10px] font-bold"
+                              className="h-5 min-w-[20px] flex items-center justify-center rounded-full px-1.5 text-[10px] font-bold relative z-10 shadow-lg shadow-destructive/25"
                             >
                               {cartCount > 9 ? "9+" : cartCount}
                             </Badge>
+                          )}
+
+                          {/* Active indicator bar */}
+                          {isActive && (
+                            <motion.div
+                              className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white/80 rounded-full shadow-sm"
+                              layoutId="activeNavIndicator"
+                              initial={{ opacity: 0, scale: 0 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            />
                           )}
                         </Link>
                       </motion.div>
@@ -220,46 +248,86 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
               </div>
 
               {/* Sidebar Footer - Fixed at bottom */}
-              <div className="flex-shrink-0 p-4 mt-auto border-t border-border/50">
+              <div className="flex-shrink-0 p-4 mt-auto border-t border-white/10">
                 {session?.user && (
                   <div className="space-y-4">
                     <Link href={getHref("/profile")}>
                       <motion.div
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
-                        className="group flex items-center gap-3 p-3 rounded-2xl bg-accent/30 border border-transparent hover:border-primary/20 hover:bg-accent/50 transition-all cursor-pointer shadow-sm hover:shadow-md"
+                        whileHover={{ y: -2, scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="group relative flex items-center gap-3 p-4 rounded-2xl backdrop-blur-md cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300"
+                        style={{
+                          background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)",
+                          border: "1px solid rgba(255,255,255,0.1)"
+                        }}
                       >
-                        <Avatar className="h-10 w-10 ring-2 ring-primary/10 group-hover:ring-primary/30 transition-all">
-                          <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "User"} />
-                          <AvatarFallback className="bg-primary text-primary-foreground text-xs font-black">
-                            {(() => {
-                              const name = session.user.name;
-                              const email = session.user.email || "";
-                              if (name && name.trim()) {
-                                return name.trim()[0].toUpperCase();
-                              }
-                              return email.charAt(0).toUpperCase();
-                            })()}
-                          </AvatarFallback>
-                        </Avatar>
+                        {/* Animated gradient overlay */}
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                        <div className="relative">
+                          <Avatar className="h-11 w-11 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
+                            <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "User"} />
+                            <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-sm font-black">
+                              {(() => {
+                                const name = session.user.name;
+                                const email = session.user.email || "";
+                                if (name && name.trim()) {
+                                  return name.trim()[0].toUpperCase();
+                                }
+                                return email.charAt(0).toUpperCase();
+                              })()}
+                            </AvatarFallback>
+                          </Avatar>
+                          {/* Pulse ring animation */}
+                          <motion.div
+                            className="absolute -inset-0.5 rounded-full border-2 border-primary/20"
+                            animate={{
+                              scale: [1, 1.15, 1],
+                              opacity: [0.3, 0.1, 0.3]
+                            }}
+                            transition={{
+                              duration: 3,
+                              repeat: Infinity,
+                              ease: "easeInOut"
+                            }}
+                          />
+                        </div>
+
                         <div className="flex-1 overflow-hidden min-w-0">
-                          <p className="truncate text-xs font-bold tracking-tight text-foreground/90 uppercase">
+                          <p className="truncate text-sm font-bold tracking-tight text-foreground/90 group-hover:text-foreground transition-colors">
                             {session.user.name || session.user.email}
                           </p>
-                          <p className="truncate text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground/60">
+                          <p className="truncate text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/50 group-hover:text-muted-foreground/70 transition-colors">
                             {session.user.email}
                           </p>
                         </div>
                       </motion.div>
                     </Link>
 
-                    {/* Scientific Action Bar */}
-                    <div className="flex items-center gap-1.5 p-1 rounded-xl bg-accent/20 border border-border/40">
-                      <div className="flex-1 flex items-center gap-1 pl-1">
-                        <ThemeToggle />
+                    {/* Modern Action Bar */}
+                    <motion.div
+                      className="flex items-center gap-2 p-2 rounded-xl backdrop-blur-md shadow-lg"
+                      style={{
+                        background: "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)",
+                        border: "1px solid rgba(255,255,255,0.08)"
+                      }}
+                    >
+                      <div className="flex items-center gap-1 flex-1">
+                        <motion.div
+                          className="p-2 rounded-lg hover:bg-white/10 transition-colors duration-200 cursor-pointer"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <ThemeToggle />
+                        </motion.div>
                       </div>
-                      <SignOutButton className="h-9 px-3 text-[10px] font-bold uppercase tracking-widest bg-background/50 hover:bg-destructive hover:text-destructive-foreground hover:shadow-[0_2px_8px_hsl(var(--destructive)_/_0.3)] border-none shadow-none rounded-lg transition-all" />
-                    </div>
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <SignOutButton className="h-9 px-4 text-[10px] font-bold uppercase tracking-widest bg-gradient-to-r from-destructive/90 to-destructive hover:from-destructive hover:to-destructive/90 text-white shadow-md hover:shadow-lg hover:shadow-destructive/25 border-none rounded-lg transition-all duration-300" />
+                      </motion.div>
+                    </motion.div>
                   </div>
                 )}
               </div>
@@ -457,7 +525,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
             </div>
 
             {/* Main Content */}
-            <main className="flex-1 px-4 sm:px-6 py-4 pt-28 pb-12 relative z-10">
+            <main className="flex-1 px-4 sm:px-6 pt-28 pb-12 relative z-10">
               <div className="mx-auto w-full max-w-none sm:max-w-7xl">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}

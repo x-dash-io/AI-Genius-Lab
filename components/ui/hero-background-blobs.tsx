@@ -16,7 +16,7 @@ export function HeroBackgroundBlobs() {
     <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none select-none">
       {/* Primary Blob - Top Left - Indigo/Primary */}
       <motion.div
-        className="absolute -top-20 -left-20 w-[600px] h-[600px] rounded-full blur-[100px] opacity-40 dark:opacity-20"
+        className="absolute -top-20 -left-20 w-[80vw] max-w-[600px] h-[80vw] max-h-[600px] rounded-full blur-[100px] opacity-40 dark:opacity-20"
         style={{
           background: "radial-gradient(circle, hsl(var(--primary) / 0.8), transparent)",
           willChange: "transform",
@@ -35,11 +35,12 @@ export function HeroBackgroundBlobs() {
 
       {/* Secondary Blob - Top Right - Accent/Purple */}
       <motion.div
-        className="absolute top-[10%] -right-20 w-[500px] h-[500px] rounded-full blur-[120px] opacity-30 dark:opacity-15"
+        className="absolute top-[10%] -right-20 w-[70vw] max-w-[500px] h-[70vw] max-h-[500px] rounded-full blur-[120px] opacity-30 dark:opacity-15"
         style={{
           background: "radial-gradient(circle, hsl(262 83% 58% / 0.7), transparent)",
           willChange: "transform",
         }}
+
         animate={shouldReduceMotion ? {} : {
           x: [0, -60, 0],
           y: [0, 80, 0],
@@ -54,7 +55,7 @@ export function HeroBackgroundBlobs() {
 
       {/* Accent Blob - Bottom Left - Sky/Cyan */}
       <motion.div
-        className="absolute bottom-[-10%] left-[-5%] w-[550px] h-[550px] rounded-full blur-[100px] opacity-25 dark:opacity-10"
+        className="absolute bottom-[-10%] left-[-5%] w-[75vw] max-w-[550px] h-[75vw] max-h-[550px] rounded-full blur-[100px] opacity-25 dark:opacity-10"
         style={{
           background: "radial-gradient(circle, hsl(199 89% 48% / 0.6), transparent)",
           willChange: "transform",

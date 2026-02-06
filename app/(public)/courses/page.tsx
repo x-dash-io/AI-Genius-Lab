@@ -139,7 +139,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
             <Zap className="h-4 w-4" />
             <span className="tracking-widest uppercase">Expert-Led Modules</span>
           </div>
-          <h1 className="font-display text-5xl sm:text-6xl font-black tracking-tight leading-tight">
+          <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight">
             Curated <span className="text-primary italic drop-shadow-sm">AI Learning</span>
           </h1>
           <p className="text-xl text-muted-foreground/80 max-w-2xl font-medium leading-relaxed">

@@ -55,7 +55,7 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
   };
 
   return (
-    <section className="relative py-12 sm:py-16 lg:py-20 min-h-0 overflow-y-visible">
+    <section className="relative py-12 sm:py-16 lg:py-20 min-h-0 overflow-hidden">
       {/* Main Hero Grid - Split Layout */}
       <div className="w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 overflow-x-hidden">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
@@ -189,7 +189,7 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="lg:hidden mt-8 sm:mt-10"
           >
-            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory -mx-5 px-5 sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {/* Mobile Stat Card 1 */}
               <div className="flex-shrink-0 w-44 sm:w-48 snap-center bg-card/60 dark:bg-card/40 backdrop-blur-xl border border-border/50 rounded-2xl p-5 sm:p-6">
                 <div className="flex flex-col items-center text-center space-y-3">

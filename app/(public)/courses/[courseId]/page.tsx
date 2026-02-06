@@ -111,7 +111,7 @@ export default async function CourseDetailPage({
                   {course.description ?? "Elevate your professional toolkit with our practitioner-led AI curriculum."}
                 </p>
 
-                <div className="flex items-center gap-6 pt-4 text-sm font-bold text-muted-foreground/60">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-6 pt-4 text-sm font-bold text-muted-foreground/60">
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                     <span>Lifetime Access</span>
@@ -159,7 +159,7 @@ export default async function CourseDetailPage({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0" />
 
                 {/* Stats Overlay */}
-                <div className="absolute bottom-8 left-8 right-8 grid grid-cols-3 gap-4">
+                <div className="absolute bottom-4 left-4 right-4 sm:bottom-8 sm:left-8 sm:right-8 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
                   {[
                     { label: "Students", value: "2.4k+" },
                     { label: "Rating", value: "4.9/5" },

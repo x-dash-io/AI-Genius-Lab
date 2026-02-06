@@ -26,7 +26,7 @@ export function Footer({ socialLinks }: FooterProps) {
   return (
     <footer className="border-t bg-card/10 backdrop-blur-md mt-20">
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4 xl:gap-16">
+        <div className="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:gap-16">
           <div className="space-y-6">
             <Link href="/" className="inline-block transition-transform hover:scale-105">
               <div className="relative h-8 w-auto">
@@ -66,7 +66,7 @@ export function Footer({ socialLinks }: FooterProps) {
 
           <div className="grid gap-6">
             <h4 className="text-sm font-bold uppercase tracking-widest text-foreground/80">Platform</h4>
-            <nav className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+            <nav className="grid gap-3 grid-cols-1 sm:grid-cols-2">
               {["Courses", "Learning Paths", "Blog", "Dashboard"].map((item) => (
                 <Link
                   key={item}
@@ -81,7 +81,7 @@ export function Footer({ socialLinks }: FooterProps) {
 
           <div className="grid gap-6">
             <h4 className="text-sm font-bold uppercase tracking-widest text-foreground/80">Company</h4>
-            <nav className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+            <nav className="grid gap-3 grid-cols-1 sm:grid-cols-2">
               {["About Us", "Testimonials", "Contact Us", "FAQ"].map((item) => (
                 <Link
                   key={item}

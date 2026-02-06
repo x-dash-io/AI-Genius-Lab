@@ -60,14 +60,14 @@ export function TypingAnimation({
   }, [currentText, isDeleting, isPaused, currentWordIndex, words, typingSpeed, deletingSpeed, pauseDuration]);
 
   return (
-    <span className="inline-block relative break-words whitespace-normal max-w-full">
+    <span className="inline-block relative break-words whitespace-normal max-w-full overflow-hidden box-border">
       {/* Invisible placeholder to reserve space - ensures layout doesn't shift */}
-      <span className={`${className} invisible`} aria-hidden="true">
+      <span className={`${className} invisible block max-w-full overflow-hidden`} aria-hidden="true">
         {longestWord}
       </span>
       {/* Visible animated text - absolutely positioned over the placeholder */}
       <span
-        className={`${className} absolute top-0 left-0 w-full`}
+        className={`${className} absolute top-0 left-0 max-w-full overflow-hidden`}
         aria-label={currentText || longestWord}
       >
         {currentText}

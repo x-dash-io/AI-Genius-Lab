@@ -28,7 +28,7 @@ export function HomeTestimonials() {
                     </motion.div>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {featured.map((testimonial, index) => (
                         <motion.div
                             key={testimonial.id}

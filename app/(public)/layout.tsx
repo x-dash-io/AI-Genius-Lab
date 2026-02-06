@@ -1,5 +1,6 @@
 import { PublicLayoutClient } from "@/components/layout/PublicLayoutClient";
 import { AppLayoutClient } from "@/components/layout/AppLayoutClient";
+import { AdminLayoutClient } from "@/components/layout/AdminLayoutClient";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getSocialLinks } from "@/lib/settings";
@@ -11,7 +12,12 @@ export default async function PublicLayout({
 }) {
   const session = await getServerSession(authOptions);
 
-  // For logged-in users, show app layout with sidebar
+  // For admin users, show admin layout with customer preview section
+  if (session?.user?.role === "admin") {
+    return <AdminLayoutClient>{children}</AdminLayoutClient>;
+  }
+
+  // For logged-in regular users, show app layout with sidebar
   if (session?.user) {
     return <AppLayoutClient>{children}</AppLayoutClient>;
   }

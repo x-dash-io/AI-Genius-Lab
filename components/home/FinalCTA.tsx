@@ -8,9 +8,9 @@ import { ArrowRight, Sparkles, Zap, ShieldCheck } from "lucide-react";
 
 export function FinalCTA() {
   return (
-    <section className="relative py-24 overflow-hidden">
+    <section className="relative py-16 sm:py-24 overflow-hidden">
       {/* Background Glows */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-primary/20 blur-[120px] rounded-full opacity-50 z-0" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[800px] h-[300px] sm:h-[500px] bg-primary/20 blur-[120px] rounded-full opacity-50 z-0" />
 
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
@@ -24,13 +24,13 @@ export function FinalCTA() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-3xl -mr-20 -mt-20 rounded-full" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent/10 blur-3xl -ml-20 -mb-20 rounded-full" />
 
-            <div className="relative z-10 px-8 py-20 md:py-24 text-center max-w-4xl mx-auto space-y-10">
+            <div className="relative z-10 px-4 sm:px-8 py-12 sm:py-20 md:py-24 text-center max-w-4xl mx-auto space-y-6 sm:space-y-10">
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase border border-primary/20">
                   <Sparkles className="h-3.5 w-3.5" />
                   <span>Limited Enrollment</span>
                 </div>
-                <h2 className="font-display text-4xl md:text-6xl font-black tracking-tight leading-[1.1]">
+                <h2 className="font-display text-2xl sm:text-4xl md:text-6xl font-black tracking-tight leading-[1.1]">
                   Start Learning AI <br />
                   <span className="text-primary">the Right Way</span>
                 </h2>
@@ -58,7 +58,7 @@ export function FinalCTA() {
                 </Link>
               </div>
 
-              <div className="pt-8 border-t border-white/5 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="pt-6 sm:pt-8 border-t border-white/5 grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                 {[
                   { icon: Zap, label: "One-Time Payment", sub: "Pay once per course" },
                   { icon: ShieldCheck, label: "Lifetime Access", sub: "Never lose your seats" },
