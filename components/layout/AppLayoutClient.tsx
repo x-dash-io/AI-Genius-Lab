@@ -370,7 +370,6 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                   </div>
                 </Link>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <ThemeToggle />
                   <Button
                     variant="ghost"
                     size="icon"
@@ -533,7 +532,10 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                             </div>
                           </motion.div>
                         </Link>
-                        <div className="flex items-center gap-2 px-1">
+                        <div className="flex items-center gap-3 px-1 mt-2">
+                          <div className="bg-muted/50 p-2 rounded-xl border">
+                            <ThemeToggle />
+                          </div>
                           <motion.div
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
@@ -549,27 +551,27 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
               )}
             </AnimatePresence>
 
-          {/* Preview Banner for Admin (Mobile) */}
-          <div className="pt-14 sm:pt-16">
-            <PreviewBanner />
-          </div>
-
-          {/* Main Content */}
-          <main className="flex-1 px-4 sm:px-6 pt-28 pb-12 relative z-10">
-            <div className="mx-auto w-full max-w-none sm:max-w-7xl">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                {children}
-              </motion.div>
+            {/* Preview Banner for Admin (Mobile) */}
+            <div className="pt-14 sm:pt-16">
+              <PreviewBanner />
             </div>
-          </main>
-          <Footer />
+
+            {/* Main Content */}
+            <main className="flex-1 px-4 sm:px-6 pt-28 pb-12 relative z-10">
+              <div className="mx-auto w-full max-w-none sm:max-w-7xl">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {children}
+                </motion.div>
+              </div>
+            </main>
+            <Footer />
+          </div>
         </div>
-      </div>
-    </CourseProgressProvider>
+      </CourseProgressProvider>
     </ConfirmDialogProvider >
   );
 }

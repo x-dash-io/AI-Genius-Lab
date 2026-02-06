@@ -214,7 +214,7 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
           <h2 className="text-xl font-semibold">
             {displayCart.items.length} {displayCart.items.length === 1 ? "Course" : "Courses"}
           </h2>
-          <Button variant="ghost" size="sm" onClick={handleClearCart} disabled={isLoading || isClearing}>
+          <Button variant="destructive" size="sm" onClick={handleClearCart} disabled={isLoading || isClearing}>
             {isClearing ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
