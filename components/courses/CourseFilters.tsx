@@ -153,7 +153,7 @@ export function CourseFilters() {
               onSearch={handleSearch}
               isLoading={showLoading}
               debounceMs={400}
-              className="w-full h-12 bg-accent/20 border-border/50 rounded-xl focus:bg-accent/40 transition-all duration-300"
+              className="w-full h-12 bg-background border-2 border-border/50 hover:border-primary/50 focus:border-primary focus:ring-4 focus:ring-primary/10 shadow-sm rounded-xl transition-all duration-300 placeholder:text-muted-foreground/60"
             />
           </div>
         </div>
@@ -162,7 +162,7 @@ export function CourseFilters() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-3 p-1 rounded-2xl glass border-white/5 bg-accent/5 flex-wrap">
             <Select value={category} onValueChange={handleCategoryChange} disabled={isLoadingCategories}>
-              <SelectTrigger className="w-full sm:w-[180px] h-10 border-none bg-transparent hover:bg-accent/40 rounded-xl font-bold text-xs uppercase tracking-widest transition-colors">
+              <SelectTrigger className="w-full sm:w-[180px] h-10 border border-border/50 bg-background hover:bg-accent/50 hover:border-primary/50 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-sm">
                 <SelectValue placeholder={isLoadingCategories ? "Loading..." : "Category"} />
               </SelectTrigger>
               <SelectContent className="rounded-2xl glass border-white/10 p-1">
@@ -178,7 +178,7 @@ export function CourseFilters() {
             <div className="w-px h-6 bg-border/30 hidden sm:block" />
 
             <Select value={price} onValueChange={handlePriceChange}>
-              <SelectTrigger className="w-full sm:w-[140px] h-10 border-none bg-transparent hover:bg-accent/40 rounded-xl font-bold text-xs uppercase tracking-widest transition-colors">
+              <SelectTrigger className="w-full sm:w-[140px] h-10 border border-border/50 bg-background hover:bg-accent/50 hover:border-primary/50 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-sm">
                 <SelectValue placeholder="Price" />
               </SelectTrigger>
               <SelectContent className="rounded-2xl glass border-white/10 p-1">
@@ -193,7 +193,7 @@ export function CourseFilters() {
             <div className="w-px h-6 bg-border/30 hidden md:block" />
 
             <Select value={sortBy} onValueChange={handleSortChange}>
-              <SelectTrigger className="w-full sm:w-[150px] h-10 border-none bg-transparent hover:bg-accent/40 rounded-xl font-bold text-xs uppercase tracking-widest transition-colors">
+              <SelectTrigger className="w-full sm:w-[150px] h-10 border border-border/50 bg-background hover:bg-accent/50 hover:border-primary/50 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-sm">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
               <SelectContent className="rounded-2xl glass border-white/10 p-1">

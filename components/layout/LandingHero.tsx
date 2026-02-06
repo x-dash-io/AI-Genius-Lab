@@ -108,7 +108,7 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
                 </Button>
               </Link>
               <Link href="/learning-paths" className="w-full sm:w-auto sm:flex-1 sm:flex-none">
-                <Button size="lg" variant="outline" className="w-full sm:px-10 h-14 rounded-2xl border-2 font-bold hover:bg-accent/50 transition-all whitespace-nowrap">
+                <Button size="lg" variant="outline" className="w-full sm:px-10 h-14 rounded-2xl font-bold whitespace-nowrap">
                   Learning Paths
                 </Button>
               </Link>

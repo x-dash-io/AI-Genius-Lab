@@ -90,7 +90,7 @@ export function CourseList({ courses }: CourseListProps) {
                   checkOwnership
                 />
                 <Link href={`/courses/${course.slug}`} className="flex-1">
-                  <Button variant="outline" className="w-full rounded-xl h-11 border-2 font-bold hover:bg-accent/50">
+                  <Button variant="outline" className="w-full rounded-xl h-11 font-bold">
                     Details
                   </Button>
                 </Link>

@@ -480,13 +480,13 @@ export function PublicLayoutClient({
                         <ThemeToggle />
                       </div>
                       <Link href="/sign-in" onClick={() => setMobileMenuOpen(false)}>
-                        <Button variant="outline" className="w-full justify-start gap-2">
+                        <Button variant="outline" className="w-full justify-center gap-2 h-12 border-2 font-bold transition-all bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-[0_4px_12px_hsl(var(--primary)_/_0.3)] active:scale-95">
                           <LogIn className="h-4 w-4" />
                           Sign In
                         </Button>
                       </Link>
                       <Link href="/sign-up" onClick={() => setMobileMenuOpen(false)}>
-                        <Button className="w-full justify-start gap-2">
+                        <Button variant="premium" className="w-full justify-center gap-2 h-12 shadow-2xl shadow-primary/20 hover:brightness-110 hover:shadow-[0_8px_24px_hsl(var(--primary)_/_0.4)] transition-all duration-300">
                           <UserPlus className="h-4 w-4" />
                           Sign Up
                         </Button>
