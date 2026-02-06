@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Award, CheckCircle2, Download, ExternalLink, Share2, Calendar, User, BookOpen, Copy } from "lucide-react";
 import { getCertificate } from "@/lib/certificates";
 import { Button } from "@/components/ui/button";
@@ -9,16 +10,21 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { CertificateActions, ShareAchievement } from "@/components/certificates/CertificateActions";
-import Image from "next/image";
+import { Great_Vibes } from "next/font/google";
+
+const greatVibes = Great_Vibes({ weight: "400", subsets: ["latin"] });
 
 export const dynamic = "force-dynamic";
 
 interface CertificatePageProps {
-  params: Promise<{ certificateId: string }>;
+  params: { certificateId: string };
 }
 
 export async function generateMetadata({ params }: CertificatePageProps): Promise<Metadata> {
-  const { certificateId } = await params;
+  const awaitedParams = await params;
+  console.log('[Certificate Page] generateMetadata params:', awaitedParams);
+  const { certificateId } = awaitedParams;
+  console.log('[Certificate Page] certificateId:', certificateId);
   const certificate = await getCertificate(certificateId);
 
   if (!certificate) {
@@ -42,7 +48,7 @@ export async function generateMetadata({ params }: CertificatePageProps): Promis
 }
 
 export default async function CertificatePage({ params }: CertificatePageProps) {
-  const { certificateId } = await params;
+  const { certificateId } = params;
   const certificate = await getCertificate(certificateId);
 
   if (!certificate) {
@@ -71,62 +77,95 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Certificate Display */}
         <Card className="lg:col-span-2 overflow-hidden border-2 border-primary/20 shadow-xl bg-card">
-          <div className="relative p-8 md:p-12 text-center space-y-8 min-h-[500px] flex flex-col justify-center">
+          <div className="relative p-8 md:p-12 min-h-[600px] flex flex-col">
             {/* Decorative background element */}
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
               <Award className="absolute -right-20 -bottom-20 h-96 w-96 rotate-12" />
             </div>
 
-            <div className="space-y-2">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
-                Certificate of Completion
-              </p>
-              <div className="h-px w-24 bg-primary/20 mx-auto" />
-            </div>
-
-            <div className="space-y-4">
-              <p className="text-muted-foreground italic">This is to certify that</p>
-              <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground">
-                {recipientName}
-              </h2>
-            </div>
-
-            <div className="space-y-4">
-              <p className="text-muted-foreground italic">has successfully completed the {isCourse ? "course" : "learning path"}</p>
-              <h3 className="text-2xl md:text-3xl font-semibold text-primary">
-                {itemName}
-              </h3>
-            </div>
-
-            <div className="pt-8 space-y-4">
-              <div className="flex items-center justify-center gap-8 flex-wrap">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                    <Image
-                      src="/logo.png"
-                      alt="AI Genius Lab"
-                      width={24}
-                      height={24}
-                      className="h-6 w-6"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Organization</p>
-                    <p className="font-medium text-primary">AI Genius Lab</p>
-                  </div>
-                </div>
+            {/* Top Row: Logo (Center) and Header (Center) - Vertical Stack */}
+            <div className="flex flex-col items-center justify-center mb-12 relative z-10 text-center">
+              {/* Logo Centered Top - Extra Large */}
+              <div className="mb-6">
+                <Image
+                  src="/logo.png"
+                  alt="AI Genius Lab"
+                  width={180}
+                  height={180}
+                  className="h-44 w-44 object-contain"
+                />
               </div>
 
-              <div className="pt-4">
-                <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-tight">
-                  Certificate ID: {certificate.certificateId}
+              {/* Centered Header Below Logo */}
+              <div className="w-full">
+                <h1 className="text-4xl md:text-6xl font-serif font-bold text-primary tracking-wider uppercase drop-shadow-sm">
+                  Certificate
+                </h1>
+                <p className="text-sm md:text-base font-light uppercase tracking-[0.4em] text-muted-foreground mt-3">
+                  Of Completion
                 </p>
               </div>
             </div>
 
-            <div className="absolute bottom-4 right-4 flex items-center gap-1">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-              <span className="text-[10px] font-semibold text-green-600 uppercase tracking-tighter">Verified</span>
+            {/* Body Content */}
+            <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8 my-8">
+              {/* Recipient Name - Fancy Font */}
+              <div className="relative py-4">
+                <span className="block text-lg font-medium text-muted-foreground mb-4 font-serif italic">This is to certify that</span>
+                <h2 className={`${greatVibes.className} text-6xl md:text-8xl text-primary drop-shadow-md py-4`}>
+                  {recipientName}
+                </h2>
+                <div className="h-px w-64 md:w-96 bg-border mx-auto mt-2" />
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-muted-foreground text-sm">has successfully completed the {isCourse ? "course" : "learning path"}</p>
+                <h3 className="text-2xl md:text-3xl font-bold text-primary max-w-2xl leading-tight">
+                  {itemName}
+                </h3>
+              </div>
+            </div>
+
+            {/* Footer Section */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-end mt-auto text-center">
+
+              {/* Left Signature */}
+              <div className="flex flex-col items-center">
+                <div className="w-full border-t border-muted-foreground/40 pt-2 mt-auto">
+                  <p className="font-display font-bold text-sm">Program Director</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">AI Genius Lab</p>
+                </div>
+              </div>
+
+              {/* Center: Date & Seal */}
+              <div className="flex flex-col items-center order-first md:order-none mb-8 md:mb-0">
+                <p className="text-xs font-medium text-muted-foreground mb-4">
+                  Date: {format(new Date(certificate.issuedAt), "MMMM d, yyyy")}
+                </p>
+
+                {/* Gold Seal Badge */}
+                <div className="relative h-24 w-24 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-amber-400 rounded-full opacity-20 blur-lg"></div>
+                  <div className="relative bg-gradient-to-br from-amber-300 to-amber-500 rounded-full h-20 w-20 flex items-center justify-center shadow-lg border-4 border-amber-200">
+                    <Award className="h-10 w-10 text-white drop-shadow-md" />
+                  </div>
+                  {/* Ribbons */}
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-8 bg-amber-600 rotate-45 -z-10 translate-y-1"></div>
+                </div>
+              </div>
+
+              {/* Right Signature */}
+              <div className="flex flex-col items-center">
+                <div className="w-full border-t border-muted-foreground/40 pt-2 mt-auto">
+                  <p className="font-display font-bold text-sm">Course Instructor</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Authorized Signature</p>
+                </div>
+              </div>
+
+            </div>
+
+            <div className="absolute bottom-2 right-2 text-[8px] text-muted-foreground/30 font-mono">
+              ID: {certificate.certificateId}
             </div>
           </div>
         </Card>
@@ -187,7 +226,7 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
             </CardContent>
           </Card>
         </div>
-      </div>
+      </div >
 
       <div className="mt-16 text-center">
         <Link href="/">
@@ -196,6 +235,6 @@ export default async function CertificatePage({ params }: CertificatePageProps) 
           </Button>
         </Link>
       </div>
-    </div>
+    </div >
   );
 }

@@ -27,7 +27,7 @@ type LearningPathDetailPageProps = {
 export async function generateMetadata({
   params,
 }: LearningPathDetailPageProps): Promise<Metadata> {
-  const { pathId } = await params;
+  const { pathId } = params;
   const path = await getLearningPathBySlug(pathId);
 
   if (!path) {
@@ -49,7 +49,7 @@ export async function generateMetadata({
 export default async function LearningPathDetailPage({
   params,
 }: LearningPathDetailPageProps) {
-  const { pathId } = await params;
+  const { pathId } = params;
   const pathData = await getLearningPathBySlug(pathId);
 
   if (!pathData) {
@@ -66,11 +66,11 @@ export default async function LearningPathDetailPage({
   };
 
   const session = await getServerSession(authOptions);
-  
+
   // Check if user has access to learning paths (Pro or Elite subscription)
   let hasAccessToPath = false;
   let userSubscription = null;
-  
+
   if (session?.user) {
     userSubscription = await getUserSubscription(session.user.id);
     hasAccessToPath = userSubscription?.plan.tier === "elite" || false;
@@ -97,32 +97,32 @@ export default async function LearningPathDetailPage({
   const priceInfo = session?.user
     ? await calculateLearningPathPrice(session.user.id, path.id)
     : {
-        fullPriceCents: totalPrice,
-        adjustedPriceCents: totalPrice,
-        alreadyPurchasedCents: 0,
-        coursesToPurchase: path.courses.length,
-        totalCourses: path.courses.length,
-      };
+      fullPriceCents: totalPrice,
+      adjustedPriceCents: totalPrice,
+      alreadyPurchasedCents: 0,
+      coursesToPurchase: path.courses.length,
+      totalCourses: path.courses.length,
+    };
 
   // Get purchased course IDs for UI display
   const purchasedCourseIds = session?.user
     ? new Set(
-        (
-          await prisma.purchase.findMany({
-            where: {
-              userId: session.user.id,
-              courseId: { in: path.courses.map((pc: any) => pc.course.id) },
-              status: "paid",
-            },
-            select: { courseId: true },
-          })
-        ).map((p: any) => p.courseId)
-      )
+      (
+        await prisma.purchase.findMany({
+          where: {
+            userId: session.user.id,
+            courseId: { in: path.courses.map((pc: any) => pc.course.id) },
+            status: "paid",
+          },
+          select: { courseId: true },
+        })
+      ).map((p: any) => p.courseId)
+    )
     : new Set<string>();
 
   async function enrollInLearningPathAction() {
     "use server";
-    
+
     const currentSession = await getServerSession(authOptions);
     if (!currentSession?.user) {
       throw new Error("You must be signed in to enroll");
@@ -146,19 +146,19 @@ export default async function LearningPathDetailPage({
     // Create PayPal order for all purchases
     const purchaseIds = purchases.map((p: any) => p.id).join(",");
     const appUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
-    
+
     // For multiple purchases, pass them as query parameter
     // PayPal will append ?token=ORDER_ID to this URL
     const returnUrl = `${appUrl}/api/payments/paypal/capture?purchases=${encodeURIComponent(purchaseIds)}`;
     const cancelUrl = `${appUrl}/learning-paths/${pathId}?checkout=cancelled`;
-    
+
     console.log("Creating PayPal order:", {
       amountCents: totalAmountCents,
       returnUrl,
       cancelUrl,
       purchaseId: purchases[0].id,
     });
-    
+
     // Use the first purchase ID for custom_id (PayPal requires a single ID)
     const { orderId, approvalUrl } = await createPayPalOrder({
       amountCents: totalAmountCents,
@@ -434,7 +434,7 @@ export default async function LearningPathDetailPage({
             <p className="text-foreground">
               Congratulations on completing <span className="font-semibold">{path.title}</span>! Generate your official completion certificate to showcase your achievement.
             </p>
-            <Button size="lg" className="w-full sm:w-auto bg-green-600 hover:bg-green-700">
+            <Button size="lg" variant="premium" className="w-full sm:w-auto">
               <Award className="h-4 w-4 mr-2" />
               Generate Completion Certificate
             </Button>

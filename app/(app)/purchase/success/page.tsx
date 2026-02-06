@@ -6,12 +6,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { 
-  CheckCircle2, 
-  ArrowLeft, 
-  BookOpen, 
-  Shield, 
-  Lock, 
+import {
+  CheckCircle2,
+  ArrowLeft,
+  BookOpen,
+  Shield,
+  Lock,
   Sparkles,
   Receipt,
   CreditCard,
@@ -104,7 +104,7 @@ function ProfessionalInvoice({
           Payment Successful!
         </h1>
         <p className="mt-3 text-lg text-muted-foreground max-w-md mx-auto">
-          {isSinglePurchase 
+          {isSinglePurchase
             ? "Thank you for your purchase. Your course is ready to explore."
             : "Thank you for your purchase. All courses are now unlocked in your library."
           }
@@ -122,7 +122,7 @@ function ProfessionalInvoice({
               <div className="absolute top-0 left-0 w-40 h-40 bg-white rounded-full -translate-x-20 -translate-y-20" />
               <div className="absolute bottom-0 right-0 w-60 h-60 bg-white rounded-full translate-x-20 translate-y-20" />
             </div>
-            
+
             <div className="relative px-6 py-8 md:px-10 md:py-10">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
                 {/* Company Branding */}
@@ -177,10 +177,10 @@ function ProfessionalInvoice({
             <div className="grid md:grid-cols-2 gap-8">
               {/* Bill To */}
               <div className="space-y-4">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-foreground">
-                <User className="h-4 w-4" />
-                <span>Billed To</span>
-              </div>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-foreground">
+                  <User className="h-4 w-4" />
+                  <span>Billed To</span>
+                </div>
                 <div className="p-4 rounded-xl bg-card border">
                   <p className="font-semibold text-lg">{customerName}</p>
                   <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
@@ -192,10 +192,10 @@ function ProfessionalInvoice({
 
               {/* Payment Info */}
               <div className="space-y-4">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-foreground">
-                <CreditCard className="h-4 w-4" />
-                <span>Payment Information</span>
-              </div>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-foreground">
+                  <CreditCard className="h-4 w-4" />
+                  <span>Payment Information</span>
+                </div>
                 <div className="p-4 rounded-xl bg-card border space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Method</span>
@@ -227,7 +227,7 @@ function ProfessionalInvoice({
                 <FileText className="h-4 w-4" />
                 <span>Purchased Items</span>
               </div>
-              
+
               <div className="rounded-xl border overflow-hidden">
                 <table className="w-full">
                   <thead>
@@ -319,9 +319,9 @@ function ProfessionalInvoice({
             <div className="p-4 rounded-xl bg-muted/30 border border-dashed">
               <p className="text-xs text-muted-foreground leading-relaxed">
                 <strong className="text-foreground">Terms & Conditions:</strong>{" "}
-                This invoice confirms your purchase of the listed digital course(s). 
-                All sales are final and non-refundable. You have been granted immediate 
-                and lifetime access to the purchased content in your library. 
+                This invoice confirms your purchase of the listed digital course(s).
+                All sales are final and non-refundable. You have been granted immediate
+                and lifetime access to the purchased content in your library.
                 No physical items will be shipped. For support, contact support@aigeniuslab.com.
               </p>
             </div>
@@ -330,14 +330,14 @@ function ProfessionalInvoice({
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
               {isSinglePurchase && courseSlug ? (
                 <Link href={`/library/${courseSlug}`} className="flex-1">
-                  <Button size="lg" className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70">
+                  <Button size="lg" variant="premium" className="w-full">
                     <BookOpen className="h-4 w-4 mr-2" />
                     Start Learning Now
                   </Button>
                 </Link>
               ) : (
                 <Link href="/library" className="flex-1">
-                  <Button size="lg" className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70">
+                  <Button size="lg" variant="premium" className="w-full">
                     <BookOpen className="h-4 w-4 mr-2" />
                     Go to Library
                   </Button>
@@ -390,7 +390,7 @@ export default async function CheckoutSuccessPage({
     if (purchaseIds.length === 0) {
       redirect("/library");
     }
-    
+
     const purchases = await prisma.purchase.findMany({
       where: {
         id: { in: purchaseIds },

@@ -62,7 +62,7 @@ export function LessonViewer({
                 };
               }
             }
-            
+
             if (errorData.code === "CONTENT_MISSING_FROM_STORAGE" || response.status === 404) {
               setContentError({
                 message: errorData.message || "Content file is missing from storage. Please contact support.",
@@ -75,7 +75,7 @@ export function LessonViewer({
           console.error("Error checking content:", error);
         }
       };
-      
+
       checkContent();
     }
   }, [lessonId, contentType, contentUrl]);
@@ -160,8 +160,8 @@ export function LessonViewer({
 
       // Try to determine a good filename
       const extension = contentType === 'pdf' ? '.pdf' :
-                       contentType === 'audio' ? '.mp3' :
-                       contentType === 'video' ? '.mp4' : '';
+        contentType === 'audio' ? '.mp3' :
+          contentType === 'video' ? '.mp4' : '';
       const baseName = contentMetadata?.title || "lesson-content";
       link.download = baseName.toLowerCase().endsWith(extension) ? baseName : `${baseName}${extension}`;
 
@@ -237,10 +237,11 @@ export function LessonViewer({
           allowDownload={allowDownload}
           onProgress={handleProgressUpdate}
         />
-        
+
+
         {allowDownload && (
-          <div className="flex justify-end">
-            <Button variant="outline" onClick={handleDownload} disabled={isDownloading}>
+          <div className="flex justify-end mt-4">
+            <Button variant="outline" size="default" onClick={handleDownload} disabled={isDownloading}>
               <Download className="mr-2 h-4 w-4" />
               {isDownloading
                 ? "Downloading..."
@@ -256,7 +257,7 @@ export function LessonViewer({
             <span className="text-lg font-bold">{Math.round(progress?.completionPercent || 0)}%</span>
           </div>
           <Progress value={progress?.completionPercent || 0} className="h-2" />
-          
+
           <div className="flex items-center justify-between mt-6 pt-6 border-t">
             <div className="text-sm">
               {progress?.completedAt ? (
@@ -308,12 +309,12 @@ export function LessonViewer({
               <ExternalLink className="h-10 w-10 text-primary" />
             )}
           </div>
-          
+
           <div className="space-y-3 w-full">
             <h3 className="text-xl font-semibold">
               {contentType === 'pdf' ? 'PDF Document' : contentType === 'link' ? 'External Resource' : 'File Resource'}
             </h3>
-            
+
             {/* Smart Metadata Display */}
             {contentMetadata && (
               <div className="space-y-2 text-left bg-muted/50 rounded-lg p-4 border">
@@ -365,7 +366,7 @@ export function LessonViewer({
                 )}
               </div>
             )}
-            
+
             {!contentMetadata && (
               <p className="text-sm text-muted-foreground">
                 Click below to access the {contentType?.toUpperCase()} content
@@ -373,13 +374,12 @@ export function LessonViewer({
             )}
           </div>
 
-          <a
-            href={`/api/content/${lessonId}`}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm hover:bg-primary/90 transition-all w-full sm:w-auto justify-center"
-          >
-            <ExternalLink className="h-5 w-5" />
-            {contentType === 'link' ? 'Open Link' : allowDownload ? 'Download' : 'Open'} Content
-          </a>
+          <Button asChild className="w-full sm:w-auto">
+            <a href={`/api/content/${lessonId}`}>
+              <ExternalLink className="h-5 w-5 mr-2" />
+              {contentType === 'link' ? 'Open Link' : allowDownload ? 'Download' : 'Open'} Content
+            </a>
+          </Button>
         </div>
       </div>
 
@@ -390,7 +390,7 @@ export function LessonViewer({
           <span className="text-lg font-bold">{Math.round(progress?.completionPercent || 0)}%</span>
         </div>
         <Progress value={progress?.completionPercent || 0} className="h-2" />
-        
+
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-6 pt-6 border-t">
           <div className="text-sm">
             {progress?.completedAt ? (

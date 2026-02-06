@@ -12,11 +12,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  Activity, 
-  AlertCircle, 
-  ShoppingCart, 
-  BookOpen, 
+import {
+  Activity,
+  AlertCircle,
+  ShoppingCart,
+  BookOpen,
   GraduationCap,
   Star,
   Calendar,
@@ -66,7 +66,7 @@ const activityLabels: Record<string, string> = {
 const getSampleActivityData = (): ActivityEntry[] => {
   const now = new Date();
   const { sampleCourses, sampleLessons } = require("@/lib/config");
-  
+
   return [
     {
       id: "sample-1",
@@ -192,7 +192,7 @@ export default function ActivityPage() {
 
   const fetchActivity = async () => {
     if (isAdminPreview) return; // Skip fetch for admin preview
-    
+
     if (!loading) {
       // Don't set loading for filter changes, use isFiltering instead
     } else {
@@ -210,7 +210,7 @@ export default function ActivityPage() {
       }
       const data = await response.json();
       setActivity(data.activity || []);
-      
+
       // Collect all unique activity types on initial load
       if (loading && data.activity) {
         const types = Array.from(new Set(data.activity.map((a: ActivityEntry) => a.type))) as string[];
@@ -238,7 +238,7 @@ export default function ActivityPage() {
 
   const groupByDate = (entries: ActivityEntry[]): ActivityGroup[] => {
     const groups: Record<string, ActivityEntry[]> = {};
-    
+
     entries.forEach((entry) => {
       const date = format(new Date(entry.createdAt), "yyyy-MM-dd");
       if (!groups[date]) {
@@ -250,7 +250,7 @@ export default function ActivityPage() {
     return Object.entries(groups)
       .map(([date, entries]) => ({
         date,
-        entries: entries.sort((a, b) => 
+        entries: entries.sort((a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         ),
       }))
@@ -270,19 +270,19 @@ export default function ActivityPage() {
     const metadata = entry.metadata || {};
     switch (entry.type) {
       case "purchase_completed":
-        return metadata.courseTitle 
+        return metadata.courseTitle
           ? `Purchased "${metadata.courseTitle}"`
           : "Completed a purchase";
       case "lesson_completed":
-        return metadata.lessonTitle 
+        return metadata.lessonTitle
           ? `Completed "${metadata.lessonTitle}"`
           : "Completed a lesson";
       case "course_started":
-        return metadata.courseTitle 
+        return metadata.courseTitle
           ? `Started "${metadata.courseTitle}"`
           : "Started a course";
       case "review_created":
-        return metadata.courseTitle 
+        return metadata.courseTitle
           ? `Reviewed "${metadata.courseTitle}"`
           : "Created a review";
       case "certificate_earned":
@@ -301,7 +301,7 @@ export default function ActivityPage() {
       case "course_started":
         return metadata.courseSlug ? `/library/${metadata.courseSlug}` : null;
       case "lesson_completed":
-        return metadata.courseSlug && metadata.lessonId 
+        return metadata.courseSlug && metadata.lessonId
           ? `/library/${metadata.courseSlug}/lesson/${metadata.lessonId}`
           : null;
       case "review_created":
@@ -348,7 +348,7 @@ export default function ActivityPage() {
         <div>
           <h1 className="font-display text-4xl font-bold tracking-tight">Activity</h1>
           <p className="mt-2 text-lg text-muted-foreground">
-            {isAdminPreview 
+            {isAdminPreview
               ? "Sample learning activity and purchase history."
               : "Your learning activity and purchase history."}
           </p>
@@ -424,7 +424,7 @@ export default function ActivityPage() {
                     <Button variant="outline">Browse Courses</Button>
                   </Link>
                   <Link href="/library">
-                    <Button>View Library</Button>
+                    <Button variant="premium">View Library</Button>
                   </Link>
                 </>
               )}

@@ -108,7 +108,7 @@ export function CourseActions({
 
         <div className="flex gap-3 p-1">
           <Link href={`/library/${courseSlug}`} className="w-full sm:w-auto">
-            <Button size="lg" className="w-full sm:w-auto rounded-xl h-12 px-8 font-black bg-green-600 hover:bg-green-700 shadow-xl shadow-green-500/20 group">
+            <Button size="lg" variant="premium" className="w-full sm:w-auto">
               <BookOpen className="h-5 w-5 mr-2 transition-transform group-hover:scale-110" />
               Open Curriculum
             </Button>
@@ -138,7 +138,7 @@ export function CourseActions({
         </div>
         <div className="flex flex-col sm:flex-row gap-4">
           <Link href="/pricing" className="flex-1">
-            <Button size="lg" className="w-full rounded-xl h-14 font-black bg-amber-500 hover:bg-amber-600 shadow-2xl shadow-amber-500/20">
+            <Button size="lg" variant="premium" className="w-full rounded-xl h-14">
               Upgrade to Unlock
             </Button>
           </Link>

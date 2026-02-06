@@ -22,7 +22,7 @@ async function cancelAction(formData: FormData) {
 
   const subId = formData.get("subId") as string;
   await cancelSubscription(subId);
-  
+
   // Revalidate all subscription-related pages to ensure UI updates
   revalidatePath("/profile/subscription");
   revalidatePath("/profile");
@@ -37,10 +37,10 @@ export default async function UserSubscriptionPage() {
   // We use `orderBy: { createdAt: 'desc' }` so the Elite plan (created today)
   // appears before the Pro plan (created previously).
   let subscription = await prisma.subscription.findFirst({
-    where: { 
-      userId: session.user.id 
+    where: {
+      userId: session.user.id
     },
-    orderBy: { 
+    orderBy: {
       createdAt: 'desc' // <--- THIS IS THE KEY FIX
     },
     include: {
@@ -55,16 +55,16 @@ export default async function UserSubscriptionPage() {
   // Keep your logic for checking pending status
   if (subscription?.status === "pending") {
     const updatedStatus = await refreshSubscriptionStatus(subscription.id);
-    
+
     // If the status changed during refresh, update the local variable
     if (updatedStatus && updatedStatus.status !== "pending") {
-        subscription = await prisma.subscription.findUnique({
-            where: { id: subscription.id },
-            include: {
-                plan: true,
-                payments: { orderBy: { paidAt: "desc" }, take: 10 }
-            }
-        });
+      subscription = await prisma.subscription.findUnique({
+        where: { id: subscription.id },
+        include: {
+          plan: true,
+          payments: { orderBy: { paidAt: "desc" }, take: 10 }
+        }
+      });
     }
   }
 
@@ -182,13 +182,13 @@ export default async function UserSubscriptionPage() {
               {(!subscription.cancelAtPeriodEnd && subscription.status === 'active') ? (
                 <form action={cancelAction} className="w-full sm:w-auto">
                   <input type="hidden" name="subId" value={subscription.id} />
-                  <Button variant="outline" className="w-full sm:w-auto text-destructive hover:bg-destructive/10">
+                  <Button variant="destructive" className="w-full sm:w-auto">
                     Cancel Subscription
                   </Button>
                 </form>
               ) : (
                 <Link href="/pricing" className="w-full sm:w-auto">
-                   {/* If it's cancelled, we essentially ask them to buy again (Re-activate) */}
+                  {/* If it's cancelled, we essentially ask them to buy again (Re-activate) */}
                   <Button className="w-full">
                     {subscription.status === 'active' ? "Re-activate Subscription" : "Renew Subscription"}
                   </Button>
@@ -208,7 +208,7 @@ export default async function UserSubscriptionPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                {subscription.payments.map((payment: any) => (
+                  {subscription.payments.map((payment: any) => (
                     <div key={payment.id} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
                       <div>
                         <p className="font-medium">{format(new Date(payment.paidAt), "PPP")}</p>

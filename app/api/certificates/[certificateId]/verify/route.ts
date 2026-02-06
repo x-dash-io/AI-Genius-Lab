@@ -1,27 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyCertificate } from "@/lib/certificates";
+import { withErrorHandler } from "@/app/api/error-handler";
 
-export async function GET(
+export const GET = withErrorHandler(async (
   request: NextRequest,
-  { params }: { params: Promise<{ certificateId: string }> }
-) {
-  try {
-    const { certificateId } = await params;
-    const result = await verifyCertificate(certificateId);
-    
-    if (!result.valid) {
-      return NextResponse.json(
-        { valid: false, error: result.error },
-        { status: 404 }
-      );
-    }
-    
-    return NextResponse.json(result);
-  } catch (error) {
-    console.error("Error verifying certificate:", error);
+  { params }: { params: { certificateId: string } }
+) => {
+  const { certificateId } = params;
+  const result = await verifyCertificate(certificateId);
+
+  if (!result.valid) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to verify certificate" },
-      { status: 500 }
+      { valid: false, error: result.error },
+      { status: 404 }
     );
   }
-}
+
+  return NextResponse.json(result);
+});

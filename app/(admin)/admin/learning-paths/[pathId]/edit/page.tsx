@@ -133,7 +133,7 @@ export default async function EditLearningPathPage({
   params: Promise<{ pathId: string }>;
 }) {
   await requireRole("admin");
-  const { pathId } = await params;
+  const { pathId } = params;
 
   return (
     <Suspense fallback={

@@ -44,7 +44,7 @@ export function LaunchCurriculum({ stats }: LaunchCurriculumProps) {
             New courses are being added. Check back soon!
           </p>
           <Link href="/courses" className="inline-block mt-4">
-            <Button>View All Courses</Button>
+            <Button variant="premium">View All Courses</Button>
           </Link>
         </div>
       </section>
@@ -143,7 +143,7 @@ export function LaunchCurriculum({ stats }: LaunchCurriculumProps) {
         {/* View All Courses Link */}
         <div className="text-center">
           <Link href="/courses">
-            <Button size="lg" variant="outline">
+            <Button size="lg" variant="premium">
               View All {stats.totalCourses} Courses
             </Button>
           </Link>

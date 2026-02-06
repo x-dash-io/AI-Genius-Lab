@@ -6,10 +6,10 @@ import { AppError } from "@/lib/errors";
 
 export const GET = withErrorHandler(async (
   request: NextRequest,
-  { params }: { params: Promise<{ postId: string }> }
+  { params }: { params: { postId: string } }
 ) => {
   await requireRole("admin");
-  const { postId } = await params;
+  const { postId } = params;
   const post = await getPostForEdit(postId);
 
   if (!post) {
@@ -21,10 +21,10 @@ export const GET = withErrorHandler(async (
 
 export const PATCH = withErrorHandler(async (
   request: NextRequest,
-  { params }: { params: Promise<{ postId: string }> }
+  { params }: { params: { postId: string } }
 ) => {
   await requireRole("admin");
-  const { postId } = await params;
+  const { postId } = params;
   const data = await request.json();
 
   const post = await updatePost(postId, data);
@@ -33,10 +33,10 @@ export const PATCH = withErrorHandler(async (
 
 export const DELETE = withErrorHandler(async (
   request: NextRequest,
-  { params }: { params: Promise<{ postId: string }> }
+  { params }: { params: { postId: string } }
 ) => {
   await requireRole("admin");
-  const { postId } = await params;
+  const { postId } = params;
 
   await deletePost(postId);
   return NextResponse.json({ success: true });

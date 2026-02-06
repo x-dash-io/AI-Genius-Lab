@@ -55,7 +55,7 @@ export default async function LibraryPage() {
             </CardHeader>
             <CardContent>
               <Link href={`/library/${purchase.Course.slug}`}>
-                <Button>Resume Learning</Button>
+                <Button variant="premium">Resume Learning</Button>
               </Link>
             </CardContent>
           </Card>

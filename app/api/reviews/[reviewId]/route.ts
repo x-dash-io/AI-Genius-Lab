@@ -4,10 +4,10 @@ import { reviewSchema, safeParse } from "@/lib/validation";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ reviewId: string }> }
+  { params }: { params: { reviewId: string } }
 ) {
   try {
-    const { reviewId } = await params;
+    const { reviewId } = params;
     const body = await request.json();
     const { rating, text } = body;
 
@@ -43,10 +43,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ reviewId: string }> }
+  { params }: { params: { reviewId: string } }
 ) {
   try {
-    const { reviewId } = await params;
+    const { reviewId } = params;
     await deleteReview(reviewId);
     return NextResponse.json({ success: true });
   } catch (error) {

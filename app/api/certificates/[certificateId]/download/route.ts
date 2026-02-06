@@ -6,20 +6,20 @@ import { certificateDownloadSchema, validateRequestBody } from "@/lib/validation
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ certificateId: string }> }
+  { params }: { params: { certificateId: string } }
 ) {
   try {
-    const { certificateId } = await params;
-    
+    const { certificateId } = params;
+
     // Validate input
     const validation = validateRequestBody(certificateDownloadSchema, { certificateId });
     if (!validation.success) {
       return validation.response;
     }
-    
+
     // Get certificate details
     const certificate = await getCertificate(certificateId);
-    
+
     if (!certificate) {
       return NextResponse.json(
         { error: "Certificate not found" },

@@ -7,14 +7,14 @@ import { AppError } from "@/lib/errors";
 
 export const POST = withErrorHandler(async (
   request: NextRequest,
-  { params }: { params: Promise<{ postId: string }> }
+  { params }: { params: { postId: string } }
 ) => {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     throw AppError.unauthorized("You must be signed in to review");
   }
 
-  const { postId } = await params;
+  const { postId } = params;
   const { rating, text } = await request.json();
 
   if (!rating || rating < 1 || rating > 5) {

@@ -28,7 +28,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
     redirect("/sign-in");
   }
 
-  const { courseId, lessonId } = await params;
+  const { courseId, lessonId } = params;
 
   let lesson, courseSlug, signedUrl, downloadUrl, contentMetadata;
   try {
@@ -175,11 +175,11 @@ export default async function LessonPage({ params }: LessonPageProps) {
           {/* Quick Actions Card */}
           <div className="rounded-xl border bg-card p-6 shadow-sm sticky top-6">
             <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
-            
+
             <div className="space-y-3">
               <Link
                 href={`/library/${courseId}`}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg border bg-muted/50 hover:bg-muted transition-all group"
+                className="flex items-center gap-3 px-5 py-3 rounded-lg border bg-muted/50 hover:bg-muted transition-all group"
               >
                 <ArrowLeft className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                 <span className="font-medium">Back to Course</span>
@@ -187,7 +187,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
               <Link
                 href="/library"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg border bg-muted/50 hover:bg-muted transition-all group"
+                className="flex items-center gap-3 px-5 py-3 rounded-lg border bg-muted/50 hover:bg-muted transition-all group"
               >
                 <BookOpen className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                 <span className="font-medium">My Library</span>

@@ -293,12 +293,12 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                           />
                         </div>
 
-                        <div className="flex-1 overflow-hidden min-w-0">
-                          <p className="truncate text-sm font-bold tracking-tight text-foreground/90 group-hover:text-foreground transition-colors">
-                            {session.user.name || session.user.email}
+                        <div className="flex-1 overflow-hidden min-w-0 flex flex-col justify-center">
+                          <p className="truncate text-sm font-bold text-foreground group-hover:text-primary transition-colors duration-200">
+                            {session.user.name || "User"}
                           </p>
-                          <p className="truncate text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/50 group-hover:text-muted-foreground/70 transition-colors">
-                            {session.user.email}
+                          <p className="truncate text-[10px] uppercase font-bold tracking-wider text-muted-foreground group-hover:text-foreground/80 transition-colors duration-200">
+                            Member
                           </p>
                         </div>
                       </motion.div>
@@ -479,38 +479,68 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
-                        className="border-t px-4 py-4 space-y-3 sticky bottom-0 bg-background/95 backdrop-blur-md"
+                        className="border-t px-4 py-4 space-y-3 sticky bottom-0 bg-card/95 backdrop-blur-md"
                       >
                         <Link href={getHref("/profile")} onClick={() => setMobileMenuOpen(false)}>
-                          <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors active:scale-[0.98]">
-                            <Avatar className="h-10 w-10 ring-2 ring-primary/20">
-                              <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "User"} />
-                              <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
-                                {(() => {
-                                  const name = session.user.name;
-                                  const email = session.user.email || "";
-                                  if (name && name.trim()) {
-                                    const nameParts = name.trim().split(/\s+/);
-                                    return nameParts[0][0].toUpperCase();
-                                  }
-                                  return email.charAt(0).toUpperCase();
-                                })()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 overflow-hidden min-w-0">
-                              <p className="truncate text-sm font-semibold">
-                                {session.user.name || session.user.email}
-                              </p>
-                              {session.user.name && (
-                                <p className="truncate text-xs text-muted-foreground">
-                                  {session.user.email}
-                                </p>
-                              )}
+                          <motion.div
+                            className="group relative flex items-center gap-3 p-3 rounded-2xl backdrop-blur-md bg-white/10 border border-white/20 transition-all cursor-pointer shadow-lg hover:shadow-xl"
+                            whileHover={{ y: -1, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            style={{
+                              background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)"
+                            }}
+                          >
+                            {/* Animated gradient overlay */}
+                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                            <div className="relative">
+                              <Avatar className="h-10 w-10 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
+                                <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "User"} />
+                                <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-sm font-bold">
+                                  {(() => {
+                                    const name = session.user.name;
+                                    const email = session.user.email || "";
+                                    if (name && name.trim()) {
+                                      const nameParts = name.trim().split(/\s+/);
+                                      return nameParts[0][0].toUpperCase();
+                                    }
+                                    return email.charAt(0).toUpperCase();
+                                  })()}
+                                </AvatarFallback>
+                              </Avatar>
+                              {/* Animated avatar ring */}
+                              <motion.div
+                                className="absolute -inset-1 rounded-full border-2 border-primary/30"
+                                animate={{
+                                  scale: [1, 1.1, 1],
+                                  opacity: [0.3, 0.6, 0.3]
+                                }}
+                                transition={{
+                                  duration: 2,
+                                  repeat: Infinity,
+                                  ease: "easeInOut"
+                                }}
+                              />
                             </div>
-                          </div>
+
+                            <div className="flex-1 overflow-hidden min-w-0">
+                              <p className="truncate text-sm font-semibold group-hover:text-foreground transition-colors duration-200">
+                                {session.user.name || "User"}
+                              </p>
+                              <p className="truncate text-xs text-muted-foreground group-hover:text-muted-foreground transition-colors duration-200">
+                                Member
+                              </p>
+                            </div>
+                          </motion.div>
                         </Link>
                         <div className="flex items-center gap-2 px-1">
-                          <SignOutButton className="flex-1" />
+                          <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="flex-1"
+                          >
+                            <SignOutButton className="w-full h-10 text-[10px] font-bold uppercase tracking-widest bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg hover:shadow-xl hover:shadow-destructive/25 border-none rounded-xl transition-all duration-300" />
+                          </motion.div>
                         </div>
                       </motion.div>
                     )}
@@ -519,27 +549,27 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
               )}
             </AnimatePresence>
 
-            {/* Preview Banner for Admin (Mobile) */}
-            <div className="pt-14 sm:pt-16">
-              <PreviewBanner />
-            </div>
-
-            {/* Main Content */}
-            <main className="flex-1 px-4 sm:px-6 pt-28 pb-12 relative z-10">
-              <div className="mx-auto w-full max-w-none sm:max-w-7xl">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {children}
-                </motion.div>
-              </div>
-            </main>
-            <Footer />
+          {/* Preview Banner for Admin (Mobile) */}
+          <div className="pt-14 sm:pt-16">
+            <PreviewBanner />
           </div>
+
+          {/* Main Content */}
+          <main className="flex-1 px-4 sm:px-6 pt-28 pb-12 relative z-10">
+            <div className="mx-auto w-full max-w-none sm:max-w-7xl">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {children}
+              </motion.div>
+            </div>
+          </main>
+          <Footer />
         </div>
-      </CourseProgressProvider>
-    </ConfirmDialogProvider>
+      </div>
+    </CourseProgressProvider>
+    </ConfirmDialogProvider >
   );
 }

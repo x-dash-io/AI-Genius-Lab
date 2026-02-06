@@ -18,7 +18,7 @@ interface BlogPostPageProps {
 }
 
 export async function generateMetadata({ params }: BlogPostPageProps) {
-  const { slug } = await params;
+  const { slug } = params;
   const post = await getPostBySlug(slug);
 
   if (!post) {
@@ -100,7 +100,7 @@ async function BlogPostContent({ slug }: { slug: string }) {
         </p>
       )}
 
-      <div 
+      <div
         className="prose prose-lg dark:prose-invert max-w-none prose-primary prose-headings:font-display prose-a:text-primary hover:prose-a:text-primary/80"
         dangerouslySetInnerHTML={{ __html: post.content }}
       />
@@ -111,7 +111,7 @@ async function BlogPostContent({ slug }: { slug: string }) {
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const { slug } = await params;
+  const { slug } = params;
 
   return (
     <Suspense fallback={

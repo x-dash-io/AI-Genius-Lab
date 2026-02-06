@@ -6,7 +6,7 @@ import { withErrorHandler } from "@/app/api/error-handler";
 
 export const GET = withErrorHandler(async (
   request: NextRequest,
-  { params }: { params: Promise<{ courseId: string }> }
+  { params }: { params: { courseId: string } }
 ) => {
   const session = await getServerSession(authOptions);
 
@@ -14,7 +14,7 @@ export const GET = withErrorHandler(async (
     return NextResponse.json({ owned: false });
   }
 
-  const { courseId } = await params;
+  const { courseId } = params;
   const owned = await hasPurchasedCourse(session.user.id, courseId);
 
   return NextResponse.json({ owned });

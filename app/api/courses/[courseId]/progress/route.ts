@@ -8,17 +8,17 @@ import { getCachedProgress, setCachedProgress, updateCachedLessonProgress } from
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ courseId: string }> }
+  { params }: { params: { courseId: string } }
 ) {
   try {
-    const { courseId } = await params;
-    
+    const { courseId } = params;
+
     // Validate input
     const validation = validateRequestBody(courseProgressSchema, { courseId });
     if (!validation.success) {
       return validation.response;
     }
-    
+
     const user = await requireUser();
 
     // Check cache first
@@ -51,17 +51,17 @@ export async function GET(
     const progressEntries = lessonIds.length === 0
       ? []
       : await prisma.progress.findMany({
-          where: { 
-            userId: user.id, 
-            lessonId: { in: lessonIds } 
-          },
-        });
+        where: {
+          userId: user.id,
+          lessonId: { in: lessonIds }
+        },
+      });
 
     // Calculate progress
     const totalLessons = lessonIds.length;
     const completedLessons = progressEntries.filter((p) => p.completedAt != null).length;
-    const overallProgress = totalLessons > 0 
-      ? Math.round((completedLessons / totalLessons) * 100) 
+    const overallProgress = totalLessons > 0
+      ? Math.round((completedLessons / totalLessons) * 100)
       : 0;
 
     // Format lessons progress

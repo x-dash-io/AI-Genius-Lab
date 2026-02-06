@@ -266,7 +266,7 @@ export function PublicLayoutClient({
                 ) : (
                   <div className="flex items-center gap-2.5">
                     <Link href="/sign-in">
-                      <Button variant="outline" size="sm" className="h-10 px-6 border-2 font-bold transition-all bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-[0_4px_12px_hsl(var(--primary)_/_0.3)] active:scale-95">
+                      <Button variant="outline" size="sm" className="h-10 px-6 font-bold">
                         Sign In
                       </Button>
                     </Link>
@@ -274,7 +274,7 @@ export function PublicLayoutClient({
                       <Button
                         size="default"
                         variant="premium"
-                        className="h-10 px-6 shadow-2xl shadow-primary/20 hover:brightness-110 hover:shadow-[0_8px_24px_hsl(var(--primary)_/_0.4)] transition-all duration-300"
+                        className="h-10 px-6"
                       >
                         Join Now
                       </Button>

@@ -22,7 +22,7 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
     redirect("/sign-in");
   }
 
-  const { courseId } = await params;
+  const { courseId } = params;
   const course = await getCourseForLibraryBySlug(courseId);
   if (!course) {
     redirect("/courses");
@@ -33,7 +33,7 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
     session.user.role,
     course.id
   );
-  
+
   if (!hasAccess) {
     const isPremium = course.tier === "PREMIUM";
 
@@ -64,7 +64,7 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
               </Link>
             ) : (
               <Link href={`/courses/${course.slug}`}>
-                <Button size="lg">
+                <Button size="lg" variant="outline">
                   View Course Details
                 </Button>
               </Link>
@@ -83,8 +83,8 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
     lessonIds.length === 0
       ? []
       : await prisma.progress.findMany({
-          where: { userId: session.user.id, lessonId: { in: lessonIds } },
-        });
+        where: { userId: session.user.id, lessonId: { in: lessonIds } },
+      });
 
   const progressMap = new Map<string, any>(
     progressEntries.map((entry: any) => [entry.lessonId, entry])
@@ -112,8 +112,8 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
 
   return (
     <CourseProgressProvider>
-      <DynamicCoursePage 
-        course={course} 
+      <DynamicCoursePage
+        course={course}
         initialProgress={initialProgress}
       />
     </CourseProgressProvider>

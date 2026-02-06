@@ -12,11 +12,11 @@ import { Badge } from "@/components/ui/badge";
 import { SubscriptionSuccessToast } from "@/components/checkout/SubscriptionSuccessToast";
 import { CertificateViewButton } from "@/components/dashboard/CertificateViewButton";
 import { CertificateSyncButton } from "@/components/dashboard/CertificateSyncButton";
-import { 
-  BookOpen, 
-  Activity, 
-  TrendingUp, 
-  Clock, 
+import {
+  BookOpen,
+  Activity,
+  TrendingUp,
+  Clock,
   Award,
   PlayCircle,
   CheckCircle2,
@@ -202,7 +202,7 @@ export default async function DashboardPage({
   // Calculate learning streak (days with activity in last 30 days)
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  
+
   const recentProgressDates = await prisma.progress.findMany({
     where: {
       userId: session.user.id,
@@ -217,14 +217,14 @@ export default async function DashboardPage({
   const learningStreak = uniqueDays.size;
 
   // Calculate average completion rate
-  const avgCompletionRate = totalCourses > 0 
+  const avgCompletionRate = totalCourses > 0
     ? Math.round(coursesWithProgress.reduce((sum: number, c: any) => sum + c.completionPercent, 0) / totalCourses)
     : 0;
 
   // Get this week's activity
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
-  
+
   const weekProgress = await prisma.progress.count({
     where: {
       userId: session.user.id,
@@ -444,7 +444,7 @@ export default async function DashboardPage({
                       </div>
                     </div>
                     <Link href={`/library/${course.Course.slug}`} className="w-full sm:w-auto">
-                      <Button className="w-full sm:w-auto" size="sm">
+                      <Button className="w-full sm:w-auto" size="sm" variant="premium">
                         {course.completionPercent === 0 ? "Start" : "Continue"}
                       </Button>
                     </Link>
@@ -654,7 +654,7 @@ export default async function DashboardPage({
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/courses">
-                <Button size="lg">
+                <Button size="lg" variant="premium">
                   Browse Courses
                 </Button>
               </Link>

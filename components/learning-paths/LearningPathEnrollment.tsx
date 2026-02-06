@@ -25,7 +25,7 @@ export function LearningPathEnrollment({
     try {
       const result = await enrollAction();
       console.log("Enrollment result:", result); // Debug log
-      
+
       if (result.approvalUrl) {
         // Redirect to PayPal
         window.location.href = result.approvalUrl;
@@ -50,7 +50,7 @@ export function LearningPathEnrollment({
   };
 
   return (
-    <Button size="lg" onClick={handleEnroll} disabled={isEnrolling}>
+    <Button size="lg" variant="premium" onClick={handleEnroll} disabled={isEnrolling} className="w-full">
       {isEnrolling ? (
         <>
           <Loader2 className="h-4 w-4 mr-2 animate-spin" />

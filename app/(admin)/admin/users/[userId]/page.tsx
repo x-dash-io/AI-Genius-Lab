@@ -46,9 +46,9 @@ export default async function UserDetailPage({
   const session = await getServerSession(authOptions);
   await requireRole("admin");
 
-  const { userId } = await params;
+  const { userId } = params;
   const user = await getUserById(userId);
-  
+
   // Type assertion to ensure user has id property
   const currentUserId = (session?.user as any)?.id;
   const isCurrentUser = currentUserId === userId;
@@ -127,8 +127,8 @@ export default async function UserDetailPage({
           <CardHeader>
             <CardTitle>Role Management</CardTitle>
             <CardDescription>
-              {isCurrentUser 
-                ? "You cannot change your own role" 
+              {isCurrentUser
+                ? "You cannot change your own role"
                 : "Change user role"}
             </CardDescription>
           </CardHeader>

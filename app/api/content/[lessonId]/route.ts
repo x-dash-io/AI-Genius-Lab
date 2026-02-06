@@ -14,115 +14,94 @@ import { checkCloudinaryResourceExists } from "@/lib/cloudinary";
  * 3. Signed URLs expire in 10 minutes
  * 4. URLs are generated fresh on each request (user-specific)
  */
-export async function GET(
+import { withErrorHandler } from "@/app/api/error-handler";
+import { AppError } from "@/lib/errors";
+
+export const GET = withErrorHandler(async (
   request: NextRequest,
-  { params }: { params: Promise<{ lessonId: string }> }
-) {
-  try {
-    const { lessonId } = await params;
+  { params }: { params: { lessonId: string } }
+) => {
+  const { lessonId } = params;
 
-    // Validate session
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  // Validate session
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    throw AppError.unauthorized();
+  }
 
-    // Validate access and get lesson content (this checks purchase status)
-    const { lesson, signedUrl, downloadUrl, publicId } = await getAuthorizedLessonContent(lessonId);
+  // Validate access and get lesson content (this checks purchase status)
+  const { lesson, signedUrl, downloadUrl, publicId } = await getAuthorizedLessonContent(lessonId);
 
-    console.log(`[Content API] lessonId: ${lessonId}, contentType: ${lesson.contentType}, hasSignedUrl: ${!!signedUrl}`);
+  console.log(`[Content API] lessonId: ${lessonId}, contentType: ${lesson.contentType}, hasSignedUrl: ${!!signedUrl}`);
 
-    // Check for download intent
-    const { searchParams } = request.nextUrl;
-    const isDownload = searchParams.get("download") === "true";
+  // Check for download intent
+  const { searchParams } = request.nextUrl;
+  const isDownload = searchParams.get("download") === "true";
 
-    const targetUrl = (isDownload && downloadUrl) ? downloadUrl : signedUrl;
+  const targetUrl = (isDownload && downloadUrl) ? downloadUrl : signedUrl;
 
-    if (!targetUrl) {
-      if (isDownload && !downloadUrl) {
-        return NextResponse.json({ error: "Download not allowed" }, { status: 403 });
-      }
-
-      return NextResponse.json(
-        {
-          error: "Content not available",
-          message: "This lesson content has not been uploaded yet. Please contact support if this issue persists."
-        },
-        { status: 404 }
-      );
-    }
-
-    // For link type, redirect directly (no proxy needed)
-    if (lesson.contentType === "link") {
-      return NextResponse.redirect(targetUrl);
-    }
-
-    // Stream media through this endpoint to control inline vs download behavior
-    const upstreamResponse = await fetch(targetUrl, {
-      headers: {
-        ...(request.headers.get("range")
-          ? { Range: request.headers.get("range") as string }
-          : {}),
-      },
-    });
-
-    if (!upstreamResponse.ok || !upstreamResponse.body) {
-      return NextResponse.json(
-        { error: "Content not available" },
-        { status: upstreamResponse.status || 502 }
-      );
-    }
-
-    const headers = new Headers(upstreamResponse.headers);
-    let filename = (publicId || "content").split("/").pop() || "content";
-
-    // Ensure filename has appropriate extension based on contentType
-    const extensionMap: Record<string, string> = {
-      video: ".mp4",
-      audio: ".mp3",
-      pdf: ".pdf",
-    };
-
-    const expectedExt = extensionMap[lesson.contentType];
-    if (expectedExt && !filename.toLowerCase().endsWith(expectedExt)) {
-      filename += expectedExt;
-    }
-
-    const dispositionType = isDownload ? "attachment" : "inline";
-
-    headers.set(
-      "Content-Disposition",
-      `${dispositionType}; filename=\"${encodeURIComponent(filename)}\"`
-    );
-    headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-    headers.set("Pragma", "no-cache");
-    headers.set("Expires", "0");
-
-    return new NextResponse(upstreamResponse.body, {
-      status: upstreamResponse.status,
-      headers,
-    });
-  } catch (error) {
-    console.error("Content proxy error:", error);
-
-    if (error instanceof Error) {
-      if (error.message === "UNAUTHORIZED" || error.message === "FORBIDDEN") {
-        return NextResponse.json(
-          { error: "Access denied" },
-          { status: 403 }
-        );
-      }
-      if (error.message === "NOT_FOUND") {
-        return NextResponse.json(
-          { error: "Content not found" },
-          { status: 404 }
-        );
-      }
+  if (!targetUrl) {
+    if (isDownload && !downloadUrl) {
+      return NextResponse.json({ error: "Download not allowed" }, { status: 403 });
     }
 
     return NextResponse.json(
-      { error: "Failed to retrieve content" },
-      { status: 500 }
+      {
+        error: "Content not available",
+        message: "This lesson content has not been uploaded yet. Please contact support if this issue persists."
+      },
+      { status: 404 }
     );
   }
-}
+
+  // For link type, redirect directly (no proxy needed)
+  if (lesson.contentType === "link") {
+    return NextResponse.redirect(targetUrl);
+  }
+
+  // Stream media through this endpoint to control inline vs download behavior
+  const upstreamResponse = await fetch(targetUrl, {
+    headers: {
+      ...(request.headers.get("range")
+        ? { Range: request.headers.get("range") as string }
+        : {}),
+    },
+  });
+
+  if (!upstreamResponse.ok || !upstreamResponse.body) {
+    return NextResponse.json(
+      { error: "Content not available" },
+      { status: upstreamResponse.status || 502 }
+    );
+  }
+
+  const headers = new Headers(upstreamResponse.headers);
+  let filename = (publicId || "content").split("/").pop() || "content";
+
+  // Ensure filename has appropriate extension based on contentType
+  const extensionMap: Record<string, string> = {
+    video: ".mp4",
+    audio: ".mp3",
+    pdf: ".pdf",
+  };
+
+  const expectedExt = extensionMap[lesson.contentType];
+  if (expectedExt && !filename.toLowerCase().endsWith(expectedExt)) {
+    filename += expectedExt;
+  }
+
+  const dispositionType = isDownload ? "attachment" : "inline";
+
+  headers.set(
+    "Content-Disposition",
+    `${dispositionType}; filename=\"${encodeURIComponent(filename)}\"`
+  );
+  headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  headers.set("Pragma", "no-cache");
+  headers.set("Expires", "0");
+
+  return new NextResponse(upstreamResponse.body, {
+    status: upstreamResponse.status,
+    headers,
+  });
+});

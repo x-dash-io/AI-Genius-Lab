@@ -16,7 +16,7 @@ interface CertificatePageProps {
 }
 
 export async function generateMetadata({ params }: CertificatePageProps): Promise<Metadata> {
-  const { certificateId } = await params;
+  const { certificateId } = params;
   const certificate = await getCertificate(certificateId);
 
   if (!certificate) {
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: CertificatePageProps): Promis
 }
 
 export default async function VerifyCertificatePage({ params }: CertificatePageProps) {
-  const { certificateId } = await params;
+  const { certificateId } = params;
   const certificate = await getCertificate(certificateId);
 
   if (!certificate) {

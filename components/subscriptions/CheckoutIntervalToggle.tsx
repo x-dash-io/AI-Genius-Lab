@@ -27,7 +27,7 @@ export function CheckoutIntervalToggle() {
       <div className="relative grid grid-cols-2 p-1.5 rounded-2xl bg-muted/40 border border-border/40 w-full max-w-[450px] shadow-sm backdrop-blur-sm">
         {/* Animated background pill - positioned absolutely so no layout shift */}
         <motion.div
-          className="absolute top-1.5 bottom-1.5 rounded-xl bg-blue-600 shadow-md ring-1 ring-blue-500/20"
+          className="absolute top-1.5 bottom-1.5 rounded-xl bg-primary shadow-md ring-1 ring-primary/20"
           initial={false}
           animate={{
             left: interval === "monthly" ? "6px" : "calc(50% + 2px)",
@@ -40,7 +40,7 @@ export function CheckoutIntervalToggle() {
             mass: 1
           }}
         />
-        
+
         {options.map((option) => {
           const isActive = interval === option.value;
           return (
@@ -50,9 +50,9 @@ export function CheckoutIntervalToggle() {
               className="relative flex items-center justify-center gap-2.5 py-3 px-4 text-sm font-bold outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-xl z-10 transition-colors duration-300"
               data-testid={`interval-toggle-${option.value}`}
             >
-              <motion.span 
+              <motion.span
                 className="flex items-center gap-2"
-                animate={{ 
+                animate={{
                   color: isActive ? "#ffffff" : "hsl(var(--muted-foreground))"
                 }}
                 transition={{ duration: 0.25 }}

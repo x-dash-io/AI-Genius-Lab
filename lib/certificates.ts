@@ -57,9 +57,9 @@ export async function hasCompletedCourse(userId: string, courseId: string): Prom
   // Check if all lessons are completed
   const completedLessons = progressRecords.filter((p) => p.completedAt != null).length;
   const isCompleted = completedLessons === lessonIds.length;
-  
+
   logger.info(`Course completion check: userId=${userId}, courseId=${courseId}, totalLessons=${lessonIds.length}, completedLessons=${completedLessons}, isCompleted=${isCompleted}`);
-  
+
   return isCompleted;
 }
 
@@ -418,7 +418,7 @@ export async function generatePathCertificate(pathId: string) {
  */
 export async function getUserCertificates(userId: string) {
   const user = await requireCustomer();
-  
+
   if (user.id !== userId) {
     throw new Error("FORBIDDEN: You can only view your own certificates");
   }
@@ -504,6 +504,12 @@ export async function verifyCertificate(certificateId: string) {
  * Get a single certificate by its database ID or its public certificate ID
  */
 export async function getCertificate(idOrCertificateId: string) {
+  // Validate input
+  if (!idOrCertificateId || typeof idOrCertificateId !== 'string') {
+    console.warn(`[getCertificate] Invalid idOrCertificateId provided:`, idOrCertificateId);
+    return null;
+  }
+
   return prisma.certificate.findFirst({
     where: {
       OR: [
