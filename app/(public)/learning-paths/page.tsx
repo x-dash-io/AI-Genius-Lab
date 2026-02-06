@@ -156,7 +156,7 @@ async function LearningPathsContent({ searchParams }: LearningPathsPageProps) {
                     </div>
                   )}
                   <Link href={`/learning-paths/${path.slug}`}>
-                    <Button variant="outline" className="w-full border-primary/20 hover:border-primary hover:bg-primary/5 transition-colors">
+                    <Button variant="outline" size="lg" className="w-full border-primary/20 hover:border-primary hover:bg-primary/5 transition-colors">
                       View Learning Path
                     </Button>
                   </Link>

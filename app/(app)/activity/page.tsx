@@ -421,7 +421,7 @@ export default function ActivityPage() {
               ) : (
                 <>
                   <Link href="/courses">
-                    <Button variant="outline">Browse Courses</Button>
+                    <Button variant="outline" size="lg">Browse Courses</Button>
                   </Link>
                   <Link href="/library">
                     <Button variant="premium">View Library</Button>

@@ -97,11 +97,10 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
                 {[1, 2, 3, 4, 5].map((value) => (
                   <Star
                     key={value}
-                    className={`h-5 w-5 ${
-                      value <= Math.round(stats.averageRating)
+                    className={`h-5 w-5 ${value <= Math.round(stats.averageRating)
                         ? "fill-yellow-400 text-yellow-400"
                         : "fill-gray-300 text-gray-300"
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
@@ -148,7 +147,7 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
                 onCancel={() => setShowForm(false)}
               />
             ) : (
-              <Button onClick={() => setShowForm(true)}>Write a Review</Button>
+              <Button size="lg" variant="outline" className="w-full border-primary/20 hover:bg-primary/5" onClick={() => setShowForm(true)}>Write a Review</Button>
             )}
           </CardContent>
         </Card>

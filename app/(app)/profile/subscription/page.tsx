@@ -182,20 +182,20 @@ export default async function UserSubscriptionPage() {
               {(!subscription.cancelAtPeriodEnd && subscription.status === 'active') ? (
                 <form action={cancelAction} className="w-full sm:w-auto">
                   <input type="hidden" name="subId" value={subscription.id} />
-                  <Button variant="destructive" className="w-full sm:w-auto">
+                  <Button variant="destructive" size="lg" className="w-full sm:w-auto">
                     Cancel Subscription
                   </Button>
                 </form>
               ) : (
                 <Link href="/pricing" className="w-full sm:w-auto">
                   {/* If it's cancelled, we essentially ask them to buy again (Re-activate) */}
-                  <Button className="w-full">
+                  <Button className="w-full" size="lg">
                     {subscription.status === 'active' ? "Re-activate Subscription" : "Renew Subscription"}
                   </Button>
                 </Link>
               )}
               <Link href="/pricing" className="w-full sm:w-auto">
-                <Button variant="outline" className="w-full">Change Plan</Button>
+                <Button variant="outline" size="lg" className="w-full">Change Plan</Button>
               </Link>
             </CardFooter>
           </Card>

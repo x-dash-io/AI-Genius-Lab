@@ -74,14 +74,13 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                 <Card className="shadow-2xl border-border/50">
                   <CardHeader className="pb-4">
                     <div className="flex items-start gap-4">
-                      <div className={`p-3 rounded-full ${
-                        options.variant === "destructive" 
-                          ? "bg-destructive/10 text-destructive" 
+                      <div className={`p-3 rounded-full ${options.variant === "destructive"
+                          ? "bg-destructive/10 text-destructive"
                           : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                      }`}>
+                        }`}>
                         {options.icon || (
-                          options.variant === "destructive" 
-                            ? <Trash2 className="h-5 w-5" /> 
+                          options.variant === "destructive"
+                            ? <Trash2 className="h-5 w-5" />
                             : <AlertTriangle className="h-5 w-5" />
                         )}
                       </div>
@@ -104,6 +103,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                   <CardFooter className="flex gap-3 pt-2">
                     <Button
                       variant="outline"
+                      size="lg"
                       className="flex-1"
                       onClick={handleCancel}
                     >
@@ -111,6 +111,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                     </Button>
                     <Button
                       variant={options.variant === "destructive" ? "destructive" : "default"}
+                      size="lg"
                       className="flex-1"
                       onClick={handleConfirm}
                     >

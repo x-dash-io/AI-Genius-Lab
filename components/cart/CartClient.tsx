@@ -199,7 +199,7 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
             Add courses to your cart to get started
           </p>
           <Link href="/courses">
-            <Button>Browse Courses</Button>
+            <Button size="lg">Browse Courses</Button>
           </Link>
         </CardContent>
       </Card>
