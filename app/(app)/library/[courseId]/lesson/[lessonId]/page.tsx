@@ -28,7 +28,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
     redirect("/sign-in");
   }
 
-  const { courseId, lessonId } = params;
+  const { courseId, lessonId } = await params;
 
   let lesson, courseSlug, signedUrl, downloadUrl, contentMetadata;
   try {

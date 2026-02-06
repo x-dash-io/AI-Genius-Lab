@@ -21,7 +21,7 @@ export default async function EditBlogPostPage({
   params: Promise<{ postId: string }>;
 }) {
   await requireRole("admin");
-  const { postId } = params;
+  const { postId } = await params;
 
   return (
     <div className="max-w-5xl mx-auto">

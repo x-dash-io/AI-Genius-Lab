@@ -3,9 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { CouponForm } from "../CouponForm";
 
 interface EditCouponPageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 async function getCoupon(id: string) {
@@ -21,7 +21,8 @@ async function getCoupon(id: string) {
 }
 
 export default async function EditCouponPage({ params }: EditCouponPageProps) {
-    const coupon = await getCoupon(params.id);
+    const { id } = await params;
+    const coupon = await getCoupon(id);
 
     if (!coupon) {
         notFound();

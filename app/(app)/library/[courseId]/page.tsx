@@ -22,7 +22,7 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
     redirect("/sign-in");
   }
 
-  const { courseId } = params;
+  const { courseId } = await params;
   const course = await getCourseForLibraryBySlug(courseId);
   if (!course) {
     redirect("/courses");

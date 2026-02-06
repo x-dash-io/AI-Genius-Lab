@@ -46,7 +46,7 @@ export default async function UserDetailPage({
   const session = await getServerSession(authOptions);
   await requireRole("admin");
 
-  const { userId } = params;
+  const { userId } = await params;
   const user = await getUserById(userId);
 
   // Type assertion to ensure user has id property

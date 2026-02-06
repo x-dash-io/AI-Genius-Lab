@@ -4,9 +4,9 @@ import { withErrorHandler } from "@/app/api/error-handler";
 
 export const GET = withErrorHandler(async (
   request: NextRequest,
-  { params }: { params: { certificateId: string } }
+  { params }: { params: Promise<{ certificateId: string }> }
 ) => {
-  const { certificateId } = params;
+  const { certificateId } = await params;
   const result = await verifyCertificate(certificateId);
 
   if (!result.valid) {

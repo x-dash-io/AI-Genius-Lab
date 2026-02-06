@@ -6,10 +6,10 @@ import { certificateDownloadSchema, validateRequestBody } from "@/lib/validation
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { certificateId: string } }
+  { params }: { params: Promise<{ certificateId: string }> }
 ) {
   try {
-    const { certificateId } = params;
+    const { certificateId } = await params;
 
     // Validate input
     const validation = validateRequestBody(certificateDownloadSchema, { certificateId });

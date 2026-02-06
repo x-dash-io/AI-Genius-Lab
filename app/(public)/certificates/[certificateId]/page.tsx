@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: CertificatePageProps): Promis
 }
 
 export default async function CertificatePage({ params }: CertificatePageProps) {
-  const { certificateId } = params;
+  const { certificateId } = await params;
   const certificate = await getCertificate(certificateId);
 
   if (!certificate) {

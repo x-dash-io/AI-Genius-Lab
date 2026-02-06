@@ -21,7 +21,7 @@ type CourseDetailPageProps = {
 export async function generateMetadata({
   params,
 }: CourseDetailPageProps): Promise<Metadata> {
-  const { courseId } = params;
+  const { courseId } = await params;
   const course = await getCoursePreviewBySlug(courseId);
 
   if (!course) {
@@ -44,7 +44,7 @@ export async function generateMetadata({
 export default async function CourseDetailPage({
   params,
 }: CourseDetailPageProps) {
-  const { courseId } = params;
+  const { courseId } = await params;
   const course = await getCoursePreviewBySlug(courseId);
 
   if (!course) {

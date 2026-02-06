@@ -19,9 +19,9 @@ import { AppError } from "@/lib/errors";
 
 export const GET = withErrorHandler(async (
   request: NextRequest,
-  { params }: { params: { lessonId: string } }
+  { params }: { params: Promise<{ lessonId: string }> }
 ) => {
-  const { lessonId } = params;
+  const { lessonId } = await params;
 
   // Validate session
   const session = await getServerSession(authOptions);

@@ -27,7 +27,7 @@ type LearningPathDetailPageProps = {
 export async function generateMetadata({
   params,
 }: LearningPathDetailPageProps): Promise<Metadata> {
-  const { pathId } = params;
+  const { pathId } = await params;
   const path = await getLearningPathBySlug(pathId);
 
   if (!path) {
@@ -49,7 +49,7 @@ export async function generateMetadata({
 export default async function LearningPathDetailPage({
   params,
 }: LearningPathDetailPageProps) {
-  const { pathId } = params;
+  const { pathId } = await params;
   const pathData = await getLearningPathBySlug(pathId);
 
   if (!pathData) {

@@ -8,10 +8,10 @@ import { getCachedProgress, setCachedProgress, updateCachedLessonProgress } from
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { courseId: string } }
+  { params }: { params: Promise<{ courseId: string }> }
 ) {
   try {
-    const { courseId } = params;
+    const { courseId } = await params;
 
     // Validate input
     const validation = validateRequestBody(courseProgressSchema, { courseId });

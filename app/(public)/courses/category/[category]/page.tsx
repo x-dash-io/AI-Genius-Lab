@@ -14,7 +14,7 @@ type CategoryPageProps = {
 export async function generateMetadata({
   params,
 }: CategoryPageProps): Promise<Metadata> {
-  const { category } = params;
+  const { category } = await params;
   const categoryData = await getCategoryBySlug(category);
   const categoryName = categoryData?.name || category;
 
@@ -27,7 +27,7 @@ export async function generateMetadata({
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const { category } = params;
+  const { category } = await params;
   const categoryData = await getCategoryBySlug(category);
 
   if (!categoryData || !categoryData.isActive) {

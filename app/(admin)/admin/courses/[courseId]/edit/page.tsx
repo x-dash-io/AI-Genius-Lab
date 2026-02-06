@@ -303,7 +303,7 @@ export default async function EditCoursePage({
   params: Promise<{ courseId: string }>;
 }) {
   await requireRole("admin");
-  const { courseId } = params;
+  const { courseId } = await params;
 
   return (
     <Suspense fallback={
