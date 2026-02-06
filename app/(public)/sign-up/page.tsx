@@ -296,6 +296,7 @@ export default function SignUpPage() {
                         className="w-full"
                         onClick={handleOTPSubmit}
                         disabled={otp.length !== 6 || isVerifyingOTP}
+                        size="lg"
                       >
                         {isVerifyingOTP ? (
                           <span className="flex items-center gap-2">
@@ -399,7 +400,7 @@ export default function SignUpPage() {
                           </Alert>
                         </motion.div>
                       )}
-                      <Button type="submit" variant="premium" className="w-full h-12 text-base" disabled={isLoading || isGoogleLoading || isRedirecting}>
+                      <Button type="submit" variant="premium" className="w-full" size="lg" disabled={isLoading || isGoogleLoading || isRedirecting}>
                         {isLoading ? (
                           <span className="flex items-center gap-2">
                             <Loader size="sm" inline />

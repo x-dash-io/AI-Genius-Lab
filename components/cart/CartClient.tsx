@@ -421,7 +421,7 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
             )}
 
             <Link href="/courses">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" size="lg">
                 <BookOpen className="h-4 w-4 mr-2" />
                 Continue Shopping
               </Button>

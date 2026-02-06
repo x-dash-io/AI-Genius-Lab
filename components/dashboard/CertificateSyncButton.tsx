@@ -51,7 +51,7 @@ export function CertificateSyncButton() {
       onClick={handleSync}
       disabled={isSyncing}
       variant="default"
-      size="sm"
+      size="lg"
       className="w-full"
     >
       <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />

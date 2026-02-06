@@ -13,17 +13,17 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:shadow-md shadow-sm",
         outline:
-          "border-2 border-input bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-[0_4px_12px_hsl(var(--primary)/0.3)] shadow-sm font-bold transition-all duration-200",
+          "border-2 border-input bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-[0_4px_12px_hsl(var(--primary)/25%)] shadow-sm font-bold transition-all duration-200 px-8",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/90 hover:shadow-[0_2px_8px_hsl(var(--secondary)/0.2)] shadow-sm font-medium",
         ghost: "text-muted-foreground hover:bg-accent hover:text-foreground hover:shadow-[0_2px_8px_hsl(var(--accent)/0.15)] transition-all font-medium",
         link: "text-primary underline-offset-4 hover:underline hover:text-primary/80 font-medium",
-        premium: "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xl shadow-amber-500/20 hover:brightness-110 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 border-none font-bold",
+        premium: "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xl shadow-amber-500/20 hover:brightness-110 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 border-none font-bold px-10",
       },
       size: {
-        default: "h-11 px-6 py-2.5",
+        default: "h-11 px-8 py-2.5",
         sm: "h-9 rounded-lg px-4",
-        lg: "h-14 rounded-2xl px-12 text-base",
+        lg: "h-14 rounded-2xl px-14 text-base",
         icon: "h-11 w-11",
       },
     }

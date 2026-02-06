@@ -20,7 +20,7 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
 
   const handleRequestChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (newEmail === currentEmail) {
       toast({
         title: "Same email",
@@ -87,7 +87,7 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
       setStep("input");
       setNewEmail("");
       setVerificationCode("");
-      
+
       // Refresh the page to show new email
       router.refresh();
     } catch (error) {
@@ -112,7 +112,7 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
       <form onSubmit={handleVerifyChange} className="space-y-4">
         <div className="rounded-lg bg-muted p-4">
           <p className="text-sm text-muted-foreground">
-            We've sent a 6-digit verification code to <strong>{newEmail}</strong>. 
+            We've sent a 6-digit verification code to <strong>{newEmail}</strong>.
             Please enter it below to confirm your email change.
           </p>
         </div>
@@ -144,6 +144,7 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
             type="submit"
             disabled={isLoading || verificationCode.length !== 6}
             className="flex-1"
+            size="lg"
           >
             {isLoading ? (
               <>
@@ -184,6 +185,7 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
         type="submit"
         disabled={isLoading || !newEmail}
         className="w-full"
+        size="lg"
       >
         {isLoading ? (
           <>

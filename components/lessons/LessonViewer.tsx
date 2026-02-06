@@ -241,7 +241,7 @@ export function LessonViewer({
 
         {allowDownload && (
           <div className="flex justify-end mt-4">
-            <Button variant="outline" size="default" onClick={handleDownload} disabled={isDownloading}>
+            <Button variant="outline" size="lg" onClick={handleDownload} disabled={isDownloading}>
               <Download className="mr-2 h-4 w-4" />
               {isDownloading
                 ? "Downloading..."
@@ -276,6 +276,7 @@ export function LessonViewer({
               <Button
                 onClick={handleComplete}
                 disabled={isCompleting}
+                size="lg"
               >
                 {isCompleting ? (
                   <>
@@ -374,7 +375,7 @@ export function LessonViewer({
             )}
           </div>
 
-          <Button asChild className="w-full sm:w-auto">
+          <Button asChild size="lg" className="w-full sm:w-auto">
             <a href={`/api/content/${lessonId}`}>
               <ExternalLink className="h-5 w-5 mr-2" />
               {contentType === 'link' ? 'Open Link' : allowDownload ? 'Download' : 'Open'} Content
@@ -410,6 +411,7 @@ export function LessonViewer({
               onClick={handleComplete}
               disabled={isCompleting}
               className="w-full sm:w-auto"
+              size="lg"
             >
               {isCompleting ? (
                 <>

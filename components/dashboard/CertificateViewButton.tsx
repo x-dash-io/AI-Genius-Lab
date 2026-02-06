@@ -20,7 +20,7 @@ export function CertificateViewButton({ certificateId }: CertificateViewButtonPr
     <Link href={`/certificates/${certificateId}`} onClick={handleClick}>
       <Button
         variant="default"
-        size="sm"
+        size="lg"
         className="w-full"
         disabled={isLoading}
       >

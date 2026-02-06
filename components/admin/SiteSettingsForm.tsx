@@ -83,8 +83,8 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                 updateSiteSettings("social_links", value.socialLinks),
                                 updateSiteSettings("hero_logos", (value.heroLogos || []).filter(Boolean))
                             ]);
-                            setLastSaved({ 
-                                socialLinks: value.socialLinks || {}, 
+                            setLastSaved({
+                                socialLinks: value.socialLinks || {},
                                 heroLogos: (value.heroLogos || []).filter((logo): logo is NonNullable<typeof logo> => Boolean(logo)).map(logo => ({
                                     id: logo.id || `logo-${Date.now()}`,
                                     name: logo.name || "",
@@ -208,10 +208,10 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                     Manage the trusted company logos displayed in the hero section.
                                 </CardDescription>
                             </div>
-                            <Button 
-                                type="button" 
-                                variant="outline" 
-                                size="sm" 
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
                                 onClick={() => append({ id: `logo-${Date.now()}`, name: "", type: "image", value: "", visible: true })}
                                 className="w-full sm:w-auto whitespace-nowrap"
                             >
@@ -327,11 +327,11 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                         )}
                                     />
                                 </div>
-                                <Button 
-                                    type="button" 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    className="mt-2 sm:mt-6 text-destructive flex-shrink-0" 
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="mt-2 sm:mt-6 text-destructive flex-shrink-0"
                                     onClick={() => remove(index)}
                                 >
                                     <Trash2 className="h-4 w-4" />
@@ -346,7 +346,7 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                     </CardContent>
                 </Card>
 
-                <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
+                <Button type="submit" disabled={isPending} size="lg" className="w-full sm:w-auto">
                     {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Save Changes
                 </Button>

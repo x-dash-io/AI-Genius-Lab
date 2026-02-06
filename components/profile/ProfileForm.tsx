@@ -23,7 +23,7 @@ export function ProfileForm({ initialData, updateProfileAction }: ProfileFormPro
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     if (isAdminPreview) {
       toast({
         title: "Preview Mode",
@@ -92,7 +92,7 @@ export function ProfileForm({ initialData, updateProfileAction }: ProfileFormPro
         </p>
       </div>
 
-      <Button type="submit" disabled={isSubmitting || isAdminPreview}>
+      <Button type="submit" size="lg" disabled={isSubmitting || isAdminPreview}>
         {isAdminPreview ? (
           <>
             <ShieldAlert className="h-4 w-4 mr-2" />
