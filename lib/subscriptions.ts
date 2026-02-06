@@ -112,7 +112,7 @@ export async function getUserSubscription(userId: string) {
     include: { plan: true },
     // Crucial: Get the NEWEST one first. 
     // This ensures a new Pending/Active plan overrides an old Cancelled one.
-    orderBy: { createdAt: "desc" } 
+    orderBy: { createdAt: "desc" }
   });
 
   if (!subscription) return null;
@@ -172,10 +172,10 @@ export async function refreshSubscriptionStatus(subscriptionId: string) {
 export async function hasSubscriptionTier(userId: string, requiredTier: SubscriptionTier) {
   const subscription = await getUserSubscription(userId);
   if (!subscription || (subscription.status !== 'active' && subscription.status !== 'cancelled' && subscription.status !== 'past_due')) {
-     return false;
+    return false;
   }
 
-  const tiers: SubscriptionTier[] = ["starter", "pro", "elite"];
+  const tiers: SubscriptionTier[] = ["starter", "professional", "founder"];
   const userTierIndex = tiers.indexOf(subscription.plan.tier);
   const requiredTierIndex = tiers.indexOf(requiredTier);
 
@@ -248,7 +248,7 @@ export async function grantSubscriptionManually({
  */
 export async function cleanupAbandonedPendingSubscriptions() {
   const cutoffDate = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  
+
   const abandoned = await prisma.subscription.findMany({
     where: {
       status: "pending",

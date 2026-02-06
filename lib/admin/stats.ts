@@ -86,9 +86,9 @@ export async function getAdminStats() {
 
     // Breakdown
     const tier = sub.plan.tier.toLowerCase();
-    if (tier === "pro" || sub.plan.name.toLowerCase().includes("professional")) {
+    if (tier === "professional" || sub.plan.name.toLowerCase().includes("professional")) {
       subscriberBreakdown.professional++;
-    } else if (tier === "elite" || sub.plan.name.toLowerCase().includes("founder")) {
+    } else if (tier === "founder" || sub.plan.name.toLowerCase().includes("founder")) {
       subscriberBreakdown.founder++;
     } else if (tier === "starter" || sub.plan.priceMonthlyCents === 0) {
       // If starter is tracked as a subscription but free

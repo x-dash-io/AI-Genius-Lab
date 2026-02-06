@@ -50,16 +50,16 @@ export function PricingGrid({ plans }: PricingGridProps) {
           const perMonthPrice = interval === "annual" ? (priceCents / 12 / 100).toFixed(2) : displayPrice;
 
           return (
-            <Card key={plan.id} className={plan.tier === "pro" ? "border-2 border-blue-500 shadow-2xl relative md:scale-105 ring-2 ring-blue-400/50 z-10" : ""}>
-              {plan.tier === "pro" && (
+            <Card key={plan.id} className={plan.tier === "professional" ? "border-2 border-blue-500 shadow-2xl relative md:scale-105 ring-2 ring-blue-400/50 z-10" : ""}>
+              {plan.tier === "professional" && (
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gradient-to-r from-blue-600 via-blue-500 to-blue-400 text-white text-sm font-bold px-6 py-2.5 rounded-full uppercase tracking-widest shadow-xl border-2 border-blue-300 flex items-center gap-2 z-20 whitespace-nowrap">
                   <Zap className="h-4 w-4 flex-shrink-0" />
                   Most Popular
                 </div>
               )}
               <CardHeader>
-                <CardTitle className={plan.tier === "pro" ? "text-3xl text-blue-600 dark:text-blue-400" : "text-2xl"}>{plan.name}</CardTitle>
-                <CardDescription className={`min-h-[40px] ${plan.tier === "pro" ? "text-foreground/80 font-medium" : ""}`}>{plan.description}</CardDescription>
+                <CardTitle className={plan.tier === "professional" ? "text-3xl text-blue-600 dark:text-blue-400" : "text-2xl"}>{plan.name}</CardTitle>
+                <CardDescription className={`min-h-[40px] ${plan.tier === "professional" ? "text-foreground/80 font-medium" : ""}`}>{plan.description}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
@@ -89,8 +89,8 @@ export function PricingGrid({ plans }: PricingGridProps) {
                     <span className={plan.tier !== "starter" ? "text-foreground font-medium" : ""}>Certificates of completion</span>
                   </li>
                   <li className="flex items-center gap-2 text-muted-foreground">
-                    <Check className={plan.tier === "elite" ? "h-4 w-4 text-green-500" : "h-4 w-4 text-muted-foreground/30"} />
-                    <span className={plan.tier === "elite" ? "text-foreground font-medium" : ""}>All Learning Paths included</span>
+                    <Check className={plan.tier === "founder" ? "h-4 w-4 text-green-500" : "h-4 w-4 text-muted-foreground/30"} />
+                    <span className={plan.tier === "founder" ? "text-foreground font-medium" : ""}>All Learning Paths included</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="h-4 w-4 text-green-500" />
@@ -106,7 +106,7 @@ export function PricingGrid({ plans }: PricingGridProps) {
               </CardContent>
               <CardFooter>
                 <Link href={`/checkout/subscription?planId=${plan.id}&interval=${interval}`} className="w-full">
-                  {plan.tier === "pro" ? (
+                  {plan.tier === "professional" ? (
                     <Button
                       className="w-full hover:scale-105 transition-transform bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold border-0"
                       variant="default"

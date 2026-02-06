@@ -75,7 +75,7 @@ export default async function ProfilePage() {
   return (
     <div className="space-y-8 pb-8">
       <ProfilePreviewBanner />
-      
+
       <div>
         <h1 className="font-display text-4xl font-bold tracking-tight">Profile</h1>
         <p className="mt-2 text-lg text-muted-foreground">
@@ -161,8 +161,8 @@ export default async function ProfilePage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {subscription.plan.tier === "starter" && <Zap className="h-4 w-4 text-amber-500" />}
-                    {subscription.plan.tier === "pro" && <Star className="h-4 w-4 text-blue-500" />}
-                    {subscription.plan.tier === "elite" && <Rocket className="h-4 w-4 text-purple-500" />}
+                    {subscription.plan.tier === "professional" && <Star className="h-4 w-4 text-blue-500" />}
+                    {subscription.plan.tier === "founder" && <Rocket className="h-4 w-4 text-purple-500" />}
                     <span className="text-sm font-medium">Tier</span>
                   </div>
                   <span className="text-sm font-bold uppercase tracking-tight">{subscription.plan.name}</span>

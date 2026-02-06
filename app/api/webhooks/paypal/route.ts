@@ -56,6 +56,8 @@ export async function POST(request: Request) {
     }
 
     console.log(`[WEBHOOK] Signature verified successfully`);
+    console.log(`[WEBHOOK] Full body: ${bodyText}`);
+    console.log(`[WEBHOOK] Headers: ${JSON.stringify({ transmissionId, transmissionTime, transmissionSig, certUrl, authAlgo })}`);
 
     // Handle Subscription Events
     if (event.event_type?.startsWith("BILLING.SUBSCRIPTION.")) {
@@ -78,8 +80,9 @@ export async function POST(request: Request) {
       }
 
       console.log(
-        `[WEBHOOK] Processing subscription event ${event.event_type} for ${customId}`
+        `[WEBHOOK] Processing subscription event ${event.event_type} for ${customId}. PayPal ID: ${paypalSubId}`
       );
+      console.log(`[WEBHOOK] Subscription Resource: ${JSON.stringify(subscriptionResource)}`);
 
       switch (event.event_type) {
         case "BILLING.SUBSCRIPTION.ACTIVATED":
@@ -185,7 +188,7 @@ export async function POST(request: Request) {
               cancelAtPeriodEnd: true,
             },
           });
-          
+
           // Revalidate subscription-related pages
           try {
             revalidatePath("/profile/subscription");

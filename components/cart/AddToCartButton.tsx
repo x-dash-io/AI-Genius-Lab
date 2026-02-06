@@ -103,7 +103,7 @@ export function AddToCartButton({
   };
 
   const isPremium = tier === "PREMIUM";
-  const hasProAccess = subscription?.plan?.tier === "pro" || subscription?.plan?.tier === "elite";
+  const hasProAccess = subscription?.plan?.tier === "professional" || subscription?.plan?.tier === "founder";
 
   if (isPremium && !hasProAccess && !isOwned) {
     return (

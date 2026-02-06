@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
       // Premium check
       if (course.tier === "PREMIUM") {
         const subscription = session?.user ? await getUserSubscription(session.user.id) : null;
-        const hasProAccess = subscription?.plan.tier === "pro" || subscription?.plan.tier === "elite";
+        const hasProAccess = subscription?.plan.tier === "professional" || subscription?.plan.tier === "founder";
         if (!hasProAccess) {
           return NextResponse.json({ error: "Premium courses are exclusive to Pro/Elite subscribers." }, { status: 400 });
         }

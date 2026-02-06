@@ -68,7 +68,7 @@ export default async function PricingPage() {
                   <td className="py-4 px-4">Learning Paths</td>
                   {plans.map((plan: any) => (
                     <td key={plan.id} className="text-center py-4 px-4 min-w-[100px]">
-                      {plan.tier === "elite" ? "✓" : "-"}
+                      {plan.tier === "founder" ? "✓" : "-"}
                     </td>
                   ))}
                 </tr>

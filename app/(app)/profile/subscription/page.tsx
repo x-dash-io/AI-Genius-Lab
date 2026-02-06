@@ -139,7 +139,7 @@ export default async function UserSubscriptionPage() {
                     <span className={subscription.plan.tier === "starter" ? "text-muted-foreground" : ""}>Certificates included</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    {subscription.plan.tier === "elite" ? (
+                    {subscription.plan.tier === "founder" ? (
                       <Check className="h-4 w-4 text-green-500" />
                     ) : (
                       <XCircle className="h-4 w-4 text-muted-foreground" />

@@ -44,7 +44,7 @@ async function createCheckoutSession(formData: FormData) {
   if (course.tier === "PREMIUM") {
     const subscription = await getUserSubscription(session.user.id);
     const hasProAccess =
-      subscription?.plan.tier === "pro" || subscription?.plan.tier === "elite";
+      subscription?.plan.tier === "professional" || subscription?.plan.tier === "founder";
 
     if (!hasProAccess) {
       redirect(`/courses/${course.slug}?error=premium_only`);
@@ -210,7 +210,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
       ? await getUserSubscription(session.user.id)
       : null;
     const hasProAccess =
-      subscription?.plan.tier === "pro" || subscription?.plan.tier === "elite";
+      subscription?.plan.tier === "professional" || subscription?.plan.tier === "founder";
 
     if (!hasProAccess) {
       redirect(`/courses/${course.slug}?error=premium_only`);

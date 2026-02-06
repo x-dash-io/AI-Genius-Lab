@@ -371,8 +371,8 @@ enum CourseTier {
 
 enum SubscriptionTier {
   starter
-  pro
-  elite
+  professional
+  founder
 }
 
 enum SubscriptionStatus {

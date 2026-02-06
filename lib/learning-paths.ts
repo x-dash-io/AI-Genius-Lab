@@ -140,7 +140,7 @@ export async function calculateLearningPathPrice(userId: string, pathId: string)
   });
 
   const existingCourseIds = new Set(existingPurchases.map((p) => p.courseId));
-  
+
   const fullPriceCents = path.courses.reduce((sum, pc) => sum + pc.Course.priceCents, 0);
   const alreadyPurchasedCents = path.courses
     .filter((pc) => existingCourseIds.has(pc.Course.id))
@@ -163,7 +163,7 @@ export async function calculateLearningPathPrice(userId: string, pathId: string)
 export async function hasEnrolledInLearningPath(userId: string, pathId: string): Promise<boolean> {
   // Elite subscribers only get access to all learning paths
   const subscription = await getUserSubscription(userId);
-  if (subscription && subscription.plan.tier === "elite") {
+  if (subscription && subscription.plan.tier === "founder") {
     return true;
   }
 

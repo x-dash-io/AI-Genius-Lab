@@ -73,7 +73,7 @@ export default async function LearningPathDetailPage({
 
   if (session?.user) {
     userSubscription = await getUserSubscription(session.user.id);
-    hasAccessToPath = userSubscription?.plan.tier === "elite" || false;
+    hasAccessToPath = userSubscription?.plan.tier === "founder" || false;
   }
 
   const isEnrolled = session?.user && hasAccessToPath

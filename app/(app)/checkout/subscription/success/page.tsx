@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
+import { refreshSubscriptionStatus } from "@/lib/subscriptions";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,14 @@ export default async function SubscriptionSuccessPage({
 
   if (!subscription || subscription.userId !== session.user.id) {
     redirect("/dashboard");
+  }
+
+  // Auto-refresh if pending to provide immediate activation on success page
+  if (subscription.status === "pending") {
+    const refreshed = await refreshSubscriptionStatus(subscription.id);
+    if (refreshed) {
+      subscription = refreshed as any;
+    }
   }
 
   // Handle plan revision immediately if target plan info is provided
@@ -158,7 +167,7 @@ export default async function SubscriptionSuccessPage({
                   <span>Verified certificates of completion</span>
                 </li>
               )}
-              {subscription.plan.tier === "elite" && (
+              {subscription.plan.tier === "founder" && (
                 <li className="flex items-center gap-2 text-sm p-2 rounded-lg bg-primary/5">
                   <Rocket className="h-4 w-4 text-primary" />
                   <span>All Learning Paths unlocked</span>

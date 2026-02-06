@@ -114,7 +114,7 @@ export async function generateCourseCertificate(courseId: string) {
     const subscription = await getUserSubscription(user.id);
     if (!subscription || subscription.plan.tier === "starter") {
       throw new Error(
-        "Your current subscription does not include certificates. Upgrade to Pro to earn certificates."
+        "Your current subscription does not include certificates. Upgrade to Professional to earn certificates."
       );
     }
   }
@@ -281,9 +281,9 @@ export async function generatePathCertificate(pathId: string) {
 
   if (!isFullPurchase) {
     const subscription = await getUserSubscription(user.id);
-    if (!subscription || subscription.plan.tier !== "elite") {
+    if (!subscription || subscription.plan.tier !== "founder") {
       throw new Error(
-        "Your current subscription does not include Learning Path certificates. Upgrade to Elite to earn them."
+        "Your current subscription does not include Learning Path certificates. Upgrade to Founder to earn them."
       );
     }
   }
@@ -556,8 +556,8 @@ export async function generateLearningPathCertificate(userId: string, pathId: st
 
   // Verify user has access and completed the path
   const subscription = await getUserSubscription(userId);
-  if (!subscription || subscription.plan.tier !== "elite") {
-    throw new Error("You need an Elite subscription to generate learning path certificates");
+  if (!subscription || subscription.plan.tier !== "founder") {
+    throw new Error("You need a Founder subscription to generate learning path certificates");
   }
 
   const hasAccess = await hasEnrolledInLearningPath(userId, pathId);

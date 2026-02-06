@@ -39,28 +39,28 @@ async function createSubscriptionAction(formData: FormData) {
 
   const appUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
   let approvalUrl: string | undefined;
-  let shouldCreateNew = true; 
+  let shouldCreateNew = true;
 
   if (existingSub && existingSub.paypalSubscriptionId) {
     try {
       console.log(`Attempting to revise subscription: ${existingSub.paypalSubscriptionId}`);
-      
+
       const result = await revisePayPalSubscription({
         subscriptionId: existingSub.paypalSubscriptionId,
         planId: paypalPlanId,
         returnUrl: `${appUrl}/profile/subscription?planChanged=true`,
         cancelUrl: `${appUrl}/profile/subscription`,
       });
-      
+
       approvalUrl = result.approvalUrl;
       shouldCreateNew = false;
 
     } catch (error: any) {
       console.warn("Failed to revise PayPal subscription. Falling back to new subscription creation.", error?.message);
-      
+
       await prisma.subscription.update({
         where: { id: existingSub.id },
-        data: { status: 'cancelled' } 
+        data: { status: 'cancelled' }
       });
     }
   }
@@ -247,7 +247,7 @@ export default async function SubscriptionCheckoutPage({ searchParams }: Props) 
                         </div>
                       </li>
                     )}
-                    {plan.tier === "elite" && (
+                    {plan.tier === "founder" && (
                       <li className="flex items-start gap-4">
                         <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500/10 border border-green-500/30 mt-0.5">
                           <Check className="h-3.5 w-3.5 text-green-500" />
@@ -314,10 +314,10 @@ export default async function SubscriptionCheckoutPage({ searchParams }: Props) 
             <form action={createSubscriptionAction} className="space-y-4" data-testid="subscription-form">
               <input type="hidden" name="planId" value={plan.id} />
               <input type="hidden" name="interval" value={interval} />
-              <Button 
-                type="submit" 
-                className="w-full h-12 text-base font-semibold" 
-                size="lg" 
+              <Button
+                type="submit"
+                className="w-full h-12 text-base font-semibold"
+                size="lg"
                 disabled={!isSynced}
                 data-testid="subscribe-button"
               >

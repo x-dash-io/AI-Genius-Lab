@@ -79,15 +79,15 @@ export async function hasCourseAccess(
 
   // Access rules:
   // - Starter: STANDARD courses
-  // - Pro: STANDARD + PREMIUM courses
-  // - Elite: STANDARD + PREMIUM courses
+  // - Professional: STANDARD + PREMIUM courses
+  // - Founder: STANDARD + PREMIUM courses
   if (course.tier === "STANDARD") {
     return true; // Any active subscription gives access to Standard
   }
 
   if (course.tier === "PREMIUM") {
     return (
-      subscription.plan.tier === "pro" || subscription.plan.tier === "elite"
+      subscription.plan.tier === "professional" || subscription.plan.tier === "founder"
     );
   }
 

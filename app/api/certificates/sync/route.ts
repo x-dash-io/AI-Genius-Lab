@@ -33,7 +33,7 @@ type CourseWithSections = {
 export async function POST(request: NextRequest) {
   try {
     const user = await requireCustomer();
-    
+
     // Get all courses the user has access to
     const purchases = await prisma.purchase.findMany({
       where: {
@@ -68,8 +68,8 @@ export async function POST(request: NextRequest) {
 
     let allAccessibleCourses: CourseWithSections[] = purchases.map(p => p.Course);
 
-    // If user has Pro or Elite subscription, add all published courses
-    if (subscription && (subscription.plan.tier === "pro" || subscription.plan.tier === "elite")) {
+    // If user has Professional or Founder subscription, add all published courses
+    if (subscription && (subscription.plan.tier === "professional" || subscription.plan.tier === "founder")) {
       const publishedCourses = await prisma.course.findMany({
         where: { isPublished: true },
         include: {
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
           },
         },
       });
-      
+
       // Merge without duplicates
       const existingIds = new Set(allAccessibleCourses.map(c => c.id));
       const additionalCourses = publishedCourses.filter(c => !existingIds.has(c.id));
@@ -103,9 +103,9 @@ export async function POST(request: NextRequest) {
     for (const course of allAccessibleCourses) {
       try {
         results.processed++;
-        
+
         logger.info(`Processing course for sync: userId=${user.id}, courseId=${course.id}, title=${course.title}`);
-        
+
         // Check if already has certificate
         const existingCertificate = await prisma.certificate.findFirst({
           where: {
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
         // Check if course is completed
         const isCompleted = await hasCompletedCourse(user.id, course.id);
         logger.info(`Course completion check: userId=${user.id}, courseId=${course.id}, completed=${isCompleted}`);
-        
+
         if (isCompleted) {
           try {
             await generateCourseCertificateForUser(user.id, course.id);
@@ -163,9 +163,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     logger.error("Certificate sync failed", { error });
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : "Failed to sync certificates" 
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to sync certificates"
       },
       { status: 500 }
     );
