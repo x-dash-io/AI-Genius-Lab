@@ -9,7 +9,7 @@ import { CourseActions } from "@/components/courses/CourseActions";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateCourseSchema } from "@/lib/seo/schemas";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
-import { motion } from "framer-motion";
+import { FadeIn, ScaleIn } from "@/components/ui/motion-wrapper";
 import { Zap } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -87,10 +87,8 @@ export default async function CourseDetailPage({
 
           {/* Premium Hero Section */}
           <div className="grid lg:grid-cols-2 gap-12 xl:gap-20 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+            <FadeIn
+              direction="right"
               className="space-y-8"
             >
               <div className="space-y-4">
@@ -135,12 +133,9 @@ export default async function CourseDetailPage({
                   tier={course.tier}
                 />
               </div>
-            </motion.div>
+            </FadeIn>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+            <ScaleIn
               className="relative aspect-[4/3] w-full"
             >
               {/* Background Glow */}
@@ -172,7 +167,7 @@ export default async function CourseDetailPage({
                   ))}
                 </div>
               </div>
-            </motion.div>
+            </ScaleIn>
           </div>
 
           {/* Curriculum Section */}
@@ -192,11 +187,9 @@ export default async function CourseDetailPage({
                   </Card>
                 ) : (
                   lessons.slice(0, 8).map((lesson: any, i: number) => (
-                    <motion.div
+                    <FadeIn
                       key={lesson.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.05 }}
+                      delay={i * 0.05}
                       className="group flex items-center justify-between rounded-2xl glass border-white/5 p-5 hover:bg-accent/5 transition-all duration-300"
                     >
                       <div className="flex items-center gap-4">
@@ -213,7 +206,7 @@ export default async function CourseDetailPage({
                       <div className="h-8 w-8 rounded-full border border-border/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <div className="h-2 w-2 rounded-full bg-primary" />
                       </div>
-                    </motion.div>
+                    </FadeIn>
                   ))
                 )}
               </div>

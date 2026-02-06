@@ -21,9 +21,9 @@ const buttonVariants = cva(
         premium: "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xl shadow-amber-500/20 hover:brightness-110 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 border-none font-bold",
       },
       size: {
-        default: "h-11 px-5 py-2.5",
-        sm: "h-9 rounded-lg px-3",
-        lg: "h-14 rounded-2xl px-10 text-base",
+        default: "h-11 px-6 py-2.5",
+        sm: "h-9 rounded-lg px-4",
+        lg: "h-14 rounded-2xl px-12 text-base",
         icon: "h-11 w-11",
       },
     }
