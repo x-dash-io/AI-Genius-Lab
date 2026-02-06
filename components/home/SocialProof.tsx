@@ -41,7 +41,7 @@ export function SocialProof({ stats }: SocialProofProps) {
     const proofPoints = [
       "Built with modern AI learners in mind",
       "Designed for focused, outcome-driven learning",
-      "Structured like a real curriculum — not YouTube chaos",
+      "Structured like a real curriculum - not YouTube chaos",
     ];
 
     return (

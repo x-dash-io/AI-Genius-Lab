@@ -15,8 +15,8 @@ export function TrustSection({ stats }: TrustSectionProps) {
       icon: Filter,
       title: "Curated, Not Crowded",
       description: stats.totalCourses > 0
-        ? `${stats.totalCourses} carefully selected AI courses — no filler, no outdated content.`
-        : "Only proven AI courses — no filler, no outdated content.",
+        ? `${stats.totalCourses} carefully selected AI courses - no filler, no outdated content.`
+        : "Only proven AI courses - no filler, no outdated content.",
     },
     {
       icon: Shield,
