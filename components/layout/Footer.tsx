@@ -26,7 +26,7 @@ export function Footer({ socialLinks }: FooterProps) {
   return (
     <footer className="border-t bg-card/10 backdrop-blur-md mt-20">
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:gap-16">
+        <div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:gap-12">
           <div className="space-y-6">
             <Link href="/" className="inline-block transition-transform hover:scale-105">
               <div className="relative h-8 w-auto">
@@ -94,30 +94,17 @@ export function Footer({ socialLinks }: FooterProps) {
             </nav>
           </div>
 
-          <div className="grid gap-6">
-            <h4 className="text-sm font-bold uppercase tracking-widest text-foreground/80">Newsletter</h4>
-            <p className="text-sm text-muted-foreground">
-              Get the latest AI insights and course updates.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-              <input
-                type="email"
-                placeholder="Email address"
-                className="flex-1 rounded-xl bg-accent/20 border border-border/50 px-4 py-2 text-sm focus:ring-2 focus:ring-primary focus:bg-background outline-none transition-all placeholder:text-muted-foreground/50 sm:text-base"
-              />
-              <Button size="sm" className="rounded-xl px-4 font-bold sm:w-auto w-full sm:w-fit">Join</Button>
-            </div>
-            <nav className="flex flex-wrap gap-x-6 gap-y-2 pt-2">
-              <Link href="/privacy" className="text-xs text-muted-foreground hover:text-primary transition-colors">Privacy</Link>
-              <Link href="/terms" className="text-xs text-muted-foreground hover:text-primary transition-colors">Terms</Link>
-            </nav>
-          </div>
+
         </div>
 
         <div className="mt-16 pt-8 border-t border-border/50 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground/80 font-medium">
             &copy; {new Date().getFullYear()} <span className="text-foreground font-bold">AI Genius Lab</span>. Designed for professionals.
           </p>
+          <nav className="flex gap-6">
+            <Link href="/privacy" className="text-xs text-muted-foreground hover:text-primary transition-colors">Privacy</Link>
+            <Link href="/terms" className="text-xs text-muted-foreground hover:text-primary transition-colors">Terms</Link>
+          </nav>
         </div>
       </div>
     </footer>

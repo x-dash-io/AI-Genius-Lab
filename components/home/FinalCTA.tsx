@@ -19,7 +19,7 @@ export function FinalCTA() {
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
         >
-          <Card glass className="relative shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] border-white/10 rounded-[3rem] overflow-hidden">
+          <Card className="relative shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] border-white/10 rounded-[3rem] overflow-hidden bg-white/5 backdrop-blur-3xl">
             {/* Inner Decorative Gradients */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-3xl -mr-20 -mt-20 rounded-full" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent/10 blur-3xl -ml-20 -mb-20 rounded-full" />

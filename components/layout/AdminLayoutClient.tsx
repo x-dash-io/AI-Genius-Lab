@@ -273,8 +273,8 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                       {/* Animated gradient overlay */}
                       <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                      <div className="relative">
-                        <Avatar className="h-12 w-12 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
+                      <div className="relative flex-shrink-0">
+                        <Avatar className="h-10 w-10 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
                           <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "Admin"} />
                           <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-sm font-bold">
                             {(() => {
@@ -298,6 +298,15 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                           }}
                           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                         />
+                      </div>
+
+                      <div className="flex-1 overflow-hidden min-w-0 flex flex-col justify-center">
+                        <p className="truncate text-sm font-bold text-foreground group-hover:text-primary transition-colors duration-200">
+                          {session.user.name || "User"}
+                        </p>
+                        <p className="truncate text-[10px] uppercase font-bold tracking-wider text-muted-foreground group-hover:text-foreground/80 transition-colors duration-200">
+                          Admin
+                        </p>
                       </div>
                     </motion.div>
                   </Link>
