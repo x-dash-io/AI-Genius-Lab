@@ -76,7 +76,7 @@ export default async function PricingPage() {
                   <td className="py-4 px-4">Support</td>
                   {plans.map((plan: any) => (
                     <td key={plan.id} className="text-center py-4 px-4 min-w-[100px]">
-                      <span className="text-xs">{plan.tier === "starter" ? "Community" : plan.tier === "pro" ? "Standard" : "Priority"}</span>
+                      <span className="text-xs">{plan.tier === "starter" ? "Community" : (plan.tier === "pro" || plan.tier === "professional") ? "Standard" : "Priority"}</span>
                     </td>
                   ))}
                 </tr>

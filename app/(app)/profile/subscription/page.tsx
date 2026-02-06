@@ -144,7 +144,7 @@ export default async function UserSubscriptionPage() {
                     ) : (
                       <XCircle className="h-4 w-4 text-muted-foreground" />
                     )}
-                    <span className={subscription.plan.tier !== "elite" ? "text-muted-foreground" : ""}>Learning Paths included</span>
+                    <span className={(subscription.plan.tier as string !== "founder" && subscription.plan.tier as string !== "elite") ? "text-muted-foreground" : ""}>Learning Paths included</span>
                   </div>
                 </div>
 

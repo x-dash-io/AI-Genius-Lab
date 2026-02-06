@@ -58,13 +58,13 @@ export default async function SubscriptionSuccessPage({
   if (subscription.status === "pending") {
     const refreshed = await refreshSubscriptionStatus(subscription.id);
     if (refreshed) {
-      subscription = refreshed as any;
+      subscription = refreshed as typeof subscription;
     }
   }
 
   // Handle plan revision immediately if target plan info is provided
   // We verify with PayPal to prevent unauthorized upgrades via URL manipulation
-  if (targetPlanId && subscription.paypalSubscriptionId) {
+  if (targetPlanId && subscription?.paypalSubscriptionId) {
     try {
       const paypalSub = await getPayPalSubscription(subscription.paypalSubscriptionId);
 
@@ -95,7 +95,7 @@ export default async function SubscriptionSuccessPage({
     }
   }
 
-  const isPending = subscription.status === "pending";
+  const isPending = subscription?.status === "pending";
 
   return (
     <div className="max-w-3xl mx-auto py-16 px-4">

@@ -15,7 +15,7 @@ type PlanFormData = {
   id?: string;
   name: string;
   description: string;
-  tier: "starter" | "pro" | "elite";
+  tier: "starter" | "pro" | "elite" | "professional" | "founder";
   priceMonthlyCents: number;
   priceAnnualCents: number;
   isActive: boolean;
@@ -72,8 +72,10 @@ export function SubscriptionPlanForm({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="starter">Starter</SelectItem>
-                  <SelectItem value="pro">Pro</SelectItem>
-                  <SelectItem value="elite">Elite</SelectItem>
+                  <SelectItem value="pro">Pro (Legacy)</SelectItem>
+                  <SelectItem value="elite">Elite (Legacy)</SelectItem>
+                  <SelectItem value="professional">Professional</SelectItem>
+                  <SelectItem value="founder">Founder</SelectItem>
                 </SelectContent>
               </Select>
             </div>

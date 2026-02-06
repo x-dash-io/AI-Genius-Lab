@@ -175,9 +175,9 @@ export async function hasSubscriptionTier(userId: string, requiredTier: Subscrip
     return false;
   }
 
-  const tiers: SubscriptionTier[] = ["starter", "professional", "founder"];
-  const userTierIndex = tiers.indexOf(subscription.plan.tier);
-  const requiredTierIndex = tiers.indexOf(requiredTier);
+  const tiersList: string[] = ["starter", "pro", "elite", "professional", "founder"];
+  const userTierIndex = tiersList.indexOf(subscription.plan.tier as string);
+  const requiredTierIndex = tiersList.indexOf(requiredTier as string);
 
   return userTierIndex >= requiredTierIndex;
 }
