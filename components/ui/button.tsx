@@ -9,16 +9,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-[0_1px_0_0_rgba(255,255,255,0.1)_inset,0_2px_4px_0_rgba(0,0,0,0.05)] hover:bg-primary/95 hover:shadow-[0_4px_12px_hsl(var(--primary)/0.4)] border border-primary/20",
+        default: "bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg border border-primary/20 transition-all active:scale-[0.98]",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/95 hover:shadow-[0_4px_12px_hsl(var(--destructive)/0.3)] shadow-sm",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:shadow-md shadow-sm",
         outline:
-          "border border-border bg-background hover:bg-accent hover:text-foreground hover:border-primary/50 hover:shadow-[0_2px_8px_hsl(var(--primary)/0.15)] shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]",
+          "border-2 border-input bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-[0_4px_12px_hsl(var(--primary)/0.3)] shadow-sm font-bold transition-all duration-200",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/90 hover:shadow-[0_2px_8px_hsl(var(--secondary)/0.2)] shadow-sm",
-        ghost: "text-muted-foreground hover:bg-accent hover:text-foreground hover:shadow-[0_2px_8px_hsl(var(--accent)/0.15)] transition-all",
-        link: "text-primary underline-offset-4 hover:underline hover:text-primary/80",
-        premium: "bg-premium-gradient text-white shadow-[0_0_0_1px_rgba(255,255,255,0.1)_inset,0_10px_20px_-10px_rgba(var(--primary-rgb),0.3)] hover:brightness-110 transition-all duration-300 border border-primary/20",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/90 hover:shadow-[0_2px_8px_hsl(var(--secondary)/0.2)] shadow-sm font-medium",
+        ghost: "text-muted-foreground hover:bg-accent hover:text-foreground hover:shadow-[0_2px_8px_hsl(var(--accent)/0.15)] transition-all font-medium",
+        link: "text-primary underline-offset-4 hover:underline hover:text-primary/80 font-medium",
+        premium: "bg-premium-gradient text-white shadow-xl shadow-primary/20 hover:brightness-110 hover:shadow-[0_8px_24px_hsl(var(--primary)/0.4)] transition-all duration-300 border-none font-bold",
       },
       size: {
         default: "h-11 px-5 py-2.5",

@@ -257,87 +257,117 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
             {/* Sidebar Footer - Fixed at bottom */}
             <div className="flex-shrink-0 p-4 mt-auto border-t border-border/50">
               <div className="space-y-4">
-                {session?.user && (
-                  <Link href="/admin/profile">
-                    <motion.div
-                      whileHover={{ y: -2, boxShadow: "0 12px 40px rgba(0,0,0,0.15)" }}
-                      whileTap={{ scale: 0.98 }}
-                      className={cn(
-                        "group relative flex items-center gap-3 p-4 rounded-2xl backdrop-blur-md bg-white/10 border border-white/20 transition-all cursor-pointer shadow-lg hover:shadow-xl"
-                      )}
-                      style={{
-                        background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
-                        backdropFilter: "blur(10px)"
-                      }}
-                    >
-                      {/* Animated gradient overlay */}
-                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                {session?.user ? (
+                  <>
+                    <Link href="/admin/profile">
+                      <motion.div
+                        whileHover={{ y: -2, boxShadow: "0 12px 40px rgba(0,0,0,0.15)" }}
+                        whileTap={{ scale: 0.98 }}
+                        className={cn(
+                          "group relative flex items-center gap-3 p-4 rounded-2xl backdrop-blur-md bg-white/10 border border-white/20 transition-all cursor-pointer shadow-lg hover:shadow-xl"
+                        )}
+                        style={{
+                          background: "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
+                          backdropFilter: "blur(10px)"
+                        }}
+                      >
+                        {/* Animated gradient overlay */}
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                      <div className="relative flex-shrink-0">
-                        <Avatar className="h-10 w-10 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
-                          <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "Admin"} />
-                          <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-sm font-bold">
-                            {(() => {
-                              const name = session.user.name;
-                              const email = session.user.email || "";
-                              if (name && name.trim()) {
-                                return name.trim()[0].toUpperCase();
-                              }
-                              return email.charAt(0).toUpperCase();
-                            })()}
-                          </AvatarFallback>
-                        </Avatar>
-                        {/* Animated avatar ring */}
+                        <div className="relative flex-shrink-0">
+                          <Avatar className="h-10 w-10 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
+                            <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "Admin"} />
+                            <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-sm font-bold">
+                              {(() => {
+                                const name = session.user.name;
+                                const email = session.user.email || "";
+                                if (name && name.trim()) {
+                                  return name.trim()[0].toUpperCase();
+                                }
+                                return email.charAt(0).toUpperCase();
+                              })()}
+                            </AvatarFallback>
+                          </Avatar>
+                          {/* Animated avatar ring */}
+                          <motion.div
+                            className="absolute -inset-1 rounded-full border-2 border-primary/30"
+                            animate={{
+                              background: [
+                                "linear-gradient(45deg, transparent 30%, rgba(var(--color-primary), 0.1) 50%, transparent 70%)",
+                                "linear-gradient(45deg, transparent 30%, rgba(var(--color-primary), 0.05) 50%, transparent 70%)"
+                              ]
+                            }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                          />
+                        </div>
+
+                        <div className="flex-1 overflow-hidden min-w-0 flex flex-col justify-center">
+                          <p className="truncate text-sm font-bold text-foreground group-hover:text-primary transition-colors duration-200">
+                            {session.user.name || "User"}
+                          </p>
+                          <p className="truncate text-[10px] uppercase font-bold tracking-wider text-muted-foreground group-hover:text-foreground/80 transition-colors duration-200">
+                            Admin
+                          </p>
+                        </div>
+                      </motion.div>
+                    </Link>
+
+                    {/* Modern Action Bar */}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-center gap-2">
                         <motion.div
-                          className="absolute -inset-1 rounded-full border-2 border-primary/30"
-                          animate={{
-                            background: [
-                              "linear-gradient(45deg, transparent 30%, rgba(var(--color-primary), 0.1) 50%, transparent 70%)",
-                              "linear-gradient(45deg, transparent 30%, rgba(var(--color-primary), 0.05) 50%, transparent 70%)"
-                            ]
-                          }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        />
+                          className="p-2 rounded-xl hover:bg-accent transition-colors duration-200 cursor-pointer"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <CartIcon />
+                        </motion.div>
+                        <motion.div
+                          className="p-2 rounded-xl hover:bg-accent transition-colors duration-200 cursor-pointer"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <ThemeToggle />
+                        </motion.div>
                       </div>
-
-                      <div className="flex-1 overflow-hidden min-w-0 flex flex-col justify-center">
-                        <p className="truncate text-sm font-bold text-foreground group-hover:text-primary transition-colors duration-200">
-                          {session.user.name || "User"}
-                        </p>
-                        <p className="truncate text-[10px] uppercase font-bold tracking-wider text-muted-foreground group-hover:text-foreground/80 transition-colors duration-200">
-                          Admin
-                        </p>
-                      </div>
-                    </motion.div>
-                  </Link>
-                )}
-
-                {/* Modern Action Bar */}
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <motion.div
-                      className="p-2 rounded-xl hover:bg-accent transition-colors duration-200 cursor-pointer"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <CartIcon />
-                    </motion.div>
-                    <motion.div
-                      className="p-2 rounded-xl hover:bg-accent transition-colors duration-200 cursor-pointer"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <ThemeToggle />
-                    </motion.div>
+                      <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full"
+                      >
+                        <SignOutButton className="w-full h-10 text-[10px] font-bold uppercase tracking-widest bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg hover:shadow-xl hover:shadow-destructive/25 border-none rounded-xl transition-all duration-300" />
+                      </motion.div>
+                    </div>
+                  </>
+                ) : (
+                  /* Non-authenticated Sidebar Footer */
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                      <motion.div
+                        className="p-2 rounded-xl hover:bg-accent transition-colors duration-200 cursor-pointer"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <CartIcon />
+                      </motion.div>
+                      <motion.div
+                        className="p-2 rounded-xl hover:bg-accent transition-colors duration-200 cursor-pointer"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <ThemeToggle />
+                      </motion.div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Link href="/sign-in" className="w-full">
+                        <Button variant="outline" className="w-full justify-center">Sign In</Button>
+                      </Link>
+                      <Link href="/sign-up" className="w-full">
+                        <Button className="w-full justify-center">Join</Button>
+                      </Link>
+                    </div>
                   </div>
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full"
-                  >
-                    <SignOutButton className="w-full h-10 text-[10px] font-bold uppercase tracking-widest bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg hover:shadow-xl hover:shadow-destructive/25 border-none rounded-xl transition-all duration-300" />
-                  </motion.div>
-                </div>
+                )}
               </div>
 
             </div>

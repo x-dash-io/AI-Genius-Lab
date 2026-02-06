@@ -45,7 +45,7 @@ const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputProps>(
           onBlur={handleBlur}
           onChange={handleChange}
           className={cn(
-            "peer flex h-12 w-full rounded-md border border-input bg-background px-4 pt-4 pb-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 transition-all",
+            "peer flex h-12 w-full rounded-md border border-input bg-background hover:bg-accent/5 focus:bg-background px-4 pt-4 pb-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all shadow-sm hover:border-primary/50",
             className
           )}
         />
