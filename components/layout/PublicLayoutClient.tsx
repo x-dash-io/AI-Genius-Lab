@@ -266,7 +266,7 @@ export function PublicLayoutClient({
                 ) : (
                   <div className="flex items-center gap-2.5">
                     <Link href="/sign-in">
-                      <Button variant="outline" size="sm" className="h-10 px-6 font-bold">
+                      <Button variant="outline" size="default" className="font-bold">
                         Sign In
                       </Button>
                     </Link>
@@ -274,7 +274,7 @@ export function PublicLayoutClient({
                       <Button
                         size="default"
                         variant="premium"
-                        className="h-10 px-6"
+                        className="font-bold"
                       >
                         Join Now
                       </Button>

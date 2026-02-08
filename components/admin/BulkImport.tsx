@@ -81,7 +81,8 @@ export function BulkImport() {
           <Button
             onClick={handleUpload}
             disabled={!file || isUploading}
-            className="min-w-[120px]"
+            variant="premium"
+            className="min-w-[120px] shadow-lg shadow-primary/20"
           >
             {isUploading ? (
               <>

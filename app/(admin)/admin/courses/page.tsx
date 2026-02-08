@@ -189,7 +189,7 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
           </p>
         </div>
         <Link href="/admin/courses/new">
-          <Button variant="premium" className="rounded-xl h-12 px-8 shadow-2xl shadow-primary/20">
+          <Button variant="premium" size="lg" className="rounded-xl shadow-lg shadow-primary/20">
             <Plus className="mr-2 h-5 w-5 font-bold" />
             New Course
           </Button>

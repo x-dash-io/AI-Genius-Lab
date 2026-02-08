@@ -69,7 +69,7 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
       if (result.deleted) {
         setCategories(prev => prev.filter(c => c.id !== category.id));
       } else {
-        setCategories(prev => prev.map(c => 
+        setCategories(prev => prev.map(c =>
           c.id === category.id ? { ...c, isActive: false } : c
         ));
       }
@@ -96,10 +96,10 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
 
   const handleToggleStatus = async (category: Category) => {
     setTogglingId(category.id);
-    
+
     // Optimistic update
     const newStatus = !category.isActive;
-    setCategories(prev => prev.map(c => 
+    setCategories(prev => prev.map(c =>
       c.id === category.id ? { ...c, isActive: newStatus } : c
     ));
 
@@ -112,7 +112,7 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
 
       if (!response.ok) {
         // Revert on error
-        setCategories(prev => prev.map(c => 
+        setCategories(prev => prev.map(c =>
           c.id === category.id ? { ...c, isActive: category.isActive } : c
         ));
         throw new Error("Failed to toggle category status");
@@ -120,9 +120,9 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
 
       const data = await response.json();
       const updatedCategory = data.category || data;
-      
+
       // Update with server response
-      setCategories(prev => prev.map(c => 
+      setCategories(prev => prev.map(c =>
         c.id === category.id ? { ...c, ...updatedCategory, courseCount: c.courseCount } : c
       ));
 
@@ -156,24 +156,24 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
-    
+
     if (draggedIndex === null || draggedIndex === index) return;
 
     const newCategories = [...categories];
     const draggedItem = newCategories[draggedIndex];
-    
+
     // Remove from old position
     newCategories.splice(draggedIndex, 1);
     // Insert at new position
     newCategories.splice(index, 0, draggedItem);
-    
+
     setCategories(newCategories);
     setDraggedIndex(index);
   };
 
   const handleDragEnd = async () => {
     if (draggedIndex === null) return;
-    
+
     setDraggedIndex(null);
     setIsReordering(true);
 
@@ -220,7 +220,7 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>All Categories</CardTitle>
-            <Button onClick={() => setShowCreateDialog(true)}>
+            <Button onClick={() => setShowCreateDialog(true)} variant="premium" size="lg" className="rounded-xl shadow-lg shadow-primary/20">
               <Plus className="mr-2 h-4 w-4" />
               Create Category
             </Button>
@@ -236,11 +236,10 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
           ) : (
             <div className="space-y-3">
               {categories.map((category, index) => (
-                <Card 
-                  key={category.id} 
-                  className={`overflow-hidden transition-all ${
-                    draggedIndex === index ? "opacity-50" : ""
-                  } ${isReordering ? "pointer-events-none" : ""}`}
+                <Card
+                  key={category.id}
+                  className={`overflow-hidden transition-all ${draggedIndex === index ? "opacity-50" : ""
+                    } ${isReordering ? "pointer-events-none" : ""}`}
                   draggable
                   onDragStart={() => handleDragStart(index)}
                   onDragOver={(e) => handleDragOver(e, index)}
@@ -249,7 +248,7 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
                       {/* Drag Handle */}
-                      <div 
+                      <div
                         className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
                         onMouseDown={(e) => e.stopPropagation()}
                       >
@@ -367,19 +366,19 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
           onSuccess={(updatedCategory: any) => {
             if (updatedCategory) {
               // Optimistic update - update in list immediately
-              setCategories(prev => prev.map(c => 
-                c.id === updatedCategory.id 
-                  ? { 
-                      ...c, 
-                      name: updatedCategory.name,
-                      slug: updatedCategory.slug,
-                      description: updatedCategory.description,
-                      icon: updatedCategory.icon,
-                      color: updatedCategory.color,
-                      isActive: updatedCategory.isActive ?? c.isActive,
-                      courseCount: updatedCategory.courseCount ?? c.courseCount,
-                      updatedAt: updatedCategory.updatedAt ? new Date(updatedCategory.updatedAt) : new Date(),
-                    }
+              setCategories(prev => prev.map(c =>
+                c.id === updatedCategory.id
+                  ? {
+                    ...c,
+                    name: updatedCategory.name,
+                    slug: updatedCategory.slug,
+                    description: updatedCategory.description,
+                    icon: updatedCategory.icon,
+                    color: updatedCategory.color,
+                    isActive: updatedCategory.isActive ?? c.isActive,
+                    courseCount: updatedCategory.courseCount ?? c.courseCount,
+                    updatedAt: updatedCategory.updatedAt ? new Date(updatedCategory.updatedAt) : new Date(),
+                  }
                   : c
               ));
             }

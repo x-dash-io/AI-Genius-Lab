@@ -741,7 +741,7 @@ export function CourseEditForm({
                     />
                   </div>
                   <div className="flex gap-2">
-                    <Button type="submit" size="sm" disabled={isAddingSection}>
+                    <Button type="submit" size="default" variant="premium" disabled={isAddingSection}>
                       {isAddingSection ? (
                         <>
                           <Loader2 className="h-3 w-3 mr-2 animate-spin" />
@@ -1341,7 +1341,7 @@ export function CourseEditForm({
                                   </div>
 
                                   <div className="flex gap-2">
-                                    <Button type="submit" size="default" variant="premium" disabled={isUpdatingLesson[lesson.id]}>
+                                    <Button type="submit" disabled={isUpdatingLesson[lesson.id]} variant="premium">
                                       {isUpdatingLesson[lesson.id] ? (
                                         <>
                                           <Loader2 className="h-3 w-3 mr-2 animate-spin" />

@@ -24,7 +24,7 @@ async function BlogPostsList() {
             No blog posts yet. Create your first post to get started.
           </p>
           <Link href="/admin/blog/new">
-            <Button variant="outline">Create Post</Button>
+            <Button variant="premium" size="lg">Create Post</Button>
           </Link>
         </CardContent>
       </Card>
@@ -113,7 +113,7 @@ export default async function AdminBlogPage() {
           </p>
         </div>
         <Link href="/admin/blog/new">
-          <Button>
+          <Button variant="premium" size="lg" className="rounded-xl shadow-lg shadow-primary/20">
             <Plus className="mr-2 h-4 w-4" />
             Create Post
           </Button>

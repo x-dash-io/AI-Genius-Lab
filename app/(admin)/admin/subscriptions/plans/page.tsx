@@ -83,7 +83,6 @@ async function PlansList() {
                   title={plan.name}
                   description="This will permanently delete the subscription plan. Plans with active subscribers cannot be deleted."
                   onDelete={deleteSubscriptionPlanAction}
-                  disabled={plan.isActive} // Optional: discourage deleting active plans, but let's just rely on the server check mostly. Actually, maybe better to NOT disable, so they can try and get the error message if it has subs.
                 />
               </div>
             </div>

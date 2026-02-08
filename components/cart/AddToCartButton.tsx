@@ -25,7 +25,7 @@ export function AddToCartButton({
   courseSlug,
   priceCents,
   inventory,
-  variant = "default",
+  variant = "premium",
   size = "default",
   className,
   checkOwnership = false,
