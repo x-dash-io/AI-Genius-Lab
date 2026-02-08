@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
-// import { connection } from "next/server"; // Not available in Next.js 14
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import Link from "next/link";
 import { PricingGrid } from "@/components/subscriptions/PricingGrid";
 import { Button } from "@/components/ui/button";
@@ -8,11 +9,27 @@ import { Zap, Award } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function PricingPage() {
-  // await connection(); // Not available in Next.js 14
+  const session = await getServerSession(authOptions);
+
   const plans = await prisma.subscriptionPlan.findMany({
     where: { isActive: true },
     orderBy: { tier: "asc" }
   });
+
+  let currentPlanId = null;
+
+  if (session?.user?.id) {
+    const activeSubscription = await prisma.subscription.findFirst({
+      where: {
+        userId: session.user.id,
+        status: "active",
+      },
+      select: {
+        planId: true,
+      }
+    });
+    currentPlanId = activeSubscription?.planId || null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
@@ -32,7 +49,7 @@ export default async function PricingPage() {
         </div>
 
         {/* Pricing Grid */}
-        <PricingGrid plans={plans} />
+        <PricingGrid plans={plans} currentPlanId={currentPlanId} />
 
         {/* Comparison Table */}
         <div className="mt-32">
