@@ -94,32 +94,13 @@ export async function POST(request: Request) {
             ? new Date(subscriptionResource.billing_info.next_billing_time)
             : new Date(Date.now() + 31 * 24 * 60 * 60 * 1000); // Fallback 31 days
 
-          // If it's an update, we might need to sync the plan too
-          let updateData: any = {
+          const { updateSubscription } = await import("@/lib/subscriptions");
+          const sub = await updateSubscription(customId, {
             status: "active",
             paypalSubscriptionId: paypalSubId,
             currentPeriodStart: startTime,
             currentPeriodEnd: endTime,
-          };
-
-          if (subscriptionResource.plan_id) {
-            const plan = await prisma.subscriptionPlan.findFirst({
-              where: {
-                OR: [
-                  { paypalMonthlyPlanId: subscriptionResource.plan_id },
-                  { paypalAnnualPlanId: subscriptionResource.plan_id }
-                ]
-              }
-            });
-            if (plan) {
-              updateData.planId = plan.id;
-              updateData.interval = plan.paypalAnnualPlanId === subscriptionResource.plan_id ? "annual" : "monthly";
-            }
-          }
-
-          const sub = await prisma.subscription.update({
-            where: { id: customId },
-            data: updateData,
+            paypalPlanId: subscriptionResource.plan_id
           });
 
           console.log(`[WEBHOOK] Subscription ${sub.id} activated successfully`);
@@ -240,12 +221,10 @@ export async function POST(request: Request) {
             const paypalSub = await getPayPalSubscription(paypalSubId);
             const nextBillingTime = paypalSub.billing_info?.next_billing_time;
             if (nextBillingTime) {
-              await prisma.subscription.update({
-                where: { id: sub.id },
-                data: {
-                  status: "active",
-                  currentPeriodEnd: new Date(nextBillingTime),
-                },
+              const { updateSubscription } = await import("@/lib/subscriptions");
+              await updateSubscription(sub.id, {
+                status: "active",
+                currentPeriodEnd: new Date(nextBillingTime),
               });
               console.log(
                 `[WEBHOOK] Subscription ${sub.id} extended until ${nextBillingTime}`

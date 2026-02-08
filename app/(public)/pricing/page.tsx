@@ -28,7 +28,14 @@ export default async function PricingPage() {
         planId: true,
       }
     });
-    currentPlanId = activeSubscription?.planId || null;
+
+    if (activeSubscription) {
+      currentPlanId = activeSubscription.planId;
+    } else {
+      // If logged in but no active subscription, default current plan to "starter"
+      const starterPlan = plans.find(p => p.tier === "starter");
+      currentPlanId = starterPlan?.id || null;
+    }
   }
 
   return (

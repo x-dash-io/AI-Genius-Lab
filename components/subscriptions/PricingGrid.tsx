@@ -134,6 +134,14 @@ export function PricingGrid({ plans, currentPlanId }: PricingGridProps) {
                   >
                     Your Current Plan
                   </Button>
+                ) : plan.tier === "starter" ? (
+                  <Button
+                    className="w-full cursor-not-allowed opacity-50"
+                    variant="outline"
+                    disabled
+                  >
+                    Start for Free-ish
+                  </Button>
                 ) : (
                   <Link href={`/checkout/subscription?planId=${plan.id}&interval=${interval}`} className="w-full">
                     {plan.tier === "professional" ? (
@@ -148,7 +156,7 @@ export function PricingGrid({ plans, currentPlanId }: PricingGridProps) {
                         className="w-full hover:scale-105 transition-transform"
                         variant="outline"
                       >
-                        {plan.tier === "starter" ? "Start for Free-ish" : "Choose " + plan.name}
+                        {"Choose " + plan.name}
                       </Button>
                     )}
                   </Link>

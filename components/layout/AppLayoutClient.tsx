@@ -45,7 +45,12 @@ const navigation = [
   { name: "Profile", href: "/profile", icon: User },
 ];
 
-export function AppLayoutClient({ children }: { children: React.ReactNode }) {
+interface AppLayoutClientProps {
+  children: React.ReactNode;
+  planName?: string;
+}
+
+export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClientProps) {
   const { data: session } = useSession();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -298,7 +303,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                             {session.user.name || "User"}
                           </p>
                           <p className="truncate text-[10px] uppercase font-bold tracking-wider text-muted-foreground group-hover:text-foreground/80 transition-colors duration-200">
-                            Member
+                            {planName}
                           </p>
                         </div>
                       </motion.div>
@@ -527,7 +532,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                                 {session.user.name || "User"}
                               </p>
                               <p className="truncate text-xs text-muted-foreground group-hover:text-muted-foreground transition-colors duration-200">
-                                Member
+                                {planName}
                               </p>
                             </div>
                           </motion.div>

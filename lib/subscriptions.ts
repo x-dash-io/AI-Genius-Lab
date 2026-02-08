@@ -167,19 +167,84 @@ export async function refreshSubscriptionStatus(subscriptionId: string) {
 }
 
 /**
+ * Order of subscription tiers from lowest to highest.
+ * Used for comparison logic.
+ */
+export const SUBSCRIPTION_TIERS: SubscriptionTier[] = [
+  SubscriptionTier.starter,
+  SubscriptionTier.professional,
+  SubscriptionTier.founder,
+];
+
+/**
+ * Get the display name of a user's current subscription plan.
+ * Defaults to "Starter" if no active subscription is found.
+ */
+export async function getUserPlanDisplayName(userId: string): Promise<string> {
+  const subscription = await getUserSubscription(userId);
+
+  if (!subscription || !["active", "cancelled", "past_due"].includes(subscription.status)) {
+    return "Starter";
+  }
+
+  return subscription.plan.name;
+}
+
+/**
  * Check if a user has an active subscription of at least a certain tier.
  */
 export async function hasSubscriptionTier(userId: string, requiredTier: SubscriptionTier) {
   const subscription = await getUserSubscription(userId);
-  if (!subscription || (subscription.status !== 'active' && subscription.status !== 'cancelled' && subscription.status !== 'past_due')) {
+  if (!subscription || !["active", "cancelled", "past_due"].includes(subscription.status)) {
     return false;
   }
 
-  const tiersList: string[] = ["starter", "pro", "elite", "professional", "founder"];
-  const userTierIndex = tiersList.indexOf(subscription.plan.tier as string);
-  const requiredTierIndex = tiersList.indexOf(requiredTier as string);
+  const userTierIndex = SUBSCRIPTION_TIERS.indexOf(subscription.plan.tier);
+  const requiredTierIndex = SUBSCRIPTION_TIERS.indexOf(requiredTier);
 
   return userTierIndex >= requiredTierIndex;
+}
+
+/**
+ * Update a subscription with new resource data (usually from PayPal).
+ * Handles extending the period and syncing the plan.
+ */
+export async function updateSubscription(subscriptionId: string, data: {
+  status: SubscriptionStatus;
+  paypalSubscriptionId?: string;
+  currentPeriodStart?: Date;
+  currentPeriodEnd?: Date;
+  paypalPlanId?: string;
+}) {
+  const updateData: any = {
+    status: data.status,
+    paypalSubscriptionId: data.paypalSubscriptionId,
+    currentPeriodStart: data.currentPeriodStart,
+    currentPeriodEnd: data.currentPeriodEnd,
+  };
+
+  // If a plan ID is provided, try to find and sync our local plan record
+  if (data.paypalPlanId) {
+    const plan = await prisma.subscriptionPlan.findFirst({
+      where: {
+        OR: [
+          { paypalMonthlyPlanId: data.paypalPlanId },
+          { paypalAnnualPlanId: data.paypalPlanId }
+        ]
+      }
+    });
+
+    if (plan) {
+      updateData.planId = plan.id;
+      updateData.interval = plan.paypalAnnualPlanId === data.paypalPlanId ? "annual" : "monthly";
+    }
+  }
+
+  return await prisma.subscription.update({
+    where: { id: subscriptionId },
+    data: updateData,
+    include: { plan: true }
+  });
 }
 
 /**

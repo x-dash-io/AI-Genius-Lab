@@ -5,6 +5,7 @@ import { AppLayoutClient } from "@/components/layout/AppLayoutClient";
 import { AdminLayoutClient } from "@/components/layout/AdminLayoutClient";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
+import { getUserPlanDisplayName } from "@/lib/subscriptions";
 
 async function AppGuard({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
@@ -14,12 +15,15 @@ async function AppGuard({ children }: { children: React.ReactNode }) {
     redirect("/sign-in");
   }
 
+  // Fetch current plan name for display in sidebar
+  const planName = await getUserPlanDisplayName(session.user.id);
+
   // For admin users, show admin layout with customer preview section
   if (session.user.role === "admin") {
     return <AdminLayoutClient>{children}</AdminLayoutClient>;
   }
 
-  return <AppLayoutClient>{children}</AppLayoutClient>;
+  return <AppLayoutClient planName={planName}>{children}</AppLayoutClient>;
 }
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

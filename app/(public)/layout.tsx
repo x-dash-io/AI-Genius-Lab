@@ -4,6 +4,7 @@ import { AdminLayoutClient } from "@/components/layout/AdminLayoutClient";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getSocialLinks } from "@/lib/settings";
+import { getUserPlanDisplayName } from "@/lib/subscriptions";
 
 export default async function PublicLayout({
   children,
@@ -19,7 +20,8 @@ export default async function PublicLayout({
 
   // For logged-in regular users, show app layout with sidebar
   if (session?.user) {
-    return <AppLayoutClient>{children}</AppLayoutClient>;
+    const planName = await getUserPlanDisplayName(session.user.id);
+    return <AppLayoutClient planName={planName}>{children}</AppLayoutClient>;
   }
 
   const socialLinks = await getSocialLinks();
