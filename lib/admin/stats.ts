@@ -50,6 +50,9 @@ export async function getAdminStats() {
       },
       include: {
         plan: true,
+        user: {
+          select: { role: true },
+        },
       },
     }),
   ]);
@@ -58,12 +61,7 @@ export async function getAdminStats() {
   let mrrCents = 0;
   const subscriberBreakdown = {
     free: 0,
-    starter: 0, // Assuming starter is a paid plan in DB, or if Free is strictly no-sub. 
-    // Request says "Free vs Professional vs Founder". 
-    // "The Starter" is Free in the table? 
-    // Table says: "1. The Starter | Free". So "Starter" users might not have a subscription record if it's default, OR they have a $0 subscription.
-    // If they have no subscription, they are Free/Starter.
-    // Logic: Total Users - (Professional + Founder + Other Paid).
+    starter: 0,
     professional: 0,
     founder: 0,
     other: 0,
@@ -73,6 +71,9 @@ export async function getAdminStats() {
   const activeSubscriberIds = new Set<string>();
 
   activeSubscriptions.forEach((sub) => {
+    // Skip admins from MRR and subscription counts
+    if (sub.user?.role === "admin") return;
+
     activeSubscriberIds.add(sub.userId);
 
     // MRR Calculation
@@ -100,10 +101,10 @@ export async function getAdminStats() {
 
   // "Free" users are Total Users - Unique Paid Subscribers
   // Note: This assumes "Starter" users don't necessarily have a subscription record. 
-  // If they do (free tier sub), they are in 'activeSubscriptions'.
-  // We'll assume Free = Total - (Professional + Founder + Other Paid)
+  // We exclude admins from the total pool of potential free users.
   const paidSubscribersCount = subscriberBreakdown.professional + subscriberBreakdown.founder + subscriberBreakdown.other;
-  subscriberBreakdown.free = totalUsers - paidSubscribersCount;
+  // totalUsers includes admins, so we subtract adminUsers to get "Customer Pool", then subtract paid customers to get "Free Customers"
+  subscriberBreakdown.free = Math.max(0, (totalUsers - adminUsers) - paidSubscribersCount);
 
   return {
     courses: {

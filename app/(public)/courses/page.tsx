@@ -40,7 +40,10 @@ async function CourseCatalogContent({ searchParams }: CoursesPageProps) {
 
   // Apply category filter
   if (params.category) {
-    courses = courses.filter((course) => course.category === params.category);
+    courses = courses.filter((course) => {
+      // Check relation first (preferred), then categoryId, then legacy string
+      return course.Category?.slug === params.category || course.categoryId === params.category || course.category === params.category;
+    });
   }
 
   // Apply price filter
@@ -125,7 +128,7 @@ async function CourseCatalogContent({ searchParams }: CoursesPageProps) {
 export default async function CoursesPage({ searchParams }: CoursesPageProps) {
   return (
     <div className="min-h-screen">
-      <section className="container mx-auto py-20 px-4 grid gap-12">
+      <section className="container mx-auto py-8 md:py-12 lg:py-20 px-4 grid gap-8 md:gap-12">
         {/* Breadcrumbs */}
         <Breadcrumbs
           items={[
@@ -136,7 +139,7 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
 
         {/* Header - Premium High-End Aesthetic */}
         {/* Header - Premium High-End Aesthetic */}
-        <div className="relative rounded-3xl overflow-hidden border border-border/50 bg-background/50 backdrop-blur-xl p-8 md:p-12 mb-12">
+        <div className="relative rounded-3xl overflow-hidden border border-border/50 bg-background/50 backdrop-blur-xl p-6 md:p-12 mb-8 md:mb-12">
           <div className="absolute inset-0 z-0 opacity-30">
             <HeroPattern />
           </div>

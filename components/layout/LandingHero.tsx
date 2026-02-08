@@ -57,219 +57,157 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
 
   return (
     <section className="relative py-12 sm:py-16 lg:py-20 min-h-0 overflow-hidden">
-      {/* Main Hero Grid - Split Layout */}
-      <div className="w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 overflow-x-hidden">
-        <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          {/* Left Column - Main Content */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-            className="lg:col-span-7 relative z-10 space-y-8 min-w-0"
-          >
-            {/* Heading */}
-            <div className="space-y-6">
-              <h1 className="font-display text-2xl sm:text-5xl md:text-6xl xl:text-7xl font-black tracking-tight leading-[1.1] max-w-full break-words">
-                <span className="block text-foreground/90">Master AI With</span>
-                <span className="block mt-2 w-full">
-                  <TypingAnimation
-                    words={typingWords}
-                    className="text-primary drop-shadow-[0_4px_12px_hsl(var(--primary)/0.3)] break-words whitespace-pre-wrap"
-                    typingSpeed={60}
-                    deletingSpeed={30}
-                    pauseDuration={3000}
-                  />
-                </span>
-              </h1>
-
-              <div className="flex flex-wrap items-center gap-6 text-xs font-black tracking-[0.3em] uppercase text-muted-foreground/40">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary/60" />
-                  <span>Curated Curriculum</span>
-                </div>
-                <div className="h-1.5 w-1.5 rounded-full bg-primary/20" />
-                <div className="flex items-center gap-2 text-foreground/60">
-                  <Users className="h-4 w-4" />
-                  <span>Elite Ecosystem</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Description */}
-            <p className="text-xl text-muted-foreground/80 leading-relaxed max-w-2xl font-medium border-l-2 border-primary/20 pl-6">
-              Accelerate your engineering trajectory with practitioner-led AI modules. We provide the blueprint, the tools, and the terminal access you need to lead.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 pt-4 w-full">
-              <Link href="/courses" className="w-full sm:w-auto sm:flex-1 sm:flex-none">
-                <Button size="lg" variant="premium" className="w-full sm:px-10 h-14 rounded-2xl text-lg shadow-2xl shadow-primary/20 group whitespace-nowrap">
-                  Explore Mastery
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-2" />
-                </Button>
-              </Link>
-              <Link href="/learning-paths" className="w-full sm:w-auto sm:flex-1 sm:flex-none">
-                <Button size="lg" variant="outline" className="w-full sm:px-10 h-14 rounded-2xl font-bold whitespace-nowrap">
-                  Learning Paths
-                </Button>
-              </Link>
-            </div>
-
-            {/* Trust Badges */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-3 sm:gap-x-8 sm:gap-y-4 pt-10 border-t border-border/50">
-              {[
-                { icon: Lock, label: "Verified Access" },
-                { icon: BarChart, label: "Live Analytics" },
-                { icon: GraduationCap, label: "Lifetime Rights" },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 hover:text-primary/60 transition-colors cursor-default whitespace-nowrap">
-                  <item.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span>{item.label}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Right Column - Artistic Stats Grid */}
-          {stats.totalCourses > 0 && (
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: [0.23, 1, 0.32, 1] }}
-              className="lg:col-span-5 relative hidden lg:block"
-            >
-              {/* Background Glows */}
-              {/* Background Glows & Pattern */}
-              <div className="absolute inset-0 z-0 opacity-50 overflow-hidden rounded-3xl">
-                <HeroPattern className="w-full h-full" />
-              </div>
-              <div className="absolute -inset-10 bg-primary/10 blur-[100px] rounded-full opacity-50 animate-pulse" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[120%] w-[120%] bg-premium-gradient opacity-[0.03] rounded-full blur-[80px]" />
-
-              <div className="grid grid-cols-2 gap-5 relative z-10">
-                {/* Stats Cards with deliberate artistic "off-grid" feel */}
-                <div className="space-y-5 pt-12">
-                  <Card glass className="p-8 border-white/10 hover:border-primary/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group">
-                    <BookOpen className="h-10 w-10 text-primary mb-6 group-hover:scale-110 transition-transform" />
-                    <p className="text-4xl font-black tracking-tighter mb-1">{stats.totalCourses}</p>
-                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Expert Modules</p>
-                  </Card>
-
-                  {stats.totalReviews > 0 && (
-                    <Card glass className="p-8 border-white/10 hover:border-amber-500/20 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group">
-                      <Star className="h-10 w-10 text-amber-500 fill-amber-500 mb-6 group-hover:rotate-12 transition-transform" />
-                      <p className="text-4xl font-black tracking-tighter mb-1">{stats.averageRating.toFixed(1)}</p>
-                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Average Rating</p>
-                    </Card>
-                  )}
-                </div>
-
-                <div className="space-y-5">
-                  {stats.totalStudents >= 50 && (
-                    <Card glass className="p-8 border-white/10 hover:border-primary/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group">
-                      <Users className="h-10 w-10 text-primary mb-6 group-hover:scale-110 transition-transform" />
-                      <p className="text-4xl font-black tracking-tighter mb-1">{stats.totalStudents.toLocaleString()}+</p>
-                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Engineers Trained</p>
-                    </Card>
-                  )}
-
-                  {stats.totalLessons > 0 && (
-                    <Card glass className="p-8 border-white/10 hover:border-primary/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group">
-                      <Zap className="h-10 w-10 text-primary mb-6 group-hover:scale-110 transition-transform" />
-                      <p className="text-4xl font-black tracking-tighter mb-1">{stats.totalLessons.toLocaleString()}</p>
-                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Learning Units</p>
-                    </Card>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          )}
+      {/* Background Ambience */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl opacity-30">
+          <HeroPattern className="w-full h-full opacity-50" />
         </div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] bg-primary/20 blur-[120px] rounded-full opacity-40 mix-blend-screen" />
+      </div>
 
-        {/* Mobile Stats - Horizontal Scroll */}
-        {stats.totalCourses > 0 && (
+      <div className="w-full max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 relative z-10">
+
+        {/* Central Content Column */}
+        <div className="flex flex-col items-center text-center space-y-10 max-w-4xl mx-auto">
+
+          {/* Badge / Pill */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="lg:hidden mt-8 sm:mt-10"
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest"
           >
-            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-              {/* Mobile Stat Card 1 */}
-              <div className="flex-shrink-0 w-44 sm:w-48 snap-center bg-card/60 dark:bg-card/40 backdrop-blur-xl border border-border/50 rounded-2xl p-5 sm:p-6">
-                <div className="flex flex-col items-center text-center space-y-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
-                    <BookOpen className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-3xl font-bold text-foreground">{stats.totalCourses}</p>
-                    <p className="text-sm text-muted-foreground">Courses</p>
-                  </div>
-                </div>
-              </div>
-
-              {stats.totalStudents >= 50 && (
-                <div className="flex-shrink-0 w-44 sm:w-48 snap-center bg-card/60 dark:bg-card/40 backdrop-blur-xl border border-border/50 rounded-2xl p-5 sm:p-6">
-                  <div className="flex flex-col items-center text-center space-y-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
-                      <Users className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-3xl font-bold text-foreground">{stats.totalStudents.toLocaleString()}</p>
-                      <p className="text-sm text-muted-foreground">Learners</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {stats.totalLessons > 0 && (
-                <div className="flex-shrink-0 w-44 sm:w-48 snap-center bg-card/60 dark:bg-card/40 backdrop-blur-xl border border-border/50 rounded-2xl p-5 sm:p-6">
-                  <div className="flex flex-col items-center text-center space-y-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
-                      <GraduationCap className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-3xl font-bold text-foreground">{stats.totalLessons.toLocaleString()}</p>
-                      <p className="text-sm text-muted-foreground">Lessons</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {stats.totalReviews > 0 && stats.averageRating > 0 && (
-                <div className="flex-shrink-0 w-44 sm:w-48 snap-center bg-card/60 dark:bg-card/40 backdrop-blur-xl border border-border/50 rounded-2xl p-5 sm:p-6">
-                  <div className="flex flex-col items-center text-center space-y-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 border border-primary/20">
-                      <Star className="h-6 w-6 text-primary fill-primary" />
-                    </div>
-                    <div>
-                      <p className="text-3xl font-bold text-foreground">{stats.averageRating.toFixed(1)}</p>
-                      <p className="text-sm text-muted-foreground">{stats.totalReviews} Reviews</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <Sparkles className="h-3 w-3" />
+            <span>Curated Curriculum</span>
           </motion.div>
-        )}
-        {/* Trusted By Section - Dynamic Logos */}
-        {heroLogos.filter(l => l.visible).length > 0 && (
+
+          {/* Heading */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="mt-24 sm:mt-32 pt-12 border-t border-border/50"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="space-y-4"
           >
-            <p className="text-center text-sm font-semibold text-muted-foreground/60 mb-8 uppercase tracking-[0.2em]">
-              Trusted by professionals at
+            <h1 className="font-display text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.1] text-foreground">
+              Master AI With <br className="hidden sm:block" />
+              <span className="block mt-2">
+                <TypingAnimation
+                  words={typingWords}
+                  className="text-primary drop-shadow-[0_4px_12px_hsl(var(--primary)/0.3)]"
+                  typingSpeed={60}
+                  deletingSpeed={30}
+                  pauseDuration={3000}
+                />
+              </span>
+            </h1>
+            <p className="text-xl sm:text-2xl text-muted-foreground/80 leading-relaxed max-w-2xl mx-auto font-medium">
+              Accelerate your engineering trajectory with practitioner-led AI modules.
             </p>
-            <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12 lg:gap-16">
-              {heroLogos
-                .filter((logo) => logo.visible)
-                .map((logo) => renderLogo(logo))}
-            </div>
           </motion.div>
-        )}
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto"
+          >
+            <Link href="/courses" className="w-full sm:w-auto">
+              <Button size="lg" variant="premium" className="w-full sm:px-10 h-14 rounded-2xl text-lg shadow-2xl shadow-primary/20 group whitespace-nowrap">
+                Explore Mastery
+                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-2" />
+              </Button>
+            </Link>
+            <Link href="/learning-paths" className="w-full sm:w-auto">
+              <Button size="lg" variant="secondary" className="w-full sm:px-10 h-14 rounded-2xl font-bold whitespace-nowrap backdrop-blur-sm">
+                Learning Paths
+              </Button>
+            </Link>
+          </motion.div>
+
+          {/* Trusted By Section (Logos) */}
+          {heroLogos.filter(l => l.visible).length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="pt-8 sm:pt-12 w-full"
+            >
+              <p className="text-center text-xs font-bold text-muted-foreground/40 mb-6 uppercase tracking-[0.2em]">
+                Trusted by professionals at
+              </p>
+              <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12 lg:gap-16 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+                {heroLogos
+                  .filter((logo) => logo.visible)
+                  .map((logo) => renderLogo(logo))}
+              </div>
+            </motion.div>
+          )}
+
+        </div>
+
+        {/* Stats Grid - Bottom */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6, ease: [0.23, 1, 0.32, 1] }}
+          className="mt-20 sm:mt-24 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8"
+        >
+          {stats.totalCourses > 0 && (
+            <Card glass className="p-6 sm:p-8 border-white/10 hover:border-primary/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group text-center flex flex-col items-center justify-center">
+              <div className="p-3 rounded-full bg-primary/10 mb-4 group-hover:scale-110 transition-transform duration-300">
+                <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+              </div>
+              <p className="text-3xl sm:text-4xl font-black tracking-tighter mb-1 text-foreground">{stats.totalCourses}</p>
+              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Expert Modules</p>
+            </Card>
+          )}
+
+          {stats.totalStudents >= 50 && (
+            <Card glass className="p-6 sm:p-8 border-white/10 hover:border-primary/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group text-center flex flex-col items-center justify-center">
+              <div className="p-3 rounded-full bg-primary/10 mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+              </div>
+              <p className="text-3xl sm:text-4xl font-black tracking-tighter mb-1 text-foreground">{stats.totalStudents.toLocaleString()}+</p>
+              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Engineers Trained</p>
+            </Card>
+          )}
+
+          {stats.totalLessons > 0 && (
+            <Card glass className="p-6 sm:p-8 border-white/10 hover:border-primary/30 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group text-center flex flex-col items-center justify-center">
+              <div className="p-3 rounded-full bg-primary/10 mb-4 group-hover:scale-110 transition-transform duration-300">
+                <Zap className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+              </div>
+              <p className="text-3xl sm:text-4xl font-black tracking-tighter mb-1 text-foreground">{stats.totalLessons.toLocaleString()}</p>
+              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Learning Units</p>
+            </Card>
+          )}
+
+          {stats.totalReviews > 0 && (
+            <Card glass className="p-6 sm:p-8 border-white/10 hover:border-amber-500/20 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl group text-center flex flex-col items-center justify-center">
+              <div className="p-3 rounded-full bg-amber-500/10 mb-4 group-hover:rotate-12 transition-transform duration-300">
+                <Star className="h-6 w-6 sm:h-8 sm:w-8 text-amber-500 fill-amber-500" />
+              </div>
+              <p className="text-3xl sm:text-4xl font-black tracking-tighter mb-1 text-foreground">{stats.averageRating.toFixed(1)}</p>
+              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-muted-foreground/70">Average Rating</p>
+            </Card>
+          )}
+        </motion.div>
+
+        {/* Small Trust Indicators */}
+        <div className="mt-12 sm:mt-16 flex flex-wrap justify-center gap-6 sm:gap-10 border-t border-border/40 pt-8 opacity-60">
+          {[
+            { icon: Lock, label: "Verified Access" },
+            { icon: BarChart, label: "Live Analytics" },
+            { icon: GraduationCap, label: "Lifetime Rights" },
+          ].map((item, i) => (
+            <div key={i} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors cursor-default whitespace-nowrap">
+              <item.icon className="h-3.5 w-3.5" />
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+
       </div>
     </section>
   );

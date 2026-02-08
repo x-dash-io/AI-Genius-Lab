@@ -2,26 +2,71 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { Facebook, Linkedin, Twitter, Instagram } from "lucide-react";
+import { Facebook, Linkedin, Twitter, Instagram, Youtube, Github, Globe, Link as LinkIcon, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SocialLinks } from "@/lib/settings";
-
+import { SocialLink } from "@/lib/settings";
 import Image from "next/image";
 
 interface FooterProps {
-  socialLinks?: SocialLinks;
+  socialLinks?: SocialLink[] | any; // Handle both array and potential legacy object
 }
+
+const iconMap: Record<string, any> = {
+  facebook: Facebook,
+  twitter: Twitter,
+  linkedin: Linkedin,
+  instagram: Instagram,
+  youtube: Youtube,
+  github: Github,
+  discord: MessageCircle,
+  website: Globe,
+  other: LinkIcon,
+  tiktok: (props: any) => (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+    </svg>
+  ),
+};
 
 export function Footer({ socialLinks }: FooterProps) {
   const { data: session } = useSession();
 
-  const links = socialLinks || {
-    facebook: "#",
-    linkedin: "#",
-    twitter: "#",
-    tiktok: "#",
-    instagram: "#",
-  };
+  // Normalize links to array
+  let links: SocialLink[] = [];
+
+  if (Array.isArray(socialLinks)) {
+    links = socialLinks;
+  } else if (socialLinks && typeof socialLinks === 'object') {
+    // Legacy object support
+    links = Object.entries(socialLinks).map(([platform, url]) => ({
+      id: platform,
+      platform,
+      url: url as string,
+      visible: !!url && url !== "#",
+    }));
+  } else {
+    // defaults
+    links = [
+      { id: "facebook", platform: "facebook", url: "#", visible: true },
+      { id: "twitter", platform: "twitter", url: "#", visible: true },
+      { id: "linkedin", platform: "linkedin", url: "#", visible: true },
+      { id: "instagram", platform: "instagram", url: "#", visible: true },
+    ];
+  }
+
+  // Filter visible links
+  const visibleLinks = links.filter(link => link.visible && link.url && link.url !== "#");
 
   return (
     <footer className="border-t bg-card/10 backdrop-blur-md mt-20">
@@ -43,24 +88,22 @@ export function Footer({ socialLinks }: FooterProps) {
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs sm:max-w-sm font-medium">
               Empowering the next generation of AI professionals through structured, outcome-driven learning.
             </p>
-            <div className="flex gap-3">
-              {[
-                { icon: Facebook, href: links.facebook, label: "Facebook" },
-                { icon: Twitter, href: links.twitter, label: "Twitter" },
-                { icon: Linkedin, href: links.linkedin, label: "LinkedIn" },
-                { icon: Instagram, href: links.instagram, label: "Instagram" }
-              ].map((social) => (
-                <Link
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="h-10 w-10 flex items-center justify-center rounded-xl bg-accent/50 text-muted-foreground hover:bg-primary hover:text-white transition-all duration-300"
-                >
-                  <social.icon className="h-5 w-5" />
-                  <span className="sr-only">{social.label}</span>
-                </Link>
-              ))}
+            <div className="flex gap-3 flex-wrap">
+              {visibleLinks.map((social) => {
+                const Icon = iconMap[social.platform.toLowerCase()] || LinkIcon;
+                return (
+                  <Link
+                    key={social.id || social.platform}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="h-10 w-10 flex items-center justify-center rounded-xl bg-accent/50 text-muted-foreground hover:bg-primary hover:text-white transition-all duration-300"
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span className="sr-only">{social.platform}</span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
 

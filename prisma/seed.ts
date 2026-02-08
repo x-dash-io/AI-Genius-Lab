@@ -137,6 +137,133 @@ async function main() {
         });
     }
 
+    // 5. Seed Blog Tags & Posts
+    console.log("Seeding Blog...");
+
+    // Clean blog tables first (to be safe, though handled at top)
+    await prisma.blogReview.deleteMany();
+    await prisma.blogPost.deleteMany(); // Cascade deletes tags relation but not tags themselves? No, explicit many-to-many.
+    await prisma.blogTag.deleteMany();
+
+    const blogTags = [
+        { name: "AI News", slug: "ai-news" },
+        { name: "Tutorials", slug: "tutorials" },
+        { name: "Business", slug: "business" },
+        { name: "Ethics", slug: "ethics" },
+        { name: "Generative AI", slug: "generative-ai" },
+    ];
+
+    const tagMap = new Map();
+    for (const tag of blogTags) {
+        const created = await prisma.blogTag.create({ data: tag });
+        tagMap.set(tag.slug, created.id);
+    }
+
+    const blogPosts = [
+        {
+            title: "The Future of AI in 2026: Trends to Watch",
+            slug: "future-of-ai-2026",
+            excerpt: "From autonomous agents to hyper-personalized education, here is what the next year holds for artificial intelligence.",
+            content: `
+# The Future of AI in 2026
+
+Artificial Intelligence continues to evolve at a breakneck pace. As we settle into 2026, several key trends are emerging that will define the landscape for developers, businesses, and consumers alike.
+
+## 1. Autonomous Agents
+The shift from "prompts" to "goals" is complete. Agents can now plan, execute, and iterate on complex tasks without constant human intervention.
+
+## 2. Hyper-Personalized Education
+AI is revolutionizing how we learn. Platforms like AI Genius Lab are at the forefront, offering curriculum that adapts in real-time to your learning style.
+
+## 3. Sustainable AI
+With the massive compute requirements of LLMs, the focus is shifting towards efficient, small language models (SLMs) and green computing.
+            `,
+            featuredImage: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&q=80", // Futurist AI layout
+            tags: ["ai-news", "generative-ai"],
+            readTimeMinutes: 5,
+            views: 1250,
+        },
+        {
+            title: "How to Build Your First AI Agent with Python",
+            slug: "build-first-ai-agent-python",
+            excerpt: "A step-by-step guide to creating a simple autonomous agent using LangChain and OpenAI.",
+            content: `
+# Building Your First AI Agent
+
+Agents are the new apps. In this tutorial, we'll build a simple research agent that can search the web and summarize findings.
+
+## Prerequisites
+- Python 3.10+
+- OpenAI API Key
+- LangChain
+
+## Step 1: Setup
+First, install the necessary packages...
+
+(Content truncated for brevity, but imagine a high-quality tutorial here).
+            `,
+            featuredImage: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&q=80", // Matrix code / Python feel
+            tags: ["tutorials", "generative-ai"],
+            readTimeMinutes: 12,
+            views: 3400,
+        },
+        {
+            title: "Monetizing AI: 5 Business Models for 2026",
+            slug: "monetizing-ai-business-models",
+            excerpt: "Stop selling prompts. Start selling outcomes. Here are the most profitable AI business models right now.",
+            content: `
+# Monetizing AI
+
+The "wrapper" era is over. To build a sustainable AI business in 2026, you need defensible value.
+
+## 1. Enterprise Workflows
+Deep vertical integration into specific industries (e.g., Legal AI, Medical AI) remains highly profitable.
+
+## 2. Agent-as-a-Service (AaaS)
+Instead of SaaS, offer agents that do the work. "Hiring" an AI employee is the new subscription.
+            `,
+            featuredImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80", // Business / Charts
+            tags: ["business", "ai-news"],
+            readTimeMinutes: 7,
+            views: 890,
+        },
+        {
+            title: "The Ethics of AI-Generated Content",
+            slug: "ethics-ai-content",
+            excerpt: "As AI fills the web with content, how do we distinguish truth from hallucination? A deep dive into provenance.",
+            content: `
+# The Ethics of AI Content
+
+With the rise of multi-modal models, creating realistic fake media is easier than ever. This poses significant challenges for society.
+
+## Watermarking & Provenance
+Standard like C2PA are becoming essential. We must ensure that human creativity is respected while embracing AI tools.
+            `,
+            featuredImage: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&q=80", // Cyber/Human hybrid conceptual
+            tags: ["ethics", "ai-news"],
+            readTimeMinutes: 6,
+            views: 2100,
+        },
+    ];
+
+    for (const post of blogPosts) {
+        await prisma.blogPost.create({
+            data: {
+                title: post.title,
+                slug: post.slug,
+                excerpt: post.excerpt,
+                content: post.content,
+                featuredImage: post.featuredImage,
+                status: "published",
+                readTimeMinutes: post.readTimeMinutes,
+                views: post.views,
+                tags: {
+                    connect: post.tags.map(slug => ({ id: tagMap.get(slug) }))
+                }
+            }
+        });
+    }
+
     console.log("✅ Database reset and seeded successfully.");
 }
 

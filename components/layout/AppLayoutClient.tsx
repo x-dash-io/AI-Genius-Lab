@@ -325,7 +325,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <SignOutButton className="h-9 px-4 text-[10px] font-bold uppercase tracking-widest bg-gradient-to-r from-destructive/90 to-destructive hover:from-destructive hover:to-destructive/90 text-white shadow-md hover:shadow-lg hover:shadow-destructive/25 border-none rounded-lg transition-all duration-300" />
+                        <SignOutButton className="h-9 px-4 text-[10px] font-bold uppercase tracking-widest shadow-md hover:shadow-lg hover:shadow-destructive/25 border-none rounded-lg transition-all duration-300" />
                       </motion.div>
                     </motion.div>
                   </div>
@@ -541,7 +541,7 @@ export function AppLayoutClient({ children }: { children: React.ReactNode }) {
                             whileTap={{ scale: 0.98 }}
                             className="flex-1"
                           >
-                            <SignOutButton className="w-full h-10 text-[10px] font-bold uppercase tracking-widest bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg hover:shadow-xl hover:shadow-destructive/25 border-none rounded-xl transition-all duration-300" />
+                            <SignOutButton className="w-full h-10 text-[10px] font-bold uppercase tracking-widest shadow-lg hover:shadow-xl hover:shadow-destructive/25 border-none rounded-xl transition-all duration-300" />
                           </motion.div>
                         </div>
                       </motion.div>

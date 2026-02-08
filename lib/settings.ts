@@ -1,25 +1,20 @@
 import { prisma } from "@/lib/prisma";
 import { unstable_cache } from "next/cache";
 
-export type SocialLinks = {
-    facebook: string;
-    twitter: string;
-    instagram: string;
-    linkedin: string;
-    youtube: string;
-    tiktok: string;
-    github: string;
+export type SocialLink = {
+    id: string;
+    platform: string;
+    url: string;
+    visible: boolean;
 };
 
-export const defaultSocialLinks: SocialLinks = {
-    facebook: "#",
-    twitter: "#",
-    instagram: "#",
-    linkedin: "#",
-    youtube: "#",
-    tiktok: "#",
-    github: "#",
-};
+export const defaultSocialLinks: SocialLink[] = [
+    { id: "facebook", platform: "facebook", url: "#", visible: true },
+    { id: "twitter", platform: "twitter", url: "#", visible: true },
+    { id: "instagram", platform: "instagram", url: "#", visible: true },
+    { id: "linkedin", platform: "linkedin", url: "#", visible: true },
+    { id: "youtube", platform: "youtube", url: "#", visible: true },
+];
 
 export type HeroLogo = {
     id: string;
@@ -47,7 +42,31 @@ export async function getSiteSettings<T>(key: string, defaultValue: T): Promise<
 }
 
 export const getSocialLinks = unstable_cache(
-    async () => getSiteSettings<SocialLinks>("social_links", defaultSocialLinks),
+    async () => {
+        const links = await getSiteSettings<any>("social_links", defaultSocialLinks);
+
+        // Migration logic: if it's the old object format
+        if (links && !Array.isArray(links) && typeof links === 'object') {
+            return Object.entries(links).map(([platform, url]) => ({
+                id: platform,
+                platform,
+                url: url as string,
+                visible: !!url && url !== "#",
+            })) as SocialLink[];
+        }
+
+        // If it's already an array, ensure it matches SocialLink structure
+        if (Array.isArray(links)) {
+            return links.map(link => ({
+                id: link.id || link.platform || `social-${Math.random()}`,
+                platform: link.platform || "web",
+                url: link.url || "#",
+                visible: link.visible !== undefined ? link.visible : true,
+            })) as SocialLink[];
+        }
+
+        return defaultSocialLinks;
+    },
     ["site_settings", "social_links"],
     { tags: ["site_settings"] }
 );

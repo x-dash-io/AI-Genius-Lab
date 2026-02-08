@@ -19,7 +19,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/components/cart/CartProvider";
-import { SocialLinks } from "@/lib/settings";
+import { SocialLink } from "@/lib/settings";
 import {
   Menu,
   X,
@@ -48,6 +48,7 @@ const primaryNavigation = [
   { name: "Learning Paths", href: "/learning-paths", icon: Route },
   { name: "Blog", href: "/blog", icon: Newspaper },
   { name: "Cart", href: "/cart", icon: ShoppingCart },
+  { name: "Dashboard", href: "/dashboard", icon: GraduationCap },
 ];
 
 // Secondary navigation - resources dropdown
@@ -66,7 +67,7 @@ export function PublicLayoutClient({
   socialLinks,
 }: {
   children: React.ReactNode;
-  socialLinks?: SocialLinks;
+  socialLinks?: SocialLink[];
 }) {
   const { data: session } = useSession();
   const pathname = usePathname();
@@ -480,7 +481,7 @@ export function PublicLayoutClient({
                         <ThemeToggle />
                       </div>
                       <Link href="/sign-in" onClick={() => setMobileMenuOpen(false)}>
-                        <Button variant="outline" className="w-full justify-center gap-2 h-12 border-2 font-bold transition-all bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-[0_4px_12px_hsl(var(--primary)_/_0.3)] active:scale-95">
+                        <Button variant="secondary" className="w-full justify-center gap-2 h-12 font-bold transition-all hover:bg-primary hover:text-primary-foreground hover:shadow-[0_4px_12px_hsl(var(--primary)_/_0.3)] active:scale-95">
                           <LogIn className="h-4 w-4" />
                           Sign In
                         </Button>

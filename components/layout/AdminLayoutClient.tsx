@@ -335,7 +335,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                         whileTap={{ scale: 0.98 }}
                         className="w-full"
                       >
-                        <SignOutButton className="w-full h-10 text-[10px] font-bold uppercase tracking-widest bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg hover:shadow-xl hover:shadow-destructive/25 border-none rounded-xl transition-all duration-300" />
+                        <SignOutButton className="w-full h-10 text-[10px] font-bold uppercase tracking-widest shadow-lg hover:shadow-xl hover:shadow-destructive/25 border-none rounded-xl transition-all duration-300" />
                       </motion.div>
                     </div>
                   </>
@@ -654,7 +654,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                           whileTap={{ scale: 0.98 }}
                           className="flex-1"
                         >
-                          <SignOutButton className="w-full h-10 text-[10px] font-bold uppercase tracking-widest bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-lg hover:shadow-xl hover:shadow-destructive/25 border-none rounded-xl transition-all duration-300" />
+                          <SignOutButton className="w-full h-10 text-[10px] font-bold uppercase tracking-widest shadow-lg hover:shadow-xl hover:shadow-destructive/25 border-none rounded-xl transition-all duration-300" />
                         </motion.div>
                       </div>
                     </motion.div>

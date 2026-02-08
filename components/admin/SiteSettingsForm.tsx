@@ -18,16 +18,28 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { LogoImageUpload } from "@/components/admin/LogoImageUpload";
 import { useEffect } from "react";
 
+const SOCIAL_PLATFORMS = [
+    { value: "facebook", label: "Facebook" },
+    { value: "twitter", label: "X (Twitter)" },
+    { value: "instagram", label: "Instagram" },
+    { value: "linkedin", label: "LinkedIn" },
+    { value: "youtube", label: "YouTube" },
+    { value: "tiktok", label: "TikTok" },
+    { value: "github", label: "GitHub" },
+    { value: "discord", label: "Discord" },
+    { value: "website", label: "Website" },
+    { value: "other", label: "Other" },
+];
+
 const settingsSchema = z.object({
-    socialLinks: z.object({
-        facebook: z.string().url().optional().or(z.literal("")),
-        twitter: z.string().url().optional().or(z.literal("")),
-        instagram: z.string().url().optional().or(z.literal("")),
-        linkedin: z.string().url().optional().or(z.literal("")),
-        youtube: z.string().url().optional().or(z.literal("")),
-        tiktok: z.string().url().optional().or(z.literal("")),
-        github: z.string().url().optional().or(z.literal("")),
-    }),
+    socialLinks: z.array(
+        z.object({
+            id: z.string(),
+            platform: z.string().min(1, "Platform is required"),
+            url: z.string().url("Must be a valid URL"),
+            visible: z.boolean(),
+        })
+    ),
     heroLogos: z.array(
         z.object({
             id: z.string(),
@@ -42,13 +54,23 @@ const settingsSchema = z.object({
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 interface SiteSettingsFormProps {
-    initialSocialLinks: SettingsFormValues['socialLinks'];
+    initialSocialLinks: any; // Using any to handle migration from object to array
     initialHeroLogos: SettingsFormValues['heroLogos'];
 }
 
 export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteSettingsFormProps) {
     const [isPending, startTransition] = useTransition();
     const [lastSaved, setLastSaved] = React.useState<{ socialLinks: SettingsFormValues['socialLinks']; heroLogos: SettingsFormValues['heroLogos'] } | null>(null);
+
+    // Migration helper for social links
+    const migratedSocialLinks: SettingsFormValues['socialLinks'] = Array.isArray(initialSocialLinks)
+        ? initialSocialLinks
+        : Object.entries(initialSocialLinks || {}).map(([platform, url]) => ({
+            id: platform,
+            platform,
+            url: url as string,
+            visible: !!url && url !== "#",
+        }));
 
     // Migration helper: if initialHeroLogos come from old structure (without type), default them
     const migratedHeroLogos: SettingsFormValues['heroLogos'] = (initialHeroLogos || []).map((logo: { id: string; name?: string; type?: string; value?: string; url?: string; visible?: boolean }) => ({
@@ -62,12 +84,17 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
     const form = useForm<SettingsFormValues>({
         resolver: zodResolver(settingsSchema),
         defaultValues: {
-            socialLinks: initialSocialLinks || {},
+            socialLinks: migratedSocialLinks,
             heroLogos: migratedHeroLogos,
         },
     });
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields: socialFields, append: appendSocial, remove: removeSocial } = useFieldArray({
+        control: form.control,
+        name: "socialLinks",
+    });
+
+    const { fields: logoFields, append: appendLogo, remove: removeLogo } = useFieldArray({
         control: form.control,
         name: "heroLogos",
     });
@@ -84,7 +111,12 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                 updateSiteSettings("hero_logos", (value.heroLogos || []).filter(Boolean))
                             ]);
                             setLastSaved({
-                                socialLinks: value.socialLinks || {},
+                                socialLinks: (value.socialLinks || []).filter((link): link is NonNullable<typeof link> => Boolean(link)).map(link => ({
+                                    id: link.id || `social-${Date.now()}`,
+                                    platform: link.platform || "web",
+                                    url: link.url || "#",
+                                    visible: link.visible !== undefined ? link.visible : true
+                                })),
                                 heroLogos: (value.heroLogos || []).filter((logo): logo is NonNullable<typeof logo> => Boolean(logo)).map(logo => ({
                                     id: logo.id || `logo-${Date.now()}`,
                                     name: logo.name || "",
@@ -135,66 +167,106 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                 {/* Social Media Links */}
                 <Card className="w-full">
                     <CardHeader className="px-4 sm:px-6">
-                        <CardTitle className="text-lg sm:text-xl">Social Media Links</CardTitle>
-                        <CardDescription className="text-sm">
-                            Manage social media links displayed in the footer.
-                        </CardDescription>
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <CardTitle className="text-lg sm:text-xl">Social Media Links</CardTitle>
+                                <CardDescription className="text-sm">
+                                    Manage social media links displayed in the footer.
+                                </CardDescription>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => appendSocial({ id: `social-${Date.now()}`, platform: "instagram", url: "", visible: true })}
+                                className="w-full sm:w-auto whitespace-nowrap"
+                            >
+                                <Plus className="mr-2 h-4 w-4 flex-shrink-0" />
+                                Add Social Link
+                            </Button>
+                        </div>
                     </CardHeader>
                     <CardContent className="space-y-4 px-4 sm:px-6">
-                        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2">
-                            <FormField
-                                control={form.control}
-                                name="socialLinks.facebook"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Facebook</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="https://facebook.com/..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="socialLinks.twitter"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>X (Twitter)</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="https://twitter.com/..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="socialLinks.linkedin"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>LinkedIn</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="https://linkedin.com/..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="socialLinks.tiktok"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>TikTok</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="https://tiktok.com/..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
+                        {socialFields.map((field, index) => (
+                            <div key={field.id} className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 p-3 sm:p-4 border rounded-md w-full overflow-x-hidden">
+                                <div className="cursor-move mt-2 sm:mt-3 text-muted-foreground order-first sm:order-none">
+                                    <GripVertical className="h-5 w-5" />
+                                </div>
+                                <div className="grid gap-3 sm:gap-4 flex-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 w-full">
+                                    {/* Platform */}
+                                    <FormField
+                                        control={form.control}
+                                        name={`socialLinks.${index}.platform`}
+                                        render={({ field }) => (
+                                            <FormItem className="sm:col-span-3 lg:col-span-3">
+                                                <FormLabel className="text-xs">Platform</FormLabel>
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select platform" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        {SOCIAL_PLATFORMS.map((platform) => (
+                                                            <SelectItem key={platform.value} value={platform.value}>
+                                                                {platform.label}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    {/* URL */}
+                                    <FormField
+                                        control={form.control}
+                                        name={`socialLinks.${index}.url`}
+                                        render={({ field }) => (
+                                            <FormItem className="sm:col-span-9 lg:col-span-7">
+                                                <FormLabel className="text-xs">URL</FormLabel>
+                                                <FormControl>
+                                                    <Input placeholder="https://..." {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    {/* Visible Toggle */}
+                                    <FormField
+                                        control={form.control}
+                                        name={`socialLinks.${index}.visible`}
+                                        render={({ field }) => (
+                                            <FormItem className="sm:col-span-2 lg:col-span-2 flex flex-col items-center justify-center pt-2">
+                                                <FormLabel className="text-xs mb-2">Visible</FormLabel>
+                                                <FormControl>
+                                                    <ToggleSwitch
+                                                        checked={field.value}
+                                                        onCheckedChange={field.onChange}
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="mt-2 sm:mt-6 text-destructive flex-shrink-0"
+                                    onClick={() => removeSocial(index)}
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        ))}
+                        {socialFields.length === 0 && (
+                            <div className="text-center py-6 text-muted-foreground text-sm">
+                                No social links added yet.
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -212,7 +284,7 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => append({ id: `logo-${Date.now()}`, name: "", type: "image", value: "", visible: true })}
+                                onClick={() => appendLogo({ id: `logo-${Date.now()}`, name: "", type: "image", value: "", visible: true })}
                                 className="w-full sm:w-auto whitespace-nowrap"
                             >
                                 <Plus className="mr-2 h-4 w-4 flex-shrink-0" />
@@ -221,7 +293,7 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                         </div>
                     </CardHeader>
                     <CardContent className="space-y-4 px-4 sm:px-6">
-                        {fields.map((field, index) => (
+                        {logoFields.map((field, index) => (
                             <div key={field.id} className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 p-3 sm:p-4 border rounded-md w-full overflow-x-hidden">
                                 <div className="cursor-move mt-2 sm:mt-3 text-muted-foreground order-first sm:order-none">
                                     <GripVertical className="h-5 w-5" />
@@ -332,13 +404,13 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                     variant="ghost"
                                     size="icon"
                                     className="mt-2 sm:mt-6 text-destructive flex-shrink-0"
-                                    onClick={() => remove(index)}
+                                    onClick={() => removeLogo(index)}
                                 >
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
                             </div>
                         ))}
-                        {fields.length === 0 && (
+                        {logoFields.length === 0 && (
                             <div className="text-center py-6 text-muted-foreground text-sm">
                                 No logos added yet.
                             </div>

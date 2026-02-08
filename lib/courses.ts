@@ -10,7 +10,14 @@ export async function getPublishedCourses() {
         slug: true,
         title: true,
         description: true,
-        category: true,
+        category: true, // Keep for backward compat if needed, but rely on relation
+        categoryId: true, // Ensure we get the FK
+        Category: { // Fetch the relation to get the slug
+          select: {
+            slug: true,
+            name: true
+          }
+        },
         priceCents: true,
         tier: true,
         inventory: true,

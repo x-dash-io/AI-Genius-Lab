@@ -41,7 +41,7 @@ export async function syncSubscriptionPlansToPayPal() {
       }
 
       // 2. Ensure Monthly Plan exists
-      if (!plan.paypalMonthlyPlanId) {
+      if (!plan.paypalMonthlyPlanId && plan.priceMonthlyCents > 0) {
         const payPalPlan = await createPayPalPlan({
           productId: productId!,
           name: `${plan.name} Monthly`,
@@ -57,7 +57,7 @@ export async function syncSubscriptionPlansToPayPal() {
       }
 
       // 3. Ensure Annual Plan exists
-      if (!plan.paypalAnnualPlanId) {
+      if (!plan.paypalAnnualPlanId && plan.priceAnnualCents > 0) {
         const payPalPlan = await createPayPalPlan({
           productId: productId!,
           name: `${plan.name} Annual`,
