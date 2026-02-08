@@ -48,18 +48,18 @@ export function BlogPostForm({ initialData }: { initialData?: any }) {
     resolver: zodResolver(formSchema),
     defaultValues: initialData
       ? {
-          ...initialData,
-          tags: initialData.tags?.map((t: any) => t.name).join(", "),
-        }
+        ...initialData,
+        tags: initialData.tags?.map((t: any) => t.name).join(", "),
+      }
       : {
-          title: "",
-          slug: "",
-          content: "",
-          excerpt: "",
-          featuredImage: "",
-          status: "draft",
-          tags: "",
-        },
+        title: "",
+        slug: "",
+        content: "",
+        excerpt: "",
+        featuredImage: "",
+        status: "draft",
+        tags: "",
+      },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -238,6 +238,8 @@ export function BlogPostForm({ initialData }: { initialData?: any }) {
               <Button
                 type="submit"
                 className="w-full"
+                variant="premium"
+                size="lg"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (

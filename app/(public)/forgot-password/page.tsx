@@ -130,7 +130,7 @@ export default function ForgotPasswordPage() {
                   </Alert>
                 </motion.div>
               )}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" variant="premium" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <span className="flex items-center gap-2">
                     <Loader size="sm" inline />

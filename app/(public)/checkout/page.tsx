@@ -145,7 +145,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <Link href={`/sign-in?callbackUrl=${encodeURIComponent(`/checkout?items=${itemsParam}`)}`}>
-                <Button size="lg" className="w-full">
+                <Button size="lg" variant="premium" className="w-full">
                   Sign in to purchase
                 </Button>
               </Link>
@@ -241,7 +241,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
               ${(course.priceCents / 100).toFixed(2)}
             </div>
             <Link href={`/sign-in?callbackUrl=${encodeURIComponent(returnUrl)}`}>
-              <Button size="lg" className="w-full">
+              <Button size="lg" variant="premium" className="w-full">
                 Sign in to purchase
               </Button>
             </Link>

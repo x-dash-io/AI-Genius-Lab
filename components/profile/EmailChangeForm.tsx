@@ -183,6 +183,7 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
 
       <Button
         type="submit"
+        variant="premium"
         disabled={isLoading || !newEmail}
         className="w-full"
         size="lg"

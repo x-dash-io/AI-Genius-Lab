@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Lock, BarChart, GraduationCap, Sparkles, Zap, Users, BookOpen, Star, ArrowRight } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { TypingAnimation } from "@/components/ui/typing-animation";
+import { HeroPattern } from "@/components/ui/hero-pattern";
 import type { HomepageStats } from "@/lib/homepage-stats";
 import type { HeroLogo } from "@/lib/settings";
 
@@ -138,6 +139,10 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
               className="lg:col-span-5 relative hidden lg:block"
             >
               {/* Background Glows */}
+              {/* Background Glows & Pattern */}
+              <div className="absolute inset-0 z-0 opacity-50 overflow-hidden rounded-3xl">
+                <HeroPattern className="w-full h-full" />
+              </div>
               <div className="absolute -inset-10 bg-primary/10 blur-[100px] rounded-full opacity-50 animate-pulse" />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[120%] w-[120%] bg-premium-gradient opacity-[0.03] rounded-full blur-[80px]" />
 

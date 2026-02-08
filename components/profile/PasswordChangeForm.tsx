@@ -134,7 +134,7 @@ export function PasswordChangeForm({ changePasswordAction }: PasswordChangeFormP
         </Label>
       </div>
 
-      <Button type="submit" disabled={isSubmitting || isAdminPreview}>
+      <Button type="submit" variant="premium" size="lg" disabled={isSubmitting || isAdminPreview} className="w-full sm:w-auto">
         {isAdminPreview ? (
           <>
             <ShieldAlert className="h-4 w-4 mr-2" />

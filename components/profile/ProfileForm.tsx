@@ -92,7 +92,7 @@ export function ProfileForm({ initialData, updateProfileAction }: ProfileFormPro
         </p>
       </div>
 
-      <Button type="submit" size="lg" disabled={isSubmitting || isAdminPreview}>
+      <Button type="submit" size="lg" variant="premium" disabled={isSubmitting || isAdminPreview}>
         {isAdminPreview ? (
           <>
             <ShieldAlert className="h-4 w-4 mr-2" />

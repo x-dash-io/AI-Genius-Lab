@@ -182,7 +182,7 @@ export function CouponForm({ initialData, isEditing = false }: CouponFormProps) 
                                 <Input
                                     id="discountAmount"
                                     type="number"
-                                    {...register("discountAmount")}
+                                    {...register("discountAmount", { valueAsNumber: true })}
                                 />
                                 {errors.discountAmount && (
                                     <p className="text-sm text-destructive">
@@ -237,7 +237,7 @@ export function CouponForm({ initialData, isEditing = false }: CouponFormProps) 
                                     id="minOrderAmount"
                                     type="number"
                                     placeholder="0"
-                                    {...register("minOrderAmount")}
+                                    {...register("minOrderAmount", { valueAsNumber: true })}
                                 />
                                 <p className="text-xs text-muted-foreground">Optional minimum cart value</p>
                             </div>
@@ -247,7 +247,7 @@ export function CouponForm({ initialData, isEditing = false }: CouponFormProps) 
                                     id="maxDiscountAmount"
                                     type="number"
                                     placeholder="0"
-                                    {...register("maxDiscountAmount")}
+                                    {...register("maxDiscountAmount", { valueAsNumber: true })}
                                 />
                                 <p className="text-xs text-muted-foreground">Cap for % discounts</p>
                             </div>
@@ -259,7 +259,7 @@ export function CouponForm({ initialData, isEditing = false }: CouponFormProps) 
                                 id="maxUses"
                                 type="number"
                                 placeholder="0 (Unlimited)"
-                                {...register("maxUses")}
+                                {...register("maxUses", { valueAsNumber: true })}
                             />
                         </div>
 
@@ -290,11 +290,12 @@ export function CouponForm({ initialData, isEditing = false }: CouponFormProps) 
                         <Button
                             type="button"
                             variant="outline"
+                            size="lg"
                             onClick={() => router.back()}
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={isSubmitting}>
+                        <Button type="submit" variant="premium" size="lg" disabled={isSubmitting}>
                             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {isEditing ? "Update Coupon" : "Create Coupon"}
                         </Button>

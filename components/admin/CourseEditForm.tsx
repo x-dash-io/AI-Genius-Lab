@@ -492,7 +492,7 @@ export function CourseEditForm({
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
+                size="lg"
                 onClick={() => setIsEditingCourse(true)}
               >
                 Edit Course
@@ -621,7 +621,7 @@ export function CourseEditForm({
               </div>
 
               <div className="flex gap-2">
-                <Button type="submit" disabled={isSavingCourse}>
+                <Button type="submit" disabled={isSavingCourse} variant="premium" size="lg">
                   {isSavingCourse ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -634,6 +634,7 @@ export function CourseEditForm({
                 <Button
                   type="button"
                   variant="outline"
+                  size="lg"
                   onClick={() => setIsEditingCourse(false)}
                   disabled={isSavingCourse}
                 >
@@ -714,6 +715,7 @@ export function CourseEditForm({
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={() => setShowAddSection(true)}
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -1057,7 +1059,7 @@ export function CourseEditForm({
                               </div>
                             </div>
                             <div className="flex gap-2">
-                              <Button type="submit" size="sm" disabled={isAddingLesson[section.id]}>
+                              <Button type="submit" size="default" variant="premium" disabled={isAddingLesson[section.id]}>
                                 {isAddingLesson[section.id] ? (
                                   <>
                                     <Loader2 className="h-3 w-3 mr-2 animate-spin" />
@@ -1339,7 +1341,7 @@ export function CourseEditForm({
                                   </div>
 
                                   <div className="flex gap-2">
-                                    <Button type="submit" size="sm" disabled={isUpdatingLesson[lesson.id]}>
+                                    <Button type="submit" size="default" variant="premium" disabled={isUpdatingLesson[lesson.id]}>
                                       {isUpdatingLesson[lesson.id] ? (
                                         <>
                                           <Loader2 className="h-3 w-3 mr-2 animate-spin" />

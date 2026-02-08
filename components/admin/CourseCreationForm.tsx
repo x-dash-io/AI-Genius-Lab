@@ -265,7 +265,7 @@ export function CourseCreationForm({
                 </Label>
               </div>
 
-              <Button type="submit" disabled={isCreatingCourse}>
+              <Button type="submit" disabled={isCreatingCourse} variant="premium" size="lg">
                 {isCreatingCourse ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />

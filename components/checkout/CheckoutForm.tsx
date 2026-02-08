@@ -49,7 +49,7 @@ export function CheckoutForm({
   return (
     <form onSubmit={handleSubmit} className="grid gap-4">
       <input type="hidden" name="courseId" value={courseId} />
-      
+
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -62,8 +62,8 @@ export function CheckoutForm({
           ${(priceCents / 100).toFixed(2)}
         </span>
       </div>
-      
-      <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+
+      <Button type="submit" variant="premium" size="lg" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? (
           <>
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />

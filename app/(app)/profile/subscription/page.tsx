@@ -91,7 +91,7 @@ export default async function UserSubscriptionPage() {
               </p>
             </div>
             <Link href="/pricing">
-              <Button size="lg">View Pricing Plans</Button>
+              <Button size="lg" variant="premium">View Pricing Plans</Button>
             </Link>
           </CardContent>
         </Card>

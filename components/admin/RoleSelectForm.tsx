@@ -92,8 +92,10 @@ export function RoleSelectForm({
           </p>
         )}
       </div>
-      <Button 
-        type="submit" 
+      <Button
+        type="submit"
+        variant="premium"
+        size="lg"
         disabled={isCurrentUser || isSubmitting || selectedRole === currentRole}
       >
         {isSubmitting ? (

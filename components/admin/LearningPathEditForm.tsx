@@ -234,7 +234,7 @@ export function LearningPathEditForm({
               />
             </div>
             <div className="flex gap-2">
-              <Button type="submit" disabled={isUpdating}>
+              <Button type="submit" disabled={isUpdating} variant="premium" size="lg">
                 {isUpdating ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -265,8 +265,9 @@ export function LearningPathEditForm({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setShowDeleteConfirm(false)}
-                  disabled={isDeleting}
+                  onClick={() => router.back()}
+                  disabled={isUpdating}
+                  size="lg"
                 >
                   Cancel
                 </Button>

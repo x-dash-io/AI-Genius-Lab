@@ -55,14 +55,17 @@ export function PrintInvoiceButton({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate PDF");
+        const errorText = await response.text();
+        console.error("PDF generation API failed:", response.status, errorText);
+        throw new Error(`Failed to generate PDF: ${response.status} ${errorText}`);
       }
 
       const data = await response.json();
       const pdfUrl = data.pdfUrl;
 
       if (!pdfUrl) {
-        throw new Error("No PDF URL returned");
+        console.error("No PDF URL in response:", data);
+        throw new Error("No PDF URL returned from server");
       }
 
       // Try to fetch the PDF as a blob to enable download
@@ -84,7 +87,7 @@ export function PrintInvoiceButton({
         // Trigger the download
         document.body.appendChild(link);
         link.click();
-        
+
         // Clean up
         setTimeout(() => {
           document.body.removeChild(link);
@@ -94,7 +97,7 @@ export function PrintInvoiceButton({
         // If blob download fails (CORS issue), open in new tab as fallback
         console.warn("Blob download failed, opening in new tab:", fetchError);
         window.open(pdfUrl, '_blank');
-        
+
         toast({
           title: "Invoice opened",
           description: "The invoice has been opened in a new tab. You can download it from there.",
@@ -143,7 +146,7 @@ export function PrintInvoiceButton({
         {isGenerating ? (
           <>
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Generating...
+            Downloading...
           </>
         ) : (
           <>

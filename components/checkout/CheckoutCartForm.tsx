@@ -127,6 +127,7 @@ export function CheckoutCartForm({ items, couponCode, discountAmount }: Checkout
 
             <Button
               size="lg"
+              variant="premium"
               className="w-full"
               onClick={handleCheckout}
               disabled={isSubmitting}

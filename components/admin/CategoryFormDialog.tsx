@@ -104,7 +104,7 @@ export function CategoryFormDialog({
       const url = category
         ? `/api/admin/categories/${category.id}`
         : "/api/admin/categories";
-      
+
       const method = category ? "PATCH" : "POST";
 
       const response = await fetch(url, {
@@ -312,7 +312,7 @@ export function CategoryFormDialog({
 
             {/* Actions */}
             <div className="flex gap-2 pt-4">
-              <Button type="submit" disabled={isSubmitting} className="flex-1">
+              <Button type="submit" disabled={isSubmitting} className="flex-1" variant="premium" size="lg">
                 {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -327,6 +327,7 @@ export function CategoryFormDialog({
               <Button
                 type="button"
                 variant="outline"
+                size="lg"
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >

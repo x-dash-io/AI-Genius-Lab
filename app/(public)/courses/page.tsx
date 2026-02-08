@@ -5,7 +5,8 @@ import { CourseList } from "@/components/courses/CourseList";
 import { CourseFilters } from "@/components/courses/CourseFilters";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, Zap } from "lucide-react";
+import { Projector as BookOpen, Zap } from "lucide-react";
+import { HeroPattern } from "@/components/ui/hero-pattern";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
@@ -134,17 +135,23 @@ export default async function CoursesPage({ searchParams }: CoursesPageProps) {
         />
 
         {/* Header - Premium High-End Aesthetic */}
-        <div className="space-y-6">
-          <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-bold text-primary gap-2 shadow-[0_0_20px_rgba(var(--primary),0.1)]">
-            <Zap className="h-4 w-4" />
-            <span className="tracking-widest uppercase">Expert-Led Modules</span>
+        {/* Header - Premium High-End Aesthetic */}
+        <div className="relative rounded-3xl overflow-hidden border border-border/50 bg-background/50 backdrop-blur-xl p-8 md:p-12 mb-12">
+          <div className="absolute inset-0 z-0 opacity-30">
+            <HeroPattern />
           </div>
-          <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight">
-            Curated <span className="text-primary italic drop-shadow-sm">AI Learning</span>
-          </h1>
-          <p className="text-xl text-muted-foreground/80 max-w-2xl font-medium leading-relaxed">
-            Step into the future of engineering. Our structured learning paths are designed by practitioners to take you from fundamentals to advanced AI deployment.
-          </p>
+          <div className="relative z-10 space-y-6">
+            <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-bold text-primary gap-2 shadow-[0_0_20px_rgba(var(--primary),0.1)]">
+              <Zap className="h-4 w-4" />
+              <span className="tracking-widest uppercase">Expert-Led Modules</span>
+            </div>
+            <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight">
+              Curated <span className="text-primary italic drop-shadow-sm">AI Learning</span>
+            </h1>
+            <p className="text-xl text-muted-foreground/80 max-w-2xl font-medium leading-relaxed">
+              Step into the future of engineering. Our structured learning paths are designed by practitioners to take you from fundamentals to advanced AI deployment.
+            </p>
+          </div>
         </div>
 
         <Suspense fallback={

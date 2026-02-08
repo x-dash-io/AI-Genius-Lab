@@ -160,7 +160,7 @@ export default function ResetPasswordPage() {
                 Redirecting you to sign in...
               </p>
               <Link href="/sign-in" className="block">
-                <Button className="w-full">
+                <Button className="w-full" variant="outline">
                   Go to Sign In
                 </Button>
               </Link>
@@ -211,7 +211,7 @@ export default function ResetPasswordPage() {
                     </Alert>
                   </motion.div>
                 )}
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" variant="premium" className="w-full" disabled={isLoading}>
                   {isLoading ? (
                     <span className="flex items-center gap-2">
                       <Loader size="sm" inline />
@@ -273,6 +273,7 @@ export default function ResetPasswordPage() {
                 )}
                 <Button
                   type="button"
+                  variant="premium"
                   className="w-full"
                   onClick={handleCodeVerify}
                   disabled={resetCode.length !== 6 || isVerifying}
@@ -289,7 +290,7 @@ export default function ResetPasswordPage() {
                 <div className="text-center space-y-2">
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => {
                       setStep("email");
@@ -365,7 +366,7 @@ export default function ResetPasswordPage() {
                   </Alert>
                 </motion.div>
               )}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" variant="premium" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <span className="flex items-center gap-2">
                     <Loader size="sm" inline />
