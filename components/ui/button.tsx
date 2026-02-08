@@ -9,16 +9,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg border border-primary/20 transition-all active:scale-[0.98]",
+        default: "bg-violet-600 text-white shadow-md hover:bg-violet-700 hover:shadow-lg hover:-translate-y-0.5 border-none transition-all duration-200 active:translate-y-0 active:scale-[0.98]",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:shadow-md shadow-sm",
+          "bg-red-600 text-white shadow-md hover:bg-red-700 hover:shadow-lg transition-all duration-200",
         outline:
-          "border-2 border-input bg-background hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-[0_4px_12px_hsl(var(--primary)/25%)] shadow-sm font-bold transition-all duration-200 px-8",
+          "border-2 border-slate-200 bg-white text-slate-900 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 hover:shadow-sm font-bold transition-all duration-200 px-8",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/90 hover:shadow-[0_2px_8px_hsl(var(--secondary)/0.2)] shadow-sm font-medium",
-        ghost: "text-muted-foreground hover:bg-accent hover:text-foreground hover:shadow-[0_2px_8px_hsl(var(--accent)/0.15)] transition-all font-medium",
-        link: "text-primary underline-offset-4 hover:underline hover:text-primary/80 font-medium",
-        premium: "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xl shadow-amber-500/20 hover:brightness-110 hover:shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 border-none font-bold px-10",
+          "bg-slate-100 text-slate-900 border border-slate-200 hover:bg-slate-200 hover:shadow-sm font-medium transition-all duration-200",
+        ghost: "text-slate-600 hover:bg-slate-100 hover:text-slate-900 hover:shadow-none transition-all duration-200 font-medium",
+        "ghost-destructive": "text-red-600 font-medium hover:bg-red-50 hover:text-red-700 transition-all duration-200",
+        link: "text-violet-600 underline-offset-4 hover:underline hover:text-violet-700 font-medium",
+        premium: "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/25 hover:brightness-110 hover:shadow-amber-500/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 border-none font-bold px-10",
       },
       size: {
         default: "h-11 px-8 py-2.5",

@@ -127,7 +127,7 @@ export default function SignInPage() {
           transition={{ duration: 0.3 }}
           className="w-full max-w-md"
         >
-          <Card>
+          <Card className="shadow-2xl border-none ring-1 ring-black/5 dark:ring-white/10 bg-card/95 backdrop-blur-sm">
             <CardHeader className="space-y-1">
               <CardTitle className="font-display text-2xl font-bold">Sign in</CardTitle>
               <CardDescription>

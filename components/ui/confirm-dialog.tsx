@@ -71,51 +71,55 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                 transition={{ type: "spring", duration: 0.3 }}
                 className="w-full max-w-md"
               >
-                <Card className="shadow-2xl border-border/50">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start gap-4">
-                      <div className={`p-3 rounded-full ${options.variant === "destructive"
-                          ? "bg-destructive/10 text-destructive"
-                          : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                <Card className="shadow-2xl border-none ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+                  <CardHeader className="pb-4 bg-muted/30 pt-6">
+                    <div className="flex items-start gap-5">
+                      <div className={`p-3 rounded-full shrink-0 ${options.variant === "destructive"
+                        ? "bg-destructive/10 text-destructive"
+                        : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
                         }`}>
                         {options.icon || (
                           options.variant === "destructive"
-                            ? <Trash2 className="h-5 w-5" />
-                            : <AlertTriangle className="h-5 w-5" />
+                            ? <Trash2 className="h-6 w-6" />
+                            : <AlertTriangle className="h-6 w-6" />
                         )}
                       </div>
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{options.title}</CardTitle>
-                        <CardDescription className="mt-1.5">
+                      <div className="flex-1 space-y-2">
+                        <CardTitle className="text-xl font-bold">{options.title}</CardTitle>
+                        <CardDescription className="text-base leading-relaxed">
                           {options.description}
                         </CardDescription>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 -mt-1 -mr-2"
+                        className="h-8 w-8 -mt-2 -mr-2 text-muted-foreground hover:text-foreground"
                         onClick={handleCancel}
                       >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
                   </CardHeader>
-                  <CardFooter className="flex gap-3 pt-2">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="flex-1"
-                      onClick={handleCancel}
-                    >
-                      {options.cancelText || "Cancel"}
-                    </Button>
+                  <CardFooter className="flex gap-3 pt-6 pb-6 px-6 bg-card">
+                    {/* Swapped order: Danger/Action first (Right aligned typically, but here full width) 
+                        Actually for safety, "Safe" action often is primary focus. 
+                        Let's keep them side-by-side but style accordingly. 
+                    */}
                     <Button
                       variant={options.variant === "destructive" ? "destructive" : "default"}
                       size="lg"
-                      className="flex-1"
+                      className="flex-1 font-bold shadow-md"
                       onClick={handleConfirm}
                     >
                       {options.confirmText || "Confirm"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="flex-1 font-semibold hover:bg-muted"
+                      onClick={handleCancel}
+                    >
+                      {options.cancelText || "Cancel"}
                     </Button>
                   </CardFooter>
                 </Card>

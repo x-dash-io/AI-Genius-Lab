@@ -191,15 +191,20 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
 
   if (displayCart.items.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <ShoppingCart className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Your cart is empty</h3>
-          <p className="text-muted-foreground mb-4">
-            Add courses to your cart to get started
+      <Card className="border-dashed border-2 shadow-none bg-muted/20">
+        <CardContent className="py-20 text-center flex flex-col items-center justify-center">
+          <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+            <ShoppingCart className="h-10 w-10 text-primary" />
+          </div>
+          <h3 className="text-2xl font-bold mb-3">Your cart is empty</h3>
+          <p className="text-muted-foreground mb-8 max-w-sm mx-auto text-lg">
+            Looks like you haven't added any courses yet. Explore our catalog to find your next skill.
           </p>
           <Link href="/courses">
-            <Button size="lg">Browse Courses</Button>
+            <Button size="lg" className="h-12 px-8 font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 transition-all">
+              Browse Courses
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </Link>
         </CardContent>
       </Card>
@@ -214,7 +219,13 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
           <h2 className="text-xl font-semibold">
             {displayCart.items.length} {displayCart.items.length === 1 ? "Course" : "Courses"}
           </h2>
-          <Button variant="destructive" size="sm" onClick={handleClearCart} disabled={isLoading || isClearing}>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleClearCart}
+            disabled={isLoading || isClearing}
+            className="!bg-red-600 !text-white hover:!bg-red-700 shadow-sm"
+          >
             {isClearing ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
@@ -359,7 +370,7 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
                   onChange={(e) => setCouponCode(e.target.value)}
                   className="h-9 uppercase"
                 />
-                <Button type="submit" size="sm" variant="outline" disabled={isApplyingCoupon || !couponCode.trim()}>
+                <Button type="submit" size="sm" className="bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm font-bold" disabled={isApplyingCoupon || !couponCode.trim()}>
                   {isApplyingCoupon ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
@@ -386,8 +397,9 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
             )}
 
             <Button
+              variant="premium"
               size="lg"
-              className="w-full"
+              className="w-full text-base font-bold shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 transition-all duration-300"
               onClick={handleCheckout}
               disabled={isCheckingOut || isLoading || hasInvalidItems || isAdminPreview}
             >
