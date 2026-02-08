@@ -20,6 +20,7 @@ import {
   CreditCard,
   ShieldCheck,
   Ticket,
+  MessageSquare,
   Settings,
   PanelLeftClose,
   PanelLeft,

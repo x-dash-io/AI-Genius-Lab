@@ -46,13 +46,12 @@ const primaryNavigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "Courses", href: "/courses", icon: BookOpen },
   { name: "Learning Paths", href: "/learning-paths", icon: Route },
-  { name: "Blog", href: "/blog", icon: Newspaper },
   { name: "Cart", href: "/cart", icon: ShoppingCart },
-  { name: "Dashboard", href: "/dashboard", icon: GraduationCap },
 ];
 
 // Secondary navigation - resources dropdown
 const resourcesNavigation = [
+  { name: "Blog", href: "/blog", icon: Newspaper },
   { name: "About Us", href: "/about", icon: Info },
   { name: "Testimonials", href: "/testimonials", icon: Users },
   { name: "FAQ", href: "/faq", icon: HelpCircle },
@@ -123,8 +122,6 @@ export function PublicLayoutClient({
     };
   }, [mobileMenuOpen]);
 
-  // Hide dashboard button on sign-in/sign-up pages to avoid conflicts during redirect
-  const isAuthPage = pathname === "/sign-in" || pathname === "/sign-up";
 
   // Don't render until mounted to prevent hydration mismatch
   if (!mounted) {
@@ -243,8 +240,8 @@ export function PublicLayoutClient({
               <div className="flex items-center gap-4 h-full">
                 <ThemeToggle />
                 {session?.user ? (
-                  <div className="flex items-center gap-3">
-                    <Link href="/dashboard">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm" className="gap-2.5 rounded-xl hover:bg-accent hover:shadow-[0_2px_8px_hsl(var(--accent)_/_0.15)] px-3 transition-all">
                         <Avatar className="h-7 w-7 ring-2 ring-primary/20 transition-transform group-hover:scale-105">
                           <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "User"} />
@@ -260,10 +257,24 @@ export function PublicLayoutClient({
                           </AvatarFallback>
                         </Avatar>
                         <span className="text-sm font-semibold leading-none">{session.user.name || "My Account"}</span>
+                        <ChevronDown className="h-4 w-4 opacity-50" />
                       </Button>
-                    </Link>
-                    <SignOutButton />
-                  </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl glass border-white/20">
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href="/dashboard"
+                          className="flex items-center gap-3 cursor-pointer px-3 py-2.5 rounded-xl transition-colors hover:bg-accent"
+                        >
+                          <GraduationCap className="h-4 w-4 text-primary" />
+                          <span className="font-medium">Dashboard</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="p-0 mt-1">
+                        <SignOutButton className="w-full justify-start gap-3 px-3 py-2.5 rounded-xl transition-colors hover:bg-destructive hover:text-white" />
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 ) : (
                   <div className="flex items-center gap-2.5">
                     <Link href="/sign-in">
