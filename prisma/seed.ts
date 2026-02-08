@@ -28,9 +28,7 @@ async function main() {
     await prisma.course.deleteMany();
     await prisma.learningPath.deleteMany();
     await prisma.category.deleteMany();
-    // We keep Users for now to avoid locking ourselves out, or we can wipe them too if strictly requested. 
-    // User said "reset... no crucial data", so let's wipe users just to be clean, but maybe keep one admin if we can?
-    // Actually, "reset" usually means wipe. I'll wipe users too.
+    await prisma.testimonial.deleteMany();
     await prisma.account.deleteMany();
     await prisma.session.deleteMany();
     await prisma.user.deleteMany();
@@ -262,6 +260,64 @@ Standard like C2PA are becoming essential. We must ensure that human creativity 
                 }
             }
         });
+    }
+
+    // 6. Seed Testimonials
+    console.log("Seeding Testimonials...");
+    const testimonials = [
+        {
+            name: "Sarah Johnson",
+            role: "Marketing Manager",
+            rating: 5,
+            text: "AI Genius Lab transformed how I approach content creation. The courses are practical, well-structured, and immediately applicable. I've automated 60% of my content workflow!",
+            category: "courses",
+            courseOrPath: "AI for Content Creation",
+            date: new Date("2024-01-15"),
+            featured: true,
+        },
+        {
+            name: "Michael Chen",
+            role: "Software Developer",
+            rating: 5,
+            text: "The learning paths are incredible! Going from beginner to building production AI apps in just 3 months. The structured approach made all the difference.",
+            category: "learning-paths",
+            courseOrPath: "Full-Stack AI Developer Path",
+            date: new Date("2024-01-10"),
+            featured: true,
+        },
+        {
+            name: "David Thompson",
+            role: "Entrepreneur",
+            rating: 5,
+            text: "The platform is intuitive and the progress tracking keeps me motivated. Lifetime access means I can learn at my own pace without pressure. Best investment I've made!",
+            category: "platform",
+            date: new Date("2024-01-05"),
+            featured: true,
+        },
+        {
+            name: "James Wilson",
+            role: "Product Manager",
+            rating: 5,
+            text: "The AI Product Management path gave me the confidence to lead AI initiatives at my company. Practical case studies and hands-on projects were game-changers.",
+            category: "learning-paths",
+            courseOrPath: "AI Product Management Path",
+            date: new Date("2023-12-20"),
+            featured: true,
+        },
+        {
+            name: "Emily Rodriguez",
+            role: "Business Analyst",
+            rating: 5,
+            text: "I had zero AI experience before this. Now I'm implementing AI solutions at my company and getting recognized for it. The courses break down complex concepts beautifully.",
+            category: "courses",
+            courseOrPath: "AI for Business Professionals",
+            date: new Date("2024-01-08"),
+            featured: false,
+        }
+    ];
+
+    for (const t of testimonials) {
+        await prisma.testimonial.create({ data: t });
     }
 
     console.log("✅ Database reset and seeded successfully.");

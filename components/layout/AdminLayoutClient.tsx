@@ -46,6 +46,7 @@ const adminNavigation = [
   { name: "Purchases", href: "/admin/purchases", icon: Receipt },
   { name: "Coupons", href: "/admin/coupons", icon: Ticket },
   { name: "Blog", href: "/admin/blog", icon: Newspaper },
+  { name: "Testimonials", href: "/admin/testimonials", icon: MessageSquare },
   { name: "Settings", href: "/admin/settings", icon: Settings },
   { name: "Profile", href: "/admin/profile", icon: User },
 ];

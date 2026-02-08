@@ -13,6 +13,7 @@ import { HeroBackgroundBlobs } from "@/components/ui/hero-background-blobs";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { getHomepageStats } from "@/lib/homepage-stats";
 import { getHeroLogos } from "@/lib/settings";
+import { getFeaturedTestimonials } from "@/lib/testimonials";
 
 export const dynamic = "force-dynamic";
 
@@ -34,14 +35,17 @@ export default async function LandingPage() {
   // Fetch stats and logos
   let stats;
   let heroLogos: any[] = [];
+  let testimonials: any[] = [];
 
   try {
-    const [statsResult, logosResult] = await Promise.all([
+    const [statsResult, logosResult, testimonialsResult] = await Promise.all([
       getHomepageStats(),
-      getHeroLogos().catch(() => []) // Fallback to empty if fails
+      getHeroLogos().catch(() => []), // Fallback to empty if fails
+      getFeaturedTestimonials(),
     ]);
     stats = statsResult;
     heroLogos = logosResult;
+    testimonials = testimonialsResult;
   } catch (error) {
     console.error("Failed to fetch homepage data:", error);
     // Use empty stats as fallback
@@ -66,7 +70,7 @@ export default async function LandingPage() {
         <LaunchCurriculum stats={stats} />
         <HowItWorks />
         <SocialProof stats={stats} />
-        <HomeTestimonials />
+        <HomeTestimonials testimonials={testimonials} />
         <SecuritySection />
         <FinalCTA />
       </div>

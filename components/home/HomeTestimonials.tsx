@@ -3,11 +3,15 @@
 import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { testimonials } from "@/lib/testimonials";
+import { Testimonial } from "@/lib/testimonials";
 
-export function HomeTestimonials() {
-    // Select featured testimonials (top 3)
-    const featured = testimonials.filter(t => t.featured).slice(0, 3);
+interface HomeTestimonialsProps {
+    testimonials: Testimonial[];
+}
+
+export function HomeTestimonials({ testimonials }: HomeTestimonialsProps) {
+    // testimonials are already filtered for featured in page.tsx
+    const featured = testimonials;
 
     return (
         <section className="py-24 bg-gradient-to-b from-transparent to-primary/5">
@@ -53,7 +57,7 @@ export function HomeTestimonials() {
 
                             <div className="mt-auto flex items-center gap-4">
                                 <Avatar className="h-10 w-10 border border-primary/20">
-                                    <AvatarImage src={testimonial.avatar} alt={testimonial.name} />
+                                    <AvatarImage src={testimonial.avatar || undefined} alt={testimonial.name} />
                                     <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
                                         {testimonial.name.split(' ').map(n => n[0]).join('')}
                                     </AvatarFallback>
