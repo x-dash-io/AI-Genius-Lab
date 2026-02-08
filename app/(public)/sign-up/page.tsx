@@ -294,6 +294,7 @@ export default function SignUpPage() {
                       <Button
                         type="button"
                         className="w-full"
+                        variant="premium"
                         onClick={handleOTPSubmit}
                         disabled={otp.length !== 6 || isVerifyingOTP}
                         size="lg"
@@ -313,7 +314,7 @@ export default function SignUpPage() {
                         </p>
                         <Button
                           type="button"
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           onClick={handleResendOTP}
                           disabled={isSendingOTP}
@@ -323,7 +324,7 @@ export default function SignUpPage() {
                       </div>
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
                         className="w-full"
                         onClick={() => {

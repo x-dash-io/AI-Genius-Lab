@@ -22,9 +22,9 @@ const buttonVariants = cva(
         premium: "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/25 hover:brightness-110 hover:shadow-amber-500/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-300 border-none font-bold px-10",
       },
       size: {
-        default: "h-11 px-8 py-2.5",
-        sm: "h-9 rounded-lg px-4",
-        lg: "h-14 rounded-2xl px-14 text-base",
+        default: "h-11 px-5 py-2.5",
+        sm: "h-9 rounded-lg px-3",
+        lg: "h-12 rounded-xl px-8 text-base",
         icon: "h-11 w-11",
       },
     }
