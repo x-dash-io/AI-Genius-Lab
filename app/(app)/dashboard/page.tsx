@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
+import { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +52,51 @@ export const metadata: Metadata = generateSEOMetadata({
   nofollow: true,
 });
 
+async function getDashboardPurchases(userId: string) {
+  const courseInclude = {
+    include: {
+      sections: {
+        include: {
+          lessons: {
+            select: { id: true },
+          },
+        },
+      },
+    },
+  } as const;
+
+  const baseQuery = {
+    select: {
+      id: true,
+      Course: courseInclude,
+    },
+    take: 10,
+  } as const;
+
+  try {
+    return await prisma.purchase.findMany({
+      where: { userId, status: "paid" },
+      ...baseQuery,
+    });
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2022"
+    ) {
+      console.warn(
+        "[DASHBOARD] Purchase schema mismatch detected, falling back to legacy-safe purchase query.",
+      );
+
+      return prisma.purchase.findMany({
+        where: { userId },
+        ...baseQuery,
+      });
+    }
+
+    throw error;
+  }
+}
+
 export default async function DashboardPage({
   searchParams,
 }: {
@@ -78,24 +124,7 @@ export default async function DashboardPage({
     enrollments
   ] = await Promise.all([
     // Get purchased courses with progress
-    prisma.purchase.findMany({
-      where: { userId: session.user.id, status: "paid" },
-      include: {
-        Course: {
-          include: {
-            sections: {
-              include: {
-                lessons: {
-                  select: { id: true }
-                }
-              }
-            }
-          }
-        }
-      },
-      orderBy: { createdAt: "desc" },
-      take: 10
-    }),
+    getDashboardPurchases(session.user.id),
     // Get recent progress
     prisma.progress.findMany({
       where: { userId: session.user.id },
