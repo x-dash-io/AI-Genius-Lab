@@ -236,23 +236,63 @@ export default async function DashboardPage({
   const estimatedMinutes = totalLessonsCompleted * 5;
   const learningHours = Math.floor(estimatedMinutes / 60);
   const learningMinutes = estimatedMinutes % 60;
+  const primaryCourse = sortedCourses.find((course: any) => course.completionPercent < 100) ?? sortedCourses[0] ?? null;
+  const resumeHref = primaryCourse ? `/library/${primaryCourse.Course.slug}` : "/learning-paths";
 
   return (
     <div className="space-y-6 sm:space-y-8 pb-8">
       <Suspense fallback={null}>
         <SubscriptionSuccessToast />
       </Suspense>
-      {/* Welcome Section */}
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          Welcome Back
-        </p>
-        <h1 className="mt-2 font-display text-3xl sm:text-4xl font-bold tracking-tight">
-          {session.user.name ? `Hi, ${session.user.name.split(' ')[0]}!` : 'Your Learning Dashboard'}
-        </h1>
-        <p className="mt-2 text-base sm:text-lg text-muted-foreground">
-          Track your progress and continue your AI learning journey.
-        </p>
+      {/* Welcome + Resume Header */}
+      <div className="grid gap-4 lg:grid-cols-[1.15fr,0.85fr] items-stretch">
+        <Card className="border-primary/20 bg-card/90">
+          <CardContent className="p-6 sm:p-7">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Welcome Back</p>
+            <h1 className="mt-2 font-display text-3xl sm:text-4xl font-bold tracking-tight">
+              {session.user.name ? `Hi, ${session.user.name.split(' ')[0]}!` : 'Your Learning Dashboard'}
+            </h1>
+            <p className="mt-2 text-base text-muted-foreground">
+              Continue your active path and keep your momentum streak going.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Link href={resumeHref}>
+                <Button variant="premium" size="lg" className="rounded-2xl min-h-[44px]">
+                  Resume learning
+                  <TrendingUp className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+              <Link href="/learning-paths">
+                <Button variant="outline" size="lg" className="rounded-2xl min-h-[44px]">
+                  View Paths
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-primary/20 bg-card/90">
+          <CardContent className="p-6 flex items-center gap-5">
+            <div
+              className="h-24 w-24 rounded-full grid place-items-center"
+              style={{
+                background: `conic-gradient(hsl(var(--primary)) ${avgCompletionRate * 3.6}deg, hsl(var(--border)) 0deg)`,
+              }}
+            >
+              <div className="h-[76px] w-[76px] rounded-full bg-background grid place-items-center">
+                <span className="text-xl font-black">{avgCompletionRate}%</span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">Overall progress</p>
+              <div className="inline-flex items-center gap-2 rounded-full bg-orange-500/10 px-3 py-1.5 text-sm font-semibold text-orange-600 dark:text-orange-400">
+                <Flame className="h-4 w-4" />
+                {learningStreak} day streak
+              </div>
+              <p className="text-xs text-muted-foreground">Stay active daily to maintain streak rewards.</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Stats Grid */}

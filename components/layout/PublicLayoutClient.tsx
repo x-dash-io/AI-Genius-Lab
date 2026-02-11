@@ -44,13 +44,13 @@ import Image from "next/image";
 // Primary navigation - core conversion paths
 const primaryNavigation = [
   { name: "Home", href: "/", icon: Home },
-  { name: "Courses", href: "/courses", icon: BookOpen },
-  { name: "Learning Paths", href: "/learning-paths", icon: Route },
+  { name: "Paths", href: "/learning-paths", icon: Route },
   { name: "Cart", href: "/cart", icon: ShoppingCart },
 ];
 
 // Secondary navigation - resources dropdown
 const resourcesNavigation = [
+  { name: "Courses", href: "/courses", icon: BookOpen },
   { name: "Blog", href: "/blog", icon: Newspaper },
   { name: "About Us", href: "/about", icon: Info },
   { name: "Testimonials", href: "/testimonials", icon: Users },
