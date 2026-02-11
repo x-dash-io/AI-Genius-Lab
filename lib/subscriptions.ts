@@ -5,7 +5,8 @@ import {
   cancelPayPalSubscription,
   getPayPalSubscription
 } from "@/lib/paypal";
-import { SubscriptionTier, SubscriptionStatus, SubscriptionInterval } from "@prisma/client";
+import { Prisma, SubscriptionTier, SubscriptionStatus, SubscriptionInterval } from "@prisma/client";
+import { assertSubscriptionTransition } from "@/lib/subscription-state";
 
 /**
  * Sync all active subscription plans from the database to PayPal.
@@ -20,7 +21,7 @@ export async function syncSubscriptionPlansToPayPal() {
   }
 
   let syncedCount = 0;
-  let errorMessages: string[] = [];
+  const errorMessages: string[] = [];
 
   for (const plan of plans) {
     try {
@@ -72,8 +73,9 @@ export async function syncSubscriptionPlansToPayPal() {
         });
       }
       syncedCount++;
-    } catch (error: any) {
-      const msg = `Failed to sync plan ${plan.name}: ${error.message}`;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      const msg = `Failed to sync plan ${plan.name}: ${message}`;
       console.error(msg);
       errorMessages.push(msg);
     }
@@ -216,7 +218,18 @@ export async function updateSubscription(subscriptionId: string, data: {
   currentPeriodEnd?: Date;
   paypalPlanId?: string;
 }) {
-  const updateData: any = {
+  const current = await prisma.subscription.findUnique({
+    where: { id: subscriptionId },
+    include: { plan: true },
+  });
+
+  if (!current) {
+    throw new Error("Subscription not found");
+  }
+
+  assertSubscriptionTransition(current.status, data.status);
+
+  const updateData: Prisma.SubscriptionUpdateInput = {
     status: data.status,
     paypalSubscriptionId: data.paypalSubscriptionId,
     currentPeriodStart: data.currentPeriodStart,
@@ -268,6 +281,8 @@ export async function cancelSubscription(subscriptionId: string) {
       // We continue to update our DB even if PayPal fails
     }
   }
+
+  assertSubscriptionTransition(subscription.status, "cancelled");
 
   return prisma.subscription.update({
     where: { id: subscriptionId },

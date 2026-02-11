@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import {
+  DEFAULT_REDIRECTS,
+  isAdminRoute,
+  isCustomerOnlyRoute,
+  requiresAuthRoute,
+} from "@/lib/route-policy";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -27,33 +33,25 @@ export async function proxy(request: NextRequest) {
   }
 
   // Protect admin routes
-  if (pathname.startsWith("/admin")) {
+  if (isAdminRoute(pathname)) {
     const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
     });
 
     if (!token) {
-      const signInUrl = new URL("/sign-in", request.url);
+      const signInUrl = new URL(DEFAULT_REDIRECTS.signIn, request.url);
       signInUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(signInUrl);
     }
 
     // Check admin role
     if (token.role !== "admin") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL(DEFAULT_REDIRECTS.customerHome, request.url));
     }
   }
 
-  // Protect authenticated routes - all routes under (app) folder
-  const protectedRoutes = [
-    "/dashboard",
-    "/library",
-    "/profile",
-    "/activity",
-  ];
-
-  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
+  const isProtectedRoute = requiresAuthRoute(pathname);
 
   if (isProtectedRoute) {
     const token = await getToken({
@@ -62,18 +60,15 @@ export async function proxy(request: NextRequest) {
     });
 
     if (!token) {
-      const signInUrl = new URL("/sign-in", request.url);
+      const signInUrl = new URL(DEFAULT_REDIRECTS.signIn, request.url);
       signInUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(signInUrl);
     }
 
     // Prevent admin users from accessing customer-only pages
     // Admins should use /admin routes, not customer dashboard/library/profile/activity
-    const customerOnlyRoutes = ["/dashboard", "/library", "/activity", "/profile"];
-    const isCustomerOnlyRoute = customerOnlyRoutes.some((route) => pathname.startsWith(route));
-
-    if (isCustomerOnlyRoute && token.role === "admin") {
-      return NextResponse.redirect(new URL("/admin", request.url));
+    if (isCustomerOnlyRoute(pathname) && token.role === "admin") {
+      return NextResponse.redirect(new URL(DEFAULT_REDIRECTS.adminHome, request.url));
     }
   }
 

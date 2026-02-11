@@ -114,9 +114,10 @@ export async function POST(request: NextRequest) {
         const purchaseId = `purchase_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
         let amountToPay = course.priceCents;
+        let itemDiscount = 0;
         if (discountTotal > 0 && totalOriginalPrice > 0) {
           const ratio = course.priceCents / totalOriginalPrice;
-          const itemDiscount = Math.round(discountTotal * ratio);
+          itemDiscount = Math.round(discountTotal * ratio);
           amountToPay = Math.max(0, course.priceCents - itemDiscount);
         }
 
@@ -132,6 +133,18 @@ export async function POST(request: NextRequest) {
             provider: "paypal",
             amountCents: amountToPay,
             couponId: coupon?.id, // Link coupon
+            priceOriginalCents: course.priceCents,
+            priceDiscountCents: itemDiscount,
+            pricingSnapshot: {
+              couponId: coupon?.id ?? null,
+              couponCode: coupon?.code ?? null,
+              discountType: coupon?.discountType ?? null,
+              discountAmount: coupon?.discountAmount ?? null,
+              discountAppliedCents: itemDiscount,
+              totalOrderDiscountCents: discountTotal,
+              originalPriceCents: course.priceCents,
+              finalPriceCents: amountToPay,
+            },
           },
           create: {
             id: purchaseId,
@@ -142,6 +155,18 @@ export async function POST(request: NextRequest) {
             status: "pending",
             provider: "paypal",
             couponId: coupon?.id,
+            priceOriginalCents: course.priceCents,
+            priceDiscountCents: itemDiscount,
+            pricingSnapshot: {
+              couponId: coupon?.id ?? null,
+              couponCode: coupon?.code ?? null,
+              discountType: coupon?.discountType ?? null,
+              discountAmount: coupon?.discountAmount ?? null,
+              discountAppliedCents: itemDiscount,
+              totalOrderDiscountCents: discountTotal,
+              originalPriceCents: course.priceCents,
+              finalPriceCents: amountToPay,
+            },
           },
         });
       })

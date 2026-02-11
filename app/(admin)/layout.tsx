@@ -3,12 +3,13 @@ import { requireRole } from "@/lib/access";
 import { AdminLayoutClient } from "@/components/layout/AdminLayoutClient";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
+import { DEFAULT_REDIRECTS } from "@/lib/route-policy";
 
 async function AdminGuard({ children }: { children: React.ReactNode }) {
   try {
     await requireRole("admin");
-  } catch (error) {
-    redirect("/dashboard");
+  } catch {
+    redirect(DEFAULT_REDIRECTS.customerHome);
   }
 
   return <AdminLayoutClient>{children}</AdminLayoutClient>;
