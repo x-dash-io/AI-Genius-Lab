@@ -7,7 +7,26 @@ import { verifyPayPalWebhook, getPayPalSubscription, cancelPayPalSubscription } 
 type PayPalEvent = {
   id?: string;
   event_type?: string;
-  resource?: Record<string, unknown>;
+  resource?: {
+    id?: string;
+    custom_id?: string;
+    start_time?: string;
+    plan_id?: string;
+    billing_agreement_id?: string;
+    billing_info?: {
+      next_billing_time?: string;
+    };
+    amount?: {
+      total?: string;
+      currency_code?: string;
+    };
+    supplementary_data?: {
+      related_ids?: {
+        order_id?: string;
+      };
+    };
+    [key: string]: unknown;
+  };
 };
 
 function getOrderId(event: PayPalEvent) {
@@ -196,6 +215,13 @@ export async function POST(request: Request) {
     if (event.event_type === "PAYMENT.SALE.COMPLETED") {
       const saleResource = event.resource;
       const paypalSubId = saleResource.billing_agreement_id;
+      const saleAmount = saleResource.amount?.total;
+      const saleCurrency = saleResource.amount?.currency_code;
+
+      if (!saleAmount || !saleCurrency) {
+        console.warn("[WEBHOOK] Missing sale amount details in PAYMENT.SALE.COMPLETED event");
+        return NextResponse.json({ received: true });
+      }
 
       if (paypalSubId) {
         const sub = await prisma.subscription.findUnique({
@@ -206,8 +232,8 @@ export async function POST(request: Request) {
           await prisma.subscriptionPayment.create({
             data: {
               subscriptionId: sub.id,
-              amountCents: Math.round(parseFloat(saleResource.amount.total) * 100),
-              currency: saleResource.amount.currency_code.toLowerCase(),
+              amountCents: Math.round(parseFloat(saleAmount) * 100),
+              currency: saleCurrency.toLowerCase(),
               status: "completed",
               paypalSaleId: saleResource.id,
             },

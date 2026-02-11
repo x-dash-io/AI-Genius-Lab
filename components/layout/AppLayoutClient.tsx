@@ -20,7 +20,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { HeroBackgroundBlobs } from "@/components/ui/hero-background-blobs";
@@ -45,6 +44,14 @@ const navigation = [
   { name: "Profile", href: "/profile", icon: User },
 ];
 
+const mobileBottomNavigation = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Paths", href: "/learning-paths", icon: Route },
+  { name: "Library", href: "/library", icon: BookOpen },
+  { name: "Activity", href: "/activity", icon: Activity },
+  { name: "Account", href: "/profile", icon: User },
+];
+
 interface AppLayoutClientProps {
   children: React.ReactNode;
   planName?: string;
@@ -55,22 +62,17 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = true;
   const { cart } = useCart();
   const menuRef = useRef<HTMLElement>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null | undefined>(session?.user?.image);
-
-  // Prevent hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const [avatarOverride, setAvatarOverride] = useState<string | null | undefined>(undefined);
 
   // Listen for avatar updates
   useEffect(() => {
     if (!mounted) return;
 
     const handleAvatarUpdate = (event: CustomEvent) => {
-      setAvatarUrl(event.detail.imageUrl);
+      setAvatarOverride(event.detail.imageUrl);
     };
 
     window.addEventListener('avatarUpdated', handleAvatarUpdate as EventListener);
@@ -78,11 +80,6 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
       window.removeEventListener('avatarUpdated', handleAvatarUpdate as EventListener);
     };
   }, [mounted]);
-
-  // Update avatar when session changes
-  useEffect(() => {
-    setAvatarUrl(session?.user?.image);
-  }, [session?.user?.image]);
 
   // Close menu on scroll
   useEffect(() => {
@@ -162,8 +159,8 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
               transition={{ duration: 0.3 }}
               className="w-64 flex-col border-r border-white/10 flex fixed left-0 top-0 bottom-0 z-20"
               style={{
-                background: "linear-gradient(180deg, rgba(var(--card-rgb), 0.95) 0%, rgba(var(--card-rgb), 0.85) 100%)",
-                backdropFilter: "blur(20px)"
+                background: "hsl(var(--card) / 0.82)",
+                backdropFilter: "blur(16px)"
               }}
             >
               {/* Sidebar Header - Fixed at top */}
@@ -271,7 +268,7 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
 
                         <div className="relative">
                           <Avatar className="h-11 w-11 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
-                            <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "User"} />
+                            <AvatarImage src={(avatarOverride ?? session?.user?.image) || undefined} alt={session.user.name || session.user.email || "User"} />
                             <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-sm font-black">
                               {(() => {
                                 const name = session.user.name;
@@ -418,10 +415,10 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
                       damping: 30,
                       stiffness: 300
                     }}
-                    className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-card/95 backdrop-blur-md border-r shadow-2xl overflow-y-auto lg:hidden"
+                    className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-card/96 backdrop-blur-xl border-r border-border/80 shadow-[0_18px_40px_rgba(2,6,23,0.35)] overflow-y-auto lg:hidden"
                   >
                     {/* Menu Header */}
-                    <div className="border-b p-4 flex items-center justify-between sticky top-0 bg-card/95 backdrop-blur-md z-10 h-16">
+                    <div className="border-b border-border/80 p-4 flex items-center justify-between sticky top-0 bg-card/96 backdrop-blur-xl z-10 h-16">
                       <Link href={getHref("/dashboard")} onClick={() => setMobileMenuOpen(false)} className="flex items-center">
                         <div className="relative h-10 w-auto flex-shrink-0">
                           <Image
@@ -483,7 +480,7 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
-                        className="border-t px-4 py-4 space-y-3 sticky bottom-0 bg-card/95 backdrop-blur-md"
+                        className="border-t border-border/80 px-4 py-4 space-y-3 sticky bottom-0 bg-card/96 backdrop-blur-xl"
                       >
                         <Link href={getHref("/profile")} onClick={() => setMobileMenuOpen(false)}>
                           <motion.div
@@ -499,7 +496,7 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
 
                             <div className="relative">
                               <Avatar className="h-10 w-10 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all duration-300">
-                                <AvatarImage src={avatarUrl || undefined} alt={session.user.name || session.user.email || "User"} />
+                                <AvatarImage src={(avatarOverride ?? session?.user?.image) || undefined} alt={session.user.name || session.user.email || "User"} />
                                 <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-sm font-bold">
                                   {(() => {
                                     const name = session.user.name;
@@ -562,7 +559,7 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
             </div>
 
             {/* Main Content */}
-            <main className="flex-1 px-4 sm:px-6 pt-28 pb-12 relative z-10">
+            <main className="flex-1 px-4 sm:px-6 pt-28 pb-28 relative z-10">
               <div className="mx-auto w-full max-w-none sm:max-w-7xl">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -573,6 +570,35 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
                 </motion.div>
               </div>
             </main>
+
+            <Link href={getHref("/library")} className="fixed bottom-24 right-4 z-40">
+              <Button variant="premium" className="h-12 rounded-full px-5 shadow-xl min-h-[44px]">
+                Resume
+              </Button>
+            </Link>
+
+            <nav className="fixed bottom-0 inset-x-0 z-40 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
+              <div className="grid grid-cols-5 px-1 py-2">
+                {mobileBottomNavigation.map((item) => {
+                  const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                  const Icon = item.icon;
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={getHref(item.href)}
+                      className={cn(
+                        "flex min-h-[44px] flex-col items-center justify-center rounded-xl px-1 py-1.5 text-[10px] font-semibold",
+                        isActive ? "text-primary bg-primary/10" : "text-muted-foreground"
+                      )}
+                    >
+                      <Icon className="h-4 w-4 mb-0.5" />
+                      <span>{item.name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </nav>
             <Footer />
           </div>
         </div>

@@ -35,7 +35,6 @@ import {
   Newspaper,
   ChevronDown,
   Info,
-  MessageSquare,
   Users,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
@@ -44,13 +43,13 @@ import Image from "next/image";
 // Primary navigation - core conversion paths
 const primaryNavigation = [
   { name: "Home", href: "/", icon: Home },
-  { name: "Courses", href: "/courses", icon: BookOpen },
-  { name: "Learning Paths", href: "/learning-paths", icon: Route },
+  { name: "Paths", href: "/learning-paths", icon: Route },
   { name: "Cart", href: "/cart", icon: ShoppingCart },
 ];
 
 // Secondary navigation - resources dropdown
 const resourcesNavigation = [
+  { name: "Courses", href: "/courses", icon: BookOpen },
   { name: "Blog", href: "/blog", icon: Newspaper },
   { name: "About Us", href: "/about", icon: Info },
   { name: "Testimonials", href: "/testimonials", icon: Users },
@@ -72,14 +71,9 @@ export function PublicLayoutClient({
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [resourcesOpen, setResourcesOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = true;
   const menuRef = useRef<HTMLElement>(null);
   const { cart } = useCart();
-
-  // Prevent hydration mismatch by mounting on client only
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Close menu on scroll
   useEffect(() => {
@@ -142,10 +136,10 @@ export function PublicLayoutClient({
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="fixed top-4 left-0 right-0 z-50 px-4 pointer-events-none"
+          className="sticky top-0 left-0 right-0 z-50 px-4 pt-3 pointer-events-none"
         >
           <div className="mx-auto w-full max-w-7xl pointer-events-auto">
-            <div className="glass rounded-2xl h-16 px-6 flex items-center justify-between shadow-2xl shadow-primary/5">
+            <div className="glass rounded-2xl h-16 px-6 flex items-center justify-between border border-border/60 shadow-[0_10px_30px_rgba(2,6,23,0.12)]">
               {/* Logo */}
               <Link href="/" className="flex items-center group transition-transform hover:scale-105">
                 <div className="relative h-9 w-auto flex-shrink-0">
@@ -380,7 +374,7 @@ export function PublicLayoutClient({
                   damping: 30,
                   stiffness: 300
                 }}
-                className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-card/95 backdrop-blur-md border-r shadow-2xl flex flex-col lg:hidden"
+                className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-card/96 backdrop-blur-xl border-r border-border/80 shadow-[0_18px_40px_rgba(2,6,23,0.35)] flex flex-col lg:hidden"
               >
                 {/* Menu Header */}
                 <div className="border-b p-4 flex items-center justify-between bg-card/95 backdrop-blur-md z-10 h-16 flex-shrink-0">
