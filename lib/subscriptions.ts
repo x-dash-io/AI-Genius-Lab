@@ -248,7 +248,7 @@ export async function updateSubscription(subscriptionId: string, data: {
     });
 
     if (plan) {
-      updateData.planId = plan.id;
+      updateData.plan = { connect: { id: plan.id } };
       updateData.interval = plan.paypalAnnualPlanId === data.paypalPlanId ? "annual" : "monthly";
     }
   }
