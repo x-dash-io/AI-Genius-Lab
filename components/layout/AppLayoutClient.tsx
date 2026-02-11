@@ -45,6 +45,14 @@ const navigation = [
   { name: "Profile", href: "/profile", icon: User },
 ];
 
+const mobileBottomNavigation = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Paths", href: "/learning-paths", icon: Route },
+  { name: "Library", href: "/library", icon: BookOpen },
+  { name: "Activity", href: "/activity", icon: Activity },
+  { name: "Account", href: "/profile", icon: User },
+];
+
 interface AppLayoutClientProps {
   children: React.ReactNode;
   planName?: string;
@@ -562,7 +570,7 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
             </div>
 
             {/* Main Content */}
-            <main className="flex-1 px-4 sm:px-6 pt-28 pb-12 relative z-10">
+            <main className="flex-1 px-4 sm:px-6 pt-28 pb-28 relative z-10">
               <div className="mx-auto w-full max-w-none sm:max-w-7xl">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -573,6 +581,35 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
                 </motion.div>
               </div>
             </main>
+
+            <Link href={getHref("/library")} className="fixed bottom-24 right-4 z-40">
+              <Button variant="premium" className="h-12 rounded-full px-5 shadow-xl min-h-[44px]">
+                Resume
+              </Button>
+            </Link>
+
+            <nav className="fixed bottom-0 inset-x-0 z-40 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
+              <div className="grid grid-cols-5 px-1 py-2">
+                {mobileBottomNavigation.map((item) => {
+                  const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                  const Icon = item.icon;
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={getHref(item.href)}
+                      className={cn(
+                        "flex min-h-[44px] flex-col items-center justify-center rounded-xl px-1 py-1.5 text-[10px] font-semibold",
+                        isActive ? "text-primary bg-primary/10" : "text-muted-foreground"
+                      )}
+                    >
+                      <Icon className="h-4 w-4 mb-0.5" />
+                      <span>{item.name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </nav>
             <Footer />
           </div>
         </div>
