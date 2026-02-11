@@ -2,7 +2,7 @@
 
 import { useState, createContext, useContext, useCallback, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, Trash2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -54,16 +54,14 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
       <AnimatePresence>
         {isOpen && options && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+              className="fixed inset-0 z-[var(--z-overlay)] bg-[hsl(var(--foreground)/0.5)] backdrop-blur-[var(--blur-sm)]"
               onClick={handleCancel}
             />
-            {/* Dialog */}
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center p-4">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -71,17 +69,22 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                 transition={{ type: "spring", duration: 0.3 }}
                 className="w-full max-w-md"
               >
-                <Card className="shadow-2xl border-none ring-1 ring-black/5 dark:ring-white/10 overflow-hidden">
+                <Card className="ui-surface overflow-hidden border shadow-xl">
                   <CardHeader className="pb-4 bg-muted/30 pt-6">
                     <div className="flex items-start gap-5">
-                      <div className={`p-3 rounded-full shrink-0 ${options.variant === "destructive"
-                        ? "bg-destructive/10 text-destructive"
-                        : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                        }`}>
-                        {options.icon || (
+                      <div
+                        className={`shrink-0 rounded-full p-3 ${
                           options.variant === "destructive"
-                            ? <Trash2 className="h-6 w-6" />
-                            : <AlertTriangle className="h-6 w-6" />
+                            ? "bg-destructive/10 text-destructive"
+                            : "bg-warning/12 text-warning"
+                        }`}
+                      >
+                        {options.icon || (
+                          options.variant === "destructive" ? (
+                            <Trash2 className="h-6 w-6" />
+                          ) : (
+                            <AlertTriangle className="h-6 w-6" />
+                          )
                         )}
                       </div>
                       <div className="flex-1 space-y-2">
@@ -101,10 +104,6 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
                     </div>
                   </CardHeader>
                   <CardFooter className="flex gap-3 pt-6 pb-6 px-6 bg-card">
-                    {/* Swapped order: Danger/Action first (Right aligned typically, but here full width) 
-                        Actually for safety, "Safe" action often is primary focus. 
-                        Let's keep them side-by-side but style accordingly. 
-                    */}
                     <Button
                       variant={options.variant === "destructive" ? "destructive" : "default"}
                       size="lg"

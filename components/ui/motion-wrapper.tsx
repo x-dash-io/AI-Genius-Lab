@@ -1,5 +1,9 @@
 "use client";
 
+/** LEGACY UI COMPONENT
+ * Kept for backward compatibility with pre-refactor page animations.
+ * Do not use for new UI work; use restrained tokenized motion patterns.
+ */
 import { motion } from "framer-motion";
 
 export const FadeIn = ({ children, delay = 0, direction = "up", duration = 0.5, className }: {

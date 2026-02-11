@@ -1,5 +1,9 @@
 "use client";
 
+/** LEGACY UI COMPONENT
+ * Kept for backward compatibility with older admin settings controls.
+ * Do not use for new UI work; use the standardized `Switch` component.
+ */
 import * as React from "react";
 import * as SwitchPrimitives from "@radix-ui/react-switch";
 

@@ -1,13 +1,21 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { Metadata } from "next";
+import { ArrowRight, Search, SlidersHorizontal } from "lucide-react";
 import { getPublishedCourses } from "@/lib/courses";
-import { CourseList } from "@/components/courses/CourseList";
-import { CourseFilters } from "@/components/courses/CourseFilters";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
-import { Card, CardContent } from "@/components/ui/card";
-import { Projector as BookOpen, Zap } from "lucide-react";
-import { HeroPattern } from "@/components/ui/hero-pattern";
-import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
+import {
+  ContentRegion,
+  PageContainer,
+  PageHeader,
+  StatusRegion,
+  Toolbar,
+} from "@/components/layout/shell";
 
 export const dynamic = "force-dynamic";
 
@@ -22,33 +30,39 @@ interface CoursesPageProps {
   searchParams: Promise<{ search?: string; category?: string; price?: string; sort?: string }>;
 }
 
-async function CourseCatalogContent({ searchParams }: CoursesPageProps) {
-  const params = await searchParams;
-  const allCourses = await getPublishedCourses();
+function formatPrice(priceCents: number) {
+  return priceCents === 0 ? "Free" : `$${(priceCents / 100).toFixed(2)}`;
+}
 
+function applyFilters(
+  allCourses: Awaited<ReturnType<typeof getPublishedCourses>>,
+  search: string | undefined,
+  category: string | undefined,
+  price: string | undefined,
+  sort: string | undefined
+) {
   let courses = [...allCourses];
 
-  // Apply search filter
-  if (params.search) {
-    const searchLower = params.search.toLowerCase();
+  if (search) {
+    const term = search.toLowerCase();
     courses = courses.filter(
       (course) =>
-        course.title.toLowerCase().includes(searchLower) ||
-        course.description?.toLowerCase().includes(searchLower)
+        course.title.toLowerCase().includes(term) ||
+        course.description?.toLowerCase().includes(term)
     );
   }
 
-  // Apply category filter
-  if (params.category) {
-    courses = courses.filter((course) => {
-      // Check relation first (preferred), then categoryId, then legacy string
-      return course.Category?.slug === params.category || course.categoryId === params.category || course.category === params.category;
-    });
+  if (category) {
+    courses = courses.filter(
+      (course) =>
+        course.Category?.slug === category ||
+        course.categoryId === category ||
+        course.category === category
+    );
   }
 
-  // Apply price filter
-  if (params.price) {
-    switch (params.price) {
+  if (price) {
+    switch (price) {
       case "free":
         courses = courses.filter((course) => course.priceCents === 0);
         break;
@@ -64,109 +78,218 @@ async function CourseCatalogContent({ searchParams }: CoursesPageProps) {
     }
   }
 
-  // Apply sorting
-  if (params.sort) {
-    switch (params.sort) {
-      case "oldest":
-        // Already sorted by createdAt desc from the query, reverse it
-        courses = courses.reverse();
-        break;
-      case "price-low":
-        courses = courses.sort((a, b) => a.priceCents - b.priceCents);
-        break;
-      case "price-high":
-        courses = courses.sort((a, b) => b.priceCents - a.priceCents);
-        break;
-      case "title":
-        courses = courses.sort((a, b) => a.title.localeCompare(b.title));
-        break;
-      // "newest" is the default from the query
-    }
+  switch (sort) {
+    case "oldest":
+      courses = courses.reverse();
+      break;
+    case "price-low":
+      courses = courses.sort((a, b) => a.priceCents - b.priceCents);
+      break;
+    case "price-high":
+      courses = courses.sort((a, b) => b.priceCents - a.priceCents);
+      break;
+    case "title":
+      courses = courses.sort((a, b) => a.title.localeCompare(b.title));
+      break;
+    default:
+      break;
   }
 
+  return courses;
+}
+
+async function CoursesContent({ searchParams }: CoursesPageProps) {
+  const params = await searchParams;
+  const allCourses = await getPublishedCourses();
+  const courses = applyFilters(allCourses, params.search, params.category, params.price, params.sort);
+
   const totalCourses = allCourses.length;
-  const filteredCount = courses.length;
-  const hasFilters = params.search || params.category || params.price || params.sort;
+  const hasFilters = Boolean(params.search || params.category || params.price || params.sort);
+
+  const categories = Array.from(
+    new Map(
+      allCourses
+        .filter((course) => course.Category?.slug)
+        .map((course) => [
+          course.Category?.slug as string,
+          {
+            slug: course.Category?.slug as string,
+            name: course.Category?.name || "Category",
+          },
+        ] as const)
+    ).values()
+  );
+
+  const buildHref = (overrides: Partial<{ search: string; category: string; price: string; sort: string }>) => {
+    const next = {
+      search: params.search || "",
+      category: params.category || "",
+      price: params.price || "",
+      sort: params.sort || "",
+      ...overrides,
+    };
+
+    const query = new URLSearchParams();
+    if (next.search) query.set("search", next.search);
+    if (next.category) query.set("category", next.category);
+    if (next.price) query.set("price", next.price);
+    if (next.sort) query.set("sort", next.sort);
+
+    const asText = query.toString();
+    return asText ? `/courses?${asText}` : "/courses";
+  };
 
   return (
     <>
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <p className="text-muted-foreground">
-            {hasFilters
-              ? `Showing ${filteredCount} of ${totalCourses} courses`
-              : `Browse ${totalCourses} curated AI courses`}
-          </p>
+      <Toolbar className="justify-between gap-3">
+        <form action="/courses" method="get" className="flex w-full flex-wrap items-center gap-2 lg:w-auto">
+          <div className="relative min-w-72 flex-1 lg:w-80">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input name="search" defaultValue={params.search} placeholder="Search courses" className="pl-9" />
+          </div>
+          {params.category ? <input type="hidden" name="category" value={params.category} /> : null}
+          {params.price ? <input type="hidden" name="price" value={params.price} /> : null}
+          {params.sort ? <input type="hidden" name="sort" value={params.sort} /> : null}
+          <Button type="submit" variant="outline">
+            Search
+          </Button>
+        </form>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+          <Link href={buildHref({ sort: "newest" })}>
+            <Button variant={params.sort === "newest" || !params.sort ? "secondary" : "ghost"} size="sm">
+              Newest
+            </Button>
+          </Link>
+          <Link href={buildHref({ sort: "price-low" })}>
+            <Button variant={params.sort === "price-low" ? "secondary" : "ghost"} size="sm">
+              Price Low
+            </Button>
+          </Link>
+          <Link href={buildHref({ sort: "price-high" })}>
+            <Button variant={params.sort === "price-high" ? "secondary" : "ghost"} size="sm">
+              Price High
+            </Button>
+          </Link>
         </div>
-      </div>
+      </Toolbar>
 
-      {/* Filters */}
-      <Suspense fallback={<div className="h-12 animate-pulse bg-muted rounded" />}>
-        <CourseFilters />
-      </Suspense>
+      <Toolbar className="gap-2">
+        <Link href={buildHref({ category: "" })}>
+          <Button variant={!params.category ? "secondary" : "ghost"} size="sm">
+            All Categories
+          </Button>
+        </Link>
+        {categories.map((category) => (
+          <Link key={category.slug} href={buildHref({ category: category.slug })}>
+            <Button variant={params.category === category.slug ? "secondary" : "ghost"} size="sm">
+              {category.name}
+            </Button>
+          </Link>
+        ))}
+        <div className="ml-auto flex items-center gap-2">
+          <Link href={buildHref({ price: "" })}>
+            <Button variant={!params.price ? "secondary" : "ghost"} size="sm">
+              All Prices
+            </Button>
+          </Link>
+          <Link href={buildHref({ price: "free" })}>
+            <Button variant={params.price === "free" ? "secondary" : "ghost"} size="sm">
+              Free
+            </Button>
+          </Link>
+          <Link href={buildHref({ price: "paid" })}>
+            <Button variant={params.price === "paid" ? "secondary" : "ghost"} size="sm">
+              Paid
+            </Button>
+          </Link>
+        </div>
+      </Toolbar>
 
-      {/* Course List */}
-      {courses.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="py-16 text-center">
-            <BookOpen className="mx-auto h-16 w-16 text-muted-foreground/30 mb-4" />
-            <p className="text-lg font-medium mb-2">No courses found</p>
-            <p className="text-muted-foreground">
-              {hasFilters
-                ? "Try adjusting your filters to find what you're looking for."
-                : "Check back soon for new courses!"}
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <CourseList courses={courses} />
-      )}
+      <ContentRegion>
+        {courses.length ? (
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {courses.map((course) => (
+              <Card key={course.id} className="ui-surface flex h-full flex-col">
+                <CardHeader className="space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge variant={course.tier === "PREMIUM" ? "default" : "secondary"}>{course.tier}</Badge>
+                    <span className="text-sm font-semibold">{formatPrice(course.priceCents)}</span>
+                  </div>
+                  <CardTitle className="text-xl">{course.title}</CardTitle>
+                  <CardDescription className="line-clamp-3">
+                    {course.description || "Structured AI training with practical outcomes and guided progression."}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="mt-auto flex items-center justify-between gap-2">
+                  <div className="text-xs text-muted-foreground">
+                    {course.Category?.name || "General"}
+                  </div>
+                  <Link href={`/courses/${course.slug}`}>
+                    <Button variant="outline" size="sm">
+                      View Course
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </section>
+        ) : null}
+      </ContentRegion>
+
+      <StatusRegion>
+        {courses.length === 0 ? (
+          <EmptyState
+            icon={<Search className="h-6 w-6" />}
+            title="No courses found"
+            description={
+              hasFilters
+                ? "No courses match your current filters. Clear filters and try again."
+                : "No published courses are available yet."
+            }
+            action={
+              <Link href="/courses">
+                <Button variant="outline">Clear Filters</Button>
+              </Link>
+            }
+          />
+        ) : (
+          <Card className="ui-surface">
+            <CardContent className="flex flex-wrap items-center justify-between gap-2 p-4 text-sm">
+              <p className="text-muted-foreground">
+                Showing <span className="font-semibold text-foreground">{courses.length}</span> of{" "}
+                <span className="font-semibold text-foreground">{totalCourses}</span> courses
+              </p>
+              <Link href="/learning-paths">
+                <Button size="sm" variant="ghost">
+                  Explore Learning Paths
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+      </StatusRegion>
     </>
   );
 }
 
-export default async function CoursesPage({ searchParams }: CoursesPageProps) {
+export default function CoursesPage({ searchParams }: CoursesPageProps) {
   return (
-    <div className="min-h-screen">
-      <section className="container mx-auto py-8 md:py-12 lg:py-20 px-4 grid gap-8 md:gap-12">
-        {/* Breadcrumbs */}
-        <Breadcrumbs
-          items={[
-            { name: "Home", url: "/" },
-            { name: "Courses" },
-          ]}
-        />
-
-        {/* Header - Premium High-End Aesthetic */}
-        {/* Header - Premium High-End Aesthetic */}
-        <div className="relative rounded-3xl overflow-hidden border border-border/50 bg-background/50 backdrop-blur-xl p-6 md:p-12 mb-8 md:mb-12">
-          <div className="absolute inset-0 z-0 opacity-30">
-            <HeroPattern />
-          </div>
-          <div className="relative z-10 space-y-6">
-            <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-bold text-primary gap-2 shadow-[0_0_20px_rgba(var(--primary),0.1)]">
-              <Zap className="h-4 w-4" />
-              <span className="tracking-widest uppercase">Expert-Led Modules</span>
-            </div>
-            <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-tight">
-              Curated <span className="text-primary italic drop-shadow-sm">AI Learning</span>
-            </h1>
-            <p className="text-xl text-muted-foreground/80 max-w-2xl font-medium leading-relaxed">
-              Step into the future of engineering. Our structured learning paths are designed by practitioners to take you from fundamentals to advanced AI deployment.
-            </p>
-          </div>
-        </div>
-
-        <Suspense fallback={
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-96 animate-pulse bg-muted rounded-2xl" />
-            ))}
-          </div>
-        }>
-          <CourseCatalogContent searchParams={searchParams} />
-        </Suspense>
-      </section>
-    </div>
+    <PageContainer className="space-y-6">
+      <PageHeader
+        title="Course Catalog"
+        description="Browse, filter, and compare available AI courses with a consistent enterprise layout."
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Courses" },
+        ]}
+      />
+      <Suspense fallback={<Card className="ui-surface h-24 animate-pulse" />}>
+        <CoursesContent searchParams={searchParams} />
+      </Suspense>
+    </PageContainer>
   );
 }
+

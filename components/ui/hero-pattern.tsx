@@ -1,6 +1,10 @@
 
 "use client";
 
+/** LEGACY UI COMPONENT
+ * Kept for backward compatibility on pre-refactor marketing pages.
+ * Do not use for new UI work; use tokenized foundation patterns instead.
+ */
 import { cn } from "@/lib/utils";
 
 interface HeroPatternProps {

@@ -1,5 +1,9 @@
 "use client";
 
+/** LEGACY UI COMPONENT
+ * Kept for backward compatibility with pre-refactor list pages.
+ * Do not use for new UI work; use base `Skeleton` and tokenized layouts.
+ */
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 

@@ -3,7 +3,6 @@
 import * as React from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Alert, AlertDescription } from "./alert";
 
 export type ToastActionElement = React.ReactElement;
 
@@ -17,10 +16,17 @@ export interface ToastProps {
   onClose?: () => void;
 }
 
+const toastVariants: Record<NonNullable<ToastProps["variant"]>, string> = {
+  default: "border-border bg-card text-card-foreground",
+  destructive: "border-destructive/40 bg-destructive text-destructive-foreground",
+  success: "border-success/35 bg-success text-success-foreground",
+  warning: "border-warning/40 bg-warning text-warning-foreground",
+};
+
 export function Toast({
-  id,
   title,
   description,
+  action,
   variant = "default",
   duration = 5000,
   onClose,
@@ -28,56 +34,56 @@ export function Toast({
   const [isVisible, setIsVisible] = React.useState(true);
 
   React.useEffect(() => {
-    if (duration > 0) {
-      const timer = setTimeout(() => {
-        setIsVisible(false);
-        setTimeout(() => onClose?.(), 300); // Wait for animation
-      }, duration);
-
-      return () => clearTimeout(timer);
+    if (duration <= 0) {
+      return;
     }
+
+    const timeout = window.setTimeout(() => {
+      setIsVisible(false);
+      window.setTimeout(() => onClose?.(), 180);
+    }, duration);
+
+    return () => window.clearTimeout(timeout);
   }, [duration, onClose]);
 
-  if (!isVisible) return null;
-
-  const variantStyles = {
-    default: "bg-blue-600 dark:bg-blue-950 text-white border-blue-500 dark:border-blue-800",
-    destructive: "bg-red-600 dark:bg-red-950 text-white border-red-500 dark:border-red-800",
-    success: "bg-green-600 dark:bg-green-950 text-white border-green-500 dark:border-green-800",
-    warning: "bg-yellow-600 dark:bg-yellow-950 text-white border-yellow-500 dark:border-yellow-800",
-  };
+  if (!isVisible) {
+    return null;
+  }
 
   return (
-    <Alert
-      variant={variant}
+    <div
+      role="status"
       className={cn(
-        "min-w-[300px] shadow-lg",
-        variantStyles[variant || "default"],
-        isVisible ? "animate-in slide-in-from-top-5" : "animate-out slide-out-to-top-5"
+        "ui-surface min-w-72 max-w-md rounded-[var(--radius-md)] border p-4 shadow-lg animate-in fade-in-0 slide-in-from-top-2",
+        toastVariants[variant]
       )}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          {title && <div className="font-semibold mb-1 text-white">{title}</div>}
-          {description && <AlertDescription className="text-white/90">{description}</AlertDescription>}
+      <div className="flex items-start gap-3">
+        <div className="flex-1 space-y-1">
+          {title ? <div className="text-sm font-semibold">{title}</div> : null}
+          {description ? <div className="text-sm opacity-90">{description}</div> : null}
+          {action ? <div className="pt-1">{action}</div> : null}
         </div>
+
         <button
+          type="button"
           onClick={() => {
             setIsVisible(false);
-            setTimeout(() => onClose?.(), 300);
+            window.setTimeout(() => onClose?.(), 180);
           }}
-          className="ml-4 text-white/70 hover:text-white"
+          className="rounded-md p-1 opacity-70 hover:opacity-100"
+          aria-label="Close notification"
         >
           <X className="h-4 w-4" />
         </button>
       </div>
-    </Alert>
+    </div>
   );
 }
 
 export function ToastContainer({ toasts }: { toasts: ToastProps[] }) {
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-md">
+    <div className="fixed right-4 top-4 z-[var(--z-toast)] flex max-w-md flex-col gap-2">
       {toasts.map((toast) => (
         <Toast key={toast.id} {...toast} />
       ))}

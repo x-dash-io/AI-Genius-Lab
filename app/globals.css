@@ -91,6 +91,7 @@ body {
 
 body::before {
   content: "";
+  pointer-events: none;
   position: fixed;
   inset: 0;
   pointer-events: none;
@@ -114,6 +115,15 @@ body::before {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+.ui-shell {
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-lg);
+  background: hsl(var(--card));
+  box-shadow: var(--shadow-sm);
 }
 
 .bg-premium-gradient {
@@ -153,39 +163,34 @@ body::before {
   background: hsl(var(--muted-foreground) / 0.56);
 }
 
-/* ========================================
-   PRINT STYLES FOR PROFESSIONAL INVOICE
-   ======================================== */
-
 @media print {
-
-  /* Page Setup */
   @page {
     size: A4;
     margin: 15mm 10mm;
   }
 
-  /* Print Color Adjustment */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  /* Base Styles */
   html,
   body {
-    background: #ffffff !important;
-    color: #1a1a1a !important;
-    font-size: 11pt !important;
-    line-height: 1.5 !important;
+    background: hsl(var(--card)) !important;
+    color: hsl(var(--foreground)) !important;
     width: 100% !important;
     height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+    font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif !important;
   }
 
-  /* Hide Non-Essential Elements */
+  body::before {
+    display: none !important;
+  }
+
   header,
   nav,
   aside,
@@ -200,299 +205,48 @@ body::before {
     display: none !important;
   }
 
-  /* Main Content Container */
-  main,
-  section,
-  article {
-    display: block !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    background: #ffffff !important;
-  }
-
-  /* Invoice Card */
   #invoice,
   .invoice-card {
-    border: 1px solid #e5e5e5 !important;
-    box-shadow: none !important;
-    background: #ffffff !important;
+    border: 1px solid hsl(var(--border)) !important;
     border-radius: 0 !important;
+    background: hsl(var(--card)) !important;
+    box-shadow: none !important;
     page-break-inside: avoid;
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 !important;
-    overflow: visible !important;
   }
 
-  /* Invoice Header - Keep gradient-like appearance */
-  #invoice>div:first-child,
+  #invoice > div:first-child,
   [class*="bg-gradient-to-br"][class*="from-primary"] {
-    background: linear-gradient(135deg, #1a365d 0%, #2b4a7a 100%) !important;
-    color: #ffffff !important;
-    padding: 20pt !important;
-    border-radius: 0 !important;
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--brand-gradient-end)) 100%) !important;
+    color: hsl(var(--primary-foreground)) !important;
   }
 
-  #invoice>div:first-child *,
-  [class*="bg-gradient-to-br"][class*="from-primary"] * {
-    color: #ffffff !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  #invoice>div:first-child [class*="text-white/70"] {
-    color: rgba(255, 255, 255, 0.8) !important;
-  }
-
-  /* Invoice Body */
-  [class*="CardContent"],
-  [class*="p-6"],
-  [class*="p-10"] {
-    padding: 15pt !important;
-    background: #ffffff !important;
-  }
-
-  /* Spacing Adjustments */
-  [class*="space-y-8"]>*+* {
-    margin-top: 12pt !important;
-  }
-
-  [class*="space-y-4"]>*+* {
-    margin-top: 8pt !important;
-  }
-
-  [class*="gap-"] {
-    gap: 8pt !important;
-  }
-
-  /* Grid Layouts - Preserve */
-  [class*="grid"] {
-    display: grid !important;
-  }
-
-  [class*="md:grid-cols-2"] {
-    grid-template-columns: 1fr 1fr !important;
-  }
-
-  /* Flex Layouts - Preserve for invoice */
-  #invoice [class*="flex"],
-  section [class*="flex"] {
-    display: flex !important;
-  }
-
-  /* Info Cards */
-  [class*="rounded-xl"][class*="bg-card"],
-  [class*="rounded-xl"][class*="border"] {
-    background: #f9fafb !important;
-    border: 1px solid #e5e5e5 !important;
-    border-radius: 4pt !important;
-    padding: 10pt !important;
-  }
-
-  /* Table Styling */
   table {
     border-collapse: collapse !important;
     width: 100% !important;
-    display: table !important;
-  }
-
-  thead {
-    display: table-header-group !important;
-    background: #f3f4f6 !important;
-  }
-
-  tbody {
-    display: table-row-group !important;
-  }
-
-  tr {
-    display: table-row !important;
-    page-break-inside: avoid !important;
   }
 
   th,
   td {
-    display: table-cell !important;
-    border: 1px solid #e5e5e5 !important;
+    border: 1px solid hsl(var(--border)) !important;
     padding: 10pt 12pt !important;
     text-align: left !important;
-    vertical-align: top !important;
   }
 
-  th {
-    background: #f3f4f6 !important;
-    font-weight: 600 !important;
-    font-size: 9pt !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.5pt !important;
-    color: #6b7280 !important;
-  }
-
-  td {
-    background: #ffffff !important;
-    color: #1a1a1a !important;
-  }
-
-  /* Right-aligned amount column */
   th:last-child,
   td:last-child {
     text-align: right !important;
   }
 
-  /* Text Colors */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    color: #1a1a1a !important;
-    page-break-after: avoid !important;
-  }
-
-  p,
-  span,
-  div {
-    color: #1a1a1a !important;
-  }
-
-  [class*="text-muted-foreground"] {
-    color: #6b7280 !important;
-  }
-
-  /* Links */
-  a {
-    text-decoration: none !important;
-    color: #1a1a1a !important;
-  }
-
-  /* Badge - Payment Status */
-  [class*="Badge"],
-  [class*="badge"] {
-    background: #dcfce7 !important;
-    color: #166534 !important;
-    border: 1px solid #bbf7d0 !important;
-    border-radius: 9999px !important;
-    padding: 4pt 10pt !important;
-    font-size: 9pt !important;
-    font-weight: 600 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-  }
-
-  /* Totals Section */
-  [class*="rounded-xl"][class*="bg-muted"] {
-    background: #f9fafb !important;
-    border: 1px solid #e5e5e5 !important;
-    border-radius: 4pt !important;
-  }
-
-  /* Separator */
-  [class*="Separator"],
-  hr {
-    border: none !important;
-    border-top: 1px solid #e5e5e5 !important;
-    margin: 12pt 0 !important;
-  }
-
-  /* Terms Section */
-  [class*="border-dashed"] {
-    border-style: dashed !important;
-    border-color: #d1d5db !important;
-    background: #fafafa !important;
-    border-radius: 4pt !important;
-    padding: 10pt !important;
-  }
-
-  /* Footer - Show in print (elements with data-print-show attribute) */
   [data-print-show="true"] {
     display: block !important;
   }
 
-  /* Icons - Reduce size */
-  svg {
-    width: 14pt !important;
-    height: 14pt !important;
-  }
-
-  /* Small icons */
-  [class*="h-3"],
-  [class*="h-4"] {
-    width: 10pt !important;
-    height: 10pt !important;
-  }
-
-  /* Course Icon in table */
-  [class*="rounded-lg"][class*="bg-primary/10"] {
-    background: #f3f4f6 !important;
-    padding: 6pt !important;
-    border-radius: 4pt !important;
-  }
-
-  /* Font Sizes */
-  .text-xs {
-    font-size: 8pt !important;
-  }
-
-  .text-sm {
-    font-size: 9pt !important;
-    line-height: 1.5 !important;
-  }
-
-  .text-base {
-    font-size: 10pt !important;
-  }
-
-  .text-lg {
-    font-size: 12pt !important;
-  }
-
-  .text-xl {
-    font-size: 14pt !important;
-  }
-
-  .text-2xl {
-    font-size: 16pt !important;
-  }
-
-  /* Font Weight */
-  .font-bold {
-    font-weight: 700 !important;
-  }
-
-  .font-semibold {
-    font-weight: 600 !important;
-  }
-
-  .font-medium {
-    font-weight: 500 !important;
-  }
-
-  /* Monospace */
-  .font-mono {
-    font-family: "SF Mono", Monaco, "Cascadia Mono", "Roboto Mono", monospace !important;
-  }
-
-  /* Hide Decorative Elements */
   [class*="BackgroundBlobs"],
   [class*="blob"],
   [class*="Blob"],
-  [class*="animate-"],
-  .absolute[class*="bg-white"][class*="rounded-full"] {
+  [class*="animate-"] {
     display: none !important;
-  }
-
-  /* Page Breaks */
-  .page-break-avoid {
-    page-break-inside: avoid !important;
-  }
-
-  /* Ensure invoice stays together */
-  #invoice {
-    page-break-inside: avoid !important;
-    page-break-before: auto !important;
-    page-break-after: auto !important;
   }
 }

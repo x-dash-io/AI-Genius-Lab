@@ -1,12 +1,9 @@
 "use client";
 
-import { CheckCircle2, PlayCircle, Circle, Clock } from "lucide-react";
-
-interface Course {
-  id: string;
-  title: string;
-  status: 'completed' | 'in-progress' | 'not-started';
-}
+import { CheckCircle2, Circle, Clock3, PlayCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 interface PathProgressSectionProps {
   totalCourses: number;
@@ -14,7 +11,7 @@ interface PathProgressSectionProps {
   inProgressCount: number;
   progressPercent: number;
   estimatedHours?: number;
-  courses: Array<{ id: string; title: string; status: 'completed' | 'in-progress' | 'not-started' }>;
+  courses: Array<{ id: string; title: string; status: "completed" | "in-progress" | "not-started" }>;
 }
 
 export function PathProgressSection({
@@ -25,101 +22,79 @@ export function PathProgressSection({
   estimatedHours,
   courses,
 }: PathProgressSectionProps) {
-  const notStartedCount = totalCourses - completedCount - inProgressCount;
-  const hoursRemaining = estimatedHours 
-    ? Math.ceil((estimatedHours / totalCourses) * notStartedCount)
-    : null;
+  const notStartedCount = Math.max(0, totalCourses - completedCount - inProgressCount);
+  const hoursRemaining =
+    estimatedHours && totalCourses
+      ? Math.ceil((estimatedHours / totalCourses) * notStartedCount)
+      : null;
 
   return (
-    <section className="space-y-6">
-      {/* Progress Summary */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950/20 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground/70">Completed</p>
-              <p className="text-2xl font-bold text-blue-600">{completedCount}</p>
-            </div>
-            <CheckCircle2 className="h-8 w-8 text-blue-600 opacity-50" />
+    <Card className="ui-surface border">
+      <CardHeader className="space-y-3">
+        <CardTitle className="text-xl">Progress Snapshot</CardTitle>
+        <CardDescription>Track completion across every course in this path.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-[var(--radius-sm)] border bg-background p-3">
+            <p className="text-xs text-muted-foreground">Completed</p>
+            <p className="mt-1 text-2xl font-semibold">{completedCount}</p>
+          </div>
+          <div className="rounded-[var(--radius-sm)] border bg-background p-3">
+            <p className="text-xs text-muted-foreground">In Progress</p>
+            <p className="mt-1 text-2xl font-semibold">{inProgressCount}</p>
+          </div>
+          <div className="rounded-[var(--radius-sm)] border bg-background p-3">
+            <p className="text-xs text-muted-foreground">Not Started</p>
+            <p className="mt-1 text-2xl font-semibold">{notStartedCount}</p>
+          </div>
+          <div className="rounded-[var(--radius-sm)] border bg-background p-3">
+            <p className="text-xs text-muted-foreground">Estimated Time Left</p>
+            <p className="mt-1 text-2xl font-semibold">{hoursRemaining !== null ? `${hoursRemaining}h` : "—"}</p>
           </div>
         </div>
 
-        <div className="rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/20 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground/70">In Progress</p>
-              <p className="text-2xl font-bold text-amber-600">{inProgressCount}</p>
-            </div>
-            <PlayCircle className="h-8 w-8 text-amber-600 opacity-50" />
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-semibold">Overall completion</span>
+            <span className="text-muted-foreground">{progressPercent}%</span>
           </div>
+          <Progress value={progressPercent} className="h-2.5" />
         </div>
 
-        <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950/20 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground/70">Not Started</p>
-              <p className="text-2xl font-bold text-gray-600">{notStartedCount}</p>
-            </div>
-            <Circle className="h-8 w-8 text-gray-600 opacity-50" />
-          </div>
-        </div>
-
-        {hoursRemaining !== null && (
-          <div className="rounded-lg border border-purple-200 dark:border-purple-900 bg-purple-50 dark:bg-purple-950/20 p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground/70">Est. Time Left</p>
-                <p className="text-2xl font-bold text-purple-600">{hoursRemaining}h</p>
+        <div className="space-y-2">
+          <p className="text-sm font-semibold">Course breakdown</p>
+          <div className="grid gap-2">
+            {courses.map((course) => (
+              <div
+                key={course.id}
+                className="flex items-center gap-3 rounded-[var(--radius-sm)] border bg-background px-3 py-2.5"
+              >
+                {course.status === "completed" ? (
+                  <CheckCircle2 className="h-4 w-4 text-success" />
+                ) : course.status === "in-progress" ? (
+                  <PlayCircle className="h-4 w-4 text-primary" />
+                ) : (
+                  <Circle className="h-4 w-4 text-muted-foreground" />
+                )}
+                <span className={course.status === "completed" ? "text-sm text-muted-foreground line-through" : "text-sm text-foreground"}>
+                  {course.title}
+                </span>
+                <Badge variant={course.status === "completed" ? "secondary" : "outline"} className="ml-auto capitalize">
+                  {course.status === "in-progress" ? "In progress" : course.status.replace("-", " ")}
+                </Badge>
               </div>
-              <Clock className="h-8 w-8 text-purple-600 opacity-50" />
-            </div>
+            ))}
           </div>
-        )}
-      </div>
+        </div>
 
-      {/* Progress Bar */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-foreground">Overall Progress</h3>
-          <span className="text-sm font-medium text-foreground/70">{progressPercent}%</span>
-        </div>
-        <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Course Breakdown */}
-      <div className="space-y-3">
-        <h3 className="font-semibold text-foreground">Course Breakdown</h3>
-        <div className="space-y-2 max-h-96 overflow-y-auto">
-          {courses.map((course) => (
-            <div key={course.id} className="flex items-center gap-3 p-3 rounded-lg border border-muted-foreground/10 hover:bg-muted/50 transition-colors">
-              {course.status === 'completed' && (
-                <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-              )}
-              {course.status === 'in-progress' && (
-                <PlayCircle className="h-5 w-5 text-amber-600 flex-shrink-0" />
-              )}
-              {course.status === 'not-started' && (
-                <Circle className="h-5 w-5 text-gray-600 flex-shrink-0" />
-              )}
-              <span className={`text-sm ${
-                course.status === 'completed' ? 'text-foreground line-through opacity-60' : 'text-foreground'
-              }`}>
-                {course.title}
-              </span>
-              <span className="ml-auto text-xs font-medium px-2 py-1 rounded bg-muted text-muted-foreground">
-                {course.status === 'completed' && 'Completed'}
-                {course.status === 'in-progress' && 'In Progress'}
-                {course.status === 'not-started' && 'Not Started'}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
+        {hoursRemaining !== null ? (
+          <p className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Clock3 className="h-3.5 w-3.5" />
+            Remaining estimate is based on unfinished courses only.
+          </p>
+        ) : null}
+      </CardContent>
+    </Card>
   );
 }

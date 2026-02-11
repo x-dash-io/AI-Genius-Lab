@@ -1,5 +1,9 @@
 "use client";
 
+/** LEGACY UI COMPONENT
+ * Retained only for older decorative screens.
+ * Do not use for new UI work; use minimal tokenized backgrounds.
+ */
 import { motion } from "framer-motion";
 
 export function BackgroundBlobs() {

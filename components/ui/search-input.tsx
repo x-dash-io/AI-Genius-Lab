@@ -1,5 +1,9 @@
 "use client";
 
+/** LEGACY UI COMPONENT
+ * Kept for backward compatibility with pre-refactor filter surfaces.
+ * Do not use for new UI work; compose search with new primitives directly.
+ */
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
