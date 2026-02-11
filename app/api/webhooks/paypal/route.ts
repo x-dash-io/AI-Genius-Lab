@@ -120,6 +120,11 @@ export async function POST(request: Request) {
     // Handle Subscription Events
     if (event.event_type?.startsWith("BILLING.SUBSCRIPTION.")) {
       const subscriptionResource = event.resource;
+      if (!subscriptionResource) {
+        console.warn("[WEBHOOK] Missing resource payload in subscription event");
+        return NextResponse.json({ received: true });
+      }
+
       let customId = subscriptionResource.custom_id;
       const paypalSubId = subscriptionResource.id;
 
@@ -214,6 +219,11 @@ export async function POST(request: Request) {
     // Handle Recurring Payment Completion
     if (event.event_type === "PAYMENT.SALE.COMPLETED") {
       const saleResource = event.resource;
+      if (!saleResource) {
+        console.warn("[WEBHOOK] Missing resource payload in PAYMENT.SALE.COMPLETED event");
+        return NextResponse.json({ received: true });
+      }
+
       const paypalSubId = saleResource.billing_agreement_id;
       const saleAmount = saleResource.amount?.total;
       const saleCurrency = saleResource.amount?.currency_code;
