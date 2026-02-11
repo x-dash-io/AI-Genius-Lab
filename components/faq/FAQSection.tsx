@@ -137,8 +137,6 @@ const faqData: FAQItem[] = [
   },
 ];
 
-const categories = Array.from(new Set(faqData.map((item) => item.category)));
-
 export function FAQSection() {
   const [openItems, setOpenItems] = useState<Set<number>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");

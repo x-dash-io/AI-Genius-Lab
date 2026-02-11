@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/access";
 import { getAllCourses } from "@/lib/admin/courses";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +10,6 @@ import { CourseFilters } from "@/components/admin/CourseFilters";
 import { BulkImport } from "@/components/admin/BulkImport";
 import { DeleteButton } from "@/components/admin/DeleteButton";
 import { deleteCourseAction } from "@/app/actions/delete-actions";
-import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 

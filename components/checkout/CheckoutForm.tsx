@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
@@ -20,7 +19,6 @@ export function CheckoutForm({
   priceCents,
   createCheckoutSession,
 }: CheckoutFormProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,6 +47,7 @@ export function CheckoutForm({
   return (
     <form onSubmit={handleSubmit} className="grid gap-4">
       <input type="hidden" name="courseId" value={courseId} />
+      <p className="text-sm text-muted-foreground">{courseTitle}</p>
 
       {error && (
         <Alert variant="destructive">

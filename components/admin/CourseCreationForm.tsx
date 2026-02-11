@@ -14,9 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, ChevronDown, ChevronUp, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Plus, ChevronDown, ChevronUp, Loader2, CheckCircle } from "lucide-react";
 import { toast } from "@/lib/toast";
-import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 import type { Course, Section, Lesson, Category } from "@prisma/client";
 
 type CourseWithSections = Course & {
@@ -31,11 +30,9 @@ export function CourseCreationForm({
   createCourseAction: (formData: FormData) => Promise<{ course?: Course; error?: string }>;
 }) {
   const router = useRouter();
-  const { confirm } = useConfirmDialog();
   const [createdCourse, setCreatedCourse] = useState<CourseWithSections | null>(null);
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
   const [isCreatingCourse, setIsCreatingCourse] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 

@@ -1,4 +1,4 @@
-import { hasRole, type Role } from "@/lib/rbac";
+import { hasRole } from "@/lib/rbac";
 
 describe("RBAC utilities", () => {
   describe("hasRole", () => {

@@ -1,5 +1,4 @@
 import { v2 as cloudinary } from "cloudinary";
-import crypto from "crypto";
 
 // Cache for content existence checks to avoid repeated API calls
 const existenceCache = new Map<string, { exists: boolean; checkedAt: number }>();

@@ -60,7 +60,7 @@ export function BlogReviewSection({ postId, reviews: initialReviews }: BlogRevie
         "Thank you for your feedback."
       );
       setText("");
-    } catch (error) {
+    } catch {
       toastError(
         "Error",
         "Could not submit review. Please try again."

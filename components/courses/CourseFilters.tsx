@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/select";
 import { X, SlidersHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 
 type Category = {
   id: string;

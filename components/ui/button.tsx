@@ -24,9 +24,9 @@ const buttonVariants = cva(
           "bg-[linear-gradient(135deg,hsl(var(--primary))_0%,hsl(260_88%_63%)_100%)] text-white border border-primary/35 shadow-[0_12px_28px_hsl(var(--primary)/0.32)] hover:brightness-110 hover:-translate-y-0.5",
       },
       size: {
-        default: "h-11 px-5 py-2.5",
-        sm: "h-9 rounded-lg px-3.5",
-        lg: "h-12 rounded-xl px-8 text-base",
+        default: "h-11 px-4",
+        sm: "h-10 px-3 text-xs",
+        lg: "h-12 px-6 text-base",
         icon: "h-11 w-11",
       },
     },

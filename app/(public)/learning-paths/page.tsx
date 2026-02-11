@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Metadata } from "next";
 import { ArrowRight, Route, Search, SlidersHorizontal } from "lucide-react";
 import { getAllPublishedLearningPaths } from "@/lib/learning-paths";
@@ -60,13 +61,33 @@ function applySort(paths: LearningPathListItem[], sort: string | undefined) {
   }
 }
 
+function resolvePathImage(imageUrl: string | null) {
+  if (!imageUrl) {
+    return null;
+  }
+
+  if (imageUrl.startsWith("/") || imageUrl.includes("res.cloudinary.com")) {
+    return imageUrl;
+  }
+
+  return null;
+}
+
 export default async function LearningPathsPage({ searchParams }: LearningPathsPageProps) {
   const params = await searchParams;
   const allPathsData = await getAllPublishedLearningPaths();
 
-  const allPaths: LearningPathListItem[] = allPathsData.map((pathData: any) => ({
+  type RawLearningPath = (typeof allPathsData)[number];
+  type RawPathCourse = RawLearningPath["courses"][number] & {
+    Course: {
+      id: string;
+      title: string;
+    };
+  };
+
+  const allPaths: LearningPathListItem[] = allPathsData.map((pathData: RawLearningPath) => ({
     ...pathData,
-    courses: pathData.courses.map((pathCourse: any) => ({
+    courses: pathData.courses.map((pathCourse: RawPathCourse) => ({
       ...pathCourse,
       course: pathCourse.Course,
     })),
@@ -107,8 +128,8 @@ export default async function LearningPathsPage({ searchParams }: LearningPathsP
       />
 
       <Toolbar className="justify-between">
-        <form action="/learning-paths" method="get" className="flex w-full flex-wrap items-center gap-2 lg:w-auto">
-          <div className="relative min-w-72 flex-1 lg:w-96">
+        <form action="/learning-paths" method="get" className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
+          <div className="relative w-full lg:w-96">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               name="search"
@@ -131,7 +152,7 @@ export default async function LearningPathsPage({ searchParams }: LearningPathsP
               <option value="title">Title A-Z</option>
             </select>
           </label>
-          <Button type="submit" variant="outline">
+          <Button type="submit" variant="outline" className="h-11 sm:w-auto">
             Apply
           </Button>
           {hasFilters ? (
@@ -154,9 +175,25 @@ export default async function LearningPathsPage({ searchParams }: LearningPathsP
       <ContentRegion>
         {paths.length ? (
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {paths.map((path) => (
-              <Card key={path.id} className="ui-surface group flex h-full flex-col border">
-                <CardHeader className="space-y-3">
+            {paths.map((path) => {
+              const pathImage = resolvePathImage(path.imageUrl);
+
+              return (
+                <Card key={path.id} className="ui-surface group flex h-full flex-col border">
+                  <div className="relative aspect-video overflow-hidden border-b bg-muted/25">
+                    {pathImage ? (
+                      <Image
+                        src={pathImage}
+                        alt={path.title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-[linear-gradient(145deg,hsl(var(--primary)_/_0.16),hsl(var(--accent)_/_0.6))]" />
+                    )}
+                  </div>
+                  <CardHeader className="space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     <Badge variant="secondary">{path._count.courses} courses</Badge>
                     <Badge variant="outline">Structured</Badge>
@@ -190,7 +227,8 @@ export default async function LearningPathsPage({ searchParams }: LearningPathsP
                   </Link>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </section>
         ) : null}
       </ContentRegion>

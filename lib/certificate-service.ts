@@ -39,7 +39,7 @@ export async function checkAndGenerateCertificate(userId: string, courseId: stri
       try {
         const result = await cached.promise;
         return result;
-      } catch (error) {
+      } catch {
         // If the cached promise failed, allow retry
         certificateGenerationCache.delete(cacheKey);
       }
@@ -58,7 +58,7 @@ export async function checkAndGenerateCertificate(userId: string, courseId: stri
   }
 
   // Mark generation as in progress
-  const generationPromise = generateCertificateWithDeduplication(userId, courseId, cacheKey);
+  const generationPromise = generateCertificateWithDeduplication(userId, courseId);
   
   certificateGenerationCache.set(cacheKey, {
     isGenerating: true,
@@ -81,9 +81,8 @@ export async function checkAndGenerateCertificate(userId: string, courseId: stri
  * Internal function to handle the actual certificate generation
  */
 async function generateCertificateWithDeduplication(
-  userId: string, 
-  courseId: string, 
-  cacheKey: string
+  userId: string,
+  courseId: string
 ): Promise<{
   success: boolean;
   message: string;

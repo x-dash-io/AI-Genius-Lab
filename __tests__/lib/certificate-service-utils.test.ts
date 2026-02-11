@@ -40,9 +40,6 @@ jest.mock("@/lib/access", () => ({
 import { cleanupCertificateCache, getCertificateCacheStatus } from "@/lib/certificate-service";
 
 describe("Certificate Service Utilities", () => {
-  const userId = "user-123";
-  const courseId = "course-123";
-
   beforeEach(() => {
     // Clear the cache before each test
     cleanupCertificateCache();

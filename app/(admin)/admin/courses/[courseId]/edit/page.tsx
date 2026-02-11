@@ -62,7 +62,7 @@ async function addSectionAction(courseId: string, formData: FormData) {
   }
 }
 
-async function deleteSectionAction(sectionId: string, courseId: string) {
+async function deleteSectionAction(sectionId: string) {
   "use server";
   await requireRole("admin");
 
@@ -147,7 +147,7 @@ async function addLessonAction(sectionId: string, formData: FormData) {
   }
 }
 
-async function deleteLessonAction(lessonId: string, courseId: string) {
+async function deleteLessonAction(lessonId: string) {
   "use server";
   await requireRole("admin");
 

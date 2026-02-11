@@ -53,7 +53,7 @@ export function LessonViewer({
             try {
               const text = await response.text();
               if (text) errorData = JSON.parse(text);
-            } catch (e) {
+            } catch {
               if (response.status === 404) {
                 errorData = {
                   code: "CONTENT_MISSING_FROM_STORAGE",
@@ -117,7 +117,7 @@ export function LessonViewer({
       } else {
         throw new Error("Failed to mark lesson as completed");
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to mark lesson as completed",
@@ -169,7 +169,7 @@ export function LessonViewer({
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to download content",

@@ -94,7 +94,7 @@ export async function updateCoupon(id: string, formData: FormData) {
 
         revalidatePath("/admin/coupons");
         return { success: true };
-    } catch (error) {
+    } catch {
         return { error: "Failed to update coupon" };
     }
 }
@@ -111,7 +111,7 @@ export async function deleteCoupon(id: string) {
         });
         revalidatePath("/admin/coupons");
         return { success: true };
-    } catch (error) {
+    } catch {
         return { error: "Failed to delete coupon" };
     }
 }
@@ -129,7 +129,7 @@ export async function toggleCouponStatus(id: string, isActive: boolean) {
         });
         revalidatePath("/admin/coupons");
         return { success: true };
-    } catch (error) {
+    } catch {
         return { error: "Failed to update status" };
     }
 }

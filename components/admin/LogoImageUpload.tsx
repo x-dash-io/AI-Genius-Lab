@@ -2,10 +2,9 @@
 
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Image as ImageIcon, Upload, X, Loader2, Link as LinkIcon } from "lucide-react";
+import { Upload, X, Loader2, Link as LinkIcon } from "lucide-react";
 import { toastError, toastSuccess } from "@/lib/toast";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 
 interface LogoImageUploadProps {
     value: string;

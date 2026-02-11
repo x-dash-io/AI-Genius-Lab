@@ -29,11 +29,37 @@
   --input: 220 21% 86%;
   --ring: 231 73% 56%;
 
-  --radius: 1rem;
+  --radius: 0.875rem;
+  --radius-sm: 0.625rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.125rem;
+  --radius-xl: 1.5rem;
+
+  --shadow-sm: 0 1px 2px hsl(220 30% 10% / 0.06);
+  --shadow-md: 0 10px 24px hsl(220 30% 10% / 0.08);
+  --shadow-lg: 0 24px 46px hsl(220 30% 10% / 0.12);
+  --shadow-xl: 0 40px 72px hsl(220 30% 10% / 0.14);
 
   --glass-background: rgba(255, 255, 255, 0.78);
-  --glass-border: rgba(255, 255, 255, 0.6);
-  --glass-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+  --glass-surface: hsl(0 0% 100% / 0.62);
+  --glass-border: hsl(0 0% 100% / 0.55);
+  --glass-shadow: 0 20px 40px hsl(220 30% 10% / 0.12);
+  --blur-sm: 4px;
+  --blur-md: 14px;
+  --blur-lg: 24px;
+  --glass-blur: var(--blur-md);
+
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 220ms;
+  --brand-gradient-end: 258 87% 62%;
+  --z-base: 0;
+  --z-dropdown: 40;
+  --z-overlay: 50;
+  --z-modal: 60;
+  --z-toast: 70;
+  --supports-hover: 0;
 }
 
 .dark {
@@ -126,6 +152,24 @@ body::before {
   box-shadow: var(--shadow-sm);
 }
 
+.supports-hover-card {
+  transition-property: transform, box-shadow, border-color, background-color;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-standard);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :root {
+    --supports-hover: 1;
+  }
+
+  .supports-hover-card:hover {
+    transform: translateY(-2px);
+    border-color: hsl(var(--primary) / 0.28);
+    box-shadow: var(--shadow-md);
+  }
+}
+
 .bg-premium-gradient {
   background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(258 87% 62%) 100%);
 }
@@ -157,6 +201,25 @@ body::before {
 
 .dark ::-webkit-scrollbar-thumb {
   background: hsl(var(--muted-foreground) / 0.38);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .supports-hover-card:hover {
+    transform: none !important;
+  }
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {

@@ -309,7 +309,7 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
 
               <div className="flex items-center justify-between">
                 <ThemeToggle />
-                <SignOutButton className="h-9 w-auto px-3" />
+                <SignOutButton className="h-11 w-auto px-3" />
               </div>
             </div>
           </aside>
@@ -320,7 +320,7 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
                 <p className="font-display text-base font-semibold tracking-tight">{currentSection}</p>
                 <div className="flex items-center gap-2">
                   <Link href={getHref("/cart")} className="relative inline-flex">
-                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" aria-label="Cart">
+                    <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full" aria-label="Cart">
                       <ShoppingCart className="h-4 w-4" />
                     </Button>
                     {cartCount > 0 ? (
@@ -496,7 +496,7 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
               </Link>
               <div className="flex items-center gap-1">
                 <Link href={getHref("/cart")} className="relative inline-flex">
-                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full" aria-label="Cart">
+                  <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full" aria-label="Cart">
                     <ShoppingCart className="h-4 w-4" />
                   </Button>
                   {cartCount > 0 ? (
@@ -507,7 +507,7 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 rounded-full"
+                  className="h-11 w-11 rounded-full"
                   onClick={() => setIsMobileOpen((open) => !open)}
                   aria-label="Toggle menu"
                 >
@@ -542,7 +542,7 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
                   );
                 })}
                 <div className="mt-2 border-t pt-3">
-                  <SignOutButton className="h-9 w-full justify-center" />
+                  <SignOutButton className="h-11 w-full justify-center" />
                 </div>
               </nav>
             </div>

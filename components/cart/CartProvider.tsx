@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { Cart, CartItem } from "@/lib/cart/types";
+import { Cart } from "@/lib/cart/types";
 import { toast } from "@/lib/toast";
 import { safeJsonParse } from "@/lib/utils";
 
@@ -209,7 +209,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         variant: "success",
       });
       return {};
-    } catch (error) {
+    } catch {
       return { error: "Failed to apply coupon" };
     }
   }, []);
@@ -228,7 +228,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         description: "Discount code has been removed",
         variant: "success",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to remove coupon",

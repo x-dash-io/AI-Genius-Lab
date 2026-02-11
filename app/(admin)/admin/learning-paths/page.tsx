@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { BookOpen, Plus, Edit, Trash2, Loader2 } from "lucide-react";
+import { BookOpen, Plus, Edit, Loader2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 

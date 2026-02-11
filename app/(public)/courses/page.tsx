@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { ArrowRight, Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal } from "lucide-react";
 import { getPublishedCourses } from "@/lib/courses";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+import { CourseProductCard } from "@/components/courses/CourseProductCard";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import {
@@ -142,20 +142,20 @@ async function CoursesContent({ searchParams }: CoursesPageProps) {
   return (
     <>
       <Toolbar className="justify-between gap-3">
-        <form action="/courses" method="get" className="flex w-full flex-wrap items-center gap-2 lg:w-auto">
-          <div className="relative min-w-72 flex-1 lg:w-80">
+        <form action="/courses" method="get" className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
+          <div className="relative w-full lg:w-80">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input name="search" defaultValue={params.search} placeholder="Search courses" className="pl-9" />
           </div>
           {params.category ? <input type="hidden" name="category" value={params.category} /> : null}
           {params.price ? <input type="hidden" name="price" value={params.price} /> : null}
           {params.sort ? <input type="hidden" name="sort" value={params.sort} /> : null}
-          <Button type="submit" variant="outline">
+          <Button type="submit" variant="outline" className="h-11 sm:w-auto">
             Search
           </Button>
         </form>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full items-center gap-2 overflow-x-auto pb-1 lg:w-auto lg:overflow-visible lg:pb-0">
           <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
           <Link href={buildHref({ sort: "newest" })}>
             <Button variant={params.sort === "newest" || !params.sort ? "secondary" : "ghost"} size="sm">
@@ -188,7 +188,7 @@ async function CoursesContent({ searchParams }: CoursesPageProps) {
             </Button>
           </Link>
         ))}
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:ml-auto">
           <Link href={buildHref({ price: "" })}>
             <Button variant={!params.price ? "secondary" : "ghost"} size="sm">
               All Prices
@@ -211,29 +211,35 @@ async function CoursesContent({ searchParams }: CoursesPageProps) {
         {courses.length ? (
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {courses.map((course) => (
-              <Card key={course.id} className="ui-surface flex h-full flex-col">
-                <CardHeader className="space-y-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <Badge variant={course.tier === "PREMIUM" ? "default" : "secondary"}>{course.tier}</Badge>
-                    <span className="text-sm font-semibold">{formatPrice(course.priceCents)}</span>
-                  </div>
-                  <CardTitle className="text-xl">{course.title}</CardTitle>
-                  <CardDescription className="line-clamp-3">
-                    {course.description || "Structured AI training with practical outcomes and guided progression."}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="mt-auto flex items-center justify-between gap-2">
-                  <div className="text-xs text-muted-foreground">
-                    {course.Category?.name || "General"}
-                  </div>
-                  <Link href={`/courses/${course.slug}`}>
-                    <Button variant="outline" size="sm">
-                      View Course
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
+              <CourseProductCard
+                key={course.id}
+                title={course.title}
+                description={
+                  course.description ||
+                  "Structured AI training with practical outcomes and guided progression."
+                }
+                slug={course.slug}
+                categoryLabel={course.Category?.name || "General"}
+                priceLabel={formatPrice(course.priceCents)}
+                imageUrl={course.imageUrl}
+                tierLabel={course.tier === "PREMIUM" ? "Advanced" : "Core"}
+                metaItems={[
+                  {
+                    label: "Difficulty",
+                    value: course.tier === "PREMIUM" ? "Advanced" : "Foundational",
+                  },
+                  {
+                    label: "Duration",
+                    value: "Self-paced",
+                  },
+                  {
+                    label: "Outcome",
+                    value: "Certificate",
+                  },
+                ]}
+                primaryAction={{ href: `/courses/${course.slug}`, label: "View course" }}
+                secondaryActions={[{ href: `/checkout?course=${course.slug}`, label: "Checkout" }]}
+              />
             ))}
           </section>
         ) : null}
@@ -292,4 +298,3 @@ export default function CoursesPage({ searchParams }: CoursesPageProps) {
     </PageContainer>
   );
 }
-

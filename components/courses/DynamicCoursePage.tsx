@@ -1,18 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useCourseProgress } from "@/contexts/CourseProgressContext";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
-  BookOpen,
   CheckCircle2,
   PlayCircle,
   Clock,
-  ChevronRight,
   Award,
-  RefreshCw
+  RefreshCw,
+  Sparkles,
+  BookOpen,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -47,29 +49,11 @@ interface DynamicCoursePageProps {
 
 export function DynamicCoursePage({ course, initialProgress }: DynamicCoursePageProps) {
   const { progress, updateProgress, refreshCourse, isUpdating } = useCourseProgress();
-  const [localProgress, setLocalProgress] = useState(initialProgress);
 
   // Initialize progress in context
   useEffect(() => {
     refreshCourse(course.slug);
-  }, [course.slug]);
-
-  // Update local progress when context changes
-  useEffect(() => {
-    const courseProgress = progress.get(course.slug);
-    if (courseProgress) {
-      setLocalProgress({
-        totalLessons: courseProgress.totalLessons,
-        completedLessons: courseProgress.completedLessons,
-        overallProgress: courseProgress.overallProgress,
-        lessons: courseProgress.lessons.map(l => ({
-          lessonId: l.lessonId,
-          completedAt: l.completedAt,
-          completionPercent: l.completionPercent
-        }))
-      });
-    }
-  }, [progress, course.slug]);
+  }, [course.slug, refreshCourse]);
 
   // Listen for progress updates from lesson viewer
   useEffect(() => {
@@ -85,72 +69,85 @@ export function DynamicCoursePage({ course, initialProgress }: DynamicCoursePage
     return () => window.removeEventListener('lessonProgressUpdate', handleProgressUpdate as EventListener);
   }, [course.slug, updateProgress]);
 
+  const localProgress = useMemo(() => {
+    const courseProgress = progress.get(course.slug);
+    if (!courseProgress) {
+      return initialProgress;
+    }
+
+    return {
+      totalLessons: courseProgress.totalLessons,
+      completedLessons: courseProgress.completedLessons,
+      overallProgress: courseProgress.overallProgress,
+      lessons: courseProgress.lessons.map((lesson) => ({
+        lessonId: lesson.lessonId,
+        completedAt: lesson.completedAt,
+        completionPercent: lesson.completionPercent,
+      })),
+    };
+  }, [course.slug, initialProgress, progress]);
+
   const progressMap = new Map(
     localProgress.lessons.map(lesson => [lesson.lessonId, lesson])
   );
 
   return (
-    <div className="space-y-6">
-      {/* Course Header */}
-      <div className="rounded-xl border bg-card p-6 shadow-sm">
-        <div className="flex items-start justify-between gap-4 mb-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <BookOpen className="h-5 w-5 text-primary" />
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Course
-              </span>
+    <div className="grid gap-5">
+      <Card className="ui-surface">
+        <CardHeader className="gap-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="space-y-1">
+              <CardTitle className="text-2xl sm:text-3xl">{course.title}</CardTitle>
+              <CardDescription>
+                Follow the structured sections below to complete every lesson and unlock full outcomes.
+              </CardDescription>
             </div>
-            <div className="flex flex-col md:flex-row gap-6 items-start">
-              {course.imageUrl && (
-                <div className="w-full md:w-32 lg:w-40 aspect-video rounded-lg overflow-hidden border shadow-sm flex-shrink-0">
-                  <img src={course.imageUrl} alt={course.title} className="w-full h-full object-cover" />
-                </div>
-              )}
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold mb-2">{course.title}</h1>
-                <p className="text-muted-foreground">
-                  Continue your learning path with structured sections and lessons.
-                </p>
-              </div>
+            <div className="flex items-center gap-2">
+              {localProgress.overallProgress === 100 ? (
+                <Badge variant="secondary" className="inline-flex items-center gap-1">
+                  <Award className="h-3.5 w-3.5" />
+                  Completed
+                </Badge>
+              ) : null}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refreshCourse(course.slug)}
+                disabled={isUpdating}
+                className="h-11"
+              >
+                <RefreshCw className={`h-4 w-4 ${isUpdating ? "animate-spin" : ""}`} />
+                <span className="ml-2">Refresh</span>
+              </Button>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {localProgress.overallProgress === 100 && (
-              <Badge className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 flex items-center gap-1">
-                <Award className="h-3 w-3" />
-                Completed
-              </Badge>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => refreshCourse(course.slug)}
-              disabled={isUpdating}
-            >
-              <RefreshCw className={`h-4 w-4 ${isUpdating ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
-        </div>
 
-        {/* Overall Progress */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Overall Progress</span>
-            <span className="font-semibold">{localProgress.overallProgress}%</span>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-[var(--radius-sm)] border bg-background px-3 py-2">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Overall Progress</p>
+              <p className="mt-1 text-lg font-semibold">{localProgress.overallProgress}%</p>
+            </div>
+            <div className="rounded-[var(--radius-sm)] border bg-background px-3 py-2">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Completed</p>
+              <p className="mt-1 text-lg font-semibold">{localProgress.completedLessons}</p>
+            </div>
+            <div className="rounded-[var(--radius-sm)] border bg-background px-3 py-2">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Remaining</p>
+              <p className="mt-1 text-lg font-semibold">
+                {Math.max(localProgress.totalLessons - localProgress.completedLessons, 0)}
+              </p>
+            </div>
           </div>
+        </CardHeader>
+        <CardContent className="space-y-2">
           <Progress value={localProgress.overallProgress} className="h-2" />
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>{localProgress.completedLessons} of {localProgress.totalLessons} lessons completed</span>
-            {localProgress.totalLessons > 0 && (
-              <span>{localProgress.totalLessons - localProgress.completedLessons} remaining</span>
-            )}
-          </div>
-        </div>
-      </div>
+          <p className="text-xs text-muted-foreground">
+            {localProgress.completedLessons} of {localProgress.totalLessons} lessons completed
+          </p>
+        </CardContent>
+      </Card>
 
-      {/* Sections */}
-      <div className="space-y-4">
+      <div className="grid gap-4">
         {course.sections.map((section, sectionIndex) => {
           const sectionLessons = section.lessons;
           const sectionCompleted = sectionLessons.filter(l =>
@@ -161,115 +158,97 @@ export function DynamicCoursePage({ course, initialProgress }: DynamicCoursePage
             : 0;
 
           return (
-            <div
-              key={section.id}
-              className="rounded-xl border bg-card overflow-hidden shadow-sm"
-            >
-              {/* Section Header */}
-              <div className="p-5 border-b bg-muted/30">
-                <div className="flex items-center justify-between gap-4">
+            <Card key={section.id} className="ui-surface overflow-hidden">
+              <CardHeader className="gap-3 border-b">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-semibold text-muted-foreground">
+                    <div className="mb-1 flex items-center gap-2">
+                      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         Section {sectionIndex + 1}
                       </span>
                       {sectionProgress === 100 && (
-                        <Badge variant="secondary" className="text-xs">
-                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                        <Badge variant="secondary" className="inline-flex items-center gap-1 text-xs">
+                          <CheckCircle2 className="h-3 w-3" />
                           Complete
                         </Badge>
                       )}
                     </div>
-                    <h2 className="text-lg font-semibold">{section.title}</h2>
+                    <CardTitle className="text-lg">{section.title}</CardTitle>
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium">{sectionProgress}%</div>
-                    <div className="text-xs text-muted-foreground">
-                      {sectionCompleted}/{sectionLessons.length}
-                    </div>
+                  <div className="rounded-[var(--radius-sm)] border bg-background px-3 py-2 text-right">
+                    <p className="text-sm font-semibold">{sectionProgress}%</p>
+                    <p className="text-xs text-muted-foreground">{sectionCompleted}/{sectionLessons.length} complete</p>
                   </div>
                 </div>
                 {sectionLessons.length > 0 && (
-                  <Progress value={sectionProgress} className="h-1.5 mt-3" />
+                  <Progress value={sectionProgress} className="h-1.5" />
                 )}
-              </div>
+              </CardHeader>
 
-              {/* Lessons */}
-              <div className="divide-y">
+              <CardContent className="p-4">
                 {sectionLessons.map((lesson, lessonIndex) => {
                   const progress = progressMap.get(lesson.id);
                   const isCompleted = progress?.completedAt != null;
                   const progressPercent = progress?.completionPercent ?? 0;
 
                   return (
-                    <Link
+                    <div
                       key={lesson.id}
-                      href={`/library/${course.slug}/lesson/${lesson.id}`}
-                      className="flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors group"
+                      className="supports-hover-card flex flex-wrap items-center gap-3 rounded-[var(--radius-sm)] border bg-background px-3 py-3"
                     >
-                      {/* Lesson Number/Status */}
-                      <div className="flex-shrink-0">
-                        {isCompleted ? (
-                          <div className="h-10 w-10 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center">
-                            <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-                          </div>
-                        ) : progressPercent > 0 ? (
-                          <div className="h-10 w-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                            <PlayCircle className="h-5 w-5 text-primary" />
-                          </div>
-                        ) : (
-                          <div className="h-10 w-10 rounded-full bg-muted border flex items-center justify-center text-sm font-medium text-muted-foreground">
-                            {lessonIndex + 1}
-                          </div>
-                        )}
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full border bg-background text-muted-foreground">
+                        {isCompleted ? <CheckCircle2 className="h-5 w-5 text-success" /> : progressPercent > 0 ? <PlayCircle className="h-5 w-5 text-primary" /> : lessonIndex + 1}
                       </div>
-
-                      {/* Lesson Info */}
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium group-hover:text-primary transition-colors truncate">
+                        <p className="truncate text-sm font-semibold">
                           {lesson.title}
-                        </h3>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                        </p>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                           {isCompleted ? (
-                            <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                            <span className="inline-flex items-center gap-1 text-success">
                               <CheckCircle2 className="h-3 w-3" />
                               Completed
                             </span>
                           ) : progressPercent > 0 ? (
-                            <span className="flex items-center gap-1">
+                            <span className="inline-flex items-center gap-1">
                               <Clock className="h-3 w-3" />
                               {progressPercent}% complete
                             </span>
                           ) : (
-                            <span className="flex items-center gap-1">
+                            <span className="inline-flex items-center gap-1">
                               <PlayCircle className="h-3 w-3" />
                               Not started
                             </span>
                           )}
                         </div>
                       </div>
-
-                      {/* Arrow */}
-                      <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
-                    </Link>
+                      <Link href={`/library/${course.slug}/lesson/${lesson.id}`} className="w-full sm:w-auto">
+                        <Button size="sm" className="w-full sm:w-auto">
+                          Open lesson
+                        </Button>
+                      </Link>
+                    </div>
                   );
                 })}
                 {sectionLessons.length === 0 && (
-                  <div className="p-8 text-center text-sm text-muted-foreground">
-                    No lessons yet for this section.
-                  </div>
+                  <EmptyState
+                    icon={<Sparkles className="h-5 w-5" />}
+                    title="No lessons in this section"
+                    description="Lessons will appear here once curriculum content is published."
+                    className="min-h-40"
+                  />
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           );
         })}
 
         {course.sections.length === 0 && (
-          <div className="rounded-xl border bg-card p-8 text-center">
-            <p className="text-muted-foreground">
-              This course has no sections yet. Content will be added soon.
-            </p>
-          </div>
+          <EmptyState
+            icon={<BookOpen className="h-6 w-6" />}
+            title="No sections available yet"
+            description="This course is ready, but section content has not been added yet."
+          />
         )}
       </div>
     </div>

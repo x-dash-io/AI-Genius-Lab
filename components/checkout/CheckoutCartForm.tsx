@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { CartItem } from "@/lib/cart/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,6 @@ interface CheckoutCartFormProps {
 }
 
 export function CheckoutCartForm({ items, couponCode, discountAmount }: CheckoutCartFormProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const totalCents = items.reduce((sum, item) => sum + item.priceCents, 0);

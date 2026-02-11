@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { LazyMotion, domAnimation, m, useReducedMotion } from "framer-motion";
 import {
@@ -7,22 +8,25 @@ import {
   BadgeCheck,
   BookOpen,
   ChartNoAxesCombined,
-  CheckCircle2,
+  Clock3,
   GraduationCap,
+  ReceiptText,
   ShieldCheck,
   Sparkles,
   Star,
+  Trophy,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
+import { CourseProductCard } from "@/components/courses/CourseProductCard";
+import { ContentRegion, StatusRegion, Toolbar } from "@/components/layout/shell";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import {
-  ContentRegion,
-  PageHeader,
-  StatusRegion,
-  Toolbar,
-} from "@/components/layout/shell";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+const HERO_TYPED_PHRASE = "Real Execution";
 
 type FeaturedCourse = {
   id: string;
@@ -30,6 +34,7 @@ type FeaturedCourse = {
   slug: string;
   priceCents: number;
   categoryName: string;
+  imageUrl?: string | null;
   tier?: string;
 };
 
@@ -37,6 +42,7 @@ type Testimonial = {
   id: string;
   name: string;
   role: string;
+  avatar?: string | null;
   rating: number;
   text: string;
 };
@@ -55,13 +61,13 @@ interface PremiumHomepageExperienceProps {
   testimonials: Testimonial[];
 }
 
-function formatMetric(value: number) {
-  return value > 0 ? value.toLocaleString() : "New";
+function formatMetricValue(value: number, fallback: string) {
+  return value > 0 ? value.toLocaleString() : fallback;
 }
 
 function formatRating(averageRating: number, reviewCount: number) {
-  if (!reviewCount) {
-    return "New";
+  if (!reviewCount || averageRating <= 0) {
+    return "\u2014";
   }
 
   return averageRating.toFixed(1);
@@ -71,80 +77,154 @@ function formatPrice(priceCents: number) {
   return priceCents === 0 ? "Free" : `$${(priceCents / 100).toFixed(2)}`;
 }
 
-function getMotionProps(reduceMotion: boolean) {
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((chunk) => chunk[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+function getSectionMotion(reduceMotion: boolean) {
   if (reduceMotion) {
     return {};
   }
 
   return {
-    initial: { opacity: 0, y: 18 },
+    initial: { opacity: 0, y: 14 },
     whileInView: { opacity: 1, y: 0 },
-    transition: { duration: 0.28, ease: "easeOut" as const },
+    transition: { duration: 0.24, ease: "easeOut" as const },
     viewport: { once: true, amount: 0.2 },
   };
 }
 
+function HeroTypedPhrase({ phrase, reduceMotion }: { phrase: string; reduceMotion: boolean }) {
+  const [typedValue, setTypedValue] = useState("");
+
+  useEffect(() => {
+    if (reduceMotion) {
+      return;
+    }
+
+    let frame = 0;
+    const timer = window.setInterval(() => {
+      frame += 1;
+      setTypedValue(phrase.slice(0, frame));
+
+      if (frame >= phrase.length) {
+        window.clearInterval(timer);
+      }
+    }, 44);
+
+    return () => window.clearInterval(timer);
+  }, [phrase, reduceMotion]);
+
+  const visibleValue = reduceMotion ? phrase : typedValue;
+
+  return (
+    <span className="relative inline-flex min-w-[14ch]" aria-hidden="true">
+      <span className="invisible">{phrase}</span>
+      <span className="absolute inset-0 whitespace-nowrap text-primary">
+        {visibleValue}
+        {!reduceMotion && visibleValue.length < phrase.length ? (
+          <span className="ml-0.5 inline-block h-[1.05em] w-[1px] bg-primary align-middle" />
+        ) : null}
+      </span>
+    </span>
+  );
+}
+
 function ProductPreviewCard() {
   return (
-    <Card className="ui-surface relative overflow-hidden border">
-      <CardHeader className="border-b bg-muted/30 pb-3">
+    <Card className="ui-surface supports-hover-card overflow-hidden border">
+      <CardHeader className="space-y-3 border-b bg-muted/35 pb-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
             <span className="h-2.5 w-2.5 rounded-full bg-warning/70" />
             <span className="h-2.5 w-2.5 rounded-full bg-success/70" />
           </div>
-          <Badge variant="secondary">Product Preview</Badge>
+          <Badge variant="secondary">Product preview</Badge>
         </div>
+        <CardTitle className="text-xl">Platform control panel</CardTitle>
+        <CardDescription>
+          Preview the learner and billing experience from one unified workspace.
+        </CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-4 p-5">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-[var(--radius-sm)] border bg-background p-3">
-            <p className="text-xs text-muted-foreground">Team progress</p>
-            <p className="mt-1 text-lg font-semibold">78% completion</p>
-            <Progress value={78} className="mt-3 h-2.5" />
-          </div>
-          <div className="rounded-[var(--radius-sm)] border bg-background p-3">
-            <p className="text-xs text-muted-foreground">Active pathways</p>
-            <p className="mt-1 text-lg font-semibold">12 in motion</p>
-            <div className="mt-3 grid grid-cols-4 gap-1.5">
-              <span className="h-2 rounded-full bg-primary/35" />
-              <span className="h-2 rounded-full bg-primary/55" />
-              <span className="h-2 rounded-full bg-primary/75" />
-              <span className="h-2 rounded-full bg-primary" />
-            </div>
-          </div>
-        </div>
 
-        <div className="rounded-[var(--radius-sm)] border bg-background p-4">
-          <p className="text-xs text-muted-foreground">Weekly activity</p>
-          <div className="mt-3 grid grid-cols-7 items-end gap-1.5">
-            {[44, 58, 37, 71, 63, 86, 75].map((value, index) => (
-              <span
-                key={`activity-${index}`}
-                className="rounded-full bg-primary/60"
-                style={{ height: `${value}%` }}
-              />
-            ))}
-          </div>
-        </div>
+      <CardContent className="p-5">
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="h-11 w-full justify-start">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="progress">Progress</TabsTrigger>
+            <TabsTrigger value="billing">Billing</TabsTrigger>
+          </TabsList>
 
-        <div className="grid gap-2">
-          <div className="flex items-center justify-between rounded-[var(--radius-sm)] border bg-background px-3 py-2">
-            <div className="flex items-center gap-2 text-sm">
-              <BookOpen className="h-4 w-4 text-primary" />
-              AI Operations Foundations
+          <TabsContent value="overview" className="grid gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-[var(--radius-sm)] border bg-background p-3">
+                <p className="text-xs text-muted-foreground">Active learners</p>
+                <p className="mt-1 text-lg font-semibold">124</p>
+              </div>
+              <div className="rounded-[var(--radius-sm)] border bg-background p-3">
+                <p className="text-xs text-muted-foreground">Courses in play</p>
+                <p className="mt-1 text-lg font-semibold">18</p>
+              </div>
             </div>
-            <Badge variant="outline">In progress</Badge>
-          </div>
-          <div className="flex items-center justify-between rounded-[var(--radius-sm)] border bg-background px-3 py-2">
-            <div className="flex items-center gap-2 text-sm">
-              <BadgeCheck className="h-4 w-4 text-primary" />
-              Completion certificates
+            <div className="rounded-[var(--radius-sm)] border bg-background p-3">
+              <p className="text-xs text-muted-foreground">Weekly activity</p>
+              <div className="mt-3 grid grid-cols-7 items-end gap-1.5">
+                {[44, 58, 37, 71, 63, 86, 75].map((value, index) => (
+                  <span
+                    key={`preview-overview-${index}`}
+                    className="rounded-full bg-primary/65"
+                    style={{ height: `${value}%` }}
+                  />
+                ))}
+              </div>
             </div>
-            <span className="text-xs text-muted-foreground">Live sync</span>
-          </div>
-        </div>
+          </TabsContent>
+
+          <TabsContent value="progress" className="grid gap-3">
+            <div className="rounded-[var(--radius-sm)] border bg-background p-3">
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Team completion</span>
+                <span className="font-semibold">78%</span>
+              </div>
+              <Progress value={78} className="h-2.5" />
+            </div>
+            <div className="grid gap-2">
+              {["AI Operations", "Prompt Engineering", "Automation Systems"].map((track, index) => (
+                <div
+                  key={track}
+                  className="flex items-center justify-between rounded-[var(--radius-sm)] border bg-background px-3 py-2 text-sm"
+                >
+                  <span>{track}</span>
+                  <Badge variant="outline">{[84, 67, 53][index]}%</Badge>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="billing" className="grid gap-3">
+            <div className="rounded-[var(--radius-sm)] border bg-background p-3">
+              <p className="text-xs text-muted-foreground">Current cycle</p>
+              <p className="mt-1 text-lg font-semibold">Founder Annual</p>
+              <p className="mt-2 text-xs text-muted-foreground">Next renewal: Sep 14, 2026</p>
+            </div>
+            <div className="grid gap-2">
+              <div className="flex items-center justify-between rounded-[var(--radius-sm)] border bg-background px-3 py-2 text-sm">
+                <span className="text-muted-foreground">Invoice sync</span>
+                <Badge variant="secondary">Healthy</Badge>
+              </div>
+              <div className="flex items-center justify-between rounded-[var(--radius-sm)] border bg-background px-3 py-2 text-sm">
+                <span className="text-muted-foreground">Payment rail</span>
+                <span className="font-medium">PayPal</span>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
@@ -156,38 +236,41 @@ export function PremiumHomepageExperience({
   testimonials,
 }: PremiumHomepageExperienceProps) {
   const reduceMotion = Boolean(useReducedMotion());
-  const sectionMotion = getMotionProps(reduceMotion);
+  const sectionMotion = getSectionMotion(reduceMotion);
 
   const heroMotion = reduceMotion
     ? {}
     : {
-        initial: { opacity: 0, y: 24 },
+        initial: { opacity: 0, y: 20 },
         animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.32, ease: "easeOut" as const },
+        transition: { duration: 0.26, ease: "easeOut" as const },
       };
 
-  const metricItems = [
-    {
-      label: "Courses",
-      value: formatMetric(metrics.totalCourses),
-      detail: "Structured and production-focused",
-    },
-    {
-      label: "Learners",
-      value: formatMetric(metrics.totalStudents),
-      detail: "Individuals and teams",
-    },
-    {
-      label: "Lessons",
-      value: formatMetric(metrics.totalLessons),
-      detail: "Practical implementation paths",
-    },
-    {
-      label: "Rating",
-      value: formatRating(metrics.averageRating, metrics.totalReviews),
-      detail: metrics.totalReviews ? `${metrics.totalReviews} reviews` : "Fresh and expanding",
-    },
-  ];
+  const metricItems = useMemo(
+    () => [
+      {
+        label: "Courses",
+        value: formatMetricValue(metrics.totalCourses, "New"),
+        detail: metrics.totalCourses > 0 ? "Published and purchase-ready" : "Catalog expanding",
+      },
+      {
+        label: "Learners",
+        value: formatMetricValue(metrics.totalStudents, "New"),
+        detail: metrics.totalStudents > 0 ? "Individuals and teams" : "First cohorts onboarding",
+      },
+      {
+        label: "Lessons",
+        value: formatMetricValue(metrics.totalLessons, "\u2014"),
+        detail: metrics.totalLessons > 0 ? "Outcome-focused modules" : "Structured paths in progress",
+      },
+      {
+        label: "Rating",
+        value: formatRating(metrics.averageRating, metrics.totalReviews),
+        detail: metrics.totalReviews > 0 ? `${metrics.totalReviews} verified reviews` : "Review baseline forming",
+      },
+    ],
+    [metrics.averageRating, metrics.totalCourses, metrics.totalLessons, metrics.totalReviews, metrics.totalStudents]
+  );
 
   return (
     <LazyMotion features={domAnimation}>
@@ -196,53 +279,55 @@ export function PremiumHomepageExperience({
           className="ui-surface relative overflow-hidden rounded-[var(--radius-xl)] border p-5 sm:p-8"
           {...heroMotion}
         >
-          <m.div
+          <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0"
             style={{
               backgroundImage:
-                "radial-gradient(circle at 18% 20%, hsl(var(--primary) / 0.16), transparent 46%), radial-gradient(circle at 88% 8%, hsl(var(--primary) / 0.1), transparent 34%), linear-gradient(to right, hsl(var(--foreground) / 0.05) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--foreground) / 0.04) 1px, transparent 1px)",
-              backgroundSize: "auto, auto, 22px 22px, 22px 22px",
+                "radial-gradient(circle at 16% 14%, hsl(var(--primary) / 0.18), transparent 40%), radial-gradient(circle at 84% 10%, hsl(var(--primary) / 0.1), transparent 30%), linear-gradient(to right, hsl(var(--foreground) / 0.04) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--foreground) / 0.03) 1px, transparent 1px)",
+              backgroundSize: "auto, auto, 24px 24px, 24px 24px",
             }}
-            {...heroMotion}
           />
 
           <div className="relative z-[1] grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.02fr)] lg:items-center">
             <div className="space-y-6">
-              <PageHeader
-                title="Enterprise AI Learning That Converts Into Real Execution"
-                description="Unify discovery, checkout, and learning in one premium workflow. Built for serious operators, founders, and high-performance teams."
-                actions={
-                  <>
-                    <Link href="/courses">
-                      <Button
-                        variant="premium"
-                        size="lg"
-                        className="motion-safe:hover:-translate-y-0.5"
-                      >
-                        Explore Courses
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                    <Link href="/pricing">
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className="motion-safe:hover:-translate-y-0.5"
-                      >
-                        View Pricing
-                      </Button>
-                    </Link>
-                  </>
-                }
-              />
+              <Badge variant="secondary" className="w-fit gap-1.5">
+                <Sparkles className="h-3.5 w-3.5" />
+                Premium learning workflow
+              </Badge>
+
+              <div className="space-y-3">
+                <h1
+                  className="font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl lg:text-5xl"
+                  aria-label={`Enterprise AI learning for ${HERO_TYPED_PHRASE}`}
+                >
+                  Enterprise AI learning for <HeroTypedPhrase phrase={HERO_TYPED_PHRASE} reduceMotion={reduceMotion} />
+                </h1>
+                <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
+                  Unified discovery, checkout, and structured completion paths for operators, teams, and founders who ship outcomes.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Link href="/courses">
+                  <Button variant="premium" size="lg" className="h-11">
+                    Explore courses
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/pricing">
+                  <Button variant="outline" size="lg" className="h-11">
+                    Compare plans
+                  </Button>
+                </Link>
+              </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                {metricItems.map((item) => (
-                  <div key={item.label} className="rounded-[var(--radius-md)] border bg-background/90 px-4 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{item.label}</p>
-                    <p className="mt-1 text-2xl font-semibold">{item.value}</p>
-                    <p className="text-xs text-muted-foreground">{item.detail}</p>
+                {metricItems.map((metric) => (
+                  <div key={metric.label} className="rounded-[var(--radius-md)] border bg-background/90 px-4 py-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{metric.label}</p>
+                    <p className="mt-1 text-2xl font-semibold">{metric.value}</p>
+                    <p className="text-xs text-muted-foreground">{metric.detail}</p>
                   </div>
                 ))}
               </div>
@@ -252,48 +337,50 @@ export function PremiumHomepageExperience({
           </div>
         </m.section>
 
-        <Toolbar className="justify-between gap-3">
-          <p className="text-sm font-medium text-foreground">Trusted by teams building practical AI workflows</p>
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="inline-flex items-center gap-1 rounded-full border bg-background px-2.5 py-1 text-muted-foreground">
-              <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-              Secure payments
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full border bg-background px-2.5 py-1 text-muted-foreground">
-              <ChartNoAxesCombined className="h-3.5 w-3.5 text-primary" />
-              Progress tracking
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full border bg-background px-2.5 py-1 text-muted-foreground">
-              <GraduationCap className="h-3.5 w-3.5 text-primary" />
-              Completion certificates
-            </span>
-          </div>
-        </Toolbar>
+        <m.section {...sectionMotion}>
+          <Toolbar className="justify-between gap-3">
+            <p className="text-sm font-medium text-foreground">Trusted by teams building practical AI systems</p>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="inline-flex items-center gap-1 rounded-full border bg-background px-2.5 py-1 text-muted-foreground">
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                Secure payments
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border bg-background px-2.5 py-1 text-muted-foreground">
+                <ChartNoAxesCombined className="h-3.5 w-3.5 text-primary" />
+                Progress tracking
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border bg-background px-2.5 py-1 text-muted-foreground">
+                <Trophy className="h-3.5 w-3.5 text-primary" />
+                Verified certificates
+              </span>
+            </div>
+          </Toolbar>
+        </m.section>
 
         <m.section className="grid gap-4 lg:grid-cols-4" {...sectionMotion}>
           {[
             {
               title: "Discover",
-              detail: "Filter by goals, compare outcomes, and choose the right path quickly.",
+              detail: "Search by role, compare outcomes, and choose fast.",
               icon: Sparkles,
             },
             {
               title: "Purchase",
-              detail: "Checkout with reliable billing flow and transparent pricing cadence.",
-              icon: ShieldCheck,
+              detail: "Transparent billing cadence and secure checkout.",
+              icon: ReceiptText,
             },
             {
               title: "Learn",
-              detail: "Follow structured lessons with momentum-focused progress visibility.",
+              detail: "Structured lessons with progress visibility.",
               icon: BookOpen,
             },
             {
               title: "Certify",
-              detail: "Generate completion proof and verify achievements publicly.",
+              detail: "Issue and verify completion credentials.",
               icon: BadgeCheck,
             },
           ].map((step, index) => (
-            <Card key={step.title} className="ui-surface border">
+            <Card key={step.title} className="ui-surface supports-hover-card border">
               <CardHeader className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border bg-background text-xs font-semibold">
@@ -308,68 +395,81 @@ export function PremiumHomepageExperience({
           ))}
         </m.section>
 
-        <m.section
-          className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]"
-          {...sectionMotion}
-        >
-          <Card className="ui-surface border">
+        <m.section className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]" {...sectionMotion}>
+          <Card className="ui-surface supports-hover-card border">
             <CardHeader>
               <Badge variant="secondary" className="w-fit">
                 Spotlight
               </Badge>
-              <CardTitle className="text-2xl">Built for conversion and completion, not vanity UX</CardTitle>
+              <CardTitle className="text-2xl">Revenue-ready learning UX, not generic content pages</CardTitle>
               <CardDescription>
-                Learners move from discovery to paid enrollment with clear hierarchy, predictable forms, and low-friction actions.
+                Purpose-built sections with conversion hierarchy, trust signals, and structured follow-through from discovery to certification.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
               <div className="rounded-[var(--radius-sm)] border bg-background px-3 py-2">
-                <p className="font-semibold text-foreground">Catalog clarity</p>
-                <p>Filter, compare, and act without visual clutter.</p>
+                <p className="font-semibold text-foreground">Catalog intent matching</p>
+                <p>Find the right path quickly with clear metadata and outcome framing.</p>
               </div>
               <div className="rounded-[var(--radius-sm)] border bg-background px-3 py-2">
                 <p className="font-semibold text-foreground">Checkout confidence</p>
-                <p>Explicit pricing and trust cues on every conversion step.</p>
+                <p>Billing cadence, plan tradeoffs, and trust cues are explicit.</p>
               </div>
               <div className="rounded-[var(--radius-sm)] border bg-background px-3 py-2">
-                <p className="font-semibold text-foreground">Learning momentum</p>
-                <p>Progress views keep learners oriented and accountable.</p>
+                <p className="font-semibold text-foreground">Progress accountability</p>
+                <p>Learners see completion state and next actions at every step.</p>
               </div>
               <div className="rounded-[var(--radius-sm)] border bg-background px-3 py-2">
-                <p className="font-semibold text-foreground">Proof of completion</p>
-                <p>Certificate-ready pipeline tied to real progress data.</p>
+                <p className="font-semibold text-foreground">Credential readiness</p>
+                <p>Certificate validation stays tied to tracked outcomes.</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="ui-surface border">
-            <CardHeader>
-              <CardTitle className="text-xl">What teams value most</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2.5">
-              {[
-                "Consistent page structure across public, learner, and admin surfaces",
-                "Predictable focus states and keyboard-first controls",
-                "Token-driven spacing and visual hierarchy",
-                "Optional glass surfaces without compromising contrast",
-              ].map((item) => (
-                <p key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" />
-                  <span>{item}</span>
-                </p>
-              ))}
-            </CardContent>
-          </Card>
+          <div className="grid gap-4">
+            <Card className="ui-surface supports-hover-card border">
+              <CardHeader>
+                <CardTitle className="text-xl">Bento proof points</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-2 text-sm">
+                <div className="rounded-[var(--radius-sm)] border bg-background px-3 py-2">
+                  <p className="font-semibold">Fast onboarding</p>
+                  <p className="text-muted-foreground">Auth and plan entry paths are streamlined and responsive.</p>
+                </div>
+                <div className="rounded-[var(--radius-sm)] border bg-background px-3 py-2">
+                  <p className="font-semibold">Operational transparency</p>
+                  <p className="text-muted-foreground">Learners always see what unlocks next and why.</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="ui-surface supports-hover-card border">
+              <CardHeader>
+                <CardTitle className="text-xl">Time to complete</CardTitle>
+                <CardDescription>Designed for consistent momentum.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm text-muted-foreground">
+                <div className="flex items-center justify-between rounded-[var(--radius-sm)] border bg-background px-3 py-2">
+                  <span className="inline-flex items-center gap-2"><Clock3 className="h-4 w-4 text-primary" /> Weekly study target</span>
+                  <span className="font-semibold text-foreground">3-5h</span>
+                </div>
+                <div className="flex items-center justify-between rounded-[var(--radius-sm)] border bg-background px-3 py-2">
+                  <span className="inline-flex items-center gap-2"><GraduationCap className="h-4 w-4 text-primary" /> Guided tracks</span>
+                  <span className="font-semibold text-foreground">Multi-course</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </m.section>
 
         <m.section className="space-y-4" {...sectionMotion}>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Featured courses</p>
-              <h2 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Launch your next capability fast</h2>
+              <h2 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Course cards built for conversion</h2>
             </div>
             <Link href="/courses">
-              <Button variant="ghost">
+              <Button variant="ghost" className="h-11">
                 View full catalog
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -377,51 +477,37 @@ export function PremiumHomepageExperience({
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {featuredCourses.map((course) => {
-              const level = course.tier === "PREMIUM" ? "Advanced" : "Core";
-              return (
-                <Card key={course.id} className="ui-surface group relative overflow-hidden border">
-                  <CardHeader className="space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <Badge variant="outline">{course.categoryName}</Badge>
-                      <span className="text-sm font-semibold">{formatPrice(course.priceCents)}</span>
-                    </div>
-                    <CardTitle className="text-xl">{course.title}</CardTitle>
-                    <CardDescription>
-                      Focused, project-ready lessons with guided momentum and clear completion outcomes.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-3">
-                      <span className="rounded-[var(--radius-sm)] border bg-background px-2 py-1">
-                        <span className="font-semibold text-foreground">Level:</span> {level}
-                      </span>
-                      <span className="rounded-[var(--radius-sm)] border bg-background px-2 py-1">
-                        <span className="font-semibold text-foreground">Duration:</span> Self-paced
-                      </span>
-                      <span className="rounded-[var(--radius-sm)] border bg-background px-2 py-1">
-                        <span className="font-semibold text-foreground">Outcome:</span> Certificate
-                      </span>
-                    </div>
-                    <div className="pointer-events-none absolute inset-x-4 bottom-4 translate-y-2 opacity-0 transition duration-[var(--duration-slow)] ease-[var(--ease-standard)] group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100">
-                      <div className="flex gap-2">
-                        <Link href={`/courses/${course.slug}`} className="pointer-events-auto flex-1">
-                          <Button className="w-full" size="sm" variant="premium">
-                            View course
-                          </Button>
-                        </Link>
-                        <Link href={`/checkout?course=${course.slug}`} className="pointer-events-auto">
-                          <Button size="sm" variant="outline">
-                            Checkout
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                    <div className="h-8" aria-hidden="true" />
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {featuredCourses.map((course) => (
+              <CourseProductCard
+                key={course.id}
+                title={course.title}
+                description="Structured, project-ready lessons with measurable outcomes and practical deliverables."
+                slug={course.slug}
+                categoryLabel={course.categoryName}
+                priceLabel={formatPrice(course.priceCents)}
+                imageUrl={course.imageUrl}
+                tierLabel={course.tier === "PREMIUM" ? "Advanced" : "Core"}
+                metaItems={[
+                  { label: "Difficulty", value: course.tier === "PREMIUM" ? "Advanced" : "Foundational" },
+                  { label: "Duration", value: "Self-paced" },
+                  { label: "Outcome", value: "Certificate" },
+                ]}
+                primaryAction={{
+                  href: `/courses/${course.slug}`,
+                  label: "View course",
+                }}
+                secondaryActions={[
+                  {
+                    href: `/checkout?course=${course.slug}`,
+                    label: "Checkout",
+                  },
+                  {
+                    href: `/courses/${course.slug}#curriculum`,
+                    label: "Preview",
+                  },
+                ]}
+              />
+            ))}
           </div>
         </m.section>
       </ContentRegion>
@@ -430,19 +516,29 @@ export function PremiumHomepageExperience({
         {testimonials.length ? (
           <m.section className="grid gap-4 lg:grid-cols-3" {...sectionMotion}>
             {testimonials.slice(0, 3).map((testimonial) => (
-              <Card key={testimonial.id} className="ui-surface border">
-                <CardHeader className="space-y-2">
-                  <div className="flex items-center gap-1 text-warning">
-                    {Array.from({ length: Math.max(1, Math.min(5, testimonial.rating)) }).map((_, index) => (
-                      <Star key={`${testimonial.id}-${index}`} className="h-4 w-4 fill-current" />
-                    ))}
+              <Card key={testimonial.id} className="ui-surface supports-hover-card border">
+                <CardHeader className="space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-10 w-10 border">
+                        <AvatarImage src={testimonial.avatar || undefined} alt={testimonial.name} />
+                        <AvatarFallback className="text-xs font-semibold">{getInitials(testimonial.name)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-semibold">{testimonial.name}</p>
+                        <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 text-warning">
+                      {Array.from({ length: Math.max(1, Math.min(5, testimonial.rating || 5)) }).map((_, index) => (
+                        <Star key={`${testimonial.id}-star-${index}`} className="h-3.5 w-3.5 fill-current" />
+                      ))}
+                    </div>
                   </div>
-                  <CardDescription className="text-sm text-foreground">“{testimonial.text}”</CardDescription>
+                  <CardDescription className="text-sm text-foreground">
+                    “{testimonial.text}”
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm font-semibold">{testimonial.name}</p>
-                  <p className="text-xs text-muted-foreground">{testimonial.role}</p>
-                </CardContent>
               </Card>
             ))}
           </m.section>
@@ -453,20 +549,20 @@ export function PremiumHomepageExperience({
           {...sectionMotion}
         >
           <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Ready to start?</p>
-            <h3 className="text-2xl font-semibold tracking-tight">Turn your next AI initiative into shipped outcomes</h3>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Ready to launch?</p>
+            <h3 className="text-2xl font-semibold tracking-tight">Move from AI curiosity to shipped business outcomes</h3>
             <p className="text-sm text-muted-foreground">
-              Browse catalog, choose a plan, and keep progress measurable from first lesson to certification.
+              Pick the right path, activate checkout, and keep progress visible from first lesson to verified completion.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 lg:justify-end">
             <Link href="/courses">
-              <Button variant="premium" size="lg" className="motion-safe:hover:-translate-y-0.5">
+              <Button variant="premium" size="lg" className="h-11">
                 Browse courses
               </Button>
             </Link>
             <Link href="/pricing">
-              <Button variant="outline" size="lg" className="motion-safe:hover:-translate-y-0.5">
+              <Button variant="outline" size="lg" className="h-11">
                 Compare plans
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

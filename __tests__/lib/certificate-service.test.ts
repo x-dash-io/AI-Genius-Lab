@@ -46,31 +46,14 @@ jest.mock("@/lib/certificate-service", () => ({
 }));
 
 import { checkAndGenerateCertificate, cleanupCertificateCache, getCertificateCacheStatus } from "@/lib/certificate-service";
-import { hasCompletedCourse } from "@/lib/certificates";
-import { generateCourseCertificate } from "@/lib/certificates";
-import { logger } from "@/lib/logger";
 
 const mockCheckAndGenerateCertificate = checkAndGenerateCertificate as jest.MockedFunction<typeof checkAndGenerateCertificate>;
 const mockCleanupCertificateCache = cleanupCertificateCache as jest.MockedFunction<typeof cleanupCertificateCache>;
 const mockGetCertificateCacheStatus = getCertificateCacheStatus as jest.MockedFunction<typeof getCertificateCacheStatus>;
-const mockHasCompletedCourse = hasCompletedCourse as jest.MockedFunction<typeof hasCompletedCourse>;
-const mockGenerateCourseCertificate = generateCourseCertificate as jest.MockedFunction<typeof generateCourseCertificate>;
-const mockLoggerInfo = logger.info as jest.MockedFunction<typeof logger.info>;
-const mockLoggerError = logger.error as jest.MockedFunction<typeof logger.error>;
 
 describe("Certificate Service", () => {
   const userId = "user-123";
   const courseId = "course-123";
-  const mockCertificate = {
-    id: "cert-123",
-    certificateId: "CERT-1234567890-ABCDEF",
-    userId,
-    courseId,
-    type: "course" as const,
-    issuedAt: new Date(),
-    User: { name: "Test User", email: "test@example.com" },
-    Course: { title: "Test Course" }
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();

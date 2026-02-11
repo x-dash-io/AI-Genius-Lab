@@ -17,25 +17,6 @@ describe("getCategorySales", () => {
   });
 
   it("correctly aggregates sales and revenue by category", async () => {
-    const mockPurchases = [
-      {
-        amountCents: 1000,
-        Course: { category: "Development" },
-      },
-      {
-        amountCents: 2000,
-        Course: { category: "Development" },
-      },
-      {
-        amountCents: 1500,
-        Course: { category: "Design" },
-      },
-      {
-        amountCents: 500,
-        Course: { category: null }, // Uncategorized
-      },
-    ];
-
     // Mock queryRaw
     (prisma.$queryRaw as jest.Mock).mockResolvedValue([
         { category: "Development", sales: BigInt(2), revenue: BigInt(3000) },

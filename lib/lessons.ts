@@ -177,7 +177,7 @@ export async function getAuthorizedLessonContent(lessonId: string) {
           }
           contentUrl = publicIdParts.join('/');
         }
-      } catch (e) {
+      } catch {
         console.error('Failed to parse Cloudinary URL:', contentUrl);
       }
     }

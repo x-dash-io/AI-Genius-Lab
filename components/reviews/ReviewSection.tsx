@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
 import { ReviewForm } from "./ReviewForm";
 import { ReviewList } from "./ReviewList";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
 interface ReviewSectionProps {
   courseId: string;
@@ -24,7 +22,6 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
   const [userReview, setUserReview] = useState<any>(null);
   const [loadingStats, setLoadingStats] = useState(false);
-  const [loadingUserReview, setLoadingUserReview] = useState(false);
 
   useEffect(() => {
     // Fetch current user session
@@ -54,7 +51,6 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
   };
 
   const fetchUserReview = async (userId: string) => {
-    setLoadingUserReview(true);
     try {
       const response = await fetch(
         `/api/reviews/user?courseId=${courseId}&userId=${userId}`
@@ -65,8 +61,6 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
       }
     } catch (error) {
       console.error("Error fetching user review:", error);
-    } finally {
-      setLoadingUserReview(false);
     }
   };
 

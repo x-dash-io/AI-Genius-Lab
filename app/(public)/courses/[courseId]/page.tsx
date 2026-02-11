@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { BookOpen, Clock3, Layers3, Star } from "lucide-react";
 import { getCoursePreviewBySlug } from "@/lib/courses";
@@ -50,6 +51,18 @@ function formatPrice(priceCents: number) {
   return priceCents === 0 ? "Free" : `$${(priceCents / 100).toFixed(2)}`;
 }
 
+function resolveCourseImage(imageUrl: string | null) {
+  if (!imageUrl) {
+    return null;
+  }
+
+  if (imageUrl.startsWith("/") || imageUrl.includes("res.cloudinary.com")) {
+    return imageUrl;
+  }
+
+  return null;
+}
+
 export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
   const { courseId } = await params;
   const course = await getCoursePreviewBySlug(courseId);
@@ -59,6 +72,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
   }
 
   const reviewStats = await getCourseReviewStats(course.id);
+  const courseImage = resolveCourseImage(course.imageUrl);
   const lessons = course.sections.flatMap((section) =>
     section.lessons.map((lesson) => ({
       id: lesson.id,
@@ -105,6 +119,19 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
         <ContentRegion className="lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <div className="grid gap-6">
             <Card className="ui-surface">
+              <div className="relative aspect-video overflow-hidden rounded-t-[var(--radius-lg)] border-b bg-muted/25">
+                {courseImage ? (
+                  <Image
+                    src={courseImage}
+                    alt={course.title}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 66vw"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-[linear-gradient(145deg,hsl(var(--primary)_/_0.16),hsl(var(--accent)_/_0.6))]" />
+                )}
+              </div>
               <CardHeader>
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant={course.tier === "PREMIUM" ? "default" : "secondary"}>
@@ -239,4 +266,3 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
     </>
   );
 }
-

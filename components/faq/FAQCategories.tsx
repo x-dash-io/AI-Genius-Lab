@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { BookOpen, CreditCard, Lock, Settings, HelpCircle, Zap } from "lucide-react";
+import { BookOpen, CreditCard, Lock, Settings } from "lucide-react";
 
 const categories = [
   {

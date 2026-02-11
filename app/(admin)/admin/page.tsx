@@ -1,10 +1,8 @@
 import { Metadata } from "next";
-import { Suspense } from "react";
-import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/access";
 import { getAdminStats } from "@/lib/admin/stats";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Users, DollarSign, GraduationCap, TrendingUp, Loader2 } from "lucide-react";
+import { BookOpen, Users, DollarSign, GraduationCap, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";

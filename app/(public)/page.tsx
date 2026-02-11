@@ -41,6 +41,7 @@ export default async function LandingPage() {
     id: string;
     name: string;
     role: string;
+    avatar?: string | null;
     rating: number;
     text: string;
   }> = [];

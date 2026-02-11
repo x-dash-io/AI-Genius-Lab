@@ -59,6 +59,7 @@ async function main() {
             take: 1
         });
         console.log("Success with include!");
+        console.log("Rows fetched with include:", result.length);
     } catch (error) {
         console.error("Error with include:", error);
     }

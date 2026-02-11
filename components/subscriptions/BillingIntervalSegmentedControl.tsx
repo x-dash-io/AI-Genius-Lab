@@ -59,6 +59,7 @@ export function BillingIntervalSegmentedControl({
             value={option.value}
             className={cn(
               "relative z-10 flex flex-col items-center gap-0.5 rounded-[calc(var(--radius-md)-0.35rem)] px-3 py-2 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2",
+              "min-h-[44px] justify-center",
               isActive ? "text-primary-foreground" : "text-foreground"
             )}
           >
