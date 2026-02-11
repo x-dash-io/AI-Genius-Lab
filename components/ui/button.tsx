@@ -5,29 +5,29 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-sm)] text-sm font-semibold ring-offset-background transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-[var(--ease-standard)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-55 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold ring-offset-background transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.98]",
   {
     variants: {
       variant: {
         default:
-          "border border-transparent bg-primary text-primary-foreground shadow-sm hover:bg-primary/92 hover:shadow-md active:translate-y-px",
+          "bg-primary text-primary-foreground border border-primary/70 shadow-[0_8px_22px_hsl(var(--primary)/0.24)] hover:brightness-110 hover:-translate-y-0.5",
         destructive:
-          "border border-transparent bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/92 hover:shadow-md active:translate-y-px",
+          "bg-destructive text-destructive-foreground shadow-md hover:bg-destructive/90",
         outline:
-          "border bg-background text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground",
+          "border border-border bg-card/85 text-foreground hover:bg-accent hover:text-accent-foreground",
         secondary:
-          "border border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "border border-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-        "ghost-destructive": "border border-transparent text-destructive hover:bg-destructive/10",
-        link: "border-0 p-0 h-auto text-primary underline-offset-4 hover:underline",
+          "bg-secondary text-secondary-foreground border border-border/70 hover:bg-secondary/80",
+        ghost: "text-muted-foreground hover:bg-accent/70 hover:text-foreground",
+        "ghost-destructive": "text-destructive hover:bg-destructive/10",
+        link: "text-primary underline-offset-4 hover:underline",
         premium:
-          "border border-transparent bg-[linear-gradient(130deg,hsl(var(--primary))_0%,hsl(var(--brand-gradient-end))_100%)] text-primary-foreground shadow-md hover:brightness-105 hover:shadow-lg active:translate-y-px",
+          "bg-[linear-gradient(135deg,hsl(var(--primary))_0%,hsl(260_88%_63%)_100%)] text-white border border-primary/35 shadow-[0_12px_28px_hsl(var(--primary)/0.32)] hover:brightness-110 hover:-translate-y-0.5",
       },
       size: {
-        default: "h-10 px-4",
-        sm: "h-8 px-3 text-xs",
-        lg: "h-11 px-6 text-sm",
-        icon: "h-10 w-10",
+        default: "h-11 px-5 py-2.5",
+        sm: "h-9 rounded-lg px-3.5",
+        lg: "h-12 rounded-xl px-8 text-base",
+        icon: "h-11 w-11",
       },
     },
     defaultVariants: {
@@ -46,8 +46,16 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
+    const iconSizeClass = size === "lg" ? "[&_svg]:size-5" : "[&_svg]:size-4";
 
-    return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+    return (
+      <Comp
+        data-button-variant={variant}
+        className={cn(buttonVariants({ variant, size, className }), iconSizeClass)}
+        ref={ref}
+        {...props}
+      />
+    );
   }
 );
 Button.displayName = "Button";

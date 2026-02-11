@@ -34,7 +34,34 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { cn } from "@/lib/utils";
-import type { SocialLink } from "@/lib/settings";
+import { useCart } from "@/components/cart/CartProvider";
+import { SocialLink } from "@/lib/settings";
+import {
+  Menu,
+  X,
+  BookOpen,
+  Route,
+  HelpCircle,
+  Mail,
+  Home,
+  GraduationCap,
+  ShoppingCart,
+  LogIn,
+  UserPlus,
+  Newspaper,
+  ChevronDown,
+  Info,
+  Users,
+} from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+
+// Primary navigation - core conversion paths
+const primaryNavigation = [
+  { name: "Home", href: "/", icon: Home },
+  { name: "Paths", href: "/learning-paths", icon: Route },
+  { name: "Cart", href: "/cart", icon: ShoppingCart },
+];
 
 const mainNav = [
   { name: "Courses", href: "/courses", icon: BookOpen },
@@ -56,11 +83,40 @@ export function PublicLayoutClient({
   socialLinks?: SocialLink[];
 }) {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [resourcesOpen, setResourcesOpen] = useState(false);
+  const mounted = true;
+  const menuRef = useRef<HTMLElement>(null);
   const { cart } = useCart();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const cartCount = cart?.itemCount ?? 0;
+  // Close menu on scroll
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const handleScroll = () => {
+      setMobileMenuOpen(false);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [mobileMenuOpen]);
+
+  // Close menu when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+      }
+    };
 
   const mobileNav = useMemo(
     () => [
@@ -72,24 +128,31 @@ export function PublicLayoutClient({
   );
 
   return (
-    <AppShell area="public" className="flex flex-col">
-      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
-          <Link href="/" className="inline-flex items-center" aria-label="AI Genius Lab home">
-            <Image src="/logo.png" alt="AI Genius Lab" width={156} height={34} className="h-8 w-auto object-contain" priority />
-          </Link>
-
-          <nav className="hidden items-center gap-1 md:flex">
-            {mainNav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "rounded-full px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                  isActivePath(pathname, item.href) && "bg-accent text-foreground"
-                )}
-              >
-                {item.name}
+    <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
+      {/* Hero Background Blobs - more vibrant for all pages */}
+      <HeroBackgroundBlobs />
+      <div className="hidden lg:flex flex-col min-h-screen" suppressHydrationWarning>
+        {/* Desktop Top Navigation Bar - Floating Glass */}
+        <motion.header
+          initial={{ y: -100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="sticky top-0 left-0 right-0 z-50 px-4 pt-3 pointer-events-none"
+        >
+          <div className="mx-auto w-full max-w-7xl pointer-events-auto">
+            <div className="glass rounded-2xl h-16 px-6 flex items-center justify-between border border-border/60 shadow-[0_10px_30px_rgba(2,6,23,0.12)]">
+              {/* Logo */}
+              <Link href="/" className="flex items-center group transition-transform hover:scale-105">
+                <div className="relative h-9 w-auto flex-shrink-0">
+                  <Image
+                    src="/logo.png"
+                    alt="AI Genius Lab"
+                    width={160}
+                    height={36}
+                    className="object-contain h-9 w-auto"
+                    priority
+                  />
+                </div>
               </Link>
             ))}
           </nav>
@@ -196,10 +259,113 @@ export function PublicLayoutClient({
                   </Button>
                 </Link>
               </div>
-            ) : null}
-          </nav>
-        </div>
-      ) : null}
+            </Link>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMobileMenuOpen(!mobileMenuOpen);
+                }}
+                className="h-10 w-10"
+                aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              >
+                {mobileMenuOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        {/* Mobile Menu Overlay */}
+        <AnimatePresence mode="wait">
+          {mobileMenuOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                key="backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+                onClick={() => setMobileMenuOpen(false)}
+              />
+
+              {/* Menu Panel - Slides from Left */}
+              <motion.nav
+                key="menu"
+                ref={menuRef}
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%" }}
+                transition={{
+                  type: "spring",
+                  damping: 30,
+                  stiffness: 300
+                }}
+                className="fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw] bg-card/96 backdrop-blur-xl border-r border-border/80 shadow-[0_18px_40px_rgba(2,6,23,0.35)] flex flex-col lg:hidden"
+              >
+                {/* Menu Header */}
+                <div className="border-b p-4 flex items-center justify-between bg-card/95 backdrop-blur-md z-10 h-16 flex-shrink-0">
+                  <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center">
+                    <div className="relative h-10 w-auto flex-shrink-0">
+                      <Image
+                        src="/logo.png"
+                        alt="AI Genius Lab"
+                        width={180}
+                        height={40}
+                        className="object-contain h-10 w-auto"
+                        priority
+                      />
+                    </div>
+                  </Link>
+                </div>
+
+                {/* Navigation Items */}
+                <div className="px-3 py-4 space-y-1 flex-1 overflow-y-auto">
+                  {publicNavigation.map((item, index) => {
+                    const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href + "/"));
+                    const Icon = item.icon;
+                    const isCart = item.href === "/cart";
+                    const cartCount = cart?.itemCount || 0;
+
+                    return (
+                      <motion.div
+                        key={item.href}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.05 * (index + 1) }}
+                      >
+                        <Link
+                          href={item.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={cn(
+                            "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-all active:scale-[0.98]",
+                            isActive
+                              ? "bg-primary text-primary-foreground shadow-sm"
+                              : "text-foreground hover:bg-accent hover:text-accent-foreground"
+                          )}
+                        >
+                          <Icon className="h-5 w-5 flex-shrink-0" />
+                          <span className="flex-1">{item.name}</span>
+                          {isCart && cartCount > 0 && (
+                            <Badge
+                              variant="destructive"
+                              className="h-5 min-w-[20px] flex items-center justify-center rounded-full px-1.5 text-[10px] font-bold"
+                            >
+                              {cartCount > 9 ? "9+" : cartCount}
+                            </Badge>
+                          )}
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+                </div>
 
       <main className="flex-1">
         <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:py-8">{children}</div>

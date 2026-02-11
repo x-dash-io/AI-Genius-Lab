@@ -9,75 +9,45 @@ import { motion, useReducedMotion } from "framer-motion";
 export function HeroBackgroundBlobs() {
   const shouldReduceMotion = useReducedMotion();
 
-  const blobVariants = {
-    animate: shouldReduceMotion ? {} : {
-      x: [0, 50, 0],
-      y: [0, 30, 0],
-    }
-  };
-
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none select-none">
-      {/* Primary Blob - Top Left - Indigo/Primary */}
       <motion.div
-        className="absolute -top-20 -left-20 w-[80vw] max-w-[600px] h-[80vw] max-h-[600px] rounded-full blur-[100px] opacity-40 dark:opacity-20"
+        className="absolute -top-36 -left-24 w-[72vw] max-w-[720px] h-[72vw] max-h-[720px] rounded-full blur-[115px] opacity-35 dark:opacity-28"
         style={{
-          background: "radial-gradient(circle, hsl(var(--primary) / 0.8), transparent)",
+          background: "radial-gradient(circle, hsl(var(--primary) / 0.45), transparent 64%)",
           willChange: "transform",
         }}
-        animate={shouldReduceMotion ? {} : {
-          x: [0, 80, 0],
-          y: [0, 40, 0],
-          scale: [1, 1.1, 1],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
+        animate={shouldReduceMotion ? {} : { x: [0, 56, 0], y: [0, 30, 0], scale: [1, 1.06, 1] }}
+        transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* Secondary Blob - Top Right - Accent/Purple */}
       <motion.div
-        className="absolute top-[10%] -right-20 w-[70vw] max-w-[500px] h-[70vw] max-h-[500px] rounded-full blur-[120px] opacity-30 dark:opacity-15"
+        className="absolute top-[6%] -right-28 w-[66vw] max-w-[620px] h-[66vw] max-h-[620px] rounded-full blur-[130px] opacity-28 dark:opacity-20"
         style={{
-          background: "radial-gradient(circle, hsl(262 83% 58% / 0.7), transparent)",
+          background: "radial-gradient(circle, hsl(190 94% 57% / 0.26), transparent 66%)",
           willChange: "transform",
         }}
-
-        animate={shouldReduceMotion ? {} : {
-          x: [0, -60, 0],
-          y: [0, 80, 0],
-          scale: [1, 1.05, 1],
-        }}
-        transition={{
-          duration: 25,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
+        animate={shouldReduceMotion ? {} : { x: [0, -50, 0], y: [0, 68, 0], scale: [1, 1.04, 1] }}
+        transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* Accent Blob - Bottom Left - Sky/Cyan */}
       <motion.div
-        className="absolute bottom-[-10%] left-[-5%] w-[75vw] max-w-[550px] h-[75vw] max-h-[550px] rounded-full blur-[100px] opacity-25 dark:opacity-10"
+        className="absolute bottom-[-20%] left-[10%] w-[74vw] max-w-[700px] h-[74vw] max-h-[700px] rounded-full blur-[130px] opacity-25 dark:opacity-18"
         style={{
-          background: "radial-gradient(circle, hsl(199 89% 48% / 0.6), transparent)",
+          background: "radial-gradient(circle, hsl(258 90% 62% / 0.18), transparent 70%)",
           willChange: "transform",
         }}
-        animate={shouldReduceMotion ? {} : {
-          x: [0, 100, 0],
-          y: [0, -50, 0],
-          scale: [1, 1.15, 1],
-        }}
-        transition={{
-          duration: 30,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
+        animate={shouldReduceMotion ? {} : { x: [0, 80, 0], y: [0, -48, 0] }}
+        transition={{ duration: 34, repeat: Infinity, ease: "easeInOut" }}
       />
 
-      {/* Noise Texture Overlay for subtle grains */}
-      <div className="absolute inset-0 opacity-[0.07] dark:opacity-[0.05] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}></div>
+      <div
+        className="absolute inset-0 opacity-[0.04] dark:opacity-[0.03]"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E\")",
+        }}
+      />
     </div>
   );
 }
