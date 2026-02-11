@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { verifyPayPalWebhook, getPayPalSubscription } from "@/lib/paypal";
+import { verifyPayPalWebhook, getPayPalSubscription, cancelPayPalSubscription } from "@/lib/paypal";
 
 type PayPalEvent = {
+  id?: string;
   event_type?: string;
-  resource?: any;
+  resource?: Record<string, unknown>;
 };
 
 function getOrderId(event: PayPalEvent) {
@@ -14,6 +16,36 @@ function getOrderId(event: PayPalEvent) {
     event.resource?.id ??
     null
   );
+}
+
+function getWebhookEventId(event: PayPalEvent, transmissionId: string) {
+  const resourceId = event.resource?.id ?? getOrderId(event) ?? "unknown-resource";
+  return event.id ?? `${event.event_type ?? "unknown-event"}:${resourceId}:${transmissionId}`;
+}
+
+async function tryRegisterWebhookEvent(event: PayPalEvent, eventId: string, transmissionId: string) {
+  try {
+    await prisma.webhookEvent.create({
+      data: {
+        provider: "paypal",
+        eventId,
+        eventType: event.event_type ?? "unknown",
+        transmissionId,
+        payload: event as Prisma.InputJsonValue,
+      },
+    });
+
+    return true;
+  } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return false;
+    }
+
+    throw error;
+  }
 }
 
 export async function POST(request: Request) {
@@ -40,7 +72,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing PayPal headers" }, { status: 400 });
     }
 
-    console.log(`[WEBHOOK] Verifying webhook signature...`);
+    console.log("[WEBHOOK] Verifying webhook signature...");
     const verified = await verifyPayPalWebhook({
       transmissionId,
       transmissionTime,
@@ -55,9 +87,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
+    const eventId = getWebhookEventId(event, transmissionId);
+    const registered = await tryRegisterWebhookEvent(event, eventId, transmissionId);
+
+    if (!registered) {
+      console.log(`[WEBHOOK] Event ${eventId} already processed, skipping`);
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
     console.log(`[WEBHOOK] Signature verified successfully`);
-    console.log(`[WEBHOOK] Full body: ${bodyText}`);
-    console.log(`[WEBHOOK] Headers: ${JSON.stringify({ transmissionId, transmissionTime, transmissionSig, certUrl, authAlgo })}`);
+    console.log(`[WEBHOOK] Event ID: ${eventId}`);
 
     // Handle Subscription Events
     if (event.event_type?.startsWith("BILLING.SUBSCRIPTION.")) {
@@ -75,118 +114,79 @@ export async function POST(request: Request) {
       }
 
       if (!customId) {
-        console.warn(`[WEBHOOK] Missing custom_id in subscription event and could not find by PayPal ID`);
+        console.warn("[WEBHOOK] Missing custom_id in subscription event and could not find by PayPal ID");
         return NextResponse.json({ received: true });
       }
 
-      console.log(
-        `[WEBHOOK] Processing subscription event ${event.event_type} for ${customId}. PayPal ID: ${paypalSubId}`
-      );
-      console.log(`[WEBHOOK] Subscription Resource: ${JSON.stringify(subscriptionResource)}`);
-
       switch (event.event_type) {
         case "BILLING.SUBSCRIPTION.ACTIVATED":
-        case "BILLING.SUBSCRIPTION.UPDATED":
-          const startTime = new Date(
-            subscriptionResource.start_time || Date.now()
-          );
+        case "BILLING.SUBSCRIPTION.UPDATED": {
+          const startTime = new Date(subscriptionResource.start_time || Date.now());
           const endTime = subscriptionResource.billing_info?.next_billing_time
             ? new Date(subscriptionResource.billing_info.next_billing_time)
-            : new Date(Date.now() + 31 * 24 * 60 * 60 * 1000); // Fallback 31 days
+            : new Date(Date.now() + 31 * 24 * 60 * 60 * 1000);
 
           const { updateSubscription } = await import("@/lib/subscriptions");
-          const sub = await updateSubscription(customId, {
+          const updatedSub = await updateSubscription(customId, {
             status: "active",
             paypalSubscriptionId: paypalSubId,
             currentPeriodStart: startTime,
             currentPeriodEnd: endTime,
-            paypalPlanId: subscriptionResource.plan_id
+            paypalPlanId: subscriptionResource.plan_id,
           });
 
-          console.log(`[WEBHOOK] Subscription ${sub.id} activated successfully`);
-
-          // Cancel any other active/pending subscriptions for this user
-          // This handles plan changes where old subscription should be replaced
           const otherSubs = await prisma.subscription.findMany({
             where: {
-              userId: sub.userId,
-              id: { not: sub.id },
+              userId: updatedSub.userId,
+              id: { not: updatedSub.id },
               status: { in: ["active", "cancelled", "past_due", "pending"] },
             },
           });
 
-          console.log(`[WEBHOOK] Found ${otherSubs.length} other subscriptions to clean up`);
-
           for (const other of otherSubs) {
-            try {
-              // Cancel pending subscriptions immediately (abandoned plan changes)
-              if (other.status === "pending") {
-                console.log(`[WEBHOOK] Cleaning up abandoned pending subscription ${other.id}`);
-                await prisma.subscription.update({
-                  where: { id: other.id },
-                  data: { status: "expired" },
-                });
-                continue;
+            if (other.status !== "pending" && other.paypalSubscriptionId) {
+              try {
+                await cancelPayPalSubscription(other.paypalSubscriptionId, "Replaced by new subscription");
+              } catch (error) {
+                console.error(`[WEBHOOK] Failed to cancel previous PayPal sub ${other.paypalSubscriptionId}:`, error);
               }
-
-              // For active subscriptions, cancel in PayPal first
-              if (other.paypalSubscriptionId) {
-                console.log(`[WEBHOOK] Cancelling old PayPal subscription ${other.paypalSubscriptionId}`);
-                const { cancelPayPalSubscription } = await import("@/lib/paypal");
-                await cancelPayPalSubscription(
-                  other.paypalSubscriptionId,
-                  "Replaced by new subscription"
-                );
-              }
-
-              await prisma.subscription.update({
-                where: { id: other.id },
-                data: { status: "expired" },
-              });
-              console.log(`[WEBHOOK] Old subscription ${other.id} marked as expired`);
-            } catch (err) {
-              console.error(`[WEBHOOK] Failed to cancel old sub ${other.id}:`, err);
             }
           }
 
-          // Revalidate subscription-related pages to update UI
-          try {
-            revalidatePath("/profile/subscription");
-            revalidatePath("/profile");
-            revalidatePath("/pricing");
-            revalidatePath("/dashboard");
-            console.log(`[WEBHOOK] Revalidated subscription pages for user ${sub.userId}`);
-          } catch (err) {
-            console.error(`[WEBHOOK] Failed to revalidate paths:`, err);
-          }
-          break;
-
-        case "BILLING.SUBSCRIPTION.CANCELLED":
-          const cancelledSub = await prisma.subscription.update({
-            where: { id: customId },
-            data: {
-              status: "cancelled",
-              cancelAtPeriodEnd: true,
-            },
+          await prisma.$transaction(async (tx) => {
+            for (const other of otherSubs) {
+              await tx.subscription.update({
+                where: { id: other.id },
+                data: { status: other.status === "pending" ? "expired" : "expired" },
+              });
+            }
           });
 
-          // Revalidate subscription-related pages
-          try {
-            revalidatePath("/profile/subscription");
-            revalidatePath("/profile");
-            console.log(`[WEBHOOK] Revalidated pages after cancellation for user ${cancelledSub.userId}`);
-          } catch (err) {
-            console.error(`[WEBHOOK] Failed to revalidate paths:`, err);
-          }
+          revalidatePath("/profile/subscription");
+          revalidatePath("/profile");
+          revalidatePath("/pricing");
+          revalidatePath("/dashboard");
           break;
+        }
 
-        case "BILLING.SUBSCRIPTION.EXPIRED":
-        case "BILLING.SUBSCRIPTION.SUSPENDED":
+        case "BILLING.SUBSCRIPTION.CANCELLED": {
+          const { updateSubscription } = await import("@/lib/subscriptions");
+          await updateSubscription(customId, { status: "cancelled" });
           await prisma.subscription.update({
             where: { id: customId },
-            data: { status: "expired" },
+            data: { cancelAtPeriodEnd: true },
           });
+          revalidatePath("/profile/subscription");
+          revalidatePath("/profile");
           break;
+        }
+
+        case "BILLING.SUBSCRIPTION.EXPIRED":
+        case "BILLING.SUBSCRIPTION.SUSPENDED": {
+          const { updateSubscription } = await import("@/lib/subscriptions");
+          await updateSubscription(customId, { status: "expired" });
+          break;
+        }
       }
 
       return NextResponse.json({ received: true });
@@ -198,15 +198,11 @@ export async function POST(request: Request) {
       const paypalSubId = saleResource.billing_agreement_id;
 
       if (paypalSubId) {
-        console.log(
-          `[WEBHOOK] Recurring payment completed for subscription: ${paypalSubId}`
-        );
         const sub = await prisma.subscription.findUnique({
           where: { paypalSubscriptionId: paypalSubId },
         });
 
         if (sub) {
-          // Record payment
           await prisma.subscriptionPayment.create({
             data: {
               subscriptionId: sub.id,
@@ -214,7 +210,7 @@ export async function POST(request: Request) {
               currency: saleResource.amount.currency_code.toLowerCase(),
               status: "completed",
               paypalSaleId: saleResource.id,
-            }
+            },
           });
 
           try {
@@ -226,18 +222,13 @@ export async function POST(request: Request) {
                 status: "active",
                 currentPeriodEnd: new Date(nextBillingTime),
               });
-              console.log(
-                `[WEBHOOK] Subscription ${sub.id} extended until ${nextBillingTime}`
-              );
             }
           } catch (error) {
-            console.error(
-              `[WEBHOOK] Failed to fetch PayPal subscription details to extend period:`,
-              error
-            );
+            console.error("[WEBHOOK] Failed to refresh next billing period:", error);
           }
         }
       }
+
       return NextResponse.json({ received: true });
     }
 
@@ -245,17 +236,13 @@ export async function POST(request: Request) {
       event.event_type !== "PAYMENT.CAPTURE.COMPLETED" &&
       event.event_type !== "CHECKOUT.ORDER.APPROVED"
     ) {
-      console.log(`[WEBHOOK] Ignoring event type: ${event.event_type}`);
       return NextResponse.json({ received: true });
     }
 
     const orderId = getOrderId(event);
     if (!orderId) {
-      console.error("[WEBHOOK] Missing order id in event");
       return NextResponse.json({ error: "Missing order id" }, { status: 400 });
     }
-
-    console.log(`[WEBHOOK] Looking up purchases for order: ${orderId}`);
 
     const purchases = await prisma.purchase.findMany({
       where: { providerRef: orderId },
@@ -266,125 +253,128 @@ export async function POST(request: Request) {
             title: true,
             inventory: true,
             slug: true,
-          }
+          },
         },
         User: {
           select: {
             id: true,
             email: true,
             name: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     if (purchases.length === 0) {
-      console.error(`[WEBHOOK] No purchases found for orderId: ${orderId}`);
       return NextResponse.json({ received: true });
     }
 
-    console.log(`[WEBHOOK] Found ${purchases.length} purchases to process`);
-
-    // Process all purchases in the order
     for (const purchase of purchases) {
-      if (purchase.status === "paid") {
-        console.warn(`[WEBHOOK] Purchase ${purchase.id} already marked as paid, skipping`);
-        continue;
-      }
+      await prisma.$transaction(async (tx) => {
+        const statusUpdate = await tx.purchase.updateMany({
+          where: {
+            id: purchase.id,
+            status: { not: "paid" },
+          },
+          data: { status: "paid" },
+        });
 
-      console.log(`[WEBHOOK] Processing purchase ${purchase.id} for course ${purchase.courseId}`);
+        if (statusUpdate.count === 0) {
+          return;
+        }
 
-      // Update purchase status
-      await prisma.purchase.update({
-        where: { id: purchase.id },
-        data: { status: "paid" },
-      });
+        if (purchase.Course && purchase.Course.inventory !== null) {
+          const inventoryUpdate = await tx.course.updateMany({
+            where: {
+              id: purchase.courseId,
+              inventory: {
+                gt: 0,
+              },
+            },
+            data: {
+              inventory: {
+                decrement: 1,
+              },
+            },
+          });
 
-      // Decrement inventory if course has limited inventory
-      if (purchase.Course && purchase.Course.inventory !== null) {
-        console.log(`[WEBHOOK] Decrementing inventory for course ${purchase.courseId}`);
-        await prisma.course.update({
-          where: { id: purchase.courseId },
+          if (inventoryUpdate.count === 0) {
+            throw new Error(`OUT_OF_STOCK_DURING_CAPTURE:${purchase.courseId}`);
+          }
+        }
+
+        await tx.enrollment.upsert({
+          where: {
+            userId_courseId: {
+              userId: purchase.userId,
+              courseId: purchase.courseId,
+            },
+          },
+          update: { purchaseId: purchase.id },
+          create: {
+            id: `enrollment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            userId: purchase.userId,
+            courseId: purchase.courseId,
+            purchaseId: purchase.id,
+          },
+        });
+
+        await tx.payment.create({
           data: {
-            inventory: {
-              decrement: 1,
+            id: `payment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            userId: purchase.userId,
+            purchaseId: purchase.id,
+            provider: "paypal",
+            providerRef: orderId,
+            amountCents: purchase.amountCents,
+            currency: purchase.currency,
+            status: "paid",
+          },
+        });
+
+        if (purchase.couponId) {
+          await tx.$executeRaw`
+            UPDATE "Coupon"
+            SET "usedCount" = "usedCount" + 1
+            WHERE "id" = ${purchase.couponId}
+              AND ("maxUses" IS NULL OR "usedCount" < "maxUses")
+          `;
+        }
+
+        await tx.activityLog.create({
+          data: {
+            id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            userId: purchase.userId,
+            type: "purchase_completed",
+            metadata: {
+              purchaseId: purchase.id,
+              courseId: purchase.courseId,
+              courseTitle: purchase.Course?.title,
             },
           },
         });
-      }
-
-      // Create enrollment
-      const enrollment = await prisma.enrollment.upsert({
-        where: {
-          userId_courseId: {
-            userId: purchase.userId,
-            courseId: purchase.courseId,
-          },
-        },
-        update: { purchaseId: purchase.id },
-        create: {
-          id: `enrollment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-          userId: purchase.userId,
-          courseId: purchase.courseId,
-          purchaseId: purchase.id,
-        },
       });
-      console.log(`[WEBHOOK] Enrollment ${enrollment.id} created/updated`);
-
-      // Create payment record
-      await prisma.payment.create({
-        data: {
-          id: `payment_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-          userId: purchase.userId,
-          purchaseId: purchase.id,
-          provider: "paypal",
-          providerRef: orderId,
-          amountCents: purchase.amountCents,
-          currency: purchase.currency,
-          status: "paid",
-        },
-      });
-
-      // Create activity log
-      await prisma.activityLog.create({
-        data: {
-          id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-          userId: purchase.userId,
-          type: "purchase_completed",
-          metadata: {
-            purchaseId: purchase.id,
-            courseId: purchase.courseId,
-            courseTitle: purchase.Course?.title,
-          },
-        },
-      });
-
-      console.log(`[WEBHOOK] Purchase ${purchase.id} processed successfully`);
     }
 
-    // Send consolidated email notifications
     const firstPurchase = purchases[0];
     if (firstPurchase.User) {
       try {
-        console.log(`[WEBHOOK] Sending confirmation emails to ${firstPurchase.User.email}`);
         const { sendPurchaseConfirmationEmail, sendEnrollmentEmail } = await import("@/lib/email");
-
-        const courseTitles = purchases.map((p: any) => p.Course?.title || "Course").join(", ");
-        const totalAmount = purchases.reduce((sum: number, p: any) => sum + p.amountCents, 0);
+        const courseTitles = purchases.map((p) => p.Course?.title || "Course").join(", ");
+        const totalAmount = purchases.reduce((sum, p) => sum + p.amountCents, 0);
 
         await sendPurchaseConfirmationEmail(firstPurchase.User.email, courseTitles, totalAmount);
 
-        // Individual enrollment emails for each course
         for (const p of purchases) {
           if (p.Course?.title) {
             await sendEnrollmentEmail(firstPurchase.User.email, p.Course.title);
           }
         }
-        console.log(`[WEBHOOK] Consolidated emails sent successfully`);
       } catch (error) {
         console.error("[WEBHOOK] Failed to send email notifications:", error);
       }
     }
+
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error("[WEBHOOK] Critical error processing webhook:", error);
@@ -392,8 +382,7 @@ export async function POST(request: Request) {
       console.error("[WEBHOOK] Error message:", error.message);
       console.error("[WEBHOOK] Error stack:", error.stack);
     }
-    // Still return success to PayPal to avoid redelivery
-    // The error is logged and can be investigated
-    return NextResponse.json({ received: true, error: "Processing error logged" }, { status: 200 });
+
+    return NextResponse.json({ received: false, error: "Processing failed" }, { status: 500 });
   }
 }
