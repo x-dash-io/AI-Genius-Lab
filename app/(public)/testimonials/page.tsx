@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import * as motion from "framer-motion/m";
 import { GraduationCap, Route, Quote, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";

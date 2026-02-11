@@ -98,7 +98,7 @@ export function PublicLayoutClient({
             <ThemeToggle />
 
             <Link href="/cart" className="relative inline-flex">
-              <Button variant="ghost" size="icon" aria-label="Shopping cart" className="h-9 w-9 rounded-full">
+              <Button variant="ghost" size="icon" aria-label="Shopping cart" className="h-11 w-11 rounded-full">
                 <ShoppingCart className="h-4 w-4" />
               </Button>
               {cartCount > 0 ? (
@@ -109,7 +109,7 @@ export function PublicLayoutClient({
             {session?.user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-9 rounded-full px-1.5">
+                  <Button variant="ghost" className="h-11 rounded-full px-1.5">
                     <Avatar className="h-7 w-7">
                       <AvatarImage src={session.user.image || undefined} alt={session.user.name || session.user.email || "User"} />
                       <AvatarFallback className="text-xs font-semibold">
@@ -127,19 +127,19 @@ export function PublicLayoutClient({
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <div className="px-1 pb-1">
-                    <SignOutButton className="h-9 w-full justify-start" />
+                    <SignOutButton className="h-11 w-full justify-start" />
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <div className="hidden items-center gap-2 sm:flex">
                 <Link href="/sign-in">
-                  <Button variant="ghost" size="sm" className="h-9 rounded-full">
+                  <Button variant="ghost" size="sm" className="h-11 rounded-full">
                     Sign In
                   </Button>
                 </Link>
                 <Link href="/sign-up">
-                  <Button variant="premium" size="sm" className="h-9 rounded-full px-4">
+                  <Button variant="premium" size="sm" className="h-11 rounded-full px-4">
                     Create Account
                   </Button>
                 </Link>
@@ -149,7 +149,7 @@ export function PublicLayoutClient({
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 rounded-full md:hidden"
+              className="h-11 w-11 rounded-full md:hidden"
               onClick={() => setIsMobileOpen((open) => !open)}
               aria-label="Toggle menu"
             >

@@ -10,14 +10,8 @@ import {
   updateCourseOrder,
 } from "@/lib/admin/learning-paths";
 import { getAllCourses } from "@/lib/admin/courses";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { ArrowLeft, Plus, X, GripVertical, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { LearningPathEditForm } from "@/components/admin/LearningPathEditForm";
 
 async function updateLearningPathAction(pathId: string, formData: FormData) {

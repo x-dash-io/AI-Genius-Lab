@@ -19,7 +19,6 @@ export function CertificateActions({
   itemSlug
 }: CertificateActionsProps) {
   const [isDownloading, setIsDownloading] = useState(false);
-  const [isCopying, setIsCopying] = useState(false);
 
   const handleDownload = async () => {
     // Always generate and download PDF from API to ensure consistency
@@ -48,7 +47,7 @@ export function CertificateActions({
         description: "Certificate downloaded successfully.",
         variant: "success",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to download certificate",
@@ -59,30 +58,8 @@ export function CertificateActions({
     }
   };
 
-  const handleCopyLink = async () => {
-    setIsCopying(true);
-    try {
-      const shareUrl = `${window.location.origin}/certificates/${certificateId}`;
-      await navigator.clipboard.writeText(shareUrl);
-
-      toast({
-        title: "Link Copied!",
-        description: "Certificate link copied to clipboard.",
-        variant: "success",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to copy link",
-        variant: "destructive",
-      });
-    } finally {
-      setIsCopying(false);
-    }
-  };
-
   return (
-    <div className="space-y-3 pt-2">
+    <div className="space-y-3 pt-2" data-legacy-pdf-url={pdfUrl ?? undefined}>
       <Button
         className="w-full"
         variant="premium"
@@ -124,7 +101,7 @@ export function ShareAchievement({ certificateId }: ShareAchievementProps) {
         description: "Certificate link copied to clipboard.",
         variant: "success",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to copy link",
@@ -146,8 +123,8 @@ export function ShareAchievement({ certificateId }: ShareAchievementProps) {
           text: shareText,
           url: shareUrl,
         });
-      } catch (error) {
-        console.log("Error sharing:", error);
+      } catch {
+        console.log("Error sharing certificate");
       }
     } else {
       // Fallback: copy to clipboard

@@ -56,7 +56,7 @@ export function ContactForm() {
 
       // Reset success state after 5 seconds
       setTimeout(() => setIsSuccess(false), 5000);
-    } catch (error) {
+    } catch {
       toast({
         title: "Failed to send message",
         description: "Please try again or email us directly.",

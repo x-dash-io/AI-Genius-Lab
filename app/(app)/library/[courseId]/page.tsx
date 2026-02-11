@@ -8,7 +8,18 @@ import { prisma } from "@/lib/prisma";
 import { CourseProgressProvider } from "@/contexts/CourseProgressContext";
 import { DynamicCoursePage } from "@/components/courses/DynamicCoursePage";
 import { Button } from "@/components/ui/button";
-import { Lock } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Badge } from "@/components/ui/badge";
+import { BookOpen, Lock } from "lucide-react";
+import {
+  ContentRegion,
+  PageContainer,
+  PageHeader,
+  StatusRegion,
+  Toolbar,
+} from "@/components/layout/shell";
 
 export const dynamic = "force-dynamic";
 
@@ -38,45 +49,58 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
     const isPremium = course.tier === "PREMIUM";
 
     return (
-      <div className="space-y-6">
-        <div className="rounded-xl border bg-card p-8 text-center">
-          <div className="flex flex-col items-center gap-4 max-w-md mx-auto">
-            <div className="h-20 w-20 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
-              <Lock className="h-10 w-10 text-amber-600 dark:text-amber-400" />
-            </div>
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold">{course.title}</h1>
-              {isPremium ? (
-                <p className="text-muted-foreground">
-                  This is a <span className="font-bold uppercase">Premium</span> course. It is available exclusively to Pro and Elite subscribers.
-                </p>
+      <PageContainer className="space-y-6">
+        <PageHeader
+          title={course.title}
+          description="Course content is locked for your current access level."
+          breadcrumbs={[
+            { label: "Dashboard", href: "/dashboard" },
+            { label: "Library", href: "/library" },
+            { label: course.title },
+          ]}
+          actions={
+            <Link href="/courses">
+              <Button variant="outline">Browse catalog</Button>
+            </Link>
+          }
+        />
+
+        <StatusRegion>
+          <EmptyState
+            icon={<Lock className="h-6 w-6" />}
+            title={isPremium ? "Premium plan required" : "Purchase required"}
+            description={
+              isPremium
+                ? "This premium course is available to active Professional or Founder subscriptions."
+                : "Purchase this course to unlock lessons, progress tracking, and certificates."
+            }
+            action={
+              isPremium ? (
+                <Link href="/pricing">
+                  <Button variant="premium">Upgrade subscription</Button>
+                </Link>
               ) : (
-                <p className="text-muted-foreground">
-                  Purchase required to unlock the full lesson experience.
-                </p>
-              )}
-            </div>
-            {isPremium ? (
-              <Link href="/pricing">
-                <Button size="lg">
-                  Upgrade to Pro
-                </Button>
-              </Link>
-            ) : (
-              <Link href={`/courses/${course.slug}`}>
-                <Button size="lg" variant="outline">
-                  View Course Details
-                </Button>
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
+                <Link href={`/courses/${course.slug}`}>
+                  <Button>View course details</Button>
+                </Link>
+              )
+            }
+          />
+
+          <Alert>
+            <BookOpen className="h-4 w-4" />
+            <AlertTitle>Access remains unchanged</AlertTitle>
+            <AlertDescription>
+              Enrollment and billing logic were not modified in this UI pass.
+            </AlertDescription>
+          </Alert>
+        </StatusRegion>
+      </PageContainer>
     );
   }
 
-  const lessonIds = course.sections.flatMap((section: any) =>
-    section.lessons.map((lesson: any) => lesson.id)
+  const lessonIds = course.sections.flatMap((section) =>
+    section.lessons.map((lesson) => lesson.id)
   );
 
   const progressEntries =
@@ -86,13 +110,13 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
         where: { userId: session.user.id, lessonId: { in: lessonIds } },
       });
 
-  const progressMap = new Map<string, any>(
-    progressEntries.map((entry: any) => [entry.lessonId, entry])
+  const progressMap = new Map(
+    progressEntries.map((entry) => [entry.lessonId, entry])
   );
 
   // Calculate overall progress
   const totalLessons = lessonIds.length;
-  const completedLessons = progressEntries.filter((p: any) => p.completedAt != null).length;
+  const completedLessons = progressEntries.filter((entry) => entry.completedAt != null).length;
   const overallProgress = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
   // Format initial progress for dynamic component
@@ -100,7 +124,7 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
     totalLessons,
     completedLessons,
     overallProgress,
-    lessons: lessonIds.map(lessonId => {
+    lessons: lessonIds.map((lessonId) => {
       const progress = progressMap.get(lessonId);
       return {
         lessonId,
@@ -111,11 +135,62 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
   };
 
   return (
-    <CourseProgressProvider>
-      <DynamicCoursePage
-        course={course}
-        initialProgress={initialProgress}
+    <PageContainer className="space-y-6">
+      <PageHeader
+        title={course.title}
+        description="Continue lesson modules, monitor progress, and resume exactly where you left off."
+        breadcrumbs={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "Library", href: "/library" },
+          { label: course.title },
+        ]}
+        actions={
+          <Link href={`/courses/${course.slug}`}>
+            <Button variant="outline">Course overview</Button>
+          </Link>
+        }
       />
-    </CourseProgressProvider>
+
+      <Toolbar className="justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="secondary">
+            {initialProgress.completedLessons}/{initialProgress.totalLessons} lessons complete
+          </Badge>
+          <Badge variant="outline">{initialProgress.overallProgress}% progress</Badge>
+        </div>
+        <Link href="/library">
+          <Button variant="ghost" size="sm">
+            Back to library
+          </Button>
+        </Link>
+      </Toolbar>
+
+      <ContentRegion>
+        <CourseProgressProvider>
+          <DynamicCoursePage
+            course={course}
+            initialProgress={initialProgress}
+          />
+        </CourseProgressProvider>
+      </ContentRegion>
+
+      <StatusRegion>
+        <Card className="ui-surface">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
+            <p className="text-muted-foreground">
+              Need another route? Continue browsing or open your dashboard overview.
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm">Open dashboard</Button>
+              </Link>
+              <Link href="/courses">
+                <Button variant="ghost" size="sm">Find new courses</Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </StatusRegion>
+    </PageContainer>
   );
 }

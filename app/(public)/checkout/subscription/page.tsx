@@ -1,13 +1,22 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createPayPalSubscription, revisePayPalSubscription } from "@/lib/paypal";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, AlertCircle, TrendingDown, Shield, Lock, Zap, Sparkles, Crown } from "lucide-react";
+import { Check, AlertCircle, Clock3, Crown, Lock, ShieldCheck, Zap } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CheckoutIntervalToggle } from "@/components/subscriptions/CheckoutIntervalToggle";
+import {
+  ContentRegion,
+  PageContainer,
+  PageHeader,
+  StatusRegion,
+  Toolbar,
+} from "@/components/layout/shell";
 
 export const dynamic = "force-dynamic";
 
@@ -17,24 +26,31 @@ type Props = {
 
 async function createSubscriptionAction(formData: FormData) {
   "use server";
+
   const session = await getServerSession(authOptions);
-  if (!session?.user) redirect("/sign-in");
+  if (!session?.user) {
+    redirect("/sign-in");
+  }
 
   const planId = formData.get("planId") as string;
   const interval = formData.get("interval") as "monthly" | "annual";
 
   const plan = await prisma.subscriptionPlan.findUnique({ where: { id: planId } });
-  if (!plan) throw new Error("Plan not found");
+  if (!plan) {
+    throw new Error("Plan not found");
+  }
 
   const paypalPlanId = interval === "annual" ? plan.paypalAnnualPlanId : plan.paypalMonthlyPlanId;
-  if (!paypalPlanId) throw new Error("Plan not synced with PayPal");
+  if (!paypalPlanId) {
+    throw new Error("Plan not synced with PayPal");
+  }
 
   const existingSub = await prisma.subscription.findFirst({
     where: {
       userId: session.user.id,
       status: { in: ["active", "past_due"] },
-      currentPeriodEnd: { gt: new Date() }
-    }
+      currentPeriodEnd: { gt: new Date() },
+    },
   });
 
   const appUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
@@ -43,8 +59,6 @@ async function createSubscriptionAction(formData: FormData) {
 
   if (existingSub && existingSub.paypalSubscriptionId) {
     try {
-      console.log(`Attempting to revise subscription: ${existingSub.paypalSubscriptionId}`);
-
       const result = await revisePayPalSubscription({
         subscriptionId: existingSub.paypalSubscriptionId,
         planId: paypalPlanId,
@@ -54,13 +68,16 @@ async function createSubscriptionAction(formData: FormData) {
 
       approvalUrl = result.approvalUrl;
       shouldCreateNew = false;
-
-    } catch (error: any) {
-      console.warn("Failed to revise PayPal subscription. Falling back to new subscription creation.", error?.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      console.warn(
+        "Failed to revise PayPal subscription. Falling back to new subscription creation.",
+        errorMessage
+      );
 
       await prisma.subscription.update({
         where: { id: existingSub.id },
-        data: { status: 'cancelled' }
+        data: { status: "cancelled" },
       });
     }
   }
@@ -98,268 +115,280 @@ async function createSubscriptionAction(formData: FormData) {
 
   if (approvalUrl) {
     redirect(approvalUrl);
-  } else {
-    throw new Error("Failed to generate PayPal approval URL");
   }
+
+  throw new Error("Failed to generate PayPal approval URL");
+}
+
+function formatCurrency(cents: number) {
+  return `$${(cents / 100).toFixed(2)}`;
 }
 
 export default async function SubscriptionCheckoutPage({ searchParams }: Props) {
   const session = await getServerSession(authOptions);
   const { planId, interval = "monthly" } = await searchParams;
 
-  if (!planId) redirect("/pricing");
+  if (!planId) {
+    redirect("/pricing");
+  }
 
   const plan = await prisma.subscriptionPlan.findUnique({ where: { id: planId } });
-  if (!plan) redirect("/pricing");
+  if (!plan) {
+    redirect("/pricing");
+  }
+
+  const billingInterval = interval === "annual" ? "annual" : "monthly";
 
   if (!session?.user) {
-    redirect(`/sign-in?callbackUrl=/checkout/subscription?planId=${planId}&interval=${interval}`);
+    redirect(`/sign-in?callbackUrl=/checkout/subscription?planId=${planId}&interval=${billingInterval}`);
   }
 
   const existingSub = await prisma.subscription.findFirst({
     where: {
       userId: session.user.id,
       status: { in: ["active", "past_due"] },
-      currentPeriodEnd: { gt: new Date() }
+      currentPeriodEnd: { gt: new Date() },
     },
-    include: { plan: true }
+    include: { plan: true },
   });
 
-  const isSwitching = !!existingSub;
+  const isSwitching = Boolean(existingSub);
+  const priceCents =
+    billingInterval === "annual" ? plan.priceAnnualCents : plan.priceMonthlyCents;
+  const annualSavingsCents = Math.max(0, plan.priceMonthlyCents * 12 - plan.priceAnnualCents);
+  const paypalPlanId =
+    billingInterval === "annual" ? plan.paypalAnnualPlanId : plan.paypalMonthlyPlanId;
+  const isSynced = Boolean(paypalPlanId);
 
-  const price = interval === "annual" ? plan.priceAnnualCents : plan.priceMonthlyCents;
-  const paypalPlanId = interval === "annual" ? plan.paypalAnnualPlanId : plan.paypalMonthlyPlanId;
-  const isSynced = !!paypalPlanId;
+  const nextBillingDate =
+    existingSub?.currentPeriodEnd.toLocaleDateString() ||
+    (billingInterval === "annual" ? "In 1 year" : "In 1 month");
+
+  const featureRows = [
+    {
+      title: "Unlimited course access",
+      detail: `Includes ${plan.tier === "starter" ? "standard" : "standard + premium"} courses`,
+      enabled: true,
+    },
+    {
+      title: "Course certificates",
+      detail: "Verified completion certificates",
+      enabled: plan.tier !== "starter",
+    },
+    {
+      title: "Learning path support",
+      detail: "Structured progression across multi-course paths",
+      enabled: plan.tier === "founder",
+    },
+    {
+      title: "Priority support",
+      detail: "Faster response for billing and access requests",
+      enabled: plan.tier !== "starter",
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto py-12 px-4 sm:py-16 sm:px-6 lg:px-8">
-        {/* Progress indicator */}
-        <div className="mb-10 flex items-center justify-center gap-3" data-testid="checkout-progress">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-sm">
-              1
-            </div>
-            <span className="text-xs font-medium text-muted-foreground hidden sm:inline">Select Plan</span>
-          </div>
-          <div className="h-px w-16 bg-border" />
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary border border-border text-muted-foreground font-bold text-sm">
-              2
-            </div>
-            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider hidden sm:inline">Confirmation</span>
-          </div>
-        </div>
+    <PageContainer width="wide" className="space-y-6 lg:space-y-8">
+      <PageHeader
+        title={isSwitching ? "Switch Subscription Plan" : "Confirm Subscription"}
+        description={
+          isSwitching
+            ? `Move from ${existingSub?.plan.name || "your current plan"} to ${plan.name}.`
+            : "Review cadence and plan details, then continue securely with PayPal."
+        }
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Pricing", href: "/pricing" },
+          { label: "Subscription checkout" },
+        ]}
+        actions={
+          <Link href="/pricing">
+            <Button variant="outline" className="h-11">
+              Back to pricing
+            </Button>
+          </Link>
+        }
+      />
 
-        {!isSynced && (
-          <Alert variant="destructive" className="mb-8" data-testid="plan-not-synced-alert">
+      <Toolbar className="justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="secondary">Step 1: Plan</Badge>
+          <Badge variant="outline">Step 2: PayPal approval</Badge>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {billingInterval === "annual" ? "Yearly cadence" : "Monthly cadence"} selected
+        </p>
+      </Toolbar>
+
+      <StatusRegion>
+        {!isSynced ? (
+          <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Plan Not Ready</AlertTitle>
+            <AlertTitle>Plan not synced with PayPal</AlertTitle>
             <AlertDescription>
-              This subscription plan has not been synced with PayPal yet.
-              If you are the administrator, please go to the admin dashboard and click "Sync to PayPal".
+              This plan is not currently available for checkout. Please contact support or choose another plan.
             </AlertDescription>
           </Alert>
-        )}
+        ) : null}
 
-        {/* Header */}
-        <div className="mb-12 text-center" data-testid="checkout-header">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground mb-4">
-            {isSwitching ? "Switch Your Plan" : "Confirm Your Subscription"}
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {isSwitching
-              ? `Upgrading from ${existingSub.plan.name} to ${plan.name}. Changes apply immediately.`
-              : "Review your selection and complete your payment securely."}
-          </p>
-        </div>
+        {isSwitching ? (
+          <Alert>
+            <Zap className="h-4 w-4" />
+            <AlertTitle>Active subscription detected</AlertTitle>
+            <AlertDescription>
+              Your current active subscription will be replaced with this selection after PayPal approval.
+            </AlertDescription>
+          </Alert>
+        ) : null}
+      </StatusRegion>
 
-        <div className="grid gap-8 lg:grid-cols-5">
-          {/* Order Summary - Left Column */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Interval Toggle */}
-            <Card data-testid="interval-toggle-card">
-              <CardContent className="pt-6">
-                <CheckoutIntervalToggle />
-              </CardContent>
-            </Card>
+      <ContentRegion className="gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.8fr)]">
+        <div className="grid gap-6">
+          <Card className="ui-surface">
+            <CardHeader>
+              <CardTitle>Billing cadence</CardTitle>
+              <CardDescription>
+                Choose monthly or yearly billing before continuing.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CheckoutIntervalToggle />
+            </CardContent>
+          </Card>
 
-            {/* Plan Details Card */}
-            <Card className="border-2 border-primary/20" data-testid="plan-details-card">
-              {/* Plan Header */}
-              <CardHeader className="pb-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
-                      <Crown className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                      <CardDescription className="mt-1">{plan.description}</CardDescription>
-                    </div>
+          <Card className="ui-surface">
+            <CardHeader>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-[var(--radius-sm)] border bg-background">
+                    <Crown className="h-5 w-5 text-primary" />
+                  </span>
+                  <div>
+                    <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                    <CardDescription className="mt-1">
+                      {plan.description || "Subscription access with structured learning progression."}
+                    </CardDescription>
                   </div>
-                  {isSwitching && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 px-3 py-1.5 text-xs font-semibold text-blue-400">
-                      <Zap className="h-3 w-3" />
-                      Upgrade
+                </div>
+
+                <Badge variant="outline" className="capitalize">
+                  {plan.tier}
+                </Badge>
+              </div>
+            </CardHeader>
+
+            <CardContent className="grid gap-5">
+              <div className="rounded-[var(--radius-md)] border bg-background p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {billingInterval === "annual" ? "Yearly billing" : "Monthly billing"}
+                </p>
+                <div className="mt-1 flex items-end gap-2">
+                  <span className="text-4xl font-semibold tracking-tight">{formatCurrency(priceCents)}</span>
+                  <span className="pb-1 text-sm text-muted-foreground">
+                    /{billingInterval === "annual" ? "year" : "month"}
+                  </span>
+                </div>
+                {billingInterval === "annual" && annualSavingsCents > 0 ? (
+                  <p className="mt-2 text-sm text-success">
+                    Save {formatCurrency(annualSavingsCents)} per year compared to monthly billing.
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="grid gap-2">
+                {featureRows.map((feature) => (
+                  <div
+                    key={`${plan.id}-${feature.title}`}
+                    className="flex items-start gap-3 rounded-[var(--radius-sm)] border bg-background p-3"
+                  >
+                    <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full border">
+                      <Check className={`h-3.5 w-3.5 ${feature.enabled ? "text-success" : "text-muted-foreground"}`} />
                     </span>
-                  )}
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-6">
-                {/* Price Section */}
-                <div className="rounded-lg bg-muted/30 p-6">
-                  <div className="mb-2 text-sm font-medium text-muted-foreground uppercase tracking-wider">Price</div>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-bold text-foreground">${(price / 100).toFixed(2)}</span>
-                    <span className="text-muted-foreground text-lg">/{interval === "annual" ? "year" : "month"}</span>
+                    <span>
+                      <p className="text-sm font-semibold">{feature.title}</p>
+                      <p className="text-xs text-muted-foreground">{feature.detail}</p>
+                    </span>
                   </div>
-                  {interval === "annual" && (
-                    <p className="mt-3 text-sm text-green-500 font-medium flex items-center gap-2">
-                      <TrendingDown className="h-4 w-4" />
-                      Save ${((plan.priceMonthlyCents * 12 - price) / 100).toFixed(2)}/year compared to monthly
-                    </p>
-                  )}
-                </div>
-
-                {/* What's Included */}
-                <div>
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-5">What's Included</h3>
-                  <ul className="space-y-4">
-                    <li className="flex items-start gap-4">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500/10 border border-green-500/30 mt-0.5">
-                        <Check className="h-3.5 w-3.5 text-green-500" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground">Unlimited Courses</p>
-                        <p className="text-sm text-muted-foreground">Access to {plan.tier === "starter" ? "standard" : "all"} curated courses</p>
-                      </div>
-                    </li>
-                    {plan.tier !== "starter" && (
-                      <li className="flex items-start gap-4">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500/10 border border-green-500/30 mt-0.5">
-                          <Check className="h-3.5 w-3.5 text-green-500" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">Certificates</p>
-                          <p className="text-sm text-muted-foreground">Verified certificates of completion</p>
-                        </div>
-                      </li>
-                    )}
-                    {plan.tier === "founder" && (
-                      <li className="flex items-start gap-4">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500/10 border border-green-500/30 mt-0.5">
-                          <Check className="h-3.5 w-3.5 text-green-500" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">Learning Paths</p>
-                          <p className="text-sm text-muted-foreground">Structured learning journeys</p>
-                        </div>
-                      </li>
-                    )}
-                    {plan.tier !== "starter" && (
-                      <li className="flex items-start gap-4">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500/10 border border-green-500/30 mt-0.5">
-                          <Check className="h-3.5 w-3.5 text-green-500" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">Priority Support</p>
-                          <p className="text-sm text-muted-foreground">Dedicated support team</p>
-                        </div>
-                      </li>
-                    )}
-                  </ul>
-                </div>
-
-                {isSwitching && existingSub && (
-                  <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-4">
-                    <p className="text-sm font-medium text-blue-400 flex items-center gap-2">
-                      <Zap className="h-4 w-4" />
-                      Your current plan ({existingSub.plan.name}) will be replaced. No refunds are issued.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar - Order Summary */}
-          <div className="lg:col-span-2 lg:sticky lg:top-6 h-fit space-y-5">
-            <Card className="border-2 border-border bg-card" data-testid="order-summary-card">
-              <CardHeader>
-                <CardTitle className="text-lg">Order Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3 border-b border-border pb-4">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">{plan.name}</span>
-                    <span className="font-semibold text-foreground">${(price / 100).toFixed(2)}</span>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {interval === "annual" ? "Annual" : "Monthly"} billing
-                  </div>
-                </div>
-                <div className="flex justify-between items-center pt-1">
-                  <span className="text-lg font-semibold text-foreground">Total</span>
-                  <span className="text-2xl font-bold text-foreground">${(price / 100).toFixed(2)}</span>
-                </div>
-                <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
-                  Your next billing date: <span className="text-foreground font-medium">{new Date(Date.now() + (interval === "annual" ? 365 : 30) * 24 * 60 * 60 * 1000).toLocaleDateString()}</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Payment Button */}
-            <form action={createSubscriptionAction} className="space-y-4" data-testid="subscription-form">
-              <input type="hidden" name="planId" value={plan.id} />
-              <input type="hidden" name="interval" value={interval} />
-              <Button
-                type="submit"
-                className="w-full h-12 text-base font-semibold"
-                size="lg"
-                disabled={!isSynced}
-                data-testid="subscribe-button"
-              >
-                {isSwitching ? "Confirm & Pay via PayPal" : "Subscribe via PayPal"}
-              </Button>
-              <p className="text-xs text-center text-muted-foreground">
-                Secure payment powered by PayPal
-              </p>
-            </form>
-
-            {/* Trust Badges */}
-            <div className="rounded-lg bg-muted/30 border border-border p-5 space-y-3" data-testid="trust-badges">
-              <div className="flex items-center gap-3 text-sm">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-green-500/10 border border-green-500/20">
-                  <Check className="h-3.5 w-3.5 text-green-500" />
-                </div>
-                <span className="text-foreground">Cancel anytime</span>
+                ))}
               </div>
-              <div className="flex items-center gap-3 text-sm">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-green-500/10 border border-green-500/20">
-                  <Shield className="h-3.5 w-3.5 text-green-500" />
-                </div>
-                <span className="text-foreground">No hidden fees</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-green-500/10 border border-green-500/20">
-                  <Lock className="h-3.5 w-3.5 text-green-500" />
-                </div>
-                <span className="text-foreground">Instant access</span>
-              </div>
-            </div>
-
-            {/* Terms */}
-            <p className="text-xs text-muted-foreground text-center px-4">
-              By clicking "Subscribe", you agree to our{" "}
-              <a href="/terms" className="text-foreground underline hover:text-primary transition-colors">Terms of Service</a>
-              {" "}and{" "}
-              <a href="/privacy" className="text-foreground underline hover:text-primary transition-colors">Privacy Policy</a>
-            </p>
-          </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
-    </div>
+
+        <div className="grid gap-6 lg:sticky lg:top-6 lg:self-start">
+          <Card className="ui-surface">
+            <CardHeader>
+              <CardTitle>Order summary</CardTitle>
+              <CardDescription>Review before proceeding to PayPal.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Plan</span>
+                <span className="font-semibold">{plan.name}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Cadence</span>
+                <span className="font-semibold capitalize">{billingInterval}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Total</span>
+                <span className="text-xl font-semibold">{formatCurrency(priceCents)}</span>
+              </div>
+              <div className="rounded-[var(--radius-sm)] border bg-background px-3 py-2 text-xs text-muted-foreground">
+                Next billing date: <span className="font-medium text-foreground">{nextBillingDate}</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="ui-surface">
+            <CardContent className="grid gap-4 pt-6">
+              <form action={createSubscriptionAction} className="grid gap-3" data-testid="subscription-form">
+                <input type="hidden" name="planId" value={plan.id} />
+                <input type="hidden" name="interval" value={billingInterval} />
+
+                <Button
+                  type="submit"
+                  className="h-11 w-full"
+                  variant="premium"
+                  disabled={!isSynced}
+                  data-testid="subscribe-button"
+                >
+                  {isSwitching ? "Confirm switch with PayPal" : "Subscribe with PayPal"}
+                </Button>
+              </form>
+
+              <p className="text-center text-xs text-muted-foreground">
+                Secure payment powered by PayPal.
+              </p>
+
+              <div className="grid gap-2 rounded-[var(--radius-sm)] border bg-background p-3 text-xs">
+                <p className="inline-flex items-center gap-2 text-muted-foreground">
+                  <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                  No hidden fees
+                </p>
+                <p className="inline-flex items-center gap-2 text-muted-foreground">
+                  <Lock className="h-3.5 w-3.5 text-primary" />
+                  Cancel any time from profile
+                </p>
+                <p className="inline-flex items-center gap-2 text-muted-foreground">
+                  <Clock3 className="h-3.5 w-3.5 text-primary" />
+                  Instant entitlement update
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </ContentRegion>
+
+      <StatusRegion>
+        <Alert>
+          <AlertTitle>Billing terms</AlertTitle>
+          <AlertDescription>
+            By subscribing, you agree to our <Link href="/terms" className="underline">Terms of Service</Link> and{" "}
+            <Link href="/privacy" className="underline">Privacy Policy</Link>. Renewal follows your selected cadence until cancelled.
+          </AlertDescription>
+        </Alert>
+      </StatusRegion>
+    </PageContainer>
   );
 }

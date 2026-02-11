@@ -96,7 +96,7 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
     try {
       const courseIds = displayCart.items.map((item) => item.courseId).join(",");
       router.push(`/checkout?items=${encodeURIComponent(courseIds)}`);
-    } catch (error) {
+    } catch {
       toast({
         title: "Checkout failed",
         description: "Unable to proceed to checkout. Please try again.",
@@ -387,4 +387,3 @@ export function CartClient({ initialCart, isAuthenticated }: CartClientProps) {
     </div>
   );
 }
-

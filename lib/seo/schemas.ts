@@ -189,6 +189,7 @@ export function generateLearningPathSchema(config: {
       name: "AI Genius Lab",
       url: siteUrl,
     },
+    url: url.startsWith("http") ? url : `${siteUrl}${url}`,
   };
 
   if (courses && courses.length > 0) {

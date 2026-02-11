@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Phone, MapPin, Clock, HelpCircle } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { contactInfo, businessHours } from "@/lib/config";
 
 const contactMethods = [

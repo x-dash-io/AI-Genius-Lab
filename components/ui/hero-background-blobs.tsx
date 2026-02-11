@@ -9,13 +9,6 @@ import { motion, useReducedMotion } from "framer-motion";
 export function HeroBackgroundBlobs() {
   const shouldReduceMotion = useReducedMotion();
 
-  const blobVariants = {
-    animate: shouldReduceMotion ? {} : {
-      x: [0, 50, 0],
-      y: [0, 30, 0],
-    }
-  };
-
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none select-none">
       {/* Primary Blob - Top Left - Indigo/Primary */}

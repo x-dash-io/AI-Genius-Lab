@@ -4,7 +4,7 @@ import { getCourseForLibraryBySlug } from "@/lib/courses";
 import { hasCourseAccess } from "@/lib/access";
 import { prisma } from "@/lib/prisma";
 import { courseProgressSchema, validateRequestBody } from "@/lib/validation";
-import { getCachedProgress, setCachedProgress, updateCachedLessonProgress } from "@/lib/progress-cache";
+import { getCachedProgress, setCachedProgress } from "@/lib/progress-cache";
 
 export async function GET(
   request: NextRequest,

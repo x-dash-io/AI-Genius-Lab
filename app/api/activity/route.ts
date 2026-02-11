@@ -47,7 +47,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
                   },
                 };
               }
-            } catch (error) {
+            } catch {
               // Continue without enrichment if course fetch fails
             }
           }

@@ -122,7 +122,7 @@ export function CouponForm({ initialData, isEditing = false }: CouponFormProps) 
                 router.push("/admin/coupons");
                 router.refresh();
             }
-        } catch (error) {
+        } catch {
             toast({
                 title: "Error",
                 description: "Something went wrong",

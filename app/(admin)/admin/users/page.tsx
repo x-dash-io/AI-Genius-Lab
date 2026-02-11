@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { requireRole } from "@/lib/access";
@@ -10,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Users as UsersIcon, User, Shield, Loader2 } from "lucide-react";
 import { UserFilters } from "@/components/admin/UserFilters";
-import { FilterSkeleton } from "@/components/ui/filter-skeleton";
 
 export const dynamic = "force-dynamic";
 

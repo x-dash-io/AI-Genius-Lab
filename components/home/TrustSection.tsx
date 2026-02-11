@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Filter, Shield, Route, TrendingUp, BookOpen, Users } from "lucide-react";
+import { Filter, Shield, Route, TrendingUp } from "lucide-react";
 import type { HomepageStats } from "@/lib/homepage-stats";
 
 interface TrustSectionProps {

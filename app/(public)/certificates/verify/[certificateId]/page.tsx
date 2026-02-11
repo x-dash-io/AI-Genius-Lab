@@ -1,13 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { Award, CheckCircle2, Download, ExternalLink, Share2, Calendar, User, BookOpen } from "lucide-react";
 import { getCertificate } from "@/lib/certificates";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { format } from "date-fns";
 
 export const dynamic = "force-dynamic";
 

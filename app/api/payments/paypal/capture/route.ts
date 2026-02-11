@@ -265,7 +265,7 @@ export async function GET(request: Request) {
       });
     }
 
-    const enrollment = await prisma.enrollment.upsert({
+    await prisma.enrollment.upsert({
       where: {
         userId_courseId: {
           userId: purchase.userId,

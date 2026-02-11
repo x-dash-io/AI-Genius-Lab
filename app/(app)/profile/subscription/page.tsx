@@ -1,17 +1,26 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
+import { revalidatePath } from "next/cache";
+import { Suspense } from "react";
+import { format } from "date-fns";
+import Link from "next/link";
+
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { cancelSubscription, refreshSubscriptionStatus } from "@/lib/subscriptions";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { SubscriptionSuccessToast } from "@/components/checkout/SubscriptionSuccessToast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
-import { Check, XCircle, CreditCard, RefreshCw } from "lucide-react";
-import Link from "next/link";
-import { revalidatePath } from "next/cache";
-import { Suspense } from "react";
-import { SubscriptionSuccessToast } from "@/components/checkout/SubscriptionSuccessToast";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import {
+  ContentRegion,
+  PageContainer,
+  PageHeader,
+  StatusRegion,
+  Toolbar,
+} from "@/components/layout/shell";
+import { Check, CreditCard, Sparkles, XCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +32,6 @@ async function cancelAction(formData: FormData) {
   const subId = formData.get("subId") as string;
   await cancelSubscription(subId);
 
-  // Revalidate all subscription-related pages to ensure UI updates
   revalidatePath("/profile/subscription");
   revalidatePath("/profile");
   revalidatePath("/pricing");
@@ -33,211 +41,242 @@ export default async function UserSubscriptionPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user) redirect("/sign-in");
 
-  // FIX: We query Prisma directly here to ensure we get the NEWEST subscription.
-  // We use `orderBy: { createdAt: 'desc' }` so the Elite plan (created today)
-  // appears before the Pro plan (created previously).
   let subscription = await prisma.subscription.findFirst({
-    where: {
-      userId: session.user.id
-    },
-    orderBy: {
-      createdAt: 'desc' // <--- THIS IS THE KEY FIX
-    },
+    where: { userId: session.user.id },
+    orderBy: { createdAt: "desc" },
     include: {
       plan: true,
       payments: {
         orderBy: { paidAt: "desc" },
-        take: 10
-      }
-    }
+        take: 10,
+      },
+    },
   });
 
-  // Keep your logic for checking pending status
   if (subscription?.status === "pending") {
     const updatedStatus = await refreshSubscriptionStatus(subscription.id);
 
-    // If the status changed during refresh, update the local variable
     if (updatedStatus && updatedStatus.status !== "pending") {
       subscription = await prisma.subscription.findUnique({
         where: { id: subscription.id },
         include: {
           plan: true,
-          payments: { orderBy: { paidAt: "desc" }, take: 10 }
-        }
+          payments: { orderBy: { paidAt: "desc" }, take: 10 },
+        },
       });
     }
   }
 
+  const hasSubscription = Boolean(subscription);
+  const billingAmount = subscription
+    ? subscription.interval === "monthly"
+      ? subscription.plan.priceMonthlyCents
+      : subscription.plan.priceAnnualCents
+    : 0;
+
   return (
-    <div className="space-y-8 pb-8">
+    <PageContainer className="space-y-6">
       <Suspense fallback={null}>
         <SubscriptionSuccessToast />
       </Suspense>
-      <div>
-        <h1 className="font-display text-4xl font-bold tracking-tight">Subscription</h1>
-        <p className="mt-2 text-lg text-muted-foreground">
-          Manage your subscription plan and billing.
-        </p>
-      </div>
 
-      {!subscription ? (
-        <Card className="border-dashed">
-          <CardContent className="py-12 flex flex-col items-center text-center space-y-4">
-            <CreditCard className="h-12 w-12 text-muted-foreground opacity-50" />
-            <div className="space-y-2">
-              <h3 className="text-xl font-semibold">No active subscription</h3>
-              <p className="text-muted-foreground max-w-sm">
-                Get unlimited access to all courses and earn certificates by subscribing to one of our plans.
-              </p>
-            </div>
-            <Link href="/pricing">
-              <Button size="lg" variant="premium">View Pricing Plans</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-6">
-          <Card>
+      <PageHeader
+        title="Subscription"
+        description="Manage your plan, billing cadence, and payment history."
+        breadcrumbs={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "Profile", href: "/profile" },
+          { label: "Subscription" },
+        ]}
+        actions={
+          <Link href="/pricing">
+            <Button variant="outline">Compare Plans</Button>
+          </Link>
+        }
+      />
+
+      <Toolbar className="justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant={hasSubscription ? "default" : "secondary"}>
+            {hasSubscription
+              ? subscription?.status === "pending"
+                ? "Processing"
+                : "Active subscription"
+              : "No active subscription"}
+          </Badge>
+          {subscription ? (
+            <Badge variant="outline" className="capitalize">
+              {subscription.interval} billing
+            </Badge>
+          ) : null}
+        </div>
+        {subscription ? (
+          <span className="text-xs text-muted-foreground">
+            {subscription.status === "pending"
+              ? "Activation pending"
+              : `Renews ${format(new Date(subscription.currentPeriodEnd), "PPP")}`}
+          </span>
+        ) : null}
+      </Toolbar>
+
+      <ContentRegion>
+        {!subscription ? (
+          <EmptyState
+            icon={<CreditCard className="h-6 w-6" />}
+            title="No active subscription"
+            description="Choose a plan to unlock premium courses, certificates, and learning paths."
+            action={
+              <Link href="/pricing">
+                <Button variant="premium">View pricing plans</Button>
+              </Link>
+            }
+          />
+        ) : (
+          <Card className="ui-surface">
             <CardHeader>
-              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="text-2xl">{subscription.plan.name} Plan</CardTitle>
-                    <Badge
-                      variant={subscription.status === "active" ? "default" : "secondary"}
-                      className={subscription.status === "pending" ? "animate-pulse" : ""}
-                    >
+                  <CardTitle className="text-2xl">{subscription.plan.name} Plan</CardTitle>
+                  <CardDescription>
+                    {subscription.interval === "monthly" ? "Monthly" : "Annual"} billing through PayPal.
+                  </CardDescription>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-semibold">${(billingAmount / 100).toFixed(2)}</p>
+                  <p className="text-xs text-muted-foreground">/{subscription.interval === "monthly" ? "mo" : "yr"}</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="grid gap-6 md:grid-cols-2">
+              <section className="space-y-3">
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Plan Inclusions</h3>
+                <ul className="space-y-2 text-sm">
+                  <li className="inline-flex items-center gap-2">
+                    <Check className="h-4 w-4 text-success" />
+                    Access to {subscription.plan.tier === "starter" ? "standard" : "all"} courses
+                  </li>
+                  <li className="inline-flex items-center gap-2">
+                    {subscription.plan.tier !== "starter" ? (
+                      <Check className="h-4 w-4 text-success" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <span className={subscription.plan.tier === "starter" ? "text-muted-foreground" : ""}>
+                      Certificates included
+                    </span>
+                  </li>
+                  <li className="inline-flex items-center gap-2">
+                    {subscription.plan.tier === "founder" ? (
+                      <Check className="h-4 w-4 text-success" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <span className={subscription.plan.tier === "founder" ? "" : "text-muted-foreground"}>
+                      Learning paths included
+                    </span>
+                  </li>
+                </ul>
+              </section>
+
+              <section className="rounded-[var(--radius-md)] border bg-background p-4">
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Billing Details</h3>
+                <div className="mt-3 grid gap-3 text-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-muted-foreground">Status</span>
+                    <Badge variant={subscription.status === "active" ? "default" : "secondary"}>
                       {subscription.status === "pending" ? "Processing" : subscription.status}
                     </Badge>
                   </div>
-                  <CardDescription>
-                    {subscription.interval === "monthly" ? "Monthly" : "Annual"} billing
-                  </CardDescription>
-                </div>
-                <Badge variant="outline" className="text-lg py-1 px-3 w-fit">
-                  ${((subscription.interval === "monthly" ? subscription.plan.priceMonthlyCents : subscription.plan.priceAnnualCents) / 100).toFixed(2)}
-                  <span className="text-xs font-normal text-muted-foreground ml-1">
-                    /{subscription.interval === "monthly" ? "mo" : "yr"}
-                  </span>
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Inclusions</h4>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-green-500" />
-                    <span>Access to {subscription.plan.tier === "starter" ? "Standard" : "All"} Courses</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    {subscription.plan.tier !== "starter" ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <XCircle className="h-4 w-4 text-muted-foreground" />
-                    )}
-                    <span className={subscription.plan.tier === "starter" ? "text-muted-foreground" : ""}>Certificates included</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    {subscription.plan.tier === "founder" ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <XCircle className="h-4 w-4 text-muted-foreground" />
-                    )}
-                    <span className={(subscription.plan.tier as string !== "founder" && subscription.plan.tier as string !== "elite") ? "text-muted-foreground" : ""}>Learning Paths included</span>
-                  </div>
-                </div>
-
-                <div className="space-y-4 p-4 rounded-lg bg-muted/50 border">
-                  <h4 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">Billing Details</h4>
-                  <div className="flex justify-between items-center text-sm">
+                  <div className="flex items-center justify-between gap-3">
                     <span className="text-muted-foreground">
                       {subscription.status === "pending" ? "Expected renewal" : "Next billing date"}
                     </span>
                     <span className="font-medium">
                       {subscription.status === "pending"
                         ? "Pending confirmation"
-                        : format(new Date(subscription.currentPeriodEnd), "PPP")
-                      }
+                        : format(new Date(subscription.currentPeriodEnd), "PPP")}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-sm">
+                  <div className="flex items-center justify-between gap-3">
                     <span className="text-muted-foreground">Payment method</span>
-                    <span className="flex items-center gap-2">
-                      <CreditCard className="h-4 w-4 text-blue-500" />
+                    <span className="inline-flex items-center gap-1.5 font-medium">
+                      <CreditCard className="h-4 w-4" />
                       PayPal
                     </span>
                   </div>
-                  {/* FIX: Check explicitly for 'cancelled' status OR cancelAtPeriodEnd */}
-                  {(subscription.cancelAtPeriodEnd || subscription.status === 'cancelled') && (
-                    <div className="bg-amber-100 dark:bg-amber-950/30 p-3 rounded text-xs text-zinc-900 dark:text-amber-300 flex items-start gap-2">
-                      <RefreshCw className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                      <span>Your subscription will end on {format(new Date(subscription.currentPeriodEnd), "PPP")} and will not renew.</span>
-                    </div>
-                  )}
+                  {(subscription.cancelAtPeriodEnd || subscription.status === "cancelled") ? (
+                    <p className="rounded-[var(--radius-sm)] border border-warning/35 bg-warning/10 px-3 py-2 text-xs text-warning-foreground">
+                      Your subscription will end on {format(new Date(subscription.currentPeriodEnd), "PPP")} and will not renew.
+                    </p>
+                  ) : null}
                 </div>
-              </div>
+              </section>
             </CardContent>
-            <CardFooter className="flex flex-col sm:flex-row justify-between gap-4 border-t pt-6">
-              {(!subscription.cancelAtPeriodEnd && subscription.status === 'active') ? (
+
+            <CardFooter className="flex flex-col gap-3 border-t sm:flex-row sm:justify-between">
+              {!subscription.cancelAtPeriodEnd && subscription.status === "active" ? (
                 <form action={cancelAction} className="w-full sm:w-auto">
                   <input type="hidden" name="subId" value={subscription.id} />
-                  <Button variant="destructive" size="lg" className="w-full sm:w-auto">
+                  <Button variant="destructive" className="w-full sm:w-auto">
                     Cancel Subscription
                   </Button>
                 </form>
               ) : (
                 <Link href="/pricing" className="w-full sm:w-auto">
-                  {/* If it's cancelled, we essentially ask them to buy again (Re-activate) */}
-                  <Button className="w-full" size="lg">
-                    {subscription.status === 'active' ? "Re-activate Subscription" : "Renew Subscription"}
+                  <Button className="w-full sm:w-auto">
+                    {subscription.status === "active" ? "Re-activate Subscription" : "Renew Subscription"}
                   </Button>
                 </Link>
               )}
+
               <Link href="/pricing" className="w-full sm:w-auto">
-                <Button variant="outline" size="lg" className="w-full">Change Plan</Button>
+                <Button variant="outline" className="w-full sm:w-auto">
+                  Change Plan
+                </Button>
               </Link>
             </CardFooter>
           </Card>
+        )}
+      </ContentRegion>
 
-          {subscription.payments.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Billing History</CardTitle>
-                <CardDescription>Your recent subscription payments.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {subscription.payments.map((payment: any) => (
-                    <div key={payment.id} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
-                      <div>
-                        <p className="font-medium">{format(new Date(payment.paidAt), "PPP")}</p>
-                        <p className="text-xs text-muted-foreground font-mono">{payment.paypalSaleId}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold">${(payment.amountCents / 100).toFixed(2)}</p>
-                        <p className="text-xs text-green-600 capitalize">{payment.status}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card>
+      <StatusRegion>
+        {subscription?.payments.length ? (
+          <Card className="ui-surface">
             <CardHeader>
-              <CardTitle>Billing Support</CardTitle>
-              <CardDescription>Need help with your subscription or payments?</CardDescription>
+              <CardTitle>Billing History</CardTitle>
+              <CardDescription>Your recent subscription payments.</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
-                If you have questions about your billing, want to request a refund, or encounter any issues, please contact our support team at support@aigeniuslab.com.
-              </p>
+              <div className="space-y-2">
+                {subscription.payments.map((payment) => (
+                  <div key={payment.id} className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-sm)] border bg-background px-3 py-2 text-sm">
+                    <div>
+                      <p className="font-medium">{format(new Date(payment.paidAt), "PPP")}</p>
+                      <p className="font-mono text-xs text-muted-foreground">{payment.paypalSaleId}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold">${(payment.amountCents / 100).toFixed(2)}</p>
+                      <p className="text-xs capitalize text-success">{payment.status}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
-        </div>
-      )}
-    </div>
+        ) : null}
+
+        <Card className="ui-surface">
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
+            <p className="inline-flex items-center gap-2 text-muted-foreground">
+              <Sparkles className="h-4 w-4" />
+              Need billing help? Contact support@aigeniuslab.com.
+            </p>
+            <Link href="/contact">
+              <Button variant="ghost" size="sm">Contact support</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </StatusRegion>
+    </PageContainer>
   );
 }

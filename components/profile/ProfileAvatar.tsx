@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Loader2, Upload, User, ShieldAlert } from "lucide-react";
+import { Loader2, Upload, ShieldAlert } from "lucide-react";
 import { toast } from "@/lib/toast";
 import { useAdminPreview } from "@/components/admin/PreviewBanner";
 

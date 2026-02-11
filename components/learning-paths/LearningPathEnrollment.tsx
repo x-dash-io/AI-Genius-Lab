@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Loader2, ShoppingCart } from "lucide-react";
 import { toast } from "@/lib/toast";
@@ -17,7 +16,6 @@ export function LearningPathEnrollment({
   totalPriceCents,
   enrollAction,
 }: LearningPathEnrollmentProps) {
-  const router = useRouter();
   const [isEnrolling, setIsEnrolling] = useState(false);
 
   const handleEnroll = async () => {
@@ -50,7 +48,14 @@ export function LearningPathEnrollment({
   };
 
   return (
-    <Button size="lg" variant="premium" onClick={handleEnroll} disabled={isEnrolling} className="w-full">
+    <Button
+      id={`learning-path-enroll-${pathId}`}
+      size="lg"
+      variant="premium"
+      onClick={handleEnroll}
+      disabled={isEnrolling}
+      className="w-full"
+    >
       {isEnrolling ? (
         <>
           <Loader2 className="h-4 w-4 mr-2 animate-spin" />

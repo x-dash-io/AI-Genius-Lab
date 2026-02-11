@@ -70,6 +70,7 @@
   --z-overlay: 50;
   --z-modal: 60;
   --z-toast: 70;
+  --supports-hover: 0;
 }
 
 .dark {
@@ -222,6 +223,24 @@ select {
   box-shadow: var(--shadow-sm);
 }
 
+.supports-hover-card {
+  transition-property: transform, box-shadow, border-color, background-color;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-standard);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  :root {
+    --supports-hover: 1;
+  }
+
+  .supports-hover-card:hover {
+    transform: translateY(-2px);
+    border-color: hsl(var(--primary) / 0.28);
+    box-shadow: var(--shadow-md);
+  }
+}
+
 .bg-premium-gradient {
   background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--brand-gradient-end)) 100%);
 }
@@ -263,6 +282,10 @@ select {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .supports-hover-card:hover {
+    transform: none !important;
   }
 }
 

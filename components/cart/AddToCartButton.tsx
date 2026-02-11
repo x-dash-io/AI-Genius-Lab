@@ -84,7 +84,7 @@ export function AddToCartButton({
   }, [inventory, currentQuantity]);
 
   const isOutOfStock = inventory !== null && inventory !== undefined && inventory === 0;
-  const isAtMaxQuantity = inventory !== null && inventory !== undefined && currentQuantity >= inventory;
+  const addToCartLabel = `Add to Cart · $${(priceCents / 100).toFixed(2)}`;
 
   const handleAddToCart = async () => {
     if (isInCart && !canAddMore) return;
@@ -95,7 +95,7 @@ export function AddToCartButton({
       await addToCart(courseId);
       setIsAdded(true);
       setTimeout(() => setIsAdded(false), 2000);
-    } catch (error) {
+    } catch {
       // Error is handled by toast in addToCart
     } finally {
       setIsAdding(false);
@@ -177,7 +177,7 @@ export function AddToCartButton({
       ) : (
         <div className="flex items-center justify-center gap-2">
           <ShoppingCart className="h-4 w-4" />
-          <span>Add to Cart</span>
+          <span>{addToCartLabel}</span>
         </div>
       )}
     </Button>

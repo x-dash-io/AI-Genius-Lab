@@ -18,7 +18,6 @@ import {
   Heading1,
   Heading2,
   Link as LinkIcon,
-  Image as ImageIcon,
   Youtube as YoutubeIcon
 } from "lucide-react";
 

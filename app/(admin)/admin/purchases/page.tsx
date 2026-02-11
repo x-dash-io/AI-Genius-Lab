@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/access";
 import { getAllPurchases } from "@/lib/admin/purchases";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

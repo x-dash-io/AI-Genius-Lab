@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Plus, Ticket } from "lucide-react";
 import Link from "next/link";
-import { getCoupons, toggleCouponStatus } from "./actions";
+import { getCoupons } from "./actions";
 import { formatPrice } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";

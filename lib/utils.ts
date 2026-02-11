@@ -33,7 +33,7 @@ export async function safeJsonParse(response: Response): Promise<any> {
 
   try {
     return await response.json();
-  } catch (error) {
+  } catch {
     throw new Error(
       `Failed to parse server response as JSON. ` +
       `Status: ${response.status} ${response.statusText}`

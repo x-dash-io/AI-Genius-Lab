@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Award } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { toast } from "@/lib/toast";
 
 export function CertificateSyncButton() {
@@ -35,7 +35,7 @@ export function CertificateSyncButton() {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to sync certificates. Please try again.",

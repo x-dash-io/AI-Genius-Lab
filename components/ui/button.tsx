@@ -24,10 +24,10 @@ const buttonVariants = cva(
           "border border-transparent bg-[linear-gradient(130deg,hsl(var(--primary))_0%,hsl(var(--brand-gradient-end))_100%)] text-primary-foreground shadow-md hover:brightness-105 hover:shadow-lg active:translate-y-px",
       },
       size: {
-        default: "h-10 px-4",
-        sm: "h-8 px-3 text-xs",
-        lg: "h-11 px-6 text-sm",
-        icon: "h-10 w-10",
+        default: "h-11 px-4",
+        sm: "h-10 px-3 text-xs",
+        lg: "h-12 px-6 text-base",
+        icon: "h-11 w-11",
       },
     },
     defaultVariants: {

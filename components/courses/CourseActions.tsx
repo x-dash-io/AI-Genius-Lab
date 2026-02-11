@@ -9,7 +9,6 @@ import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { useCart } from "@/components/cart/CartProvider";
 import { CheckCircle, BookOpen, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 
 interface CourseActionsProps {
   courseId: string;
@@ -172,7 +171,7 @@ export function CourseActions({
               await addToCart(courseId);
             }
             router.push("/cart");
-          } catch (error) { }
+          } catch {}
         }}
         disabled={isChecking}
       >

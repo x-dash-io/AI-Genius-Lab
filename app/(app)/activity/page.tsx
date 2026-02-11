@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,6 +30,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast";
 import { useAdminPreview } from "@/components/admin/PreviewBanner";
+import {
+  ContentRegion,
+  PageContainer,
+  PageHeader,
+  StatusRegion,
+  Toolbar,
+} from "@/components/layout/shell";
 
 export const dynamic = "force-dynamic";
 
@@ -316,51 +323,55 @@ export default function ActivityPage() {
 
   if (loading) {
     return (
-      <div className="space-y-8">
-        <div>
-          <h1 className="font-display text-4xl font-bold tracking-tight">Activity</h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            Your learning activity and purchase history.
-          </p>
-        </div>
-        <ActivitySkeleton />
-      </div>
+      <PageContainer className="space-y-6">
+        <PageHeader
+          title="Activity"
+          description="Your learning activity and purchase history."
+          breadcrumbs={[
+            { label: "Dashboard", href: "/dashboard" },
+            { label: "Activity" },
+          ]}
+        />
+        <ContentRegion>
+          <ActivitySkeleton />
+        </ContentRegion>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="space-y-8 pb-8">
-      {isAdminPreview && (
-        <div className="flex items-center gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
-          <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-              Sample Activity Data
-            </p>
-            <p className="text-xs text-amber-700 dark:text-amber-300">
-              This is sample data showing how the activity page appears to customers. No real data is displayed.
-            </p>
-          </div>
-        </div>
-      )}
+    <PageContainer className="space-y-6">
+      <PageHeader
+        title="Activity"
+        description={
+          isAdminPreview
+            ? "Sample learning activity and purchase history."
+            : "Your learning activity and purchase history."
+        }
+        breadcrumbs={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "Activity" },
+        ]}
+      />
 
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="font-display text-4xl font-bold tracking-tight">Activity</h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            {isAdminPreview
-              ? "Sample learning activity and purchase history."
-              : "Your learning activity and purchase history."}
-          </p>
-        </div>
-        {allActivityTypes.length > 0 && (
-          <div className="flex items-center gap-2">
-            {isFiltering && (
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-            )}
+      <Toolbar className="justify-between gap-3">
+        {isAdminPreview ? (
+          <div className="flex items-start gap-2 rounded-[var(--radius-sm)] border bg-warning/10 px-3 py-2 text-xs text-warning-foreground">
+            <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+            <span>
+              Sample activity mode is enabled for admin preview.
+            </span>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Track purchases, progress milestones, and certificate events.</p>
+        )}
+
+        {allActivityTypes.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {isFiltering ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : null}
             <Filter className="h-4 w-4 text-muted-foreground" />
             <Select value={filter} onValueChange={handleFilterChange}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full min-w-48 sm:w-56">
                 <SelectValue placeholder="Filter by type" />
               </SelectTrigger>
               <SelectContent>
@@ -372,122 +383,125 @@ export default function ActivityPage() {
                 ))}
               </SelectContent>
             </Select>
-            {hasFilter && (
+            {hasFilter ? (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleClearFilter}
-                className="h-9 w-9"
+                className="h-11 w-11"
+                aria-label="Clear activity filter"
               >
                 <X className="h-4 w-4" />
               </Button>
-            )}
+            ) : null}
           </div>
-        )}
-      </div>
+        ) : null}
+      </Toolbar>
 
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            {error.includes("Can't reach database server")
-              ? "Unable to connect to the database. Please check your database connection settings or try again later."
-              : error}
-          </AlertDescription>
-        </Alert>
-      )}
+      <StatusRegion>
+        {error ? (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {error.includes("Can't reach database server")
+                ? "Unable to connect to the database. Please check your database connection settings or try again later."
+                : error}
+            </AlertDescription>
+          </Alert>
+        ) : null}
 
-      {!error && isFiltering && (
-        <div className="text-sm text-muted-foreground flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          Filtering activity...
-        </div>
-      )}
+        {!error && isFiltering ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Filtering activity...
+          </div>
+        ) : null}
 
-      {!error && !isFiltering && groupedActivity.length === 0 && (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Activity className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">
-              {hasFilter
-                ? "No activity matches your filter. Try selecting a different type."
-                : "No activity yet. Start learning or make a purchase to see your activity here."}
-            </p>
-            <div className="mt-4 flex gap-2 justify-center">
-              {hasFilter ? (
-                <Button variant="outline" onClick={handleClearFilter}>
-                  Clear Filter
-                </Button>
-              ) : (
-                <>
-                  <Link href="/courses">
-                    <Button variant="outline" size="lg">Browse Courses</Button>
-                  </Link>
-                  <Link href="/library">
-                    <Button variant="premium">View Library</Button>
-                  </Link>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {!error && !isFiltering && groupedActivity.length > 0 && (
-        <div className="space-y-8">
-          {groupedActivity.map((group) => (
-            <div key={group.date} className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <h2 className="text-lg font-semibold">
-                  {format(new Date(group.date), "EEEE, MMMM d, yyyy")}
-                </h2>
-              </div>
-              <div className="space-y-3">
-                {group.entries.map((entry) => {
-                  const Icon = getActivityIcon(entry.type);
-                  const link = getActivityLink(entry);
-                  const content = (
-                    <Card className="hover:shadow-md transition-shadow">
-                      <CardContent className="pt-6">
-                        <div className="flex items-start gap-4">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                            <Icon className="h-5 w-5 text-primary" />
-                          </div>
-                          <div className="flex-1 space-y-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <p className="font-medium">{getActivityLabel(entry.type)}</p>
-                              <Badge variant="secondary" className="text-xs">
-                                {formatDistanceToNow(new Date(entry.createdAt), { addSuffix: true })}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              {getActivityDescription(entry)}
-                            </p>
-                            {entry.metadata && Object.keys(entry.metadata).length > 0 && (
-                              <div className="text-xs text-muted-foreground mt-2">
-                                {format(new Date(entry.createdAt), "h:mm a")}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-
-                  return link ? (
-                    <Link key={entry.id} href={link}>
-                      {content}
+        {!error && !isFiltering && groupedActivity.length === 0 ? (
+          <Card className="ui-surface">
+            <CardContent className="py-12 text-center">
+              <Activity className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+              <p className="text-muted-foreground">
+                {hasFilter
+                  ? "No activity matches your filter. Try selecting a different type."
+                  : "No activity yet. Start learning or make a purchase to see activity here."}
+              </p>
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                {hasFilter ? (
+                  <Button variant="outline" onClick={handleClearFilter}>
+                    Clear filter
+                  </Button>
+                ) : (
+                  <>
+                    <Link href="/courses">
+                      <Button variant="outline">Browse courses</Button>
                     </Link>
-                  ) : (
-                    <div key={entry.id}>{content}</div>
-                  );
-                })}
+                    <Link href="/library">
+                      <Button variant="premium">View library</Button>
+                    </Link>
+                  </>
+                )}
               </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+            </CardContent>
+          </Card>
+        ) : null}
+      </StatusRegion>
+
+      <ContentRegion>
+        {!error && !isFiltering && groupedActivity.length > 0 ? (
+          <section className="space-y-6">
+            {groupedActivity.map((group) => (
+              <article key={group.date} className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <h2 className="text-lg font-semibold">
+                    {format(new Date(group.date), "EEEE, MMMM d, yyyy")}
+                  </h2>
+                </div>
+                <div className="space-y-3">
+                  {group.entries.map((entry) => {
+                    const Icon = getActivityIcon(entry.type);
+                    const link = getActivityLink(entry);
+                    const content = (
+                      <Card className="ui-surface supports-hover-card">
+                        <CardContent className="pt-6">
+                          <div className="flex items-start gap-4">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                              <Icon className="h-5 w-5 text-primary" />
+                            </div>
+                            <div className="flex-1 space-y-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <p className="font-medium">{getActivityLabel(entry.type)}</p>
+                                <Badge variant="secondary" className="text-xs">
+                                  {formatDistanceToNow(new Date(entry.createdAt), { addSuffix: true })}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground">{getActivityDescription(entry)}</p>
+                              {entry.metadata && Object.keys(entry.metadata).length > 0 ? (
+                                <div className="mt-2 text-xs text-muted-foreground">
+                                  {format(new Date(entry.createdAt), "h:mm a")}
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+
+                    return link ? (
+                      <Link key={entry.id} href={link}>
+                        {content}
+                      </Link>
+                    ) : (
+                      <div key={entry.id}>{content}</div>
+                    );
+                  })}
+                </div>
+              </article>
+            ))}
+          </section>
+        ) : null}
+      </ContentRegion>
+    </PageContainer>
   );
 }

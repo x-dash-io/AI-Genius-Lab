@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { requireCustomer } from "@/lib/access";
-import { hasCompletedCourse, generateCourseCertificateForUser, getUserCertificates } from "@/lib/certificates";
+import { hasCompletedCourse, generateCourseCertificateForUser } from "@/lib/certificates";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
 
@@ -30,7 +30,7 @@ type CourseWithSections = {
   }[];
 };
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const user = await requireCustomer();
 

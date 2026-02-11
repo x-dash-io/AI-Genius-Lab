@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth";
 import { requireRole } from "@/lib/access";
 import { getUserById, updateUserRole } from "@/lib/admin/users";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ArrowLeft, Shield, User, ShoppingCart, GraduationCap, Activity } from "lucide-react";
