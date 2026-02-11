@@ -7,11 +7,17 @@ import { prisma } from "@/lib/prisma";
 import { getUserSubscription } from "@/lib/subscriptions";
 import { createPayPalOrder } from "@/lib/paypal";
 import { getCartFromCookies } from "@/lib/cart/utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { CheckoutCartForm } from "@/components/checkout/CheckoutCartForm";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckoutForm } from "@/components/checkout/CheckoutForm";
+import {
+  ContentRegion,
+  PageContainer,
+  PageHeader,
+  StatusRegion,
+} from "@/components/layout/shell";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +46,6 @@ async function createCheckoutSession(formData: FormData) {
     redirect("/courses");
   }
 
-  // PREMIUM courses can only be purchased by Pro/Elite subscribers
   if (course.tier === "PREMIUM") {
     const subscription = await getUserSubscription(session.user.id);
     const hasProAccess =
@@ -91,6 +96,24 @@ async function createCheckoutSession(formData: FormData) {
   redirect(approvalUrl ?? `${appUrl}/courses/${course.slug}`);
 }
 
+function CheckoutStatusAlerts({ checkoutStatus }: { checkoutStatus?: string }) {
+  return (
+    <>
+      {checkoutStatus === "cancelled" ? (
+        <Alert variant="warning">
+          <AlertDescription>Checkout was cancelled. You can retry at any time.</AlertDescription>
+        </Alert>
+      ) : null}
+
+      {checkoutStatus === "failed" ? (
+        <Alert variant="destructive">
+          <AlertDescription>Payment failed. Retry checkout or contact support.</AlertDescription>
+        </Alert>
+      ) : null}
+    </>
+  );
+}
+
 export default async function CheckoutPage({ searchParams }: CheckoutPageProps) {
   const session = await getServerSession(authOptions);
   const resolvedSearchParams = await searchParams;
@@ -98,10 +121,9 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
   const itemsParam = resolvedSearchParams?.items;
   const checkoutStatus = resolvedSearchParams?.checkout;
 
-  // Handle cart checkout (multiple items)
   if (itemsParam) {
     const courseIds = itemsParam.split(",").filter(Boolean);
-    if (courseIds.length === 0) {
+    if (!courseIds.length) {
       redirect("/cart");
     }
 
@@ -113,88 +135,63 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
       cart = { items: [], totalCents: 0, itemCount: 0 };
     }
 
-    // Ensure cart has valid structure
-    if (!cart || !cart.items || !Array.isArray(cart.items) || cart.items.length === 0) {
+    if (!cart || !cart.items || !Array.isArray(cart.items) || !cart.items.length) {
       redirect("/cart");
     }
 
-    // Verify all items in cart match the requested items
-    const requestedItems = cart.items.filter((item) =>
-      courseIds.includes(item.courseId)
-    );
-
-    if (requestedItems.length === 0) {
+    const requestedItems = cart.items.filter((item) => courseIds.includes(item.courseId));
+    if (!requestedItems.length) {
       redirect("/cart");
-    }
-
-    if (!session?.user) {
-      return (
-        <section className="grid gap-8">
-          <div>
-            <h1 className="font-display text-4xl font-bold tracking-tight">Checkout</h1>
-            <p className="mt-2 text-lg text-muted-foreground">
-              Sign in to complete your purchase.
-            </p>
-          </div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Sign In Required</CardTitle>
-              <CardDescription>
-                Please sign in to proceed with checkout
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <Link href={`/sign-in?callbackUrl=${encodeURIComponent(`/checkout?items=${itemsParam}`)}`}>
-                <Button size="lg" variant="premium" className="w-full">
-                  Sign in to purchase
-                </Button>
-              </Link>
-              <Link href="/cart">
-                <Button variant="outline" className="w-full">
-                  Back to cart
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </section>
-      );
     }
 
     return (
-      <section className="grid gap-8">
-        <div>
-          <h1 className="font-display text-4xl font-bold tracking-tight">Checkout</h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            Complete your purchase to unlock your courses.
-          </p>
-        </div>
-
-        {checkoutStatus === "cancelled" && (
-          <Alert variant="warning">
-            <AlertDescription>
-              Checkout was cancelled. You can try again when you're ready.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {checkoutStatus === "failed" && (
-          <Alert variant="destructive">
-            <AlertDescription>
-              Payment failed. Please try again or contact support if the problem persists.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <CheckoutCartForm
-          items={requestedItems}
-          couponCode={cart.couponCode}
-          discountAmount={cart.discountTotal}
+      <PageContainer className="space-y-6">
+        <PageHeader
+          title="Checkout"
+          description="Confirm your selected courses and complete payment."
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Cart", href: "/cart" },
+            { label: "Checkout" },
+          ]}
         />
-      </section>
+
+        <StatusRegion>
+          <CheckoutStatusAlerts checkoutStatus={checkoutStatus} />
+        </StatusRegion>
+
+        <ContentRegion>
+          {!session?.user ? (
+            <Card className="ui-surface">
+              <CardHeader>
+                <CardTitle>Sign in required</CardTitle>
+                <CardDescription>Sign in to continue with checkout.</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-2">
+                <Link href={`/sign-in?callbackUrl=${encodeURIComponent(`/checkout?items=${itemsParam}`)}`}>
+                  <Button variant="premium" className="w-full">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/cart">
+                  <Button variant="outline" className="w-full">
+                    Back to Cart
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ) : (
+            <CheckoutCartForm
+              items={requestedItems}
+              couponCode={cart.couponCode}
+              discountAmount={cart.discountTotal}
+            />
+          )}
+        </ContentRegion>
+      </PageContainer>
     );
   }
 
-  // Handle single course checkout (legacy)
   if (!slug) {
     redirect("/courses");
   }
@@ -204,11 +201,8 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
     redirect("/courses");
   }
 
-  // PREMIUM courses can only be purchased by Pro/Elite subscribers
   if (course.tier === "PREMIUM") {
-    const subscription = session?.user
-      ? await getUserSubscription(session.user.id)
-      : null;
+    const subscription = session?.user ? await getUserSubscription(session.user.id) : null;
     const hasProAccess =
       subscription?.plan.tier === "professional" || subscription?.plan.tier === "founder";
 
@@ -217,93 +211,85 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
     }
   }
 
-  if (!session?.user) {
-    const returnUrl = slug ? `/checkout?course=${slug}` : "/checkout";
-    return (
-      <section className="grid gap-8">
-        <div>
-          <h1 className="font-display text-4xl font-bold tracking-tight">
-            Checkout
-          </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            Sign in to purchase and unlock this course.
-          </p>
-        </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>{course.title}</CardTitle>
-            <CardDescription>
-              {course.description ?? "Course details coming soon."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <div className="text-2xl font-bold">
-              ${(course.priceCents / 100).toFixed(2)}
-            </div>
-            <Link href={`/sign-in?callbackUrl=${encodeURIComponent(returnUrl)}`}>
-              <Button size="lg" variant="premium" className="w-full">
-                Sign in to purchase
-              </Button>
-            </Link>
-            <Link href={`/courses/${course.slug}`}>
-              <Button variant="outline" className="w-full">
-                Back to course
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </section>
-    );
-  }
-
   return (
-    <section className="grid gap-8">
-      <div>
-        <h1 className="font-display text-4xl font-bold tracking-tight">
-          Checkout
-        </h1>
-        <p className="mt-2 text-lg text-muted-foreground">
-          Complete your purchase to unlock this course.
-        </p>
-      </div>
+    <PageContainer className="space-y-6">
+      <PageHeader
+        title="Checkout"
+        description="Complete purchase and unlock access."
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Courses", href: "/courses" },
+          { label: "Checkout" },
+        ]}
+      />
 
-      {checkoutStatus === "cancelled" && (
-        <Alert variant="warning">
-          <AlertDescription>
-            Checkout was cancelled. You can try again when you're ready.
-          </AlertDescription>
-        </Alert>
-      )}
+      <StatusRegion>
+        <CheckoutStatusAlerts checkoutStatus={checkoutStatus} />
+      </StatusRegion>
 
-      {checkoutStatus === "failed" && (
-        <Alert variant="destructive">
-          <AlertDescription>
-            Payment failed. Please try again or contact support if the problem persists.
-          </AlertDescription>
-        </Alert>
-      )}
+      <ContentRegion>
+        {!session?.user ? (
+          <Card className="ui-surface">
+            <CardHeader>
+              <CardTitle>{course.title}</CardTitle>
+              <CardDescription>{course.description ?? "Course details coming soon."}</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-2">
+              <p className="text-2xl font-semibold">${(course.priceCents / 100).toFixed(2)}</p>
+              <Link href={`/sign-in?callbackUrl=${encodeURIComponent(`/checkout?course=${slug}`)}`}>
+                <Button variant="premium" className="w-full">
+                  Sign in to purchase
+                </Button>
+              </Link>
+              <Link href={`/courses/${course.slug}`}>
+                <Button variant="outline" className="w-full">
+                  Back to course
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]">
+            <Card className="ui-surface">
+              <CardHeader>
+                <CardTitle>{course.title}</CardTitle>
+                <CardDescription>{course.description ?? "Course details coming soon."}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CheckoutForm
+                  courseId={course.id}
+                  courseTitle={course.title}
+                  priceCents={course.priceCents}
+                  createCheckoutSession={createCheckoutSession}
+                />
+              </CardContent>
+            </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{course.title}</CardTitle>
-          <CardDescription>
-            {course.description ?? "Course details coming soon."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <CheckoutForm
-            courseId={course.id}
-            courseTitle={course.title}
-            priceCents={course.priceCents}
-            createCheckoutSession={createCheckoutSession}
-          />
-          <Link href={`/courses/${course.slug}`} className="block mt-4">
-            <Button type="button" variant="outline" className="w-full">
-              Cancel
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
-    </section>
+            <Card className="ui-surface">
+              <CardHeader>
+                <CardTitle>Order Summary</CardTitle>
+                <CardDescription>Single course purchase</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Course</span>
+                  <span className="font-semibold">{course.title}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Price</span>
+                  <span className="font-semibold">${(course.priceCents / 100).toFixed(2)}</span>
+                </div>
+                <Link href={`/courses/${course.slug}`} className="block pt-2">
+                  <Button variant="outline" className="w-full">
+                    Cancel
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </ContentRegion>
+    </PageContainer>
   );
 }
+

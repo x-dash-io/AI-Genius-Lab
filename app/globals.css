@@ -1,78 +1,128 @@
 @import "tailwindcss";
 
 :root {
-  /* Core Palette - Premium Graphite & Indigo */
-  --background: 210 40% 98%;
-  --foreground: 222 47% 11%;
-  
+  color-scheme: light;
+
+  --background: 214 30% 98%;
+  --foreground: 220 25% 14%;
+
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  
+  --card-foreground: 220 25% 14%;
+
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover-foreground: 220 25% 14%;
 
-  /* Vibrant & Trustworthy Primary */
-  --primary: 246 80% 60%; /* Keeping the signature indigo but ensuring it pops */
-  --primary-foreground: 210 40% 98%;
+  --primary: 218 74% 52%;
+  --primary-foreground: 0 0% 100%;
 
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222 47% 11.2%;
+  --secondary: 214 26% 94%;
+  --secondary-foreground: 220 23% 18%;
 
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
+  --muted: 214 20% 93%;
+  --muted-foreground: 218 14% 40%;
 
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222 47% 11.2%;
+  --accent: 214 30% 92%;
+  --accent-foreground: 220 25% 14%;
 
-  /* Refined Destructive Red */
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
+  --destructive: 0 70% 48%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 158 64% 42%;
+  --success-foreground: 0 0% 100%;
+  --warning: 39 92% 52%;
+  --warning-foreground: 31 88% 14%;
 
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 246 80% 60%;
+  --border: 218 22% 86%;
+  --input: 218 22% 86%;
+  --ring: 218 74% 52%;
 
-  --radius: 0.75rem;
+  --chart-1: 215 77% 54%;
+  --chart-2: 170 58% 42%;
+  --chart-3: 260 52% 56%;
+  --chart-4: 35 86% 56%;
+  --chart-5: 332 67% 55%;
+  --brand-gradient-end: 222 68% 45%;
 
-  /* Glassmorphism Tokens */
-  --glass-background: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --radius: 0.875rem;
+  --radius-sm: 0.625rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.125rem;
+  --radius-xl: 1.5rem;
+
+  --shadow-sm: 0 1px 2px hsl(220 30% 10% / 0.06);
+  --shadow-md: 0 10px 24px hsl(220 30% 10% / 0.08);
+  --shadow-lg: 0 24px 46px hsl(220 30% 10% / 0.12);
+  --shadow-xl: 0 40px 72px hsl(220 30% 10% / 0.14);
+
+  --glass-surface: hsl(0 0% 100% / 0.62);
+  --glass-border: hsl(0 0% 100% / 0.55);
+  --glass-shadow: 0 20px 40px hsl(220 30% 10% / 0.12);
+  --blur-sm: 4px;
+  --blur-md: 14px;
+  --blur-lg: 24px;
+  --glass-blur: var(--blur-md);
+
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 220ms;
+  --z-base: 0;
+  --z-dropdown: 40;
+  --z-overlay: 50;
+  --z-modal: 60;
+  --z-toast: 70;
 }
 
 .dark {
-  --background: 222 47% 11%;
-  --foreground: 210 40% 98%;
-  
-  --card: 222 47% 13%;
-  --card-foreground: 210 40% 98%;
-  
-  --popover: 222 47% 11%;
-  --popover-foreground: 210 40% 98%;
+  color-scheme: dark;
 
-  --primary: 246 80% 65%; /* Slightly lighter for dark mode contrast */
-  --primary-foreground: 210 40% 98%;
+  --background: 222 22% 10%;
+  --foreground: 214 32% 95%;
 
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
+  --card: 222 22% 13%;
+  --card-foreground: 214 32% 95%;
 
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
+  --popover: 222 22% 12%;
+  --popover-foreground: 214 32% 95%;
 
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
+  --primary: 213 80% 64%;
+  --primary-foreground: 222 36% 10%;
 
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
+  --secondary: 221 18% 18%;
+  --secondary-foreground: 214 32% 95%;
 
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 246 80% 65%;
+  --muted: 221 18% 18%;
+  --muted-foreground: 216 14% 70%;
 
-  /* Glassmorphism Tokens - Dark */
-  --glass-background: rgba(18, 26, 43, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  --accent: 221 18% 20%;
+  --accent-foreground: 214 32% 95%;
+
+  --destructive: 0 73% 53%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 158 70% 44%;
+  --success-foreground: 0 0% 100%;
+  --warning: 39 90% 56%;
+  --warning-foreground: 33 100% 10%;
+
+  --border: 218 16% 24%;
+  --input: 218 16% 24%;
+  --ring: 213 80% 64%;
+
+  --chart-1: 213 80% 64%;
+  --chart-2: 165 55% 50%;
+  --chart-3: 268 64% 70%;
+  --chart-4: 40 90% 64%;
+  --chart-5: 340 77% 66%;
+  --brand-gradient-end: 218 86% 58%;
+
+  --shadow-sm: 0 1px 2px hsl(220 30% 2% / 0.45);
+  --shadow-md: 0 10px 24px hsl(220 30% 2% / 0.45);
+  --shadow-lg: 0 24px 46px hsl(220 30% 2% / 0.5);
+  --shadow-xl: 0 40px 72px hsl(220 30% 2% / 0.55);
+
+  --glass-surface: hsl(222 24% 15% / 0.58);
+  --glass-border: hsl(214 30% 95% / 0.12);
+  --glass-shadow: 0 24px 52px hsl(220 30% 2% / 0.45);
+  --glass-blur: 14px;
 }
 
 * {
@@ -80,71 +130,112 @@
 }
 
 html {
-  overflow-x: hidden;
-  scroll-behavior: smooth;
   width: 100%;
   max-width: 100vw;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 body {
-  background-color: hsl(var(--background));
-  background-image:
-    radial-gradient(at 0% 0%, hsl(var(--primary) / 0.05) 0px, transparent 40%),
-    radial-gradient(at 100% 0%, hsl(var(--accent) / 0.05) 0px, transparent 40%);
-  color: hsl(var(--foreground));
-  font-feature-settings: "rlig" 1, "calt" 1;
-  overflow-x: hidden;
+  min-height: 100vh;
   width: 100%;
   max-width: 100vw;
-  position: relative;
+  overflow-x: hidden;
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(circle at 16% 0%, hsl(var(--primary) / 0.1), transparent 34%),
+    radial-gradient(circle at 100% 0%, hsl(var(--primary) / 0.06), transparent 28%),
+    linear-gradient(hsl(var(--background)), hsl(var(--background)));
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body::before {
   content: "";
+  pointer-events: none;
   position: fixed;
   inset: 0;
-  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
-  opacity: 0.12;
-  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(120deg, hsl(var(--foreground) / 0.025) 1px, transparent 1px),
+    linear-gradient(210deg, hsl(var(--foreground) / 0.02) 1px, transparent 1px);
+  background-size: 28px 28px, 28px 28px;
+  mask-image: radial-gradient(circle at center, black 25%, transparent 80%);
+}
+
+#__next,
+main,
+section,
+article,
+header,
+footer {
+  position: relative;
   z-index: 1;
-  mix-blend-mode: overlay;
 }
 
-.dark body::before {
-  opacity: 0.05;
+a,
+button,
+input,
+textarea,
+select {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-standard);
 }
 
-.dark body {
-  background-image: none;
+:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px hsl(var(--background)),
+    0 0 0 4px hsl(var(--ring) / 0.5);
 }
 
-/* Glassmorphism Utility */
-.glass {
-  background: var(--glass-background);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid var(--glass-border);
+::selection {
+  color: hsl(var(--primary-foreground));
+  background: hsl(var(--primary) / 0.75);
+}
+
+[data-ui-effects="solid"] .ui-surface,
+[data-ui-effects="solid"] .glass {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
+  box-shadow: var(--shadow-sm);
+}
+
+[data-ui-effects="glass"] .ui-surface,
+[data-ui-effects="glass"] .glass {
+  background: var(--glass-surface);
+  border-color: var(--glass-border);
   box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
-/* Premium Gradients */
+.ui-shell {
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-lg);
+  background: hsl(var(--card));
+  box-shadow: var(--shadow-sm);
+}
+
 .bg-premium-gradient {
-  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(262 83% 58%) 100%);
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--brand-gradient-end)) 100%);
 }
 
 .text-gradient {
-  background: linear-gradient(to right, hsl(var(--primary)), hsl(262 83% 58%));
+  background: linear-gradient(90deg, hsl(var(--foreground)) 0%, hsl(var(--primary)) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Modern Scrollbar - Subtle & Professional */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -152,23 +243,29 @@ body::before {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.2);
-  border-radius: 10px;
+  border-radius: 9999px;
+  background: hsl(var(--muted-foreground) / 0.24);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.4);
+  background: hsl(var(--muted-foreground) / 0.42);
 }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.3);
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
-}
-
-/* Hide Next.js development indicator in production and development */
 #__next-build-watcher,
 #__next-dev-overlay,
 [data-nextjs-dialog],
@@ -198,39 +295,34 @@ button[data-nextjs-toast-close] {
   overflow: hidden !important;
 }
 
-/* ========================================
-   PRINT STYLES FOR PROFESSIONAL INVOICE
-   ======================================== */
-
 @media print {
-
-  /* Page Setup */
   @page {
     size: A4;
     margin: 15mm 10mm;
   }
 
-  /* Print Color Adjustment */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  /* Base Styles */
   html,
   body {
-    background: #ffffff !important;
-    color: #1a1a1a !important;
-    font-size: 11pt !important;
-    line-height: 1.5 !important;
+    background: hsl(var(--card)) !important;
+    color: hsl(var(--foreground)) !important;
     width: 100% !important;
     height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+    font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif !important;
   }
 
-  /* Hide Non-Essential Elements */
+  body::before {
+    display: none !important;
+  }
+
   header,
   nav,
   aside,
@@ -245,299 +337,48 @@ button[data-nextjs-toast-close] {
     display: none !important;
   }
 
-  /* Main Content Container */
-  main,
-  section,
-  article {
-    display: block !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    background: #ffffff !important;
-  }
-
-  /* Invoice Card */
   #invoice,
   .invoice-card {
-    border: 1px solid #e5e5e5 !important;
-    box-shadow: none !important;
-    background: #ffffff !important;
+    border: 1px solid hsl(var(--border)) !important;
     border-radius: 0 !important;
+    background: hsl(var(--card)) !important;
+    box-shadow: none !important;
     page-break-inside: avoid;
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 !important;
-    overflow: visible !important;
   }
 
-  /* Invoice Header - Keep gradient-like appearance */
-  #invoice>div:first-child,
+  #invoice > div:first-child,
   [class*="bg-gradient-to-br"][class*="from-primary"] {
-    background: linear-gradient(135deg, #1a365d 0%, #2b4a7a 100%) !important;
-    color: #ffffff !important;
-    padding: 20pt !important;
-    border-radius: 0 !important;
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--brand-gradient-end)) 100%) !important;
+    color: hsl(var(--primary-foreground)) !important;
   }
 
-  #invoice>div:first-child *,
-  [class*="bg-gradient-to-br"][class*="from-primary"] * {
-    color: #ffffff !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  #invoice>div:first-child [class*="text-white/70"] {
-    color: rgba(255, 255, 255, 0.8) !important;
-  }
-
-  /* Invoice Body */
-  [class*="CardContent"],
-  [class*="p-6"],
-  [class*="p-10"] {
-    padding: 15pt !important;
-    background: #ffffff !important;
-  }
-
-  /* Spacing Adjustments */
-  [class*="space-y-8"]>*+* {
-    margin-top: 12pt !important;
-  }
-
-  [class*="space-y-4"]>*+* {
-    margin-top: 8pt !important;
-  }
-
-  [class*="gap-"] {
-    gap: 8pt !important;
-  }
-
-  /* Grid Layouts - Preserve */
-  [class*="grid"] {
-    display: grid !important;
-  }
-
-  [class*="md:grid-cols-2"] {
-    grid-template-columns: 1fr 1fr !important;
-  }
-
-  /* Flex Layouts - Preserve for invoice */
-  #invoice [class*="flex"],
-  section [class*="flex"] {
-    display: flex !important;
-  }
-
-  /* Info Cards */
-  [class*="rounded-xl"][class*="bg-card"],
-  [class*="rounded-xl"][class*="border"] {
-    background: #f9fafb !important;
-    border: 1px solid #e5e5e5 !important;
-    border-radius: 4pt !important;
-    padding: 10pt !important;
-  }
-
-  /* Table Styling */
   table {
     border-collapse: collapse !important;
     width: 100% !important;
-    display: table !important;
-  }
-
-  thead {
-    display: table-header-group !important;
-    background: #f3f4f6 !important;
-  }
-
-  tbody {
-    display: table-row-group !important;
-  }
-
-  tr {
-    display: table-row !important;
-    page-break-inside: avoid !important;
   }
 
   th,
   td {
-    display: table-cell !important;
-    border: 1px solid #e5e5e5 !important;
+    border: 1px solid hsl(var(--border)) !important;
     padding: 10pt 12pt !important;
     text-align: left !important;
-    vertical-align: top !important;
   }
 
-  th {
-    background: #f3f4f6 !important;
-    font-weight: 600 !important;
-    font-size: 9pt !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.5pt !important;
-    color: #6b7280 !important;
-  }
-
-  td {
-    background: #ffffff !important;
-    color: #1a1a1a !important;
-  }
-
-  /* Right-aligned amount column */
   th:last-child,
   td:last-child {
     text-align: right !important;
   }
 
-  /* Text Colors */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    color: #1a1a1a !important;
-    page-break-after: avoid !important;
-  }
-
-  p,
-  span,
-  div {
-    color: #1a1a1a !important;
-  }
-
-  [class*="text-muted-foreground"] {
-    color: #6b7280 !important;
-  }
-
-  /* Links */
-  a {
-    text-decoration: none !important;
-    color: #1a1a1a !important;
-  }
-
-  /* Badge - Payment Status */
-  [class*="Badge"],
-  [class*="badge"] {
-    background: #dcfce7 !important;
-    color: #166534 !important;
-    border: 1px solid #bbf7d0 !important;
-    border-radius: 9999px !important;
-    padding: 4pt 10pt !important;
-    font-size: 9pt !important;
-    font-weight: 600 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-  }
-
-  /* Totals Section */
-  [class*="rounded-xl"][class*="bg-muted"] {
-    background: #f9fafb !important;
-    border: 1px solid #e5e5e5 !important;
-    border-radius: 4pt !important;
-  }
-
-  /* Separator */
-  [class*="Separator"],
-  hr {
-    border: none !important;
-    border-top: 1px solid #e5e5e5 !important;
-    margin: 12pt 0 !important;
-  }
-
-  /* Terms Section */
-  [class*="border-dashed"] {
-    border-style: dashed !important;
-    border-color: #d1d5db !important;
-    background: #fafafa !important;
-    border-radius: 4pt !important;
-    padding: 10pt !important;
-  }
-
-  /* Footer - Show in print (elements with data-print-show attribute) */
   [data-print-show="true"] {
     display: block !important;
   }
 
-  /* Icons - Reduce size */
-  svg {
-    width: 14pt !important;
-    height: 14pt !important;
-  }
-
-  /* Small icons */
-  [class*="h-3"],
-  [class*="h-4"] {
-    width: 10pt !important;
-    height: 10pt !important;
-  }
-
-  /* Course Icon in table */
-  [class*="rounded-lg"][class*="bg-primary/10"] {
-    background: #f3f4f6 !important;
-    padding: 6pt !important;
-    border-radius: 4pt !important;
-  }
-
-  /* Font Sizes */
-  .text-xs {
-    font-size: 8pt !important;
-  }
-
-  .text-sm {
-    font-size: 9pt !important;
-    line-height: 1.5 !important;
-  }
-
-  .text-base {
-    font-size: 10pt !important;
-  }
-
-  .text-lg {
-    font-size: 12pt !important;
-  }
-
-  .text-xl {
-    font-size: 14pt !important;
-  }
-
-  .text-2xl {
-    font-size: 16pt !important;
-  }
-
-  /* Font Weight */
-  .font-bold {
-    font-weight: 700 !important;
-  }
-
-  .font-semibold {
-    font-weight: 600 !important;
-  }
-
-  .font-medium {
-    font-weight: 500 !important;
-  }
-
-  /* Monospace */
-  .font-mono {
-    font-family: "SF Mono", Monaco, "Cascadia Mono", "Roboto Mono", monospace !important;
-  }
-
-  /* Hide Decorative Elements */
   [class*="BackgroundBlobs"],
   [class*="blob"],
   [class*="Blob"],
-  [class*="animate-"],
-  .absolute[class*="bg-white"][class*="rounded-full"] {
+  [class*="animate-"] {
     display: none !important;
-  }
-
-  /* Page Breaks */
-  .page-break-avoid {
-    page-break-inside: avoid !important;
-  }
-
-  /* Ensure invoice stays together */
-  #invoice {
-    page-break-inside: avoid !important;
-    page-break-before: auto !important;
-    page-break-after: auto !important;
   }
 }

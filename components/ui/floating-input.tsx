@@ -1,5 +1,9 @@
 "use client";
 
+/** LEGACY UI COMPONENT
+ * Kept for backward compatibility with pre-refactor auth/contact flows.
+ * Do not use for new UI work; use `Input` + `Label` from the new foundation.
+ */
 import * as React from "react";
 import { cn } from "@/lib/utils";
 

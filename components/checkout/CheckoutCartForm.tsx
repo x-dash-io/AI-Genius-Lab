@@ -59,10 +59,10 @@ export function CheckoutCartForm({ items, couponCode, discountAmount }: Checkout
   };
 
   return (
-    <div className="grid gap-6 md:grid-cols-3">
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
       {/* Order Items */}
-      <div className="md:col-span-2 space-y-4">
-        <Card>
+      <div className="space-y-4">
+        <Card className="ui-surface">
           <CardHeader>
             <CardTitle>Order Items</CardTitle>
             <CardDescription>
@@ -74,7 +74,7 @@ export function CheckoutCartForm({ items, couponCode, discountAmount }: Checkout
               {items.map((item) => (
                 <div
                   key={item.courseId}
-                  className="flex items-start justify-between rounded-lg border p-4"
+                  className="flex items-start justify-between rounded-[var(--radius-sm)] border bg-background p-4"
                 >
                   <div className="flex-1">
                     <h3 className="font-semibold">{item.title}</h3>
@@ -90,8 +90,8 @@ export function CheckoutCartForm({ items, couponCode, discountAmount }: Checkout
       </div>
 
       {/* Order Summary */}
-      <div className="md:col-span-1">
-        <Card className="sticky top-24">
+      <div>
+        <Card className="ui-surface xl:sticky xl:top-24">
           <CardHeader>
             <CardTitle>Order Summary</CardTitle>
             <CardDescription>Review your order details</CardDescription>
@@ -108,7 +108,7 @@ export function CheckoutCartForm({ items, couponCode, discountAmount }: Checkout
               ))}
 
               {couponCode && (
-                <div className="flex justify-between text-sm text-green-600 font-medium pt-2">
+                <div className="flex justify-between text-sm text-success pt-2">
                   <span className="flex items-center gap-1">
                     <Tag className="h-3 w-3" />
                     Discount ({couponCode})

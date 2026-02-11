@@ -1,0 +1,36 @@
+[
+  {
+    "route": "/",
+    "status": 200,
+    "errors": []
+  },
+  {
+    "route": "/courses",
+    "status": 200,
+    "errors": []
+  },
+  {
+    "route": "/courses/launch-ai-agency",
+    "status": 200,
+    "errors": [
+      "console:Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ]
+  },
+  {
+    "route": "/cart",
+    "status": 200,
+    "errors": [
+      "console:Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ]
+  },
+  {
+    "route": "/checkout",
+    "status": 200,
+    "errors": []
+  },
+  {
+    "route": "/dashboard",
+    "status": 200,
+    "errors": []
+  }
+]

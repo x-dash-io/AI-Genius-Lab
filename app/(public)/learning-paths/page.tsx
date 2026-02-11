@@ -1,13 +1,20 @@
-import { Suspense } from "react";
-import { Metadata } from "next";
 import Link from "next/link";
+import { Metadata } from "next";
+import { ArrowRight, Route, Search, SlidersHorizontal } from "lucide-react";
 import { getAllPublishedLearningPaths } from "@/lib/learning-paths";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Route, BookOpen } from "lucide-react";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
-import { LearningPathFilters } from "@/components/learning-paths/LearningPathFilters";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
+import {
+  ContentRegion,
+  PageContainer,
+  PageHeader,
+  StatusRegion,
+  Toolbar,
+} from "@/components/layout/shell";
 
 export const dynamic = "force-dynamic";
 
@@ -22,16 +29,46 @@ interface LearningPathsPageProps {
   searchParams: Promise<{ search?: string; sort?: string }>;
 }
 
-async function LearningPathsContent({ searchParams }: LearningPathsPageProps) {
+type LearningPathListItem = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  imageUrl: string | null;
+  courses: Array<{
+    id: string;
+    course: {
+      id: string;
+      title: string;
+    };
+  }>;
+  _count: {
+    courses: number;
+  };
+};
+
+function applySort(paths: LearningPathListItem[], sort: string | undefined) {
+  switch (sort) {
+    case "oldest":
+      return [...paths].reverse();
+    case "courses":
+      return [...paths].sort((a, b) => b._count.courses - a._count.courses);
+    case "title":
+      return [...paths].sort((a, b) => a.title.localeCompare(b.title));
+    default:
+      return paths;
+  }
+}
+
+export default async function LearningPathsPage({ searchParams }: LearningPathsPageProps) {
   const params = await searchParams;
   const allPathsData = await getAllPublishedLearningPaths();
 
-  // Transform the data to match expected format
-  const allPaths = allPathsData.map((pathData: any) => ({
+  const allPaths: LearningPathListItem[] = allPathsData.map((pathData: any) => ({
     ...pathData,
-    courses: pathData.courses.map((lpc: any) => ({
-      ...lpc,
-      course: lpc.Course,
+    courses: pathData.courses.map((pathCourse: any) => ({
+      ...pathCourse,
+      course: pathCourse.Course,
     })),
     _count: {
       courses: pathData._count.courses,
@@ -40,142 +77,156 @@ async function LearningPathsContent({ searchParams }: LearningPathsPageProps) {
 
   let paths = [...allPaths];
 
-  // Apply search filter
   if (params.search) {
-    const searchLower = params.search.toLowerCase();
+    const searchTerm = params.search.toLowerCase();
     paths = paths.filter(
       (path) =>
-        path.title.toLowerCase().includes(searchLower) ||
-        path.description?.toLowerCase().includes(searchLower)
+        path.title.toLowerCase().includes(searchTerm) ||
+        path.description?.toLowerCase().includes(searchTerm)
     );
   }
 
-  // Apply sorting
-  if (params.sort) {
-    switch (params.sort) {
-      case "oldest":
-        paths = paths.reverse();
-        break;
-      case "courses":
-        paths = paths.sort((a: any, b: any) => b._count.courses - a._count.courses);
-        break;
-      case "title":
-        paths = paths.sort((a: any, b: any) => a.title.localeCompare(b.title));
-        break;
-      // "newest" is the default
-    }
-  }
+  paths = applySort(paths, params.sort);
 
+  const hasFilters = Boolean(params.search || params.sort);
   const totalPaths = allPaths.length;
-  const filteredCount = paths.length;
-  const hasFilters = params.search || params.sort;
 
   return (
-    <>
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          Learning Paths
-        </p>
-        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
-          Structured Learning Journeys
-        </h1>
-        <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
-          {hasFilters
-            ? `Showing ${filteredCount} of ${totalPaths} learning paths`
-            : "Follow curated learning paths designed to take you from beginner to expert."}
-        </p>
-      </div>
+    <PageContainer className="space-y-6">
+      <PageHeader
+        title="Learning Paths"
+        description={
+          hasFilters
+            ? `Showing ${paths.length} of ${totalPaths} curated learning paths.`
+            : "Choose an end-to-end track to move from discovery to measurable outcomes."
+        }
+        breadcrumbs={[
+          { label: "Home", href: "/" },
+          { label: "Learning Paths" },
+        ]}
+      />
 
-      {/* Filters */}
-      <Suspense fallback={<div className="h-12 animate-pulse bg-muted rounded" />}>
-        <LearningPathFilters />
-      </Suspense>
+      <Toolbar className="justify-between">
+        <form action="/learning-paths" method="get" className="flex w-full flex-wrap items-center gap-2 lg:w-auto">
+          <div className="relative min-w-72 flex-1 lg:w-96">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              name="search"
+              defaultValue={params.search}
+              placeholder="Search learning paths"
+              className="pl-9"
+            />
+          </div>
+          <label className="inline-flex items-center gap-2 rounded-[var(--radius-sm)] border bg-background px-3 py-2 text-sm text-muted-foreground">
+            <SlidersHorizontal className="h-4 w-4" />
+            Sort
+            <select
+              name="sort"
+              defaultValue={params.sort || "newest"}
+              className="bg-transparent text-sm text-foreground outline-none"
+            >
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="courses">Most Courses</option>
+              <option value="title">Title A-Z</option>
+            </select>
+          </label>
+          <Button type="submit" variant="outline">
+            Apply
+          </Button>
+          {hasFilters ? (
+            <Link href="/learning-paths">
+              <Button type="button" variant="ghost">
+                Clear
+              </Button>
+            </Link>
+          ) : null}
+        </form>
 
-      {paths.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Route className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">
-              {hasFilters
-                ? "No learning paths match your search criteria."
-                : "No learning paths available yet."}
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2">
-          {paths.map((path: any) => (
-            <Card key={path.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-xl">{path.title}</CardTitle>
-                    {path.description && (
-                      <CardDescription className="mt-2 line-clamp-2">
-                        {path.description}
-                      </CardDescription>
-                    )}
+        <Link href="/courses">
+          <Button variant="ghost" size="sm">
+            Browse Courses
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </Link>
+      </Toolbar>
+
+      <ContentRegion>
+        {paths.length ? (
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {paths.map((path) => (
+              <Card key={path.id} className="ui-surface group flex h-full flex-col border">
+                <CardHeader className="space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge variant="secondary">{path._count.courses} courses</Badge>
+                    <Badge variant="outline">Structured</Badge>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Image */}
-                <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
-                  {path.imageUrl ? (
-                    <div
-                      className="absolute inset-0 bg-cover bg-center transition-transform hover:scale-105 duration-500"
-                      style={{ backgroundImage: `url(${path.imageUrl})` }}
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
-                      <Route className="h-12 w-12 text-primary/20" />
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <BookOpen className="h-4 w-4" />
-                    <span>{path._count.courses} courses</span>
+                  <CardTitle className="text-xl">{path.title}</CardTitle>
+                  <CardDescription className="line-clamp-3">
+                    {path.description || "A guided path across multiple courses with tracked progression."}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="mt-auto space-y-3">
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    {path.courses.slice(0, 3).map((pathCourse) => (
+                      <span
+                        key={pathCourse.id}
+                        className="rounded-full border bg-background px-2.5 py-1 text-muted-foreground"
+                      >
+                        {pathCourse.course.title}
+                      </span>
+                    ))}
+                    {path.courses.length > 3 ? (
+                      <span className="rounded-full border bg-background px-2.5 py-1 text-muted-foreground">
+                        +{path.courses.length - 3} more
+                      </span>
+                    ) : null}
                   </div>
-                  {path.courses.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Courses in this path:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {path.courses.slice(0, 3).map((pathCourse: any) => (
-                          <Badge key={pathCourse.id} variant="secondary">
-                            {pathCourse.course.title}
-                          </Badge>
-                        ))}
-                        {path.courses.length > 3 && (
-                          <Badge variant="outline">
-                            +{path.courses.length - 3} more
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  )}
                   <Link href={`/learning-paths/${path.slug}`}>
-                    <Button variant="outline" size="lg" className="w-full border-primary/20 hover:border-primary hover:bg-primary/5 transition-colors">
-                      View Learning Path
+                    <Button variant="outline" className="w-full group-hover:border-primary">
+                      View Path
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-    </>
-  );
-}
+                </CardContent>
+              </Card>
+            ))}
+          </section>
+        ) : null}
+      </ContentRegion>
 
-export default async function LearningPathsPage({ searchParams }: LearningPathsPageProps) {
-  return (
-    <section className="grid gap-8">
-      <Suspense fallback={<div className="h-96 animate-pulse bg-muted rounded" />}>
-        <LearningPathsContent searchParams={searchParams} />
-      </Suspense>
-    </section>
+      <StatusRegion>
+        {paths.length === 0 ? (
+          <EmptyState
+            icon={<Route className="h-6 w-6" />}
+            title="No learning paths found"
+            description={
+              hasFilters
+                ? "No paths match your filters yet. Clear filters and try again."
+                : "Learning paths will appear here once they are published."
+            }
+            action={
+              <Link href="/learning-paths">
+                <Button variant="outline">Reset filters</Button>
+              </Link>
+            }
+          />
+        ) : (
+          <Card className="ui-surface border">
+            <CardContent className="flex flex-wrap items-center justify-between gap-2 p-4 text-sm">
+              <p className="text-muted-foreground">
+                Showing <span className="font-semibold text-foreground">{paths.length}</span> of{" "}
+                <span className="font-semibold text-foreground">{totalPaths}</span> learning paths
+              </p>
+              <Link href="/pricing">
+                <Button variant="ghost" size="sm">
+                  View subscription tiers
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+      </StatusRegion>
+    </PageContainer>
   );
 }

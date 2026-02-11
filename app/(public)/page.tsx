@@ -1,21 +1,17 @@
 import { Metadata } from "next";
-// import { connection } from "next/server"; // Not available in Next.js 14
-import { LandingHero } from "@/components/layout/LandingHero";
-import { TrustSection } from "@/components/home/TrustSection";
-import { LaunchCurriculum } from "@/components/home/LaunchCurriculum";
-import { HowItWorks } from "@/components/home/HowItWorks";
-import { SocialProof } from "@/components/home/SocialProof";
-import { SecuritySection } from "@/components/home/SecuritySection";
-import { HomeTestimonials } from "@/components/home/HomeTestimonials";
-import { HomeFeaturedCourses } from "@/components/home/HomeFeaturedCourses";
-import { FinalCTA } from "@/components/home/FinalCTA";
-import { HeroBackgroundBlobs } from "@/components/ui/hero-background-blobs";
+import { Sparkles } from "lucide-react";
+import { PremiumHomepageExperience } from "@/components/home/PremiumHomepageExperience";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { getHomepageStats } from "@/lib/homepage-stats";
-import { getHeroLogos } from "@/lib/settings";
 import { getFeaturedTestimonials } from "@/lib/testimonials";
+import { PageContainer, StatusRegion } from "@/components/layout/shell";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+
+type HomepageStats = Awaited<ReturnType<typeof getHomepageStats>>;
 
 export const metadata: Metadata = generateSEOMetadata({
   title: "Master AI With Curated Learning Paths",
@@ -31,49 +27,83 @@ export const metadata: Metadata = generateSEOMetadata({
 });
 
 export default async function LandingPage() {
-  // await connection(); // Not available in Next.js 14
-  // Fetch stats and logos
-  let stats;
-  let heroLogos: any[] = [];
-  let testimonials: any[] = [];
+  const emptyStats: HomepageStats = {
+    totalCourses: 0,
+    totalStudents: 0,
+    totalLessons: 0,
+    averageRating: 0,
+    totalReviews: 0,
+    categoriesWithCourses: [],
+  };
+
+  let stats = emptyStats;
+  let testimonials: Array<{
+    id: string;
+    name: string;
+    role: string;
+    rating: number;
+    text: string;
+  }> = [];
 
   try {
-    const [statsResult, logosResult, testimonialsResult] = await Promise.all([
+    const [statsResult, testimonialsResult] = await Promise.all([
       getHomepageStats(),
-      getHeroLogos().catch(() => []), // Fallback to empty if fails
       getFeaturedTestimonials(),
     ]);
     stats = statsResult;
-    heroLogos = logosResult;
     testimonials = testimonialsResult;
   } catch (error) {
     console.error("Failed to fetch homepage data:", error);
-    // Use empty stats as fallback
-    stats = {
-      totalCourses: 0,
-      totalStudents: 0,
-      totalLessons: 0,
-      averageRating: 0,
-      totalReviews: 0,
-      categoriesWithCourses: [],
-    };
-    heroLogos = [];
   }
 
+  const featuredCourses = Array.from(
+    new Map(
+      stats.categoriesWithCourses.flatMap((category) =>
+        category.courses.map((course) => [
+          course.id,
+          {
+            ...course,
+            categoryName: category.name || "General",
+            tier: course.priceCents > 0 ? "PREMIUM" : "STANDARD",
+          },
+        ] as const)
+      )
+    ).values()
+  ).slice(0, 6);
+
   return (
-    <div className="relative overflow-x-hidden">
-      <HeroBackgroundBlobs />
-      <div className="grid gap-16 md:gap-24 relative z-10 overflow-x-hidden">
-        <LandingHero stats={stats} heroLogos={heroLogos} />
-        <TrustSection stats={stats} />
-        <HomeFeaturedCourses courses={stats.categoriesWithCourses.flatMap(c => c.courses).slice(0, 6)} />
-        <LaunchCurriculum stats={stats} />
-        <HowItWorks />
-        <SocialProof stats={stats} />
-        <HomeTestimonials testimonials={testimonials} />
-        <SecuritySection />
-        <FinalCTA />
-      </div>
-    </div>
+    <PageContainer className="space-y-6 lg:space-y-8" width="wide">
+      <PremiumHomepageExperience
+        metrics={{
+          totalCourses: stats.totalCourses,
+          totalStudents: stats.totalStudents,
+          totalLessons: stats.totalLessons,
+          averageRating: stats.averageRating,
+          totalReviews: stats.totalReviews,
+        }}
+        featuredCourses={featuredCourses}
+        testimonials={testimonials}
+      />
+
+      <StatusRegion>
+        {!featuredCourses.length ? (
+          <EmptyState
+            icon={<Sparkles className="h-6 w-6" />}
+            title="Course catalog is being prepared"
+            description="New learning tracks are being published. Browse pricing or contact the team for early access."
+            action={
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <Link href="/pricing">
+                  <Button variant="outline">View pricing</Button>
+                </Link>
+                <Link href="/contact">
+                  <Button variant="premium">Contact team</Button>
+                </Link>
+              </div>
+            }
+          />
+        ) : null}
+      </StatusRegion>
+    </PageContainer>
   );
 }
