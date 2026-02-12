@@ -113,15 +113,16 @@ function HeroTypedPhrase({
   const [phraseIndex, setPhraseIndex] = useState(0);
   const phrase = phrases[phraseIndex] ?? "";
   const [typedValue, setTypedValue] = useState("");
+  const maxPhrase = useMemo(() => {
+    return phrases.reduce(
+      (longest, current) => (current.length > longest.length ? current : longest),
+      phrases[0] ?? ""
+    );
+  }, [phrases]);
+  const maxWidthCh = maxPhrase.length + 1;
 
   useEffect(() => {
-    if (!phrases.length) {
-      setTypedValue("");
-      return;
-    }
-
-    if (reduceMotion) {
-      setTypedValue(phrases[0]);
+    if (!phrases.length || reduceMotion) {
       return;
     }
 
@@ -155,15 +156,19 @@ function HeroTypedPhrase({
     return () => window.clearInterval(timer);
   }, [phraseIndex, phrase, phrases, reduceMotion]);
 
-  const visiblePhrase = phrase || phrases[0] || "";
-  const visibleValue = reduceMotion ? visiblePhrase : typedValue;
+  const visiblePhrase = maxPhrase;
+  const visibleValue = !phrases.length ? "" : reduceMotion ? visiblePhrase : typedValue;
 
   return (
-    <span className="relative inline-flex min-w-[14ch]" aria-hidden="true">
+    <span
+      className="relative inline-flex"
+      style={{ minWidth: `${maxWidthCh}ch` }}
+      aria-hidden="true"
+    >
       <span className="invisible">{visiblePhrase}</span>
       <span className="absolute inset-0 whitespace-nowrap text-primary">
         {visibleValue}
-        {!reduceMotion && visibleValue.length < visiblePhrase.length ? (
+        {!reduceMotion && typedValue.length < phrase.length ? (
           <span className="ml-0.5 inline-block h-[1.05em] w-[1px] bg-primary align-middle" />
         ) : null}
       </span>

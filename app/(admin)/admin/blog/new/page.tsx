@@ -3,6 +3,8 @@ import { requireRole } from "@/lib/access";
 import { BlogPostForm } from "@/components/admin/BlogPostForm";
 import { Loader2 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 async function NewBlogContent() {
   await requireRole("admin");
   return <BlogPostForm />;

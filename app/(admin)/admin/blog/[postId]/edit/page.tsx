@@ -5,6 +5,8 @@ import { BlogPostForm } from "@/components/admin/BlogPostForm";
 import { notFound } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 async function EditBlogFormWrapper({ postId }: { postId: string }) {
   const post = await getPostForEdit(postId);
 
