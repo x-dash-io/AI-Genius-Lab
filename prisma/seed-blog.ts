@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+import { estimateReadTime } from "../lib/read-time";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL || process.env.DIRECT_URL });
 const adapter = new PrismaPg(pool);
@@ -28,7 +29,6 @@ async function main() {
       featuredImage: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1000",
       status: "published" as const,
       tags: ["AI", "Future", "Technology"],
-      readTimeMinutes: 5,
     },
     {
       title: "Mastering Prompt Engineering for 2026 Models",
@@ -42,7 +42,6 @@ async function main() {
       featuredImage: "https://images.unsplash.com/photo-1620712943543-bcc4628c9757?auto=format&fit=crop&q=80&w=1000",
       status: "published" as const,
       tags: ["Prompt Engineering", "Tutorial", "AI"],
-      readTimeMinutes: 8,
     },
     {
       title: "Why Continuous Learning is the Only Skill that Matters",
@@ -56,16 +55,17 @@ async function main() {
       featuredImage: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=1000",
       status: "published" as const,
       tags: ["Education", "Mindset", "Career"],
-      readTimeMinutes: 4,
     }
   ];
 
   for (const postData of posts) {
     const { tags, ...data } = postData;
+    const readTimeMinutes = estimateReadTime(data.content);
     await prisma.blogPost.upsert({
       where: { slug: data.slug },
       update: {
         ...data,
+        readTimeMinutes,
         tags: {
           connectOrCreate: tags.map(tag => ({
             where: { name: tag },
@@ -78,6 +78,7 @@ async function main() {
       },
       create: {
         ...data,
+        readTimeMinutes,
         tags: {
           connectOrCreate: tags.map(tag => ({
             where: { name: tag },

@@ -1,4 +1,5 @@
 import { prisma, withRetry } from "@/lib/prisma";
+import { estimateReadTime } from "@/lib/read-time";
 import type { Prisma } from "@prisma/client";
 
 export async function getPublishedPosts(options: { tag?: string; search?: string } = {}) {
@@ -76,9 +77,4 @@ export async function incrementPostViews(postId: string) {
   });
 }
 
-export function estimateReadTime(content: string): number {
-  const wordsPerMinute = 200;
-  const noOfWords = content.split(/\s+/g).length;
-  const minutes = noOfWords / wordsPerMinute;
-  return Math.max(1, Math.ceil(minutes));
-}
+export { estimateReadTime };

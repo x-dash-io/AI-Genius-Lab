@@ -282,7 +282,7 @@ export function BlogPostForm({ initialData }: { initialData?: BlogPostFormInitia
                   render={({ field: { value, onChange } }) => (
                     <ContentUpload
                       sectionId="blog"
-                      contentType="file"
+                      contentType="image"
                       value={value}
                       onChange={onChange}
                     />

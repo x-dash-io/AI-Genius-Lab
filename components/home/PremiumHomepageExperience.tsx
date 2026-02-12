@@ -26,7 +26,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const HERO_TYPED_PHRASE = "Real Execution";
+const HERO_TYPED_PHRASES = [
+  "Hands-on AI skills",
+  "Real AI execution",
+  "Empower your future with AI",
+];
 
 type FeaturedCourse = {
   id: string;
@@ -99,35 +103,64 @@ function getSectionMotion(reduceMotion: boolean) {
   };
 }
 
-function HeroTypedPhrase({ phrase, reduceMotion }: { phrase: string; reduceMotion: boolean }) {
+function HeroTypedPhrase({
+  phrases,
+  reduceMotion,
+}: { phrases: string[]; reduceMotion: boolean }) {
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const phrase = phrases[phraseIndex] ?? "";
   const [typedValue, setTypedValue] = useState("");
 
   useEffect(() => {
-    if (reduceMotion) return;
+    if (!phrases.length) {
+      setTypedValue("");
+      return;
+    }
+
+    if (reduceMotion) {
+      setTypedValue(phrases[0]);
+      return;
+    }
+
     let frame = 0;
     let direction = 1;
-    const timer = window.setInterval(() => {
-      frame += direction;
-      if (frame > phrase.length) {
-        // once fully typed, reset after a short pause by deleting letters
-        direction = -phrase.length;
-      } else if (frame <= 0) {
-        // begin typing again
-        direction = 1;
-      }
-      setTypedValue(phrase.slice(0, Math.max(frame, 0)));
-    }, 60);
-    return () => window.clearInterval(timer);
-  }, [phrase, reduceMotion]);
+    let holdTicks = 0;
+    const holdTickCount = Math.ceil(800 / 90);
 
-  const visibleValue = reduceMotion ? phrase : typedValue;
+    const timer = window.setInterval(() => {
+      if (holdTicks > 0) {
+        holdTicks -= 1;
+        return;
+      }
+
+      frame += direction;
+
+      if (frame > phrase.length) {
+        frame = phrase.length;
+        direction = -1;
+        holdTicks = holdTickCount;
+      } else if (frame <= 0) {
+        frame = 0;
+        setTypedValue("");
+        setPhraseIndex((prev) => (prev + 1) % phrases.length);
+        return;
+      }
+
+      setTypedValue(phrase.slice(0, Math.max(0, frame)));
+    }, 90);
+
+    return () => window.clearInterval(timer);
+  }, [phraseIndex, phrase, phrases, reduceMotion]);
+
+  const visiblePhrase = phrase || phrases[0] || "";
+  const visibleValue = reduceMotion ? visiblePhrase : typedValue;
 
   return (
     <span className="relative inline-flex min-w-[14ch]" aria-hidden="true">
-      <span className="invisible">{phrase}</span>
+      <span className="invisible">{visiblePhrase}</span>
       <span className="absolute inset-0 whitespace-nowrap text-primary">
         {visibleValue}
-        {!reduceMotion && visibleValue.length < phrase.length ? (
+        {!reduceMotion && visibleValue.length < visiblePhrase.length ? (
           <span className="ml-0.5 inline-block h-[1.05em] w-[1px] bg-primary align-middle" />
         ) : null}
       </span>
@@ -305,9 +338,10 @@ export function PremiumHomepageExperience({
               <div className="space-y-3">
                 <h1
                   className="font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl lg:text-5xl"
-                  aria-label={`Enterprise AI learning for ${HERO_TYPED_PHRASE}`}
+                  aria-label={`Enterprise AI learning for ${HERO_TYPED_PHRASES[0]}`}
                 >
-                  Enterprise AI learning for <HeroTypedPhrase phrase={HERO_TYPED_PHRASE} reduceMotion={reduceMotion} />
+                  Enterprise AI learning for{" "}
+                  <HeroTypedPhrase phrases={HERO_TYPED_PHRASES} reduceMotion={reduceMotion} />
                 </h1>
                 <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
                   Unified discovery, checkout, and structured completion paths for operators, teams, and founders who ship outcomes.

@@ -45,6 +45,12 @@ export function getSignedCloudinaryUrl(
   resourceType: CloudinaryResourceType,
   options: { download?: boolean; userId?: string; isAudio?: boolean } = {}
 ) {
+  // If the value is a full URL and not a Cloudinary URL, return it as-is.
+  // This covers externally hosted assets (e.g. Unsplash/CDN images).
+  if (/^https?:\/\//.test(publicId) && !publicId.includes("cloudinary.com")) {
+    return publicId;
+  }
+
   configureCloudinary();
 
   // Validate and clean publicId

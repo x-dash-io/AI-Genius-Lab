@@ -1,6 +1,7 @@
 import { PrismaClient, SubscriptionTier, CourseTier } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+import { estimateReadTime } from "../lib/read-time";
 
 const connectionString = process.env.DATABASE_URL;
 const pool = new Pool({ connectionString });
@@ -178,7 +179,6 @@ With the massive compute requirements of LLMs, the focus is shifting towards eff
             `,
             featuredImage: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&q=80", // Futurist AI layout
             tags: ["ai-news", "generative-ai"],
-            readTimeMinutes: 5,
             views: 1250,
         },
         {
@@ -202,7 +202,6 @@ First, install the necessary packages...
             `,
             featuredImage: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&q=80", // Matrix code / Python feel
             tags: ["tutorials", "generative-ai"],
-            readTimeMinutes: 12,
             views: 3400,
         },
         {
@@ -222,7 +221,6 @@ Instead of SaaS, offer agents that do the work. "Hiring" an AI employee is the n
             `,
             featuredImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80", // Business / Charts
             tags: ["business", "ai-news"],
-            readTimeMinutes: 7,
             views: 890,
         },
         {
@@ -239,12 +237,12 @@ Standard like C2PA are becoming essential. We must ensure that human creativity 
             `,
             featuredImage: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&q=80", // Cyber/Human hybrid conceptual
             tags: ["ethics", "ai-news"],
-            readTimeMinutes: 6,
             views: 2100,
         },
     ];
 
     for (const post of blogPosts) {
+        const readTimeMinutes = estimateReadTime(post.content);
         await prisma.blogPost.create({
             data: {
                 title: post.title,
@@ -253,7 +251,7 @@ Standard like C2PA are becoming essential. We must ensure that human creativity 
                 content: post.content,
                 featuredImage: post.featuredImage,
                 status: "published",
-                readTimeMinutes: post.readTimeMinutes,
+                readTimeMinutes,
                 views: post.views,
                 tags: {
                     connect: post.tags.map(slug => ({ id: tagMap.get(slug) }))

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { getSignedCloudinaryUrl } from "@/lib/cloudinary";
 import { BlogReviewSection } from "@/components/blog/BlogReviewSection";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,7 @@ async function BlogPostContent({ slug }: { slug: string }) {
 
   // Increment views
   await incrementPostViews(post.id);
+  revalidatePath("/blog");
 
   return (
     <article className="max-w-4xl mx-auto py-12">
