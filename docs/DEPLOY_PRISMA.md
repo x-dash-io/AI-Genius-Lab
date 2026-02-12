@@ -79,7 +79,7 @@ npx prisma migrate deploy
 
 If you hit `P3005`:
 1. Do not bypass the check.
-2. Run `npx prisma migrate diff --from-url "$DIRECT_URL" --to-schema-datamodel prisma/schema.prisma --exit-code`.
+2. Run `npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code`.
 3. Only baseline (`prisma migrate resolve --applied ...`) when diff exit code is `0`.
 
 If schema changed without migration:

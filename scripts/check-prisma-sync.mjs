@@ -57,9 +57,8 @@ function databaseMatchesSchema() {
     [
       "migrate",
       "diff",
-      "--from-url",
-      datasourceUrl,
-      "--to-schema-datamodel",
+      "--from-config-datasource",
+      "--to-schema",
       "prisma/schema.prisma",
       "--exit-code",
     ],
