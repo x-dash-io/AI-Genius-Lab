@@ -145,7 +145,7 @@ export function BlogReviewSection({ postId, reviews: initialReviews }: BlogRevie
           reviews.map((review) => (
             <div key={review.id} className="flex gap-4 p-4 border rounded-lg bg-card shadow-sm">
               <Avatar className="h-10 w-10 border">
-                <AvatarImage src={review.User.image} />
+                <AvatarImage src={review.User.image ?? undefined} />
                 <AvatarFallback className="bg-primary/10 text-primary">{review.User.name?.[0] || "?"}</AvatarFallback>
               </Avatar>
               <div className="flex-1 space-y-1">

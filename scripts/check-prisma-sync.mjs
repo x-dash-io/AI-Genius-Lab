@@ -1,9 +1,27 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
-import { readdirSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-const prismaRunner = process.platform === "win32" ? "npx.cmd" : "npx";
+const localPrismaBinary = join(
+  process.cwd(),
+  "node_modules",
+  ".bin",
+  process.platform === "win32" ? "prisma.cmd" : "prisma",
+);
+const localPrismaScript = join(process.cwd(), "node_modules", "prisma", "build", "index.js");
+const prismaRunner = existsSync(localPrismaScript)
+  ? process.execPath
+  : existsSync(localPrismaBinary)
+    ? localPrismaBinary
+    : process.platform === "win32"
+      ? "npx.cmd"
+      : "npx";
+const prismaRunnerArgs = prismaRunner === process.execPath
+  ? [localPrismaScript]
+  : prismaRunner === localPrismaBinary
+    ? []
+    : ["prisma"];
 
 function printOutput(result) {
   if (result.stdout) process.stdout.write(result.stdout);
@@ -14,7 +32,7 @@ function runPrismaStep(label, prismaArgs, options = {}) {
   const { allowFailure = false } = options;
   console.log(`\n[prisma-check] ${label}`);
 
-  const result = spawnSync(prismaRunner, ["prisma", ...prismaArgs], {
+  const result = spawnSync(prismaRunner, [...prismaRunnerArgs, ...prismaArgs], {
     env: process.env,
     encoding: "utf8",
   });
@@ -39,7 +57,7 @@ function runPrismaCapture(label, prismaArgs, options = {}) {
   const { allowFailure = false, input } = options;
   console.log(`\n[prisma-check] ${label}`);
 
-  const result = spawnSync(prismaRunner, ["prisma", ...prismaArgs], {
+  const result = spawnSync(prismaRunner, [...prismaRunnerArgs, ...prismaArgs], {
     env: process.env,
     encoding: "utf8",
     input,

@@ -58,6 +58,29 @@ interface SiteSettingsFormProps {
     initialHeroLogos: SettingsFormValues['heroLogos'];
 }
 
+function normalizeSocialLinks(
+    value: Array<Partial<SettingsFormValues["socialLinks"][number]>> | undefined
+): SettingsFormValues["socialLinks"] {
+    return (value || []).map((link) => ({
+        id: link.id || `social-${Date.now()}`,
+        platform: link.platform || "web",
+        url: link.url || "#",
+        visible: link.visible !== undefined ? link.visible : true,
+    }));
+}
+
+function normalizeHeroLogos(
+    value: Array<Partial<SettingsFormValues["heroLogos"][number]>> | undefined
+): SettingsFormValues["heroLogos"] {
+    return (value || []).map((logo) => ({
+        id: logo.id || `logo-${Date.now()}`,
+        name: logo.name || "",
+        type: logo.type || "image",
+        value: logo.value || "",
+        visible: logo.visible !== undefined ? logo.visible : true,
+    }));
+}
+
 export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteSettingsFormProps) {
     const [isPending, startTransition] = useTransition();
     const [lastSaved, setLastSaved] = React.useState<{ socialLinks: SettingsFormValues['socialLinks']; heroLogos: SettingsFormValues['heroLogos'] } | null>(null);
@@ -108,26 +131,18 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                 return;
             }
 
+            const normalizedSocialLinks = normalizeSocialLinks(watchedSettings.socialLinks);
+            const normalizedHeroLogos = normalizeHeroLogos(watchedSettings.heroLogos);
+
             startTransition(async () => {
                 try {
                     await Promise.all([
-                        updateSiteSettings("social_links", watchedSettings.socialLinks),
-                        updateSiteSettings("hero_logos", (watchedSettings.heroLogos || []).filter(Boolean))
+                        updateSiteSettings("social_links", normalizedSocialLinks),
+                        updateSiteSettings("hero_logos", normalizedHeroLogos)
                     ]);
                     setLastSaved({
-                        socialLinks: (watchedSettings.socialLinks || []).filter((link): link is NonNullable<typeof link> => Boolean(link)).map((link) => ({
-                            id: link.id || `social-${Date.now()}`,
-                            platform: link.platform || "web",
-                            url: link.url || "#",
-                            visible: link.visible !== undefined ? link.visible : true
-                        })),
-                        heroLogos: (watchedSettings.heroLogos || []).filter((logo): logo is NonNullable<typeof logo> => Boolean(logo)).map((logo) => ({
-                            id: logo.id || `logo-${Date.now()}`,
-                            name: logo.name || "",
-                            type: logo.type || "image",
-                            value: logo.value || "",
-                            visible: logo.visible !== undefined ? logo.visible : true
-                        }))
+                        socialLinks: normalizedSocialLinks,
+                        heroLogos: normalizedHeroLogos
                     });
                 } catch (error: unknown) {
                     console.error("Auto-save failed:", error);
@@ -139,11 +154,14 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
     }, [lastSaved, startTransition, watchedSettings]);
 
     function onSubmit(data: SettingsFormValues) {
+        const normalizedSocialLinks = normalizeSocialLinks(data.socialLinks);
+        const normalizedHeroLogos = normalizeHeroLogos(data.heroLogos);
+
         startTransition(async () => {
             try {
                 await Promise.all([
-                    updateSiteSettings("social_links", data.socialLinks),
-                    updateSiteSettings("hero_logos", data.heroLogos)
+                    updateSiteSettings("social_links", normalizedSocialLinks),
+                    updateSiteSettings("hero_logos", normalizedHeroLogos)
                 ]);
                 toastSuccess("Settings saved", "Your changes have been updated.");
             } catch (error: unknown) {

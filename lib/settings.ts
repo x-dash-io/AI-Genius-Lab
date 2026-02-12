@@ -78,13 +78,15 @@ export const getHeroLogos = unstable_cache(
     async () => {
         const logos = await getSiteSettings<unknown[]>("hero_logos", defaultHeroLogos);
         return logos.map((logo) => {
-            const heroLogo = logo as Partial<HeroLogo> & { url?: string; visible?: boolean | string };
+            const logoRecord = logo as { visible?: unknown };
+            const heroLogo = logo as Partial<HeroLogo> & { url?: string };
+            const rawVisible = logoRecord.visible;
             return {
                 ...heroLogo,
                 id: heroLogo.id || `logo-${Math.random()}`,
                 type: heroLogo.type || "image",
                 value: heroLogo.value || heroLogo.url || "",
-                visible: heroLogo.visible === true || heroLogo.visible === "true" || heroLogo.visible === undefined,
+                visible: rawVisible === true || rawVisible === "true" || rawVisible === undefined,
             };
         }) as HeroLogo[];
     },

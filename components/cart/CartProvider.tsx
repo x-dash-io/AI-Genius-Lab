@@ -22,6 +22,35 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+function extractErrorMessage(payload: unknown): string | undefined {
+  if (
+    payload &&
+    typeof payload === "object" &&
+    "error" in payload &&
+    typeof (payload as { error?: unknown }).error === "string"
+  ) {
+    return (payload as { error: string }).error;
+  }
+  return undefined;
+}
+
+function ensureCartPayload(payload: unknown): Cart {
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Invalid cart response");
+  }
+
+  const cartCandidate = payload as Partial<Cart>;
+  if (
+    !Array.isArray(cartCandidate.items) ||
+    typeof cartCandidate.totalCents !== "number" ||
+    typeof cartCandidate.itemCount !== "number"
+  ) {
+    throw new Error("Invalid cart response");
+  }
+
+  return cartCandidate as Cart;
+}
+
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<Cart>({ items: [], totalCents: 0, itemCount: 0, couponCode: null, discountTotal: 0, finalTotal: 0 });
   const [isLoading, setIsLoading] = useState(true);
@@ -32,7 +61,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const response = await fetch("/api/cart");
       if (response.ok) {
         const data = await safeJsonParse(response);
-        setCart(data);
+        setCart(ensureCartPayload(data));
       }
     } catch (error) {
       console.error("Error fetching cart:", error);
@@ -56,10 +85,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const data = await safeJsonParse(response);
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to add to cart");
+        throw new Error(extractErrorMessage(data) || "Failed to add to cart");
       }
 
-      setCart(data);
+      setCart(ensureCartPayload(data));
       toast({
         title: "Added to cart",
         description: "Course added to your shopping cart",
@@ -88,10 +117,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const data = await safeJsonParse(response);
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to remove from cart");
+        throw new Error(extractErrorMessage(data) || "Failed to remove from cart");
       }
 
-      setCart(data);
+      setCart(ensureCartPayload(data));
       toast({
         title: "Removed from cart",
         description: "Course removed from your shopping cart",
@@ -118,10 +147,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const data = await safeJsonParse(response);
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to clear cart");
+        throw new Error(extractErrorMessage(data) || "Failed to clear cart");
       }
 
-      setCart(data);
+      setCart(ensureCartPayload(data));
       toast({
         title: "Cart cleared",
         description: "All items have been removed from your cart",
@@ -153,10 +182,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const data = await safeJsonParse(response);
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to update quantity");
+        throw new Error(extractErrorMessage(data) || "Failed to update quantity");
       }
 
-      setCart(data);
+      setCart(ensureCartPayload(data));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to update quantity";
       toast({
@@ -179,7 +208,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
         if (response.ok) {
           const data = await safeJsonParse(response);
-          setCart(data);
+          setCart(ensureCartPayload(data));
         }
       }
     } catch (error) {
@@ -199,10 +228,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const data = await safeJsonParse(response);
 
       if (!response.ok) {
-        return { error: data.error || "Failed to apply coupon" };
+        return { error: extractErrorMessage(data) || "Failed to apply coupon" };
       }
 
-      setCart(data);
+      setCart(ensureCartPayload(data));
       toast({
         title: "Coupon applied!",
         description: `Discount applied successfully`,
@@ -222,7 +251,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ action: "removeCoupon" }),
       });
       const data = await safeJsonParse(response);
-      setCart(data);
+      setCart(ensureCartPayload(data));
       toast({
         title: "Coupon removed",
         description: "Discount code has been removed",

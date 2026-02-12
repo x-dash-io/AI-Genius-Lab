@@ -75,6 +75,12 @@ export const authOptions = {
           });
 
           if (existingUser) {
+            const oauthPicture =
+              profile &&
+              typeof (profile as { picture?: unknown }).picture === "string"
+                ? ((profile as { picture?: string }).picture ?? undefined)
+                : undefined;
+
             // Check if this OAuth account is already linked
             const existingAccount = existingUser.Account?.find(
               (existingUserAccount) =>
@@ -109,10 +115,10 @@ export const authOptions = {
             }
 
             // Update user info from OAuth profile if missing
-            if (!existingUser.image && profile?.picture) {
+            if (!existingUser.image && oauthPicture) {
               await prisma.user.update({
                 where: { id: existingUser.id },
-                data: { image: profile.picture },
+                data: { image: oauthPicture },
               });
             }
           }

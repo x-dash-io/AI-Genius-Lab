@@ -18,6 +18,11 @@ interface ContentUploadProps {
   returnUrl?: boolean;
 }
 
+type UploadResponse = {
+  publicId?: string;
+  error?: string;
+};
+
 const UPLOAD_METHODS = ["file", "url", "manual"] as const;
 type UploadMethod = (typeof UPLOAD_METHODS)[number];
 
@@ -77,10 +82,14 @@ export function ContentUpload({
         body: formData,
       });
 
-      const data = await safeJsonParse(response);
+      const data = (await safeJsonParse(response)) as UploadResponse;
 
       if (!response.ok) {
         throw new Error(data.error || "Upload failed");
+      }
+
+      if (!data.publicId) {
+        throw new Error("Upload failed: missing asset id");
       }
 
       onChange(data.publicId);
@@ -128,10 +137,14 @@ export function ContentUpload({
         }),
       });
 
-      const data = await safeJsonParse(response);
+      const data = (await safeJsonParse(response)) as UploadResponse;
 
       if (!response.ok) {
         throw new Error(data.error || "Upload failed");
+      }
+
+      if (!data.publicId) {
+        throw new Error("Upload failed: missing asset id");
       }
 
       onChange(data.publicId);

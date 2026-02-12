@@ -41,6 +41,7 @@ export interface LearningPathSchema {
   "@type": string;
   name: string;
   description: string;
+  url: string;
   provider: {
     "@type": string;
     name: string;

@@ -17,10 +17,14 @@ export const logger = {
   },
 
   error: (message: string, error?: unknown, context?: Record<string, unknown>) => {
-    const errorDetails = error instanceof Error ? {
-      errorMessage: error.message,
-      stack: error.stack,
-    } : { error };
+    const errorDetails: Record<string, string | undefined> = error instanceof Error
+      ? {
+        errorMessage: error.message,
+        stack: error.stack,
+      }
+      : {
+        errorMessage: error !== undefined ? String(error) : undefined,
+      };
 
     console.error(`[ERROR] ${message}`, errorDetails, context || "");
 
