@@ -35,6 +35,32 @@ function runPrismaStep(label, prismaArgs, options = {}) {
   return result;
 }
 
+function runPrismaCapture(label, prismaArgs, options = {}) {
+  const { allowFailure = false, input } = options;
+  console.log(`\n[prisma-check] ${label}`);
+
+  const result = spawnSync(prismaRunner, ["prisma", ...prismaArgs], {
+    env: process.env,
+    encoding: "utf8",
+    input,
+  });
+
+  if (result.error) {
+    throw new Error(
+      `[prisma-check] ${label} failed to execute: ${result.error.message}`,
+    );
+  }
+
+  printOutput(result);
+
+  if (!allowFailure && result.status !== 0) {
+    const status = result.status ?? 1;
+    throw new Error(`[prisma-check] ${label} failed with exit code ${status}`);
+  }
+
+  return result;
+}
+
 function listMigrationFolders() {
   const migrationsDir = join(process.cwd(), "prisma", "migrations");
   return readdirSync(migrationsDir, { withFileTypes: true })
@@ -101,6 +127,67 @@ function baselineExistingDatabase() {
   }
 }
 
+function getReconciliationSql() {
+  const result = runPrismaCapture(
+    "Generate SQL reconciliation script",
+    [
+      "migrate",
+      "diff",
+      "--from-config-datasource",
+      "--to-schema",
+      "prisma/schema.prisma",
+      "--script",
+    ],
+    { allowFailure: true },
+  );
+
+  if (result.status !== 0) {
+    throw new Error(
+      "[prisma-check] Could not generate SQL reconciliation script.",
+    );
+  }
+
+  return (result.stdout ?? "").trim();
+}
+
+function assertAdditiveSqlOnly(sql) {
+  const forbiddenPatterns = [
+    /\bDROP\s+(TABLE|COLUMN|INDEX|TYPE|SCHEMA|VIEW|SEQUENCE)\b/i,
+    /\bTRUNCATE\b/i,
+    /\bDELETE\s+FROM\b/i,
+    /\bALTER\s+TABLE\b[\s\S]*\bDROP\b/i,
+    /\bALTER\s+TABLE\b[\s\S]*\bALTER\s+COLUMN\b/i,
+    /\bRENAME\s+(COLUMN|TO)\b/i,
+  ];
+
+  for (const pattern of forbiddenPatterns) {
+    if (pattern.test(sql)) {
+      throw new Error(
+        [
+          "[prisma-check] Reconciliation requires destructive SQL, which is blocked.",
+          "Apply a manual migration plan before retrying deployment.",
+        ].join(" "),
+      );
+    }
+  }
+}
+
+function reconcileLegacyDatabase() {
+  const sql = getReconciliationSql();
+
+  if (!sql) {
+    return;
+  }
+
+  assertAdditiveSqlOnly(sql);
+
+  runPrismaCapture(
+    "Apply additive SQL reconciliation to legacy database",
+    ["db", "execute", "--stdin"],
+    { input: `${sql}\n` },
+  );
+}
+
 function isP3005(result) {
   const combinedOutput = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
   return combinedOutput.includes("P3005");
@@ -131,12 +218,20 @@ try {
     const safeToBaseline = databaseMatchesSchema();
 
     if (!safeToBaseline) {
-      throw new Error(
-        [
-          "[prisma-check] Database schema does not match prisma/schema.prisma, so auto-baseline is unsafe.",
-          "Run an explicit migration reconciliation first (do not skip this check).",
-        ].join(" "),
+      console.log(
+        "[prisma-check] Database differs from schema; attempting additive reconciliation before baseline.",
       );
+      reconcileLegacyDatabase();
+
+      const matchesAfterReconcile = databaseMatchesSchema();
+      if (!matchesAfterReconcile) {
+        throw new Error(
+          [
+            "[prisma-check] Database still differs from prisma/schema.prisma after reconciliation.",
+            "Run an explicit manual migration reconciliation first.",
+          ].join(" "),
+        );
+      }
     }
 
     baselineExistingDatabase();
