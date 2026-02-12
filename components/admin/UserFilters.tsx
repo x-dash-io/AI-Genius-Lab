@@ -15,12 +15,12 @@ import { X } from "lucide-react";
 
 export function UserFilters() {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   
-  const currentSearch = searchParams.get("search") || "";
-  const currentRole = searchParams.get("role") || "all";
+  const currentSearch = searchParams?.get("search") || "";
+  const currentRole = searchParams?.get("role") || "all";
   
   const [role, setRole] = useState(currentRole);
   const [isFiltering, setIsFiltering] = useState(false);
@@ -40,7 +40,7 @@ export function UserFilters() {
   const handleSearch = useCallback((value: string) => {
     setIsFiltering(true);
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       if (value) {
         params.set("search", value);
       } else {
@@ -54,7 +54,7 @@ export function UserFilters() {
     setRole(value);
     setIsFiltering(true);
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       if (value && value !== "all") {
         params.set("role", value);
       } else {

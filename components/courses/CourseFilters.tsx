@@ -24,14 +24,14 @@ type Category = {
 
 export function CourseFilters() {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const currentSearch = searchParams.get("search") || "";
-  const currentCategory = searchParams.get("category") || "all";
-  const currentPrice = searchParams.get("price") || "all";
-  const currentSort = searchParams.get("sort") || "newest";
+  const currentSearch = searchParams?.get("search") || "";
+  const currentCategory = searchParams?.get("category") || "all";
+  const currentPrice = searchParams?.get("price") || "all";
+  const currentSort = searchParams?.get("sort") || "newest";
 
   const [category, setCategory] = useState(currentCategory);
   const [price, setPrice] = useState(currentPrice);
@@ -75,7 +75,7 @@ export function CourseFilters() {
   const handleSearch = useCallback((value: string) => {
     setIsFiltering(true);
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       if (value) {
         params.set("search", value);
       } else {
@@ -89,7 +89,7 @@ export function CourseFilters() {
     setPrice(value);
     setIsFiltering(true);
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       if (value && value !== "all") {
         params.set("price", value);
       } else {
@@ -103,7 +103,7 @@ export function CourseFilters() {
     setCategory(value);
     setIsFiltering(true);
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       if (value && value !== "all") {
         params.set("category", value);
       } else {
@@ -117,7 +117,7 @@ export function CourseFilters() {
     setSortBy(value);
     setIsFiltering(true);
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       if (value && value !== "newest") {
         params.set("sort", value);
       } else {

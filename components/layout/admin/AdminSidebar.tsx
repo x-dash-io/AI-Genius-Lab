@@ -11,7 +11,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { SidebarProvider, useSidebar } from "@/components/layout/useSidebar";
 
 function AdminSidebarContent() {
-    const pathname = usePathname();
+    const pathname = usePathname() ?? "/";
     const { isCollapsed, toggleCollapsed } = useSidebar();
 
     return (

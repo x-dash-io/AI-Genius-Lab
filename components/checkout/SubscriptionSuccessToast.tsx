@@ -9,7 +9,7 @@ export function SubscriptionSuccessToast() {
   const router = useRouter();
 
   useEffect(() => {
-    const success = searchParams.get("subscription") === "success";
+    const success = searchParams?.get("subscription") === "success";
     if (success) {
       toastSuccess(
         "Subscription Successful!",
@@ -18,7 +18,7 @@ export function SubscriptionSuccessToast() {
       );
 
       // Clean up the URL by removing the subscription parameter
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       params.delete("subscription");
       const newPath = params.toString() ? `?${params.toString()}` : "";
       router.replace(window.location.pathname + newPath, { scroll: false });

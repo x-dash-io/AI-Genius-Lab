@@ -18,8 +18,8 @@ function isCustomerPagePath(pathname: string): boolean {
 export function PreviewBanner() {
   const { data: session } = useSession();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const isPreviewParam = searchParams.get("preview") === "true";
+  const pathname = usePathname() ?? "/";
+  const isPreviewParam = searchParams?.get("preview") === "true";
 
   const isAdmin = session?.user?.role === "admin";
   const isCustomerPage = isCustomerPagePath(pathname);
@@ -72,12 +72,12 @@ export function PreviewBanner() {
  */
 export function useAdminPreview() {
   const { data: session } = useSession();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
   
   const isAdmin = session?.user?.role === "admin";
   const isCustomerPage = isCustomerPagePath(pathname);
-  const isPreviewParam = searchParams.get("preview") === "true";
+  const isPreviewParam = searchParams?.get("preview") === "true";
 
   return {
     isAdminPreview: isAdmin && isCustomerPage && isPreviewParam,

@@ -48,8 +48,8 @@ export default function SignInPage() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
-  const resetStatus = searchParams.get("reset");
+  const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard";
+  const resetStatus = searchParams?.get("reset");
   const showResetSuccess = resetStatus === "success";
 
   useEffect(() => {

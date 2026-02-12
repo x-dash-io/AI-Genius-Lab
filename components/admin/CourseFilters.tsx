@@ -22,13 +22,13 @@ type Category = {
 
 export function CourseFilters() {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   
-  const currentSearch = searchParams.get("search") || "";
-  const currentStatus = searchParams.get("status") || "all";
-  const currentCategory = searchParams.get("category") || "all";
+  const currentSearch = searchParams?.get("search") || "";
+  const currentStatus = searchParams?.get("status") || "all";
+  const currentCategory = searchParams?.get("category") || "all";
   
   const [status, setStatus] = useState(currentStatus);
   const [category, setCategory] = useState(currentCategory);
@@ -70,7 +70,7 @@ export function CourseFilters() {
   const handleSearch = useCallback((value: string) => {
     setIsFiltering(true);
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       if (value) {
         params.set("search", value);
       } else {
@@ -84,7 +84,7 @@ export function CourseFilters() {
     setStatus(value);
     setIsFiltering(true);
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       if (value && value !== "all") {
         params.set("status", value);
       } else {
@@ -98,7 +98,7 @@ export function CourseFilters() {
     setCategory(value);
     setIsFiltering(true);
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       if (value && value !== "all") {
         params.set("category", value);
       } else {

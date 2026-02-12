@@ -14,7 +14,7 @@ import { AdminUserSection } from "./AdminUserSection";
 
 export function AdminMobileMenu() {
     const [isOpen, setIsOpen] = useState(false);
-    const pathname = usePathname();
+    const pathname = usePathname() ?? "/";
     const menuRef = useRef<HTMLElement>(null);
 
     useEffect(() => {

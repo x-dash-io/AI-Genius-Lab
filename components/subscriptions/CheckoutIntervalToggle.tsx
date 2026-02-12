@@ -10,15 +10,15 @@ export function CheckoutIntervalToggle() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const interval = (searchParams.get("interval") as BillingInterval) || "monthly";
-  const planId = searchParams.get("planId");
+  const interval = (searchParams?.get("interval") as BillingInterval) || "monthly";
+  const planId = searchParams?.get("planId");
 
   const handleIntervalChange = (nextInterval: BillingInterval) => {
     if (!planId) {
       return;
     }
 
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
     params.set("interval", nextInterval);
     router.push(`/checkout/subscription?${params.toString()}`, { scroll: false });
   };

@@ -45,7 +45,7 @@ export function PublicLayoutClient({
   children: React.ReactNode;
   socialLinks?: SocialLink[];
 }) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
   const [mobileOpen, setMobileOpen] = useState(false);
   const { cart } = useCart();
 

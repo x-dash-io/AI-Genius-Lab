@@ -15,17 +15,17 @@ import { X } from "lucide-react";
 
 export function PurchaseFilters() {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   
-  const currentSearch = searchParams.get("search") || "";
-  const currentStatus = searchParams.get("status") || "all";
-  const currentProvider = searchParams.get("provider") || "all";
+  const currentSearch = searchParams?.get("search") || "";
+  const currentStatus = searchParams?.get("status") || "all";
+  const currentProvider = searchParams?.get("provider") || "all";
 
   const handleSearch = useCallback((value: string) => {
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       if (value) {
         params.set("search", value);
       } else {
@@ -37,7 +37,7 @@ export function PurchaseFilters() {
 
   const handleStatusChange = useCallback((value: string) => {
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       if (value && value !== "all") {
         params.set("status", value);
       } else {
@@ -49,7 +49,7 @@ export function PurchaseFilters() {
 
   const handleProviderChange = useCallback((value: string) => {
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       if (value && value !== "all") {
         params.set("provider", value);
       } else {

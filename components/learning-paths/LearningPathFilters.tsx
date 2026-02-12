@@ -15,12 +15,12 @@ import { X } from "lucide-react";
 
 export function LearningPathFilters() {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   
-  const currentSearch = searchParams.get("search") || "";
-  const currentSort = searchParams.get("sort") || "newest";
+  const currentSearch = searchParams?.get("search") || "";
+  const currentSort = searchParams?.get("sort") || "newest";
   
   const [sortBy, setSortBy] = useState(currentSort);
   const [isFiltering, setIsFiltering] = useState(false);
@@ -40,7 +40,7 @@ export function LearningPathFilters() {
   const handleSearch = useCallback((value: string) => {
     setIsFiltering(true);
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       if (value) {
         params.set("search", value);
       } else {
@@ -54,7 +54,7 @@ export function LearningPathFilters() {
     setSortBy(value);
     setIsFiltering(true);
     startTransition(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
       if (value && value !== "newest") {
         params.set("sort", value);
       } else {

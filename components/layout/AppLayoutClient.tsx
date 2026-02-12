@@ -63,7 +63,7 @@ interface AppLayoutClientProps {
 }
 
 function AppLayoutContent({ children, planName = "Member" }: AppLayoutClientProps) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
   const { data: session } = useSession();
   const { cart } = useCart();
@@ -71,7 +71,7 @@ function AppLayoutContent({ children, planName = "Member" }: AppLayoutClientProp
   const { isCollapsed, toggleCollapsed } = useSidebar();
 
   const isAdmin = session?.user?.role === "admin";
-  const isPreviewMode = searchParams.get("preview") === "true";
+  const isPreviewMode = searchParams?.get("preview") === "true";
   const preservePreview = isAdmin && isPreviewMode;
 
   const cartCount = cart?.itemCount ?? 0;
