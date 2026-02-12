@@ -16,6 +16,20 @@ type CourseImportRow = {
   isPublished?: string;
 };
 
+function parseOptionalInteger(value?: string): number | null {
+  if (!value || value.trim() === "") {
+    return null;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+function parseIntegerWithDefault(value: string | undefined, fallback: number): number {
+  const parsed = parseOptionalInteger(value);
+  return parsed ?? fallback;
+}
+
 export const POST = withErrorHandler(async (request: NextRequest) => {
   await requireRole("admin");
 
@@ -54,8 +68,8 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
                   title,
                   description: description || null,
                   category: category || null,
-                  priceCents: parseInt(priceCents) || 0,
-                  inventory: inventory ? parseInt(inventory) : null,
+                  priceCents: parseIntegerWithDefault(priceCents, 0),
+                  inventory: parseOptionalInteger(inventory),
                   isPublished: isPublished === "true" || isPublished === "1",
                   updatedAt: new Date(),
                 },
@@ -65,8 +79,8 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
                   title,
                   description: description || null,
                   category: category || null,
-                  priceCents: parseInt(priceCents) || 0,
-                  inventory: inventory ? parseInt(inventory) : null,
+                  priceCents: parseIntegerWithDefault(priceCents, 0),
+                  inventory: parseOptionalInteger(inventory),
                   isPublished: isPublished === "true" || isPublished === "1",
                   updatedAt: new Date(),
                 },
@@ -87,9 +101,8 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
           reject(error);
         }
       },
-      error: (error) => {
-        const parseError = error as { message?: string };
-        reject(AppError.badRequest(`CSV parsing error: ${parseError.message ?? "Unknown parser error"}`));
+      error: (error: { message?: string }) => {
+        reject(AppError.badRequest(`CSV parsing error: ${error.message ?? "Unknown parser error"}`));
       }
     });
   });
