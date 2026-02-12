@@ -96,6 +96,30 @@
   --glass-shadow: 0 16px 40px rgba(2, 6, 23, 0.45);
 }
 
+/* Solid effect: dropdowns should use the card colours and be fully opaque */
+:root[data-ui-effects='solid'] {
+  --popover: var(--card);
+  --popover-foreground: var(--card-foreground);
+}
+
+.dark[data-ui-effects='solid'] {
+  --popover: var(--card);
+  --popover-foreground: var(--card-foreground);
+}
+
+/* Glass effect: dropdowns should be semi-transparent and readable */
+:root[data-ui-effects='glass'] {
+  /* A bright glass tone with ~85% opacity for light mode */
+  --popover: 0 0% 100% / 0.85;
+  --popover-foreground: 222 42% 12%; /* dark text */
+}
+
+.dark[data-ui-effects='glass'] {
+  /* A slightly translucent dark tone for glass in dark mode */
+  --popover: 17 23 41 / 0.85;
+  --popover-foreground: 220 23% 96%; /* light text */
+}
+
 * {
   border-color: hsl(var(--border));
 }
