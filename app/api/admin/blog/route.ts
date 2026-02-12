@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/access";
 import { createPost, getAllPosts } from "@/lib/admin/blog";
 import { withErrorHandler } from "@/app/api/error-handler";
 import { AppError } from "@/lib/errors";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export const GET = withErrorHandler(async () => {
   await requireRole("admin");
@@ -19,5 +20,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   }
 
   const post = await createPost(data);
+  revalidateTag("blog_posts");
+  revalidatePath("/blog");
   return NextResponse.json({ post }, { status: 201 });
 });

@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/access";
 import { updatePost, deletePost, getPostForEdit } from "@/lib/admin/blog";
 import { withErrorHandler } from "@/app/api/error-handler";
 import { AppError } from "@/lib/errors";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export const GET = withErrorHandler(async (
   request: NextRequest,
@@ -28,6 +29,8 @@ export const PATCH = withErrorHandler(async (
   const data = await request.json();
 
   const post = await updatePost(postId, data);
+  revalidateTag("blog_posts");
+  revalidatePath("/blog");
   return NextResponse.json({ post });
 });
 
@@ -39,5 +42,7 @@ export const DELETE = withErrorHandler(async (
   const { postId } = await params;
 
   await deletePost(postId);
+  revalidateTag("blog_posts");
+  revalidatePath("/blog");
   return NextResponse.json({ success: true });
 });

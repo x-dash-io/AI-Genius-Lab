@@ -377,27 +377,29 @@ export function PremiumHomepageExperience({
                 ))}
               </div>
 
-              {visibleHeroLogos.length > 0 && (
-                <m.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  className="pt-8 sm:pt-10"
-                >
-                  <p className="mb-4 text-center text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
-                    Trusted by professionals at
-                  </p>
-                  <HeroLogosCarousel
-                    logos={visibleHeroLogos}
-                    direction="right"
-                    speed={20}
-                  />
-                </m.div>
-              )}
             </div>
 
             <ProductPreviewCard metrics={metrics} />
           </div>
+
+          {visibleHeroLogos.length > 0 && (
+            <m.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="-mx-5 pt-8 sm:-mx-6 sm:pt-10 lg:-mx-8"
+            >
+              <p className="mb-4 text-center text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
+                Trusted by professionals at
+              </p>
+              <HeroLogosCarousel
+                logos={visibleHeroLogos}
+                direction="right"
+                speed={25}
+                minIcons={8}
+              />
+            </m.div>
+          )}
         </m.section>
 
         <m.section {...sectionMotion}>

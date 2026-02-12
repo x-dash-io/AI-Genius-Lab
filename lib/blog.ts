@@ -1,39 +1,48 @@
 import { prisma, withRetry } from "@/lib/prisma";
 import { estimateReadTime } from "@/lib/read-time";
 import type { Prisma } from "@prisma/client";
+import { unstable_cache } from "next/cache";
 
-export async function getPublishedPosts(options: { tag?: string; search?: string } = {}) {
-  const { tag, search } = options;
+type PublishedPostsOptions = { tag?: string; search?: string };
 
-  // Construct where clause dynamically to avoid empty objects in AND array
-  const where: Prisma.BlogPostWhereInput = {
-    status: "published",
-  };
+const getPublishedPostsCached = unstable_cache(
+  async (tag?: string, search?: string) => {
+    // Construct where clause dynamically to avoid empty objects in AND array
+    const where: Prisma.BlogPostWhereInput = {
+      status: "published",
+    };
 
-  if (tag) {
-    where.tags = { some: { slug: tag } };
-  }
+    if (tag) {
+      where.tags = { some: { slug: tag } };
+    }
 
-  if (search) {
-    where.OR = [
-      { title: { contains: search, mode: "insensitive" } },
-      { content: { contains: search, mode: "insensitive" } },
-      { excerpt: { contains: search, mode: "insensitive" } },
-    ];
-  }
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { content: { contains: search, mode: "insensitive" } },
+        { excerpt: { contains: search, mode: "insensitive" } },
+      ];
+    }
 
-  return withRetry(async () => {
-    return prisma.blogPost.findMany({
-      where,
-      include: {
-        tags: true,
-        _count: {
-          select: { reviews: true },
+    return withRetry(async () => {
+      return prisma.blogPost.findMany({
+        where,
+        include: {
+          tags: true,
+          _count: {
+            select: { reviews: true },
+          },
         },
-      },
-      orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: "desc" },
+      });
     });
-  });
+  },
+  ["blog_posts"],
+  { tags: ["blog_posts"] }
+);
+
+export async function getPublishedPosts(options: PublishedPostsOptions = {}) {
+  return getPublishedPostsCached(options.tag, options.search);
 }
 
 export async function getPostBySlug(slug: string) {

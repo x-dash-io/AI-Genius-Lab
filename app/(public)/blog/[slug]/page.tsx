@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { getSignedCloudinaryUrl } from "@/lib/cloudinary";
 import { BlogReviewSection } from "@/components/blog/BlogReviewSection";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +47,7 @@ async function BlogPostContent({ slug }: { slug: string }) {
 
   // Increment views
   await incrementPostViews(post.id);
+  revalidateTag("blog_posts");
   revalidatePath("/blog");
   const updated = await prisma.blogPost.findUnique({
     where: { id: post.id },

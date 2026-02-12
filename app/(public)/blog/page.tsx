@@ -132,7 +132,7 @@ async function BlogContent({ searchParams }: BlogPageProps) {
                         </div>
                         <div className="flex items-center gap-1">
                           <Eye className="h-3 w-3" />
-                          {post.views}
+                          {post.views ?? 0}
                         </div>
                       </div>
                     </CardContent>
