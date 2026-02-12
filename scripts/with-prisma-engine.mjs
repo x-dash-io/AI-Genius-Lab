@@ -12,6 +12,7 @@ import { spawn } from "node:child_process";
 
 const command = process.argv[2];
 const args = process.argv.slice(3);
+const executable = process.platform === "win32" ? `${command}.cmd` : command;
 
 if (!command) {
   console.error("Missing command. Example: next | prisma");
@@ -23,9 +24,9 @@ if (args.length === 0) {
   process.exit(1);
 }
 
-const child = spawn(command, args, {
+const child = spawn(executable, args, {
   stdio: "inherit",
-  shell: true,
+  shell: false,
   env: {
     ...process.env,
     PRISMA_CLIENT_ENGINE_TYPE: "library",

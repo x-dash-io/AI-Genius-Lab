@@ -22,8 +22,12 @@ npm run build
 `npm run build` executes:
 1. `prisma generate`
 2. `prisma migrate deploy`
-3. `prisma migrate status`
-4. `next build`
+3. If `P3005` occurs (non-empty DB with no migration history), it runs a safety gate:
+   - compare live DB schema to `prisma/schema.prisma`
+   - baseline existing DB only if there is no schema diff
+   - fail immediately if schema differs (unsafe to auto-baseline)
+4. `prisma migrate status`
+5. `next build`
 
 If migrations are pending or DB is unreachable, build fails (intentional).
 
@@ -43,6 +47,10 @@ npm run build:local
 3. Confirm build logs include:
    - `[prisma-check] Generate Prisma Client`
    - `[prisma-check] Apply migrations`
+   - optional one-time baseline logs if this is a legacy DB:
+     - `Detected P3005`
+     - `Compare existing database schema`
+     - `Mark migration as applied: ...`
    - `[prisma-check] Validate migration status`
 4. Confirm app routes render (especially `/dashboard`, `/admin`).
 5. If rollback is needed, rollback app + DB migration plan together.
@@ -68,6 +76,11 @@ If migrations are not applied:
 ```bash
 npx prisma migrate deploy
 ```
+
+If you hit `P3005`:
+1. Do not bypass the check.
+2. Run `npx prisma migrate diff --from-url "$DIRECT_URL" --to-schema-datamodel prisma/schema.prisma --exit-code`.
+3. Only baseline (`prisma migrate resolve --applied ...`) when diff exit code is `0`.
 
 If schema changed without migration:
 1. Create a migration and commit it.
