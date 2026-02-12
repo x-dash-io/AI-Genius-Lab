@@ -8,6 +8,8 @@ import { useSession } from "next-auth/react";
 import {
   Activity,
   BookOpen,
+  ChevronLeft,
+  ChevronRight,
   CreditCard,
   GraduationCap,
   LayoutDashboard,
@@ -64,6 +66,7 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
   const { data: session } = useSession();
   const { cart } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const isAdmin = session?.user?.role === "admin";
   const isPreviewMode = searchParams.get("preview") === "true";
@@ -88,17 +91,35 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
     <CourseProgressProvider>
       <AppShell area="app">
         <div className="hidden md:block">
-          <aside className="fixed inset-y-0 left-0 z-30 flex w-72 flex-col border-r bg-card/85 px-4 py-4 backdrop-blur">
-            <Link href={getHref("/dashboard")} className="flex h-12 items-center px-2" aria-label="Dashboard">
-              <Image
-                src="/logo.png"
-                alt="AI Genius Lab"
-                width={164}
-                height={36}
-                className="h-8 w-auto object-contain"
-                priority
-              />
-            </Link>
+          <aside
+            className={cn(
+              "fixed inset-y-0 left-0 z-30 flex flex-col border-r bg-card/85 px-4 py-4 backdrop-blur transition-all duration-300",
+              isCollapsed ? "w-20" : "w-72"
+            )}
+          >
+            <div className="flex h-12 items-center px-2">
+              <Link href={getHref("/dashboard")} className="inline-flex items-center" aria-label="Dashboard">
+                <Image
+                  src="/logo.png"
+                  alt="AI Genius Lab"
+                  width={164}
+                  height={36}
+                  className={cn(
+                    "h-8 object-contain transition-all duration-300",
+                    isCollapsed ? "w-8" : "w-auto"
+                  )}
+                  priority
+                />
+              </Link>
+
+              <button
+                onClick={() => setIsCollapsed(!isCollapsed)}
+                className="ml-auto rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                aria-label="Toggle sidebar"
+              >
+                {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+              </button>
+            </div>
 
             <nav className="mt-5 flex-1 space-y-1 overflow-y-auto pr-1">
               {appNavigation.map((item) => {
@@ -111,15 +132,16 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
                     href={getHref(item.href)}
                     className={cn(
                       "group flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 text-sm font-medium",
+                      isCollapsed && "justify-center",
                       active
                         ? "bg-primary text-primary-foreground shadow-sm"
                         : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                     )}
                   >
                     <Icon className="h-4 w-4" />
-                    {item.name}
+                    <span className={cn(isCollapsed && "hidden xl:inline")}>{item.name}</span>
                     {item.href === "/cart" && cartCount > 0 ? (
-                      <Badge className="ml-auto h-5 min-w-5 justify-center px-1 text-[10px]">
+                      <Badge className={cn("ml-auto h-5 min-w-5 justify-center px-1 text-[10px]", isCollapsed && "hidden")}>
                         {cartCount > 9 ? "9+" : cartCount}
                       </Badge>
                     ) : null}
@@ -131,7 +153,10 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
             <div className="mt-4 space-y-3 border-t pt-4">
               <Link
                 href={getHref("/profile")}
-                className="ui-surface glass flex items-center gap-3 rounded-[var(--radius-md)] border p-3"
+                className={cn(
+                  "ui-surface glass flex rounded-[var(--radius-md)] border",
+                  isCollapsed ? "justify-center p-2" : "items-center gap-3 p-3"
+                )}
               >
                 <Avatar className="h-9 w-9">
                   <AvatarImage
@@ -142,20 +167,20 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
                     {(session?.user?.name?.[0] || session?.user?.email?.[0] || "U").toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="min-w-0">
+                <div className={cn("min-w-0", isCollapsed && "hidden")}>
                   <p className="truncate text-sm font-semibold">{session?.user?.name || "User"}</p>
                   <p className="truncate text-xs text-muted-foreground">{planName}</p>
                 </div>
               </Link>
 
-              <div className="flex items-center justify-between">
+              <div className={cn("flex items-center", isCollapsed ? "justify-center" : "justify-between")}>
                 <ThemeToggle />
-                <SignOutButton className="h-10 w-auto px-3" />
+                {!isCollapsed ? <SignOutButton className="h-10 w-auto px-3" /> : null}
               </div>
             </div>
           </aside>
 
-          <div className="pl-72">
+          <div className={cn("transition-all duration-300", isCollapsed ? "pl-20" : "pl-72")}>
             <header className="sticky top-0 z-20 border-b border-border/80 bg-background/90 backdrop-blur">
               <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-6">
                 <p className="font-display text-base font-semibold tracking-tight">{currentSection}</p>
@@ -213,37 +238,35 @@ export function AppLayoutClient({ children, planName = "Member" }: AppLayoutClie
             </div>
           </header>
 
-          {mobileMenuOpen ? (
-            <div className="border-b border-border/80 bg-background px-4 pb-4 pt-2">
-              <nav className="grid gap-1">
+          {mobileMenuOpen && (
+            <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur transition-opacity duration-300">
+              <nav className="mx-auto max-w-md px-4 pt-5 space-y-1">
                 {appNavigation.map((item) => {
                   const Icon = item.icon;
                   const active = isActivePath(pathname, item.href);
-
                   return (
                     <Link
                       key={item.href}
                       href={getHref(item.href)}
                       onClick={() => setMobileMenuOpen(false)}
                       className={cn(
-                        "inline-flex items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-sm font-medium",
+                        "flex items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-sm font-medium",
                         active
                           ? "bg-accent text-foreground"
                           : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                       )}
                     >
                       <Icon className="h-4 w-4" />
-                      {item.name}
+                      <span>{item.name}</span>
                     </Link>
                   );
                 })}
-
                 <div className="mt-2 border-t pt-3">
                   <SignOutButton className="h-11 w-full justify-center" />
                 </div>
               </nav>
             </div>
-          ) : null}
+          )}
 
           {isPreviewMode ? <PreviewBanner /> : null}
 
