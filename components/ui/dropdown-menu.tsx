@@ -39,7 +39,7 @@ const DropdownMenuSubContent = React.forwardRef<
   <DropdownMenuPrimitive.SubContent
     ref={ref}
     className={cn(
-      "ui-surface z-[var(--z-dropdown)] min-w-40 overflow-hidden rounded-[var(--radius-md)] border p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "ui-surface z-[var(--z-dropdown)] min-w-40 overflow-hidden rounded-[var(--radius-md)] border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
     )}
     {...props}
@@ -56,7 +56,7 @@ const DropdownMenuContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "ui-surface z-[var(--z-dropdown)] min-w-44 overflow-hidden rounded-[var(--radius-md)] border p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+        "ui-surface z-[var(--z-dropdown)] min-w-44 overflow-hidden rounded-[var(--radius-md)] border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         className
       )}
       {...props}

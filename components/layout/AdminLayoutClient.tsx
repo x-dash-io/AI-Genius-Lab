@@ -5,11 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { Eye, Menu, ShieldCheck, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, Menu, ShieldCheck, X } from "lucide-react";
 
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { Footer } from "@/components/layout/Footer";
 import { adminNavigation, customerPreviewLinks } from "@/components/layout/admin/AdminConfig";
+import { SidebarProvider, useSidebar } from "@/components/layout/useSidebar";
 import { AppShell } from "@/components/layout/shell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -20,22 +21,55 @@ function isActivePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isCollapsed, toggleCollapsed } = useSidebar();
 
   return (
     <AppShell area="admin">
       <div className="hidden md:block">
-        <aside className="fixed inset-y-0 left-0 z-30 flex w-72 flex-col border-r bg-card/85 px-4 py-4 backdrop-blur">
-          <Link href="/admin" className="flex h-12 items-center gap-2 px-2" aria-label="Admin home">
-            <Image src="/logo.png" alt="AI Genius Lab" width={156} height={34} className="h-8 w-auto object-contain" priority />
-            <span className="inline-flex items-center gap-1 rounded-full border bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
-              <ShieldCheck className="h-3 w-3" />
-              Admin
-            </span>
-          </Link>
+        <aside
+          className={cn(
+            "fixed inset-y-0 left-0 z-30 flex flex-col overflow-hidden border-r bg-card/85 py-4 backdrop-blur transition-all duration-300",
+            isCollapsed ? "w-16 px-2" : "w-72 px-3"
+          )}
+        >
+          <div
+            className={cn(
+              "px-2",
+              isCollapsed ? "flex flex-col items-center gap-2 py-1" : "flex h-12 items-center justify-between"
+            )}
+          >
+            <Link
+              href="/admin"
+              className={cn("flex min-w-0 items-center", isCollapsed ? "justify-center" : "gap-2")}
+              aria-label="Admin home"
+            >
+              <Image
+                src="/logo.png"
+                alt="AI Genius Lab"
+                width={156}
+                height={34}
+                className={cn("h-8 object-contain transition-all duration-300", isCollapsed ? "w-8" : "w-auto")}
+                priority
+              />
+              {!isCollapsed ? (
+                <span className="inline-flex items-center gap-1 rounded-full border bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                  <ShieldCheck className="h-3 w-3" />
+                  Admin
+                </span>
+              ) : null}
+            </Link>
+            <button
+              onClick={toggleCollapsed}
+              className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+              aria-label="Toggle sidebar"
+            >
+              {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            </button>
+          </div>
 
           <nav className="mt-5 flex-1 space-y-1 overflow-y-auto pr-1">
             {adminNavigation.map((item) => {
@@ -46,22 +80,26 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  title={isCollapsed ? item.name : undefined}
                   className={cn(
-                    "group flex items-center gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 text-sm font-medium",
+                    "group flex items-center rounded-[var(--radius-sm)] py-2.5 text-sm font-medium transition-colors",
+                    isCollapsed ? "justify-center px-2" : "gap-3 px-3",
                     active
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
                   <Icon className="h-4 w-4" />
-                  {item.name}
+                  <span className={isCollapsed ? "sr-only" : ""}>{item.name}</span>
                 </Link>
               );
             })}
           </nav>
 
           <div className="mt-3 space-y-2 border-t pt-4">
-            <p className="px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Customer preview</p>
+            {!isCollapsed ? (
+              <p className="px-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Customer preview</p>
+            ) : null}
             <div className="space-y-1">
               {customerPreviewLinks.map((item) => {
                 const Icon = item.icon;
@@ -70,11 +108,15 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                     key={item.href}
                     href={`${item.href}?preview=true`}
                     target="_blank"
-                    className="inline-flex w-full items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    title={isCollapsed ? item.name : undefined}
+                    className={cn(
+                      "inline-flex w-full items-center rounded-[var(--radius-sm)] py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                      isCollapsed ? "justify-center px-2" : "gap-2 px-3"
+                    )}
                   >
                     <Icon className="h-4 w-4" />
-                    {item.name}
-                    <Eye className="ml-auto h-3.5 w-3.5" />
+                    <span className={isCollapsed ? "sr-only" : ""}>{item.name}</span>
+                    {!isCollapsed ? <Eye className="ml-auto h-3.5 w-3.5" /> : null}
                   </Link>
                 );
               })}
@@ -82,25 +124,31 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="mt-4 space-y-3 border-t pt-4">
-            <Link href="/admin/profile" className="ui-surface glass flex items-center gap-3 rounded-[var(--radius-md)] border p-3">
+            <Link
+              href="/admin/profile"
+              className={cn(
+                "ui-surface glass flex rounded-[var(--radius-md)] border",
+                isCollapsed ? "justify-center p-2" : "items-center gap-3 p-3"
+              )}
+            >
               <Avatar className="h-9 w-9">
                 <AvatarImage src={session?.user?.image || undefined} alt={session?.user?.name || session?.user?.email || "Admin"} />
                 <AvatarFallback>{(session?.user?.name?.[0] || session?.user?.email?.[0] || "A").toUpperCase()}</AvatarFallback>
               </Avatar>
-              <div className="min-w-0">
+              <div className={cn("min-w-0", isCollapsed && "sr-only")}>
                 <p className="truncate text-sm font-semibold">{session?.user?.name || "Admin"}</p>
                 <p className="truncate text-xs text-muted-foreground">Administrator</p>
               </div>
             </Link>
 
-            <div className="flex items-center justify-between">
+            <div className={cn("flex items-center", isCollapsed ? "justify-center" : "justify-between")}>
               <ThemeToggle />
-              <SignOutButton className="h-9 w-auto px-3" />
+              {!isCollapsed ? <SignOutButton className="h-9 w-auto px-3" /> : null}
             </div>
           </div>
         </aside>
 
-        <div className="pl-72">
+        <div className={cn("transition-all duration-300", isCollapsed ? "pl-16" : "pl-72")}>
           <header className="sticky top-0 z-20 border-b border-border/80 bg-background/90 backdrop-blur">
             <div className="mx-auto flex h-14 w-full max-w-7xl items-center px-6">
               <p className="font-display text-base font-semibold tracking-tight">Admin Workspace</p>
@@ -193,5 +241,13 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
         <Footer />
       </div>
     </AppShell>
+  );
+}
+
+export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </SidebarProvider>
   );
 }
