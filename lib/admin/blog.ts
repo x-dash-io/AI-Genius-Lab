@@ -1,5 +1,5 @@
 import { prisma, withRetry } from "@/lib/prisma";
-import { estimateReadTime } from "../blog";
+import { estimateReadTime } from "../read-time";
 import type { Prisma } from "@prisma/client";
 
 export async function getAllPosts() {
@@ -85,7 +85,7 @@ export async function updatePost(
   const { tags, ...otherData } = data;
   const updateData: Prisma.BlogPostUpdateInput = { ...otherData };
 
-  if (data.content) {
+  if (data.content !== undefined) {
     updateData.readTimeMinutes = estimateReadTime(data.content);
   }
 

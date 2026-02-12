@@ -11,6 +11,7 @@ import { getSignedCloudinaryUrl } from "@/lib/cloudinary";
 import { BlogReviewSection } from "@/components/blog/BlogReviewSection";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,9 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     description: post.excerpt || undefined,
     url: `/blog/${post.slug}`,
     type: "article",
-    image: post.featuredImage ? getSignedCloudinaryUrl(post.featuredImage, "image") || undefined : undefined,
+    image: post.featuredImage
+      ? getSignedCloudinaryUrl(post.featuredImage, "image") || post.featuredImage || undefined
+      : undefined,
   });
 }
 
@@ -45,6 +48,14 @@ async function BlogPostContent({ slug }: { slug: string }) {
   // Increment views
   await incrementPostViews(post.id);
   revalidatePath("/blog");
+  const updated = await prisma.blogPost.findUnique({
+    where: { id: post.id },
+    select: { views: true },
+  });
+
+  const featuredImageUrl = post.featuredImage
+    ? getSignedCloudinaryUrl(post.featuredImage, "image") || post.featuredImage || ""
+    : "";
 
   return (
     <article className="max-w-4xl mx-auto py-12">
@@ -79,15 +90,15 @@ async function BlogPostContent({ slug }: { slug: string }) {
           </div>
           <div className="flex items-center gap-2">
             <Eye className="h-4 w-4" />
-            <span>{post.views + 1} views</span>
+            <span>{updated?.views ?? post.views} views</span>
           </div>
         </div>
       </div>
 
-      {post.featuredImage && (
+      {featuredImageUrl && (
         <div className="aspect-video relative rounded-2xl overflow-hidden mb-12 shadow-xl border bg-muted">
           <Image
-            src={getSignedCloudinaryUrl(post.featuredImage, "image") || ""}
+            src={featuredImageUrl}
             alt={post.title}
             fill
             className="object-cover"

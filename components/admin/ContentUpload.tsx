@@ -20,6 +20,7 @@ interface ContentUploadProps {
 
 type UploadResponse = {
   publicId?: string;
+  secureUrl?: string;
   error?: string;
 };
 
@@ -44,6 +45,14 @@ export function ContentUpload({
   const [url, setUrl] = useState("");
   const [manualId, setManualId] = useState(value || "");
   const [isDragOver, setIsDragOver] = useState(false);
+
+  const resolveUploadValue = (data: UploadResponse): string | null => {
+    if (returnUrl) {
+      return data.secureUrl || data.publicId || null;
+    }
+
+    return data.publicId || null;
+  };
 
   const handleFileUpload = async () => {
     if (!file) {
@@ -88,11 +97,12 @@ export function ContentUpload({
         throw new Error(data.error || "Upload failed");
       }
 
-      if (!data.publicId) {
+      const uploadValue = resolveUploadValue(data);
+      if (!uploadValue) {
         throw new Error("Upload failed: missing asset id");
       }
 
-      onChange(data.publicId);
+      onChange(uploadValue);
       setFile(null);
 
       // Success toast
@@ -143,11 +153,12 @@ export function ContentUpload({
         throw new Error(data.error || "Upload failed");
       }
 
-      if (!data.publicId) {
+      const uploadValue = resolveUploadValue(data);
+      if (!uploadValue) {
         throw new Error("Upload failed: missing asset id");
       }
 
-      onChange(data.publicId);
+      onChange(uploadValue);
       setUrl("");
 
       // Success toast

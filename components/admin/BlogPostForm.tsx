@@ -285,6 +285,7 @@ export function BlogPostForm({ initialData }: { initialData?: BlogPostFormInitia
                       contentType="image"
                       value={value}
                       onChange={onChange}
+                      returnUrl={true}
                     />
                   )}
                 />

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { getHomepageStats } from "@/lib/homepage-stats";
 import { getFeaturedTestimonials } from "@/lib/testimonials";
+import { getHeroLogos, defaultHeroLogos } from "@/lib/settings";
 import { PageContainer, StatusRegion } from "@/components/layout/shell";
 import Link from "next/link";
 
@@ -45,16 +46,24 @@ export default async function LandingPage() {
     rating: number;
     text: string;
   }> = [];
+  let heroLogos: Awaited<ReturnType<typeof getHeroLogos>> = [];
 
   try {
-    const [statsResult, testimonialsResult] = await Promise.all([
+    const [statsResult, testimonialsResult, heroLogosResult] = await Promise.all([
       getHomepageStats(),
       getFeaturedTestimonials(),
+      getHeroLogos(),
     ]);
     stats = statsResult;
     testimonials = testimonialsResult;
+    heroLogos = heroLogosResult;
   } catch (error) {
     console.error("Failed to fetch homepage data:", error);
+    heroLogos = defaultHeroLogos;
+  }
+
+  if (!heroLogos || !heroLogos.some((logo) => logo.visible)) {
+    heroLogos = defaultHeroLogos;
   }
 
   const featuredCourses = Array.from(
@@ -84,6 +93,7 @@ export default async function LandingPage() {
         }}
         featuredCourses={featuredCourses}
         testimonials={testimonials}
+        heroLogos={heroLogos}
       />
 
       <StatusRegion>

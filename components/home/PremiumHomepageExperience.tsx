@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { CourseProductCard } from "@/components/courses/CourseProductCard";
+import HeroLogosCarousel from "@/components/home/HeroLogosCarousel";
 import { ContentRegion, StatusRegion, Toolbar } from "@/components/layout/shell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { HeroLogo } from "@/lib/settings";
 
 const HERO_TYPED_PHRASES = [
   "Hands-on AI skills",
@@ -63,6 +65,7 @@ interface PremiumHomepageExperienceProps {
   metrics: HomepageMetrics;
   featuredCourses: FeaturedCourse[];
   testimonials: Testimonial[];
+  heroLogos: HeroLogo[];
 }
 
 function formatMetricValue(value: number, fallback: string) {
@@ -273,9 +276,11 @@ export function PremiumHomepageExperience({
   metrics,
   featuredCourses,
   testimonials,
+  heroLogos,
 }: PremiumHomepageExperienceProps) {
   const reduceMotion = Boolean(useReducedMotion());
   const sectionMotion = getSectionMotion(reduceMotion);
+  const visibleHeroLogos = useMemo(() => heroLogos.filter((logo) => logo.visible), [heroLogos]);
 
   const heroMotion = reduceMotion
     ? {}
@@ -371,6 +376,24 @@ export function PremiumHomepageExperience({
                   </div>
                 ))}
               </div>
+
+              {visibleHeroLogos.length > 0 && (
+                <m.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="pt-8 sm:pt-10"
+                >
+                  <p className="mb-4 text-center text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground/50">
+                    Trusted by professionals at
+                  </p>
+                  <HeroLogosCarousel
+                    logos={visibleHeroLogos}
+                    direction="right"
+                    speed={20}
+                  />
+                </m.div>
+              )}
             </div>
 
             <ProductPreviewCard metrics={metrics} />

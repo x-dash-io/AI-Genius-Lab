@@ -85,55 +85,61 @@ async function BlogContent({ searchParams }: BlogPageProps) {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {posts.map((post: BlogPost) => (
-              <Link key={post.id} href={`/blog/${post.slug}`}>
-                <Card className="h-full overflow-hidden hover:shadow-lg transition-all group flex flex-col">
-                  <div className="aspect-video relative bg-muted overflow-hidden">
-                    {post.featuredImage ? (
-                      <Image
-                        src={getSignedCloudinaryUrl(post.featuredImage, "image") || ""}
-                        alt={post.title}
-                        fill
-                        className="object-cover transition-transform group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <Newspaper className="h-12 w-12 text-muted-foreground/20" />
-                      </div>
-                    )}
-                  </div>
-                  <CardHeader className="flex-none">
-                    <div className="flex gap-2 mb-2 flex-wrap">
-                      {post.tags.slice(0, 3).map((tag) => (
-                        <Badge key={tag.id} variant="secondary" className="text-[10px]">
-                          {tag.name}
-                        </Badge>
-                      ))}
+            {posts.map((post: BlogPost) => {
+              const imageUrl = post.featuredImage
+                ? getSignedCloudinaryUrl(post.featuredImage, "image") || post.featuredImage || ""
+                : "";
+
+              return (
+                <Link key={post.id} href={`/blog/${post.slug}`}>
+                  <Card className="h-full overflow-hidden hover:shadow-lg transition-all group flex flex-col">
+                    <div className="aspect-video relative bg-muted overflow-hidden">
+                      {imageUrl ? (
+                        <Image
+                          src={imageUrl}
+                          alt={post.title}
+                          fill
+                          className="object-cover transition-transform group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full">
+                          <Newspaper className="h-12 w-12 text-muted-foreground/20" />
+                        </div>
+                      )}
                     </div>
-                    <CardTitle className="line-clamp-2 group-hover:text-primary transition-colors">{post.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex-1 flex flex-col">
-                    <p className="text-muted-foreground text-sm line-clamp-3 mb-4 flex-1">
-                      {post.excerpt || "Read more about this article..."}
-                    </p>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground mt-4 pt-4 border-t">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {format(new Date(post.createdAt), "MMM d, yyyy")}
+                    <CardHeader className="flex-none">
+                      <div className="flex gap-2 mb-2 flex-wrap">
+                        {post.tags.slice(0, 3).map((tag) => (
+                          <Badge key={tag.id} variant="secondary" className="text-[10px]">
+                            {tag.name}
+                          </Badge>
+                        ))}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {post.readTimeMinutes} min read
+                      <CardTitle className="line-clamp-2 group-hover:text-primary transition-colors">{post.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1 flex flex-col">
+                      <p className="text-muted-foreground text-sm line-clamp-3 mb-4 flex-1">
+                        {post.excerpt || "Read more about this article..."}
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground mt-4 pt-4 border-t">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {format(new Date(post.createdAt), "MMM d, yyyy")}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {post.readTimeMinutes} min read
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Eye className="h-3 w-3" />
+                          {post.views}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Eye className="h-3 w-3" />
-                        {post.views}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>
