@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { getSignedCloudinaryUrl } from "@/lib/cloudinary";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+import BlogHero from "@/components/blog/BlogHero";
 
 export const dynamic = "force-dynamic";
 
@@ -142,23 +143,23 @@ async function BlogContent({ searchParams }: BlogPageProps) {
 
 export default async function BlogPage({ searchParams }: BlogPageProps) {
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl font-display">
-          AI Genius Blog
-        </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Explore the latest in AI, education, and technology.
-        </p>
-      </div>
+    <>
+      <BlogHero
+        title="AI Genius Blog"
+        subtitle="Explore the latest in AI, education, and technology."
+      />
 
-      <Suspense fallback={
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="px-5">
+        <div className="space-y-8 max-w-7xl mx-auto">
+          <Suspense fallback={
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          }>
+            <BlogContent searchParams={searchParams} />
+          </Suspense>
         </div>
-      }>
-        <BlogContent searchParams={searchParams} />
-      </Suspense>
-    </div>
+      </div>
+    </>
   );
 }

@@ -7,12 +7,12 @@ import { signIn, useSession } from "next-auth/react";
 import {
   AlertCircle,
   BadgeCheck,
-  Chrome,
   MailCheck,
   ShieldCheck,
 } from "lucide-react";
 
 import { AuthCard, AuthHelpAccordion, type AuthStep } from "@/components/auth/AuthCard";
+import { GoogleLogoIcon } from "@/components/auth/GoogleLogoIcon";
 import { AuthPageLayout } from "@/components/auth/AuthPageLayout";
 import { OTPInput } from "@/components/auth/OTPInput";
 import { PasswordField } from "@/components/auth/PasswordField";
@@ -350,7 +350,7 @@ export default function SignUpPage() {
                 </span>
               ) : (
                 <>
-                  <Chrome className="h-4 w-4" />
+                  <GoogleLogoIcon />
                   Continue with Google
                 </>
               )}

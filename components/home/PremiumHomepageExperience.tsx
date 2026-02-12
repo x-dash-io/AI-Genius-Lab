@@ -103,20 +103,20 @@ function HeroTypedPhrase({ phrase, reduceMotion }: { phrase: string; reduceMotio
   const [typedValue, setTypedValue] = useState("");
 
   useEffect(() => {
-    if (reduceMotion) {
-      return;
-    }
-
+    if (reduceMotion) return;
     let frame = 0;
+    let direction = 1;
     const timer = window.setInterval(() => {
-      frame += 1;
-      setTypedValue(phrase.slice(0, frame));
-
-      if (frame >= phrase.length) {
-        window.clearInterval(timer);
+      frame += direction;
+      if (frame > phrase.length) {
+        // once fully typed, reset after a short pause by deleting letters
+        direction = -phrase.length;
+      } else if (frame <= 0) {
+        // begin typing again
+        direction = 1;
       }
-    }, 44);
-
+      setTypedValue(phrase.slice(0, Math.max(frame, 0)));
+    }, 60);
     return () => window.clearInterval(timer);
   }, [phrase, reduceMotion]);
 
@@ -135,7 +135,13 @@ function HeroTypedPhrase({ phrase, reduceMotion }: { phrase: string; reduceMotio
   );
 }
 
-function ProductPreviewCard() {
+function ProductPreviewCard({ metrics }: { metrics: HomepageMetrics }) {
+  const activeLearners = metrics.totalStudents || 0;
+  const coursesInPlay = metrics.totalCourses || 0;
+  const [weeklyActivity] = useState(() =>
+    Array.from({ length: 7 }, () => Math.min(100, Math.round(Math.random() * 100)))
+  );
+
   return (
     <Card className="ui-surface supports-hover-card overflow-hidden border">
       <CardHeader className="space-y-3 border-b bg-muted/35 pb-4">
@@ -165,17 +171,17 @@ function ProductPreviewCard() {
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-[var(--radius-sm)] border bg-background p-3">
                 <p className="text-xs text-muted-foreground">Active learners</p>
-                <p className="mt-1 text-lg font-semibold">124</p>
+                <p className="mt-1 text-lg font-semibold">{activeLearners}</p>
               </div>
               <div className="rounded-[var(--radius-sm)] border bg-background p-3">
                 <p className="text-xs text-muted-foreground">Courses in play</p>
-                <p className="mt-1 text-lg font-semibold">18</p>
+                <p className="mt-1 text-lg font-semibold">{coursesInPlay}</p>
               </div>
             </div>
             <div className="rounded-[var(--radius-sm)] border bg-background p-3">
               <p className="text-xs text-muted-foreground">Weekly activity</p>
               <div className="mt-3 grid grid-cols-7 items-end gap-1.5">
-                {[44, 58, 37, 71, 63, 86, 75].map((value, index) => (
+                {weeklyActivity.map((value, index) => (
                   <span
                     key={`preview-overview-${index}`}
                     className="rounded-full bg-primary/65"
@@ -333,7 +339,7 @@ export function PremiumHomepageExperience({
               </div>
             </div>
 
-            <ProductPreviewCard />
+            <ProductPreviewCard metrics={metrics} />
           </div>
         </m.section>
 

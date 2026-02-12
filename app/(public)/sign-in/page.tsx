@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
-import { AlertCircle, CheckCircle2, Chrome, ShieldCheck, WalletCards } from "lucide-react";
+import { AlertCircle, CheckCircle2, ShieldCheck, WalletCards } from "lucide-react";
 
 import { AuthCard, AuthHelpAccordion } from "@/components/auth/AuthCard";
+import { GoogleLogoIcon } from "@/components/auth/GoogleLogoIcon";
 import { AuthPageLayout } from "@/components/auth/AuthPageLayout";
 import { PasswordField } from "@/components/auth/PasswordField";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -170,7 +171,7 @@ export default function SignInPage() {
                 </span>
               ) : (
                 <>
-                  <Chrome className="h-4 w-4" />
+                  <GoogleLogoIcon />
                   Continue with Google
                 </>
               )}
