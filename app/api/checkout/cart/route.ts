@@ -6,6 +6,10 @@ import { createPayPalOrder } from "@/lib/paypal";
 import { isAdmin } from "@/lib/access";
 import { getCartFromCookies } from "@/lib/cart/utils";
 
+function generateId(prefix: string) {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -108,20 +112,25 @@ export async function POST(request: NextRequest) {
     // Pro-rating: itemPrice - (itemPrice / totalOriginalPrice * totalDiscount)
     const totalOriginalPrice = coursesToPurchase.reduce((sum, c) => sum + c.priceCents, 0);
 
+    const purchaseDrafts = coursesToPurchase.map((course) => {
+      let amountToPay = course.priceCents;
+      let itemDiscount = 0;
+
+      if (discountTotal > 0 && totalOriginalPrice > 0) {
+        const ratio = course.priceCents / totalOriginalPrice;
+        itemDiscount = Math.round(discountTotal * ratio);
+        amountToPay = Math.max(0, course.priceCents - itemDiscount);
+      }
+
+      return { course, amountToPay, itemDiscount };
+    });
+
+    const totalAmountCents = purchaseDrafts.reduce((sum, draft) => sum + draft.amountToPay, 0);
+
     // Create purchases
     const purchases = await Promise.all(
-      coursesToPurchase.map((course) => {
-        const purchaseId = `purchase_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-
-        let amountToPay = course.priceCents;
-        let itemDiscount = 0;
-        if (discountTotal > 0 && totalOriginalPrice > 0) {
-          const ratio = course.priceCents / totalOriginalPrice;
-          itemDiscount = Math.round(discountTotal * ratio);
-          amountToPay = Math.max(0, course.priceCents - itemDiscount);
-        }
-
-        return prisma.purchase.upsert({
+      purchaseDrafts.map(({ course, amountToPay, itemDiscount }) =>
+        prisma.purchase.upsert({
           where: {
             userId_courseId: {
               userId: session.user.id,
@@ -131,8 +140,9 @@ export async function POST(request: NextRequest) {
           update: {
             status: "pending",
             provider: "paypal",
+            providerRef: null,
             amountCents: amountToPay,
-            couponId: coupon?.id, // Link coupon
+            couponId: coupon?.id,
             priceOriginalCents: course.priceCents,
             priceDiscountCents: itemDiscount,
             pricingSnapshot: {
@@ -147,7 +157,7 @@ export async function POST(request: NextRequest) {
             },
           },
           create: {
-            id: purchaseId,
+            id: generateId("purchase"),
             userId: session.user.id,
             courseId: course.id,
             amountCents: amountToPay,
@@ -168,9 +178,107 @@ export async function POST(request: NextRequest) {
               finalPriceCents: amountToPay,
             },
           },
-        });
-      })
+        })
+      )
     );
+
+    const courseMap = new Map(coursesToPurchase.map((course) => [course.id, course]));
+
+    if (totalAmountCents === 0) {
+      await Promise.all(
+        purchases.map(async (purchase) => {
+          const purchasedCourse = courseMap.get(purchase.courseId);
+
+          await prisma.purchase.update({
+            where: { id: purchase.id },
+            data: {
+              status: "paid",
+              provider: "free",
+              providerRef: null,
+              amountCents: 0,
+            },
+          });
+
+          if (purchasedCourse && purchasedCourse.inventory !== null) {
+            await prisma.course.updateMany({
+              where: {
+                id: purchasedCourse.id,
+                inventory: { gt: 0 },
+              },
+              data: {
+                inventory: {
+                  decrement: 1,
+                },
+              },
+            });
+          }
+
+          await prisma.enrollment.upsert({
+            where: {
+              userId_courseId: {
+                userId: purchase.userId,
+                courseId: purchase.courseId,
+              },
+            },
+            update: { purchaseId: purchase.id },
+            create: {
+              id: generateId("enrollment"),
+              userId: purchase.userId,
+              courseId: purchase.courseId,
+              purchaseId: purchase.id,
+            },
+          });
+
+          const existingPaidPayment = await prisma.payment.findFirst({
+            where: {
+              purchaseId: purchase.id,
+              status: "paid",
+            },
+          });
+
+          if (!existingPaidPayment) {
+            await prisma.payment.create({
+              data: {
+                id: generateId("payment"),
+                userId: purchase.userId,
+                purchaseId: purchase.id,
+                provider: "free",
+                providerRef: null,
+                amountCents: 0,
+                currency: purchase.currency,
+                status: "paid",
+              },
+            });
+          }
+
+          await prisma.activityLog.create({
+            data: {
+              id: generateId("activity"),
+              userId: purchase.userId,
+              type: "purchase_completed",
+              metadata: {
+                purchaseId: purchase.id,
+                courseId: purchase.courseId,
+                courseTitle: purchasedCourse?.title ?? "Course",
+                courseSlug: purchasedCourse?.slug ?? "",
+              },
+            },
+          });
+
+          try {
+            const { trackPurchase } = await import("@/lib/analytics");
+            trackPurchase(purchase.courseId, 0, purchase.userId);
+          } catch (error) {
+            console.error("Failed to track free cart purchase analytics:", error);
+          }
+        })
+      );
+
+      const purchasesQuery = purchases.map((purchase) => purchase.id).join(",");
+      return NextResponse.json({
+        redirectUrl: `/purchase/success?purchases=${purchasesQuery}`,
+      });
+    }
 
     // Increment coupon usage if used (optimistic usage count, finalized on webhook?)
     // Actually, we should probably increment usage ONLY when paid. 
@@ -180,8 +288,6 @@ export async function POST(request: NextRequest) {
     // However, validation 'usedCount' check earlier might fail if many pending. 
     // For now, let's leave incrementing to the payment success handler (webhook).
 
-    const totalAmountCents = purchases.reduce((sum, purchase) => sum + purchase.amountCents, 0);
-    // Sanity check against finalTotal
     // Total might differ slightly due to rounding, but it's what we are charging.
 
     const purchaseIds = purchases.map((purchase) => purchase.id).join(",");

@@ -21,6 +21,7 @@ export function CheckoutCartForm({ items, couponCode, discountAmount }: Checkout
 
   const totalCents = items.reduce((sum, item) => sum + item.priceCents, 0);
   const finalTotalCents = Math.max(0, totalCents - (discountAmount || 0));
+  const isFreeCart = finalTotalCents === 0;
 
   const handleCheckout = async () => {
     setIsSubmitting(true);
@@ -39,10 +40,12 @@ export function CheckoutCartForm({ items, couponCode, discountAmount }: Checkout
         throw new Error(data.error || "Failed to start checkout");
       }
 
-      if (data.approvalUrl) {
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+      } else if (data.approvalUrl) {
         window.location.href = data.approvalUrl;
       } else {
-        throw new Error("No PayPal approval URL received");
+        throw new Error("No redirect URL received");
       }
     } catch (error) {
       const errorMessage =
@@ -138,7 +141,9 @@ export function CheckoutCartForm({ items, couponCode, discountAmount }: Checkout
               ) : (
                 <>
                   <ShoppingCart className="h-4 w-4 mr-2" />
-                  Pay with PayPal · ${(finalTotalCents / 100).toFixed(2)}
+                  {isFreeCart
+                    ? "Enroll for Free"
+                    : `Pay with PayPal · $${(finalTotalCents / 100).toFixed(2)}`}
                 </>
               )}
             </Button>

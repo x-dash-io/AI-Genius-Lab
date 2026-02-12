@@ -309,6 +309,7 @@ enum LessonContentType {
 enum PaymentProvider {
   stripe
   paypal
+  free
 }
 
 enum PurchaseStatus {

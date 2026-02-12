@@ -25,6 +25,10 @@ type CheckoutPageProps = {
   searchParams: Promise<{ course?: string; items?: string; checkout?: string }>;
 };
 
+function generateId(prefix: string) {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+}
+
 async function createCheckoutSession(formData: FormData) {
   "use server";
 
@@ -60,6 +64,113 @@ async function createCheckoutSession(formData: FormData) {
     where: { userId: session.user.id, courseId: course.id },
   });
 
+  if (course.priceCents === 0) {
+    if (existingPurchase?.status === "paid") {
+      redirect(`/library/${course.slug}`);
+    }
+
+    const paidPurchase =
+      existingPurchase
+        ? await prisma.purchase.update({
+            where: { id: existingPurchase.id },
+            data: {
+              amountCents: 0,
+              currency: "usd",
+              status: "paid",
+              provider: "free",
+              providerRef: null,
+            },
+          })
+        : await prisma.purchase.create({
+            data: {
+              id: generateId("purchase"),
+              userId: session.user.id,
+              courseId: course.id,
+              amountCents: 0,
+              currency: "usd",
+              status: "paid",
+              provider: "free",
+            },
+          });
+
+    if (course.inventory !== null) {
+      const inventoryUpdate = await prisma.course.updateMany({
+        where: {
+          id: course.id,
+          inventory: { gt: 0 },
+        },
+        data: {
+          inventory: { decrement: 1 },
+        },
+      });
+
+      if (inventoryUpdate.count === 0) {
+        redirect(`/courses/${course.slug}?checkout=failed`);
+      }
+    }
+
+    await prisma.enrollment.upsert({
+      where: {
+        userId_courseId: {
+          userId: paidPurchase.userId,
+          courseId: paidPurchase.courseId,
+        },
+      },
+      update: { purchaseId: paidPurchase.id },
+      create: {
+        id: generateId("enrollment"),
+        userId: paidPurchase.userId,
+        courseId: paidPurchase.courseId,
+        purchaseId: paidPurchase.id,
+      },
+    });
+
+    const existingPaidPayment = await prisma.payment.findFirst({
+      where: {
+        purchaseId: paidPurchase.id,
+        status: "paid",
+      },
+    });
+
+    if (!existingPaidPayment) {
+      await prisma.payment.create({
+        data: {
+          id: generateId("payment"),
+          userId: paidPurchase.userId,
+          purchaseId: paidPurchase.id,
+          provider: "free",
+          providerRef: null,
+          amountCents: 0,
+          currency: "usd",
+          status: "paid",
+        },
+      });
+    }
+
+    await prisma.activityLog.create({
+      data: {
+        id: generateId("activity"),
+        userId: paidPurchase.userId,
+        type: "purchase_completed",
+        metadata: {
+          purchaseId: paidPurchase.id,
+          courseId: paidPurchase.courseId,
+          courseTitle: course.title,
+          courseSlug: course.slug,
+        },
+      },
+    });
+
+    try {
+      const { trackPurchase } = await import("@/lib/analytics");
+      trackPurchase(course.id, 0, paidPurchase.userId);
+    } catch (error) {
+      console.error("Failed to track free purchase analytics:", error);
+    }
+
+    redirect(`/purchase/success?purchase=${paidPurchase.id}`);
+  }
+
   if (existingPurchase?.status === "paid") {
     redirect(`/library/${course.slug}`);
   }
@@ -68,7 +179,7 @@ async function createCheckoutSession(formData: FormData) {
     existingPurchase ??
     (await prisma.purchase.create({
       data: {
-        id: `purchase_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+        id: generateId("purchase"),
         userId: session.user.id,
         courseId: course.id,
         amountCents: course.priceCents,
@@ -292,4 +403,3 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
     </PageContainer>
   );
 }
-

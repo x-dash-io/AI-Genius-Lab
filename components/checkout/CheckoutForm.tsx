@@ -21,6 +21,7 @@ export function CheckoutForm({
 }: CheckoutFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const isFree = priceCents === 0;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -69,7 +70,7 @@ export function CheckoutForm({
             Processing...
           </>
         ) : (
-          `Pay with PayPal · $${(priceCents / 100).toFixed(2)}`
+          isFree ? "Enroll for Free" : `Pay with PayPal · $${(priceCents / 100).toFixed(2)}`
         )}
       </Button>
     </form>
