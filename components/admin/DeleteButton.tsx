@@ -20,7 +20,7 @@ interface DeleteButtonProps {
     id: string;
     title: string;
     description?: string;
-    onDelete: (id: string) => Promise<any>;
+    onDelete: (id: string) => Promise<unknown>;
     disabled?: boolean;
 }
 
@@ -43,10 +43,11 @@ export function DeleteButton({
                 `${title} has been successfully deleted.`
             );
             setOpen(false);
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Something went wrong.";
             toastError(
                 "Error",
-                error.message || "Something went wrong."
+                message
             );
             setOpen(false); // Close dialog even on error to reset
         } finally {

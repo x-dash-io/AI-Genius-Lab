@@ -74,20 +74,25 @@ async function LearningPathEditContent({ pathId }: { pathId: string }) {
     notFound();
   }
 
+  type LearningPathCourse = (typeof pathData.courses)[number];
+
   // Transform the data to match expected format
   const path = {
     ...pathData,
-    courses: (pathData.courses || []).map((lpc: any) => ({
-      ...lpc,
-      courseId: lpc.Course.id,
-      course: lpc.Course,
+    courses: (pathData.courses || []).map((learningPathCourse: LearningPathCourse) => ({
+      ...learningPathCourse,
+      courseId: learningPathCourse.Course.id,
+      course: learningPathCourse.Course,
     })),
   };
 
+  type PathCourseItem = (typeof path.courses)[number];
+  type AvailableCourse = (typeof allCourses)[number];
+
   // Get courses not already in the path
-  const pathCourseIds = new Set(path.courses.map((pc: any) => pc.courseId));
+  const pathCourseIds = new Set(path.courses.map((pathCourse: PathCourseItem) => pathCourse.courseId));
   const availableCourses = allCourses.filter(
-    (course: any) => !pathCourseIds.has(course.id)
+    (course: AvailableCourse) => !pathCourseIds.has(course.id)
   );
 
   return (

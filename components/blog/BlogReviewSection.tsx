@@ -11,9 +11,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import Link from "next/link";
 
+type BlogReview = {
+  id: string;
+  userId: string;
+  rating: number;
+  text: string | null;
+  createdAt: string | Date;
+  User: {
+    name: string | null;
+    image: string | null;
+  };
+};
+
 interface BlogReviewSectionProps {
   postId: string;
-  reviews: any[];
+  reviews: BlogReview[];
 }
 
 export function BlogReviewSection({ postId, reviews: initialReviews }: BlogReviewSectionProps) {
@@ -51,7 +63,8 @@ export function BlogReviewSection({ postId, reviews: initialReviews }: BlogRevie
       };
 
       setReviews(prev => {
-        const filtered = prev.filter(r => r.userId !== (session.user as any).id);
+        const userId = (session.user as { id?: string }).id;
+        const filtered = prev.filter((review) => review.userId !== userId);
         return [newReview, ...filtered];
       });
 

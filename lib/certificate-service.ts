@@ -4,12 +4,21 @@ import { logger } from "@/lib/logger";
 import { hasCompletedCourse } from "@/lib/certificates";
 import { generateCourseCertificate } from "@/lib/certificates";
 
+type CertificateGenerationResult = {
+  success: boolean;
+  message: string;
+  certificateId?: string;
+  newlyGenerated?: boolean;
+  isCompleted?: boolean;
+  error?: string;
+};
+
 // In-memory cache to track ongoing certificate generation attempts
 // In production, this should be replaced with Redis or similar
 const certificateGenerationCache = new Map<string, {
   isGenerating: boolean;
   timestamp: number;
-  promise?: Promise<any>;
+  promise?: Promise<CertificateGenerationResult>;
 }>();
 
 // Cache expiration time (5 minutes)
@@ -83,13 +92,7 @@ export async function checkAndGenerateCertificate(userId: string, courseId: stri
 async function generateCertificateWithDeduplication(
   userId: string,
   courseId: string
-): Promise<{
-  success: boolean;
-  message: string;
-  certificateId?: string;
-  newlyGenerated?: boolean;
-  error?: string;
-}> {
+): Promise<CertificateGenerationResult> {
   try {
     const certificate = await generateCourseCertificate(courseId);
     logger.info(`Certificate generated successfully: userId=${userId}, courseId=${courseId}, certificateId=${certificate.certificateId}`);

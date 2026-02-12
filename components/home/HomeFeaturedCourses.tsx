@@ -4,9 +4,10 @@ import { CourseList } from "@/components/courses/CourseList";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
+import type { ComponentProps } from "react";
 
 interface HomeFeaturedCoursesProps {
-    courses: any[];
+    courses: ComponentProps<typeof CourseList>["courses"];
 }
 
 export function HomeFeaturedCourses({ courses }: HomeFeaturedCoursesProps) {

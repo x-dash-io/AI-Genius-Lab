@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback, useState, useTransition, useEffect } from "react";
+import { useCallback, useTransition } from "react";
 import { SearchInput } from "@/components/ui/search-input";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,28 +22,8 @@ export function PurchaseFilters() {
   const currentSearch = searchParams.get("search") || "";
   const currentStatus = searchParams.get("status") || "all";
   const currentProvider = searchParams.get("provider") || "all";
-  
-  const [status, setStatus] = useState(currentStatus);
-  const [provider, setProvider] = useState(currentProvider);
-  
-  // Track if we're actively filtering (user initiated action)
-  const [isFiltering, setIsFiltering] = useState(false);
-
-  // Sync state with URL params when they change externally
-  useEffect(() => {
-    setStatus(currentStatus);
-    setProvider(currentProvider);
-  }, [currentStatus, currentProvider]);
-
-  // Reset filtering state when transition completes
-  useEffect(() => {
-    if (!isPending) {
-      setIsFiltering(false);
-    }
-  }, [isPending]);
 
   const handleSearch = useCallback((value: string) => {
-    setIsFiltering(true);
     startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
       if (value) {
@@ -56,8 +36,6 @@ export function PurchaseFilters() {
   }, [router, pathname, searchParams]);
 
   const handleStatusChange = useCallback((value: string) => {
-    setStatus(value);
-    setIsFiltering(true);
     startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
       if (value && value !== "all") {
@@ -70,8 +48,6 @@ export function PurchaseFilters() {
   }, [router, pathname, searchParams]);
 
   const handleProviderChange = useCallback((value: string) => {
-    setProvider(value);
-    setIsFiltering(true);
     startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
       if (value && value !== "all") {
@@ -84,16 +60,13 @@ export function PurchaseFilters() {
   }, [router, pathname, searchParams]);
 
   const handleClearAll = useCallback(() => {
-    setStatus("all");
-    setProvider("all");
-    setIsFiltering(true);
     startTransition(() => {
       router.push(pathname);
     });
   }, [router, pathname]);
 
   const hasFilters = currentSearch || currentStatus !== "all" || currentProvider !== "all";
-  const showLoading = isPending && isFiltering;
+  const showLoading = isPending;
 
   return (
     <div className="space-y-4">
@@ -107,7 +80,7 @@ export function PurchaseFilters() {
             debounceMs={400}
           />
         </div>
-        <Select value={status} onValueChange={handleStatusChange}>
+        <Select value={currentStatus} onValueChange={handleStatusChange}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
@@ -118,7 +91,7 @@ export function PurchaseFilters() {
             <SelectItem value="refunded">Refunded</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={provider} onValueChange={handleProviderChange}>
+        <Select value={currentProvider} onValueChange={handleProviderChange}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="All Providers" />
           </SelectTrigger>

@@ -20,6 +20,12 @@ interface AddToCartButtonProps {
   tier?: "STANDARD" | "PREMIUM";
 }
 
+type ActiveSubscription = {
+  plan?: {
+    tier?: string | null;
+  } | null;
+} | null;
+
 export function AddToCartButton({
   courseId,
   courseSlug,
@@ -36,7 +42,7 @@ export function AddToCartButton({
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [isOwned, setIsOwned] = useState(false);
-  const [subscription, setSubscription] = useState<any>(null);
+  const [subscription, setSubscription] = useState<ActiveSubscription>(null);
   const [isCheckingOwnership, setIsCheckingOwnership] = useState(checkOwnership);
 
   // Check ownership if enabled
@@ -54,13 +60,13 @@ export function AddToCartButton({
         ]);
 
         if (ownershipRes.ok) {
-          const data = await ownershipRes.json();
-          setIsOwned(data.owned);
+          const data = (await ownershipRes.json()) as { owned?: boolean };
+          setIsOwned(data.owned === true);
         }
 
         if (subRes.ok) {
-          const data = await subRes.json();
-          setSubscription(data.subscription);
+          const data = (await subRes.json()) as { subscription?: ActiveSubscription };
+          setSubscription(data.subscription ?? null);
         }
       } catch (error) {
         console.error("Failed to check ownership:", error);

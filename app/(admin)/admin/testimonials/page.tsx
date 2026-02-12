@@ -4,11 +4,13 @@ import { getAllTestimonials } from "@/lib/admin/testimonials";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, MessageSquare } from "lucide-react";
 import { TestimonialList } from "@/components/admin/TestimonialList";
+import type { Testimonial } from "@/lib/testimonials";
 
 export const dynamic = "force-dynamic";
 
 async function TestimonialsContent() {
     const testimonials = await getAllTestimonials();
+    type TestimonialItem = (typeof testimonials)[number];
 
     return (
         <div className="space-y-8">
@@ -25,20 +27,20 @@ async function TestimonialsContent() {
                         <div className="space-y-1">
                             <p className="text-sm text-muted-foreground">Featured</p>
                             <p className="text-2xl font-bold">
-                                {testimonials.filter((t: any) => t.featured).length}
+                                {testimonials.filter((testimonial: TestimonialItem) => testimonial.featured).length}
                             </p>
                         </div>
                         <div className="space-y-1">
                             <p className="text-sm text-muted-foreground">Drafts</p>
                             <p className="text-2xl font-bold">
-                                {testimonials.filter((t: any) => !t.featured).length}
+                                {testimonials.filter((testimonial: TestimonialItem) => !testimonial.featured).length}
                             </p>
                         </div>
                         <div className="space-y-1">
                             <p className="text-sm text-muted-foreground">Average Rating</p>
                             <p className="text-2xl font-bold">
                                 {testimonials.length > 0
-                                    ? (testimonials.reduce((sum: number, t: any) => sum + t.rating, 0) / testimonials.length).toFixed(1)
+                                    ? (testimonials.reduce((sum, testimonial: TestimonialItem) => sum + testimonial.rating, 0) / testimonials.length).toFixed(1)
                                     : "0.0"}
                             </p>
                         </div>
@@ -47,7 +49,7 @@ async function TestimonialsContent() {
             </Card>
 
             {/* Testimonial List */}
-            <TestimonialList initialTestimonials={testimonials as any} />
+            <TestimonialList initialTestimonials={testimonials as Testimonial[]} />
         </div>
     );
 }

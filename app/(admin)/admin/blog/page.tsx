@@ -14,6 +14,8 @@ export const dynamic = "force-dynamic";
 
 async function BlogPostsList() {
   const posts = await getAllPosts();
+  type BlogPost = (typeof posts)[number];
+  type BlogTag = BlogPost["tags"][number];
 
   if (posts.length === 0) {
     return (
@@ -33,7 +35,7 @@ async function BlogPostsList() {
 
   return (
     <div className="grid gap-4">
-      {posts.map((post: any) => (
+      {posts.map((post: BlogPost) => (
         <Card key={post.id}>
           <CardHeader className="p-4 sm:p-6">
             <div className="flex items-start justify-between gap-4">
@@ -59,7 +61,7 @@ async function BlogPostsList() {
                   <span>{post.readTimeMinutes} min read</span>
                 </div>
                 <div className="flex gap-1 mt-2 flex-wrap">
-                  {post.tags.map((tag: any) => (
+                  {post.tags.map((tag: BlogTag) => (
                     <Badge key={tag.id} variant="outline" className="text-[10px]">
                       {tag.name}
                     </Badge>

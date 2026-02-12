@@ -10,6 +10,7 @@ import { toast } from "@/lib/toast";
 import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 import { CategoryFormDialog } from "@/components/admin/CategoryFormDialog";
 import * as LucideIcons from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 type Category = {
   id: string;
@@ -27,6 +28,12 @@ type Category = {
 
 type CategoryListProps = {
   initialCategories: Category[];
+};
+
+type CategoryFormResult = Partial<Omit<Category, "createdAt" | "updatedAt">> & {
+  id: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 };
 
 export function CategoryList({ initialCategories }: CategoryListProps) {
@@ -146,7 +153,8 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
 
   const getCategoryIcon = (iconName: string | null) => {
     if (!iconName) return null;
-    const Icon = (LucideIcons as any)[iconName];
+    const iconRegistry = LucideIcons as unknown as Record<string, LucideIcon>;
+    const Icon = iconRegistry[iconName];
     return Icon ? <Icon className="h-5 w-5" /> : null;
   };
 
@@ -335,7 +343,7 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
       <CategoryFormDialog
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
-        onSuccess={(newCategory: any) => {
+        onSuccess={(newCategory?: CategoryFormResult) => {
           if (newCategory) {
             // Optimistic update - add to list immediately
             setCategories(prev => [...prev, {
@@ -363,7 +371,7 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
           open={!!editingCategory}
           onOpenChange={(open) => !open && setEditingCategory(null)}
           category={editingCategory}
-          onSuccess={(updatedCategory: any) => {
+          onSuccess={(updatedCategory?: CategoryFormResult) => {
             if (updatedCategory) {
               // Optimistic update - update in list immediately
               setCategories(prev => prev.map(c =>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
@@ -16,28 +16,20 @@ interface ReviewSectionProps {
   };
 }
 
+type UserReview = {
+  id: string;
+  rating: number;
+  text: string | null;
+} | null;
+
 export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
   const [showForm, setShowForm] = useState(false);
   const [stats, setStats] = useState(initialStats);
   const [currentUserId, setCurrentUserId] = useState<string | undefined>();
-  const [userReview, setUserReview] = useState<any>(null);
+  const [userReview, setUserReview] = useState<UserReview>(null);
   const [loadingStats, setLoadingStats] = useState(false);
 
-  useEffect(() => {
-    // Fetch current user session
-    fetch("/api/auth/session")
-      .then((res) => res.json())
-      .then((session) => {
-        if (session?.user?.id) {
-          setCurrentUserId(session.user.id);
-          fetchUserReview(session.user.id);
-        }
-      });
-
-    fetchStats();
-  }, [courseId]);
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     setLoadingStats(true);
     try {
       const response = await fetch(`/api/reviews/stats?courseId=${courseId}`);
@@ -48,9 +40,9 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
     } finally {
       setLoadingStats(false);
     }
-  };
+  }, [courseId]);
 
-  const fetchUserReview = async (userId: string) => {
+  const fetchUserReview = useCallback(async (userId: string) => {
     try {
       const response = await fetch(
         `/api/reviews/user?courseId=${courseId}&userId=${userId}`
@@ -62,7 +54,21 @@ export function ReviewSection({ courseId, initialStats }: ReviewSectionProps) {
     } catch (error) {
       console.error("Error fetching user review:", error);
     }
-  };
+  }, [courseId]);
+
+  useEffect(() => {
+    // Fetch current user session
+    fetch("/api/auth/session")
+      .then((res) => res.json())
+      .then((session) => {
+        if (session?.user?.id) {
+          setCurrentUserId(session.user.id);
+          void fetchUserReview(session.user.id);
+        }
+      });
+
+    void fetchStats();
+  }, [fetchStats, fetchUserReview]);
 
   const handleReviewSuccess = () => {
     setShowForm(false);

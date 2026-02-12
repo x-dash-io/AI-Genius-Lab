@@ -167,7 +167,16 @@ export async function uploadToCloudinary(
   } = options;
 
   return new Promise((resolve, reject) => {
-    const uploadOptions: any = {
+    const uploadOptions: {
+      folder: string;
+      resource_type: CloudinaryResourceType;
+      type: "upload";
+      use_filename: boolean;
+      unique_filename: boolean;
+      overwrite: boolean;
+      public_id?: string;
+      allowed_formats?: string[];
+    } = {
       folder,
       resource_type: resourceType,
       // Use type: "upload" (default) instead of "authenticated"
@@ -259,9 +268,14 @@ export async function checkCloudinaryResourceExists(
     const exists = !!result && result.public_id === publicId;
     existenceCache.set(cacheKey, { exists, checkedAt: Date.now() });
     return exists;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const cloudinaryError = error as {
+      http_code?: number;
+      error?: { message?: string };
+    };
+
     // If error indicates resource not found, cache as not exists
-    if (error?.http_code === 404 || error?.error?.message?.includes('not found')) {
+    if (cloudinaryError.http_code === 404 || cloudinaryError.error?.message?.includes("not found")) {
       existenceCache.set(cacheKey, { exists: false, checkedAt: Date.now() });
       return false;
     }

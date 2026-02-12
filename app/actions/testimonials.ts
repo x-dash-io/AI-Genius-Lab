@@ -4,7 +4,23 @@ import { prisma, withRetry } from "@/lib/prisma";
 import { requireRole } from "@/lib/access";
 import { revalidateTag } from "next/cache";
 
-export async function createTestimonial(data: any) {
+type TestimonialInput = {
+    name: string;
+    role: string;
+    avatar?: string | null;
+    rating: string | number;
+    text: string;
+    category?: string | null;
+    courseOrPath?: string | null;
+    date?: string | Date | null;
+    featured?: boolean;
+};
+
+function getErrorMessage(error: unknown) {
+    return error instanceof Error ? error.message : "Unknown error";
+}
+
+export async function createTestimonial(data: TestimonialInput) {
     try {
         await requireRole("admin");
 
@@ -14,7 +30,7 @@ export async function createTestimonial(data: any) {
                     name: data.name,
                     role: data.role,
                     avatar: data.avatar,
-                    rating: parseInt(data.rating) || 5,
+                    rating: Number.parseInt(String(data.rating), 10) || 5,
                     text: data.text,
                     category: data.category || "all",
                     courseOrPath: data.courseOrPath,
@@ -26,13 +42,13 @@ export async function createTestimonial(data: any) {
 
         revalidateTag("testimonials");
         return { success: true, data: testimonial };
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Failed to create testimonial:", error);
-        return { success: false, error: error.message };
+        return { success: false, error: getErrorMessage(error) };
     }
 }
 
-export async function updateTestimonial(id: string, data: any) {
+export async function updateTestimonial(id: string, data: TestimonialInput) {
     try {
         await requireRole("admin");
 
@@ -43,7 +59,7 @@ export async function updateTestimonial(id: string, data: any) {
                     name: data.name,
                     role: data.role,
                     avatar: data.avatar,
-                    rating: parseInt(data.rating) || 5,
+                    rating: Number.parseInt(String(data.rating), 10) || 5,
                     text: data.text,
                     category: data.category || "all",
                     courseOrPath: data.courseOrPath,
@@ -55,9 +71,9 @@ export async function updateTestimonial(id: string, data: any) {
 
         revalidateTag("testimonials");
         return { success: true, data: testimonial };
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Failed to update testimonial:", error);
-        return { success: false, error: error.message };
+        return { success: false, error: getErrorMessage(error) };
     }
 }
 
@@ -73,9 +89,9 @@ export async function deleteTestimonial(id: string) {
 
         revalidateTag("testimonials");
         return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Failed to delete testimonial:", error);
-        return { success: false, error: error.message };
+        return { success: false, error: getErrorMessage(error) };
     }
 }
 
@@ -92,8 +108,8 @@ export async function toggleTestimonialFeatured(id: string, featured: boolean) {
 
         revalidateTag("testimonials");
         return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Failed to toggle testimonial featured:", error);
-        return { success: false, error: error.message };
+        return { success: false, error: getErrorMessage(error) };
     }
 }

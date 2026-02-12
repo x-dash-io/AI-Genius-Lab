@@ -1,5 +1,6 @@
 import { prisma, withRetry } from "@/lib/prisma";
 import { estimateReadTime } from "../blog";
+import type { Prisma } from "@prisma/client";
 
 export async function getAllPosts() {
   return withRetry(async () => {
@@ -82,7 +83,7 @@ export async function updatePost(
   }
 ) {
   const { tags, ...otherData } = data;
-  const updateData: any = { ...otherData };
+  const updateData: Prisma.BlogPostUpdateInput = { ...otherData };
 
   if (data.content) {
     updateData.readTimeMinutes = estimateReadTime(data.content);
@@ -104,7 +105,7 @@ export async function updatePost(
   return withRetry(async () => {
     return prisma.blogPost.update({
       where: { id: postId },
-      data: updateData as any,
+      data: updateData,
     });
   });
 }

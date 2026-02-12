@@ -1,6 +1,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { defaultHeroLogos } from "@/lib/settings";
+import type { Prisma } from "@prisma/client";
 
 async function main() {
     console.log("Fixing broken logos in database...");
@@ -15,7 +16,7 @@ async function main() {
             await prisma.siteSettings.create({
                 data: {
                     key: "hero_logos",
-                    value: defaultHeroLogos as any, // Cast to any for JSON compatibility
+                    value: defaultHeroLogos as Prisma.JsonValue,
                 },
             });
             console.log("Created default hero_logos.");
@@ -24,7 +25,7 @@ async function main() {
             await prisma.siteSettings.update({
                 where: { key: "hero_logos" },
                 data: {
-                    value: defaultHeroLogos as any,
+                    value: defaultHeroLogos as Prisma.JsonValue,
                 },
             });
             console.log("Updated hero_logos to defaults.");

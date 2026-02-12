@@ -33,7 +33,18 @@ const formSchema = z.object({
   tags: z.string().optional(),
 });
 
-export function BlogPostForm({ initialData }: { initialData?: any }) {
+type BlogPostFormInitialData = {
+  id: string;
+  title?: string | null;
+  slug?: string | null;
+  content?: string | null;
+  excerpt?: string | null;
+  featuredImage?: string | null;
+  status?: "draft" | "published";
+  tags?: Array<{ name: string }>;
+};
+
+export function BlogPostForm({ initialData }: { initialData?: BlogPostFormInitialData }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -48,8 +59,13 @@ export function BlogPostForm({ initialData }: { initialData?: any }) {
     resolver: zodResolver(formSchema),
     defaultValues: initialData
       ? {
-        ...initialData,
-        tags: initialData.tags?.map((t: any) => t.name).join(", "),
+        title: initialData.title ?? "",
+        slug: initialData.slug ?? "",
+        content: initialData.content ?? "",
+        excerpt: initialData.excerpt ?? "",
+        featuredImage: initialData.featuredImage ?? "",
+        status: initialData.status ?? "draft",
+        tags: initialData.tags?.map((tag) => tag.name).join(", ") ?? "",
       }
       : {
         title: "",

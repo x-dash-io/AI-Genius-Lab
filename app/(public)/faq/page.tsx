@@ -37,7 +37,7 @@ export default function FAQPage() {
         <div className="text-center border-t pt-12">
           <h2 className="text-2xl font-bold mb-4">Still have questions?</h2>
           <p className="text-muted-foreground mb-6">
-            Can't find what you're looking for? We're here to help.
+            Can&apos;t find what you&apos;re looking for? We&apos;re here to help.
           </p>
           <Link href="/contact">
             <Button size="lg">

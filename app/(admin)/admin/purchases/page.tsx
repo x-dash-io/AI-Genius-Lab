@@ -24,36 +24,37 @@ interface AdminPurchasesPageProps {
 async function PurchaseList({ searchParams }: AdminPurchasesPageProps) {
   const params = await searchParams;
   const allPurchases = await getAllPurchases();
-  let purchases = [...allPurchases];
+  type PurchaseListItem = (typeof allPurchases)[number];
+  let purchases: PurchaseListItem[] = [...allPurchases];
 
   // Filter by status
   if (params.status && params.status !== "all") {
-    purchases = purchases.filter((p: any) => p.status === params.status);
+    purchases = purchases.filter((purchase) => purchase.status === params.status);
   }
 
   // Filter by provider
   if (params.provider && params.provider !== "all") {
-    purchases = purchases.filter((p: any) => p.provider === params.provider);
+    purchases = purchases.filter((purchase) => purchase.provider === params.provider);
   }
 
   // Search
   if (params.search) {
     const searchLower = params.search.toLowerCase();
     purchases = purchases.filter(
-      (p: any) =>
-        p.User.email.toLowerCase().includes(searchLower) ||
-        p.Course.title.toLowerCase().includes(searchLower) ||
-        p.User.name?.toLowerCase().includes(searchLower)
+      (purchase) =>
+        purchase.User.email.toLowerCase().includes(searchLower) ||
+        purchase.Course.title.toLowerCase().includes(searchLower) ||
+        purchase.User.name?.toLowerCase().includes(searchLower)
     );
   }
 
   const totalRevenue = purchases
-    .filter((p: any) => p.status === "paid")
-    .reduce((sum: number, p: any) => sum + p.amountCents, 0);
+    .filter((purchase) => purchase.status === "paid")
+    .reduce((sum, purchase) => sum + purchase.amountCents, 0);
 
   const allTimeTotalRevenue = allPurchases
-    .filter((p: any) => p.status === "paid")
-    .reduce((sum: number, p: any) => sum + p.amountCents, 0);
+    .filter((purchase) => purchase.status === "paid")
+    .reduce((sum, purchase) => sum + purchase.amountCents, 0);
 
   const totalPurchases = allPurchases.length;
   const filteredCount = purchases.length;
@@ -72,7 +73,7 @@ async function PurchaseList({ searchParams }: AdminPurchasesPageProps) {
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(totalRevenue)}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              From {purchases.filter((p: any) => p.status === "paid").length} paid purchases
+              From {purchases.filter((purchase) => purchase.status === "paid").length} paid purchases
             </p>
             {hasFilters && (
               <p className="text-xs text-muted-foreground">
@@ -85,12 +86,12 @@ async function PurchaseList({ searchParams }: AdminPurchasesPageProps) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {purchases.filter((p: any) => p.status === "pending").length}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Awaiting payment</p>
-          </CardContent>
+            <CardContent>
+              <div className="text-2xl font-bold">
+              {purchases.filter((purchase) => purchase.status === "pending").length}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Awaiting payment</p>
+            </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
@@ -143,7 +144,7 @@ async function PurchaseList({ searchParams }: AdminPurchasesPageProps) {
         </Card>
       ) : (
         <div className="grid gap-4">
-          {purchases.map((purchase: any) => (
+          {purchases.map((purchase) => (
             <Card key={purchase.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">

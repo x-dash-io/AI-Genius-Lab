@@ -14,6 +14,13 @@ interface VideoPlayerProps {
   onProgress?: (progress: number) => void;
 }
 
+type PlayerError = {
+  message: string;
+  adminActionRequired?: boolean;
+  code?: string;
+  source: string;
+};
+
 export function VideoPlayer({
   src,
   originalSrc,
@@ -22,11 +29,7 @@ export function VideoPlayer({
   allowDownload,
   onProgress,
 }: VideoPlayerProps) {
-  const [error, setError] = useState<{
-    message: string;
-    adminActionRequired?: boolean;
-    code?: string;
-  } | null>(null);
+  const [error, setError] = useState<PlayerError | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -68,10 +71,7 @@ export function VideoPlayer({
 
   // Always use the protected proxy endpoint for playback to keep inline behavior
   const mediaSrc = src;
-
-  useEffect(() => {
-    setError(null);
-  }, [mediaSrc]);
+  const activeError = error?.source === mediaSrc ? error : null;
 
   const mediaAttributes = useMemo(() => ({
     controls: true,
@@ -119,10 +119,11 @@ export function VideoPlayer({
   const handleError = () => {
     setError({
       message: "Failed to load content. The format might not be supported or the network connection failed.",
+      source: mediaSrc,
     });
   };
 
-  if (error) {
+  if (activeError) {
     return (
       <div className={cn(
         "relative w-full bg-muted rounded-xl overflow-hidden flex items-center justify-center border",
@@ -133,7 +134,7 @@ export function VideoPlayer({
             <AlertCircle className="h-8 w-8 text-destructive" />
           </div>
           <p className="text-lg font-semibold mb-2">Content Unavailable</p>
-          <p className="text-sm text-muted-foreground">{error.message}</p>
+          <p className="text-sm text-muted-foreground">{activeError.message}</p>
           {originalSrc && originalSrc.startsWith('http') && !originalSrc.includes('cloudinary.com') && (
             <div className="mt-4">
               <a 

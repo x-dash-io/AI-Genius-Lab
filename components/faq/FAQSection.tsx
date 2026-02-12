@@ -189,7 +189,7 @@ export function FAQSection() {
       {filteredData.length === 0 && (
         <div className="text-center py-12">
           <p className="text-muted-foreground">
-            No results found for "{searchQuery}". Try different keywords or{" "}
+            No results found for &quot;{searchQuery}&quot;. Try different keywords or{" "}
             <button
               onClick={() => setSearchQuery("")}
               className="text-primary hover:underline"

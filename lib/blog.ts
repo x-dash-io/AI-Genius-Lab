@@ -1,10 +1,11 @@
 import { prisma, withRetry } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 
 export async function getPublishedPosts(options: { tag?: string; search?: string } = {}) {
   const { tag, search } = options;
 
   // Construct where clause dynamically to avoid empty objects in AND array
-  const where: any = {
+  const where: Prisma.BlogPostWhereInput = {
     status: "published",
   };
 

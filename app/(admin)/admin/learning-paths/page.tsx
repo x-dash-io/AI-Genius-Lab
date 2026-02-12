@@ -11,13 +11,15 @@ export const dynamic = "force-dynamic";
 
 async function LearningPathsList() {
   const pathsData = await getAllLearningPaths();
+  type LearningPathData = (typeof pathsData)[number];
+  type LearningPathCourse = LearningPathData["courses"][number];
 
   // Transform the data to match expected format
-  const paths = pathsData.map((pathData: any) => ({
+  const paths = pathsData.map((pathData: LearningPathData) => ({
     ...pathData,
-    courses: (pathData.courses || []).map((lpc: any) => ({
-      ...lpc,
-      course: lpc.Course,
+    courses: (pathData.courses || []).map((learningPathCourse: LearningPathCourse) => ({
+      ...learningPathCourse,
+      course: learningPathCourse.Course,
     })),
     _count: {
       courses: pathData._count.courses,
@@ -37,7 +39,7 @@ async function LearningPathsList() {
 
   return (
     <div className="grid gap-4">
-      {paths.map((path: any) => (
+      {paths.map((path) => (
         <Card key={path.id}>
           <CardHeader>
             <div className="flex items-start justify-between">
@@ -69,7 +71,7 @@ async function LearningPathsList() {
               <div className="space-y-2">
                 <p className="text-sm font-medium">Courses in this path:</p>
                 <div className="flex flex-wrap gap-2">
-                  {path.courses.map((pathCourse: any) => (
+                  {path.courses.map((pathCourse) => (
                     <Badge
                       key={pathCourse.id}
                       variant={pathCourse.course.isPublished ? "default" : "secondary"}

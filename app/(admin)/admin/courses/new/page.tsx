@@ -40,9 +40,10 @@ async function createCourseAction(formData: FormData) {
     });
 
     return { course };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const prismaError = error as { code?: string; meta?: { target?: string[] } };
     // Handle Prisma unique constraint errors
-    if (error.code === 'P2002' && error.meta?.target?.includes('slug')) {
+    if (prismaError.code === "P2002" && prismaError.meta?.target?.includes("slug")) {
       return { error: `A course with the slug "${formData.get("slug")}" already exists. Please choose a different slug.` };
     }
 

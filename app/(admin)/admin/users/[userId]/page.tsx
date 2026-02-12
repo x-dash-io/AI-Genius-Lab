@@ -49,16 +49,20 @@ export default async function UserDetailPage({
   const user = await getUserById(userId);
 
   // Type assertion to ensure user has id property
-  const currentUserId = (session?.user as any)?.id;
+  const currentUserId = (session?.user as { id?: string } | undefined)?.id;
   const isCurrentUser = currentUserId === userId;
 
   if (!user) {
     notFound();
   }
 
+  type UserPurchase = (typeof user.purchases)[number];
+  type UserEnrollment = (typeof user.enrollments)[number];
+  type UserActivityLog = (typeof user.activityLogs)[number];
+
   const totalSpent = user.purchases
-    .filter((p: any) => p.status === "paid")
-    .reduce((sum: number, p: any) => sum + p.amountCents, 0);
+    .filter((purchase) => purchase.status === "paid")
+    .reduce((sum, purchase) => sum + purchase.amountCents, 0);
 
   return (
     <div className="space-y-8">
@@ -155,7 +159,7 @@ export default async function UserDetailPage({
             <p className="text-sm text-muted-foreground">No purchases yet.</p>
           ) : (
             <div className="space-y-4">
-              {user.purchases.map((purchase: any) => (
+              {user.purchases.map((purchase: UserPurchase) => (
                 <div
                   key={purchase.id}
                   className="flex items-center justify-between rounded-lg border p-4"
@@ -197,7 +201,7 @@ export default async function UserDetailPage({
             <p className="text-sm text-muted-foreground">No enrollments yet.</p>
           ) : (
             <div className="space-y-4">
-              {user.enrollments.map((enrollment: any) => (
+              {user.enrollments.map((enrollment: UserEnrollment) => (
                 <div
                   key={enrollment.id}
                   className="flex items-center justify-between rounded-lg border p-4"
@@ -233,7 +237,7 @@ export default async function UserDetailPage({
             <p className="text-sm text-muted-foreground">No recent activity.</p>
           ) : (
             <div className="space-y-2">
-              {user.activityLogs.map((log: any) => (
+              {user.activityLogs.map((log: UserActivityLog) => (
                 <div
                   key={log.id}
                   className="flex items-center justify-between rounded-lg border p-3"

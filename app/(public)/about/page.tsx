@@ -57,7 +57,7 @@ export default function AboutPage() {
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-              We're on a mission to make AI education accessible, practical, and transformative for everyone-from beginners to professionals looking to master the future of technology.
+              We&apos;re on a mission to make AI education accessible, practical, and transformative for everyone-from beginners to professionals looking to master the future of technology.
             </p>
           </div>
 

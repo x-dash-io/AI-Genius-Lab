@@ -26,7 +26,7 @@ export function SubscriptionPlanForm({
   saveAction,
 }: {
   initialData?: PlanFormData;
-  saveAction: (formData: FormData) => Promise<any>;
+  saveAction: (formData: FormData) => Promise<unknown>;
 }) {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
@@ -43,8 +43,9 @@ export function SubscriptionPlanForm({
       if (!initialData) {
         (e.target as HTMLFormElement).reset();
       }
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Unable to save plan.";
+      toast({ title: "Error", description: message, variant: "destructive" });
     } finally {
       setIsSaving(false);
     }

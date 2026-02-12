@@ -5,6 +5,17 @@ import { withErrorHandler } from "@/app/api/error-handler";
 import { AppError } from "@/lib/errors";
 import Papa from "papaparse";
 
+type CourseImportRow = {
+  id?: string;
+  slug?: string;
+  title?: string;
+  description?: string;
+  category?: string;
+  priceCents?: string;
+  inventory?: string;
+  isPublished?: string;
+};
+
 export const POST = withErrorHandler(async (request: NextRequest) => {
   await requireRole("admin");
 
@@ -23,7 +34,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
       skipEmptyLines: true,
       complete: async (results) => {
         try {
-          const coursesData = results.data as any[];
+          const coursesData = results.data as CourseImportRow[];
           const createdCourses = [];
           const errors = [];
 
@@ -61,8 +72,9 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
                 },
               });
               createdCourses.push(course.id);
-            } catch (err: any) {
-              errors.push({ row, error: err.message });
+            } catch (err: unknown) {
+              const message = err instanceof Error ? err.message : "Failed to import row";
+              errors.push({ row, error: message });
             }
           }
 
@@ -75,8 +87,9 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
           reject(error);
         }
       },
-      error: (error: any) => {
-        reject(AppError.badRequest(`CSV parsing error: ${error.message}`));
+      error: (error) => {
+        const parseError = error as { message?: string };
+        reject(AppError.badRequest(`CSV parsing error: ${parseError.message ?? "Unknown parser error"}`));
       }
     });
   });

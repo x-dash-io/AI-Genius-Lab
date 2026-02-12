@@ -173,7 +173,7 @@ export default function PrivacyPage() {
             <li>Right to be informed about data collection</li>
             <li>Right of access to your personal data</li>
             <li>Right to rectification of inaccurate data</li>
-            <li>Right to erasure ("right to be forgotten")</li>
+            <li>Right to erasure (&quot;right to be forgotten&quot;)</li>
             <li>Right to restrict processing</li>
             <li>Right to data portability</li>
             <li>Right to object to processing</li>
@@ -201,7 +201,7 @@ export default function PrivacyPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>10. Children's Privacy</CardTitle>
+          <CardTitle>10. Children&apos;s Privacy</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-muted-foreground">
           <p>
@@ -238,7 +238,7 @@ export default function PrivacyPage() {
         </CardHeader>
         <CardContent className="space-y-4 text-muted-foreground">
           <p>
-            We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date.
+            We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the &quot;Last updated&quot; date.
           </p>
           <p>
             You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.

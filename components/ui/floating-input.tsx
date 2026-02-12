@@ -16,7 +16,8 @@ const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputProps>(
   ({ className, label, placeholder, id, ...props }, ref) => {
     const [isFocused, setIsFocused] = React.useState(false);
     const [hasValue, setHasValue] = React.useState(false);
-    const inputId = id || `floating-input-${Math.random().toString(36).substr(2, 9)}`;
+    const generatedId = React.useId();
+    const inputId = id || generatedId;
     // Use label if provided, otherwise fall back to placeholder
     const displayLabel = label || placeholder;
 

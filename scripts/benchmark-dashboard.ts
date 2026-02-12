@@ -9,6 +9,13 @@ type Section = { lessons: Lesson[] };
 type Course = { sections: Section[] };
 type Purchase = { Course: Course };
 type Progress = { userId: string; lessonId: string; completedAt: Date | null; startedAt: Date | null; updatedAt: Date };
+type ProgressFindManyArgs = {
+  where: {
+    lessonId?: {
+      in?: string[];
+    };
+  };
+};
 
 // Mock Data
 const generateMockData = (count: number) => {
@@ -79,7 +86,7 @@ const pool = new Semaphore(CONNECTION_POOL_SIZE);
 // Mock Prisma
 const prismaMock = {
   progress: {
-    findMany: async (args: any) => {
+    findMany: async (args: ProgressFindManyArgs) => {
       await pool.acquire();
       try {
         await new Promise(resolve => setTimeout(resolve, SIMULATED_DB_LATENCY_MS));

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useCallback, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -23,13 +23,15 @@ import {
   Filter,
   Loader2,
   X,
-  ShieldAlert
+  ShieldAlert,
+  type LucideIcon,
 } from "lucide-react";
 import { formatDistanceToNow, format, subDays, subHours } from "date-fns";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/toast";
 import { useAdminPreview } from "@/components/admin/PreviewBanner";
+import { sampleCourses, sampleLessons } from "@/lib/config";
 import {
   ContentRegion,
   PageContainer,
@@ -43,7 +45,7 @@ export const dynamic = "force-dynamic";
 interface ActivityEntry {
   id: string;
   type: string;
-  metadata: any;
+  metadata: Record<string, string | number | boolean | null | undefined>;
   createdAt: Date;
 }
 
@@ -52,7 +54,7 @@ interface ActivityGroup {
   entries: ActivityEntry[];
 }
 
-const activityIcons: Record<string, any> = {
+const activityIcons: Record<string, LucideIcon> = {
   purchase_completed: ShoppingCart,
   lesson_completed: GraduationCap,
   course_started: BookOpen,
@@ -72,7 +74,6 @@ const activityLabels: Record<string, string> = {
 // Sample activity data for admin preview
 const getSampleActivityData = (): ActivityEntry[] => {
   const now = new Date();
-  const { sampleCourses, sampleLessons } = require("@/lib/config");
 
   return [
     {
@@ -168,41 +169,12 @@ export default function ActivityPage() {
   const [filter, setFilter] = useState<string>("all");
   const [isFiltering, startTransition] = useTransition();
   const [allActivityTypes, setAllActivityTypes] = useState<string[]>([]);
+  const hasLoadedActivityRef = useRef(false);
 
-  useEffect(() => {
-    if (isAdminPreview) {
-      // Use sample data for admin preview
-      const sampleData = getSampleActivityData();
-      setActivity(sampleData);
-      const types = Array.from(new Set(sampleData.map((a) => a.type))) as string[];
-      setAllActivityTypes(types);
-      setLoading(false);
-    } else {
-      fetchActivity();
-    }
-  }, [isAdminPreview]);
-
-  useEffect(() => {
-    if (!loading && !isAdminPreview) {
-      startTransition(() => {
-        fetchActivity();
-      });
-    } else if (isAdminPreview && filter !== "all") {
-      // Filter sample data for admin preview
-      const sampleData = getSampleActivityData();
-      const filtered = sampleData.filter(a => a.type === filter);
-      setActivity(filtered);
-    } else if (isAdminPreview && filter === "all") {
-      setActivity(getSampleActivityData());
-    }
-  }, [filter, isAdminPreview]);
-
-  const fetchActivity = async () => {
+  const fetchActivity = useCallback(async (showLoadingState: boolean) => {
     if (isAdminPreview) return; // Skip fetch for admin preview
 
-    if (!loading) {
-      // Don't set loading for filter changes, use isFiltering instead
-    } else {
+    if (showLoadingState) {
       setLoading(true);
     }
     setError(null);
@@ -219,12 +191,14 @@ export default function ActivityPage() {
       setActivity(data.activity || []);
 
       // Collect all unique activity types on initial load
-      if (loading && data.activity) {
+      if (!hasLoadedActivityRef.current && data.activity) {
         const types = Array.from(new Set(data.activity.map((a: ActivityEntry) => a.type))) as string[];
         setAllActivityTypes(types);
+        hasLoadedActivityRef.current = true;
       }
-    } catch (err: any) {
-      setError(err?.message || "Failed to load activity. Please check your database connection.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Failed to load activity. Please check your database connection.";
+      setError(message);
       toast({
         title: "Failed to load activity",
         description: "Please try refreshing the page.",
@@ -233,7 +207,31 @@ export default function ActivityPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, isAdminPreview]);
+
+  useEffect(() => {
+    if (isAdminPreview) {
+      // Use sample data for admin preview
+      const sampleData = getSampleActivityData();
+      const types = Array.from(new Set(sampleData.map((entry) => entry.type))) as string[];
+      const filtered = filter === "all" ? sampleData : sampleData.filter((entry) => entry.type === filter);
+      setAllActivityTypes(types);
+      setActivity(filtered);
+      setLoading(false);
+      hasLoadedActivityRef.current = true;
+      return;
+    }
+
+    const shouldShowLoadingState = !hasLoadedActivityRef.current;
+    if (shouldShowLoadingState) {
+      void fetchActivity(true);
+      return;
+    }
+
+    startTransition(() => {
+      void fetchActivity(false);
+    });
+  }, [filter, isAdminPreview, fetchActivity, startTransition]);
 
   const handleFilterChange = (value: string) => {
     setFilter(value);

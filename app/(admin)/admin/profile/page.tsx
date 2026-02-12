@@ -58,7 +58,7 @@ export default async function AdminProfilePage() {
   }
 
   // Type assertion to ensure user has id property
-  const userId = (session.user as any).id;
+  const userId = (session.user as { id?: string }).id;
   if (!userId) {
     redirect("/sign-in");
   }

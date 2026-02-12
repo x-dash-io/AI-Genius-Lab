@@ -20,7 +20,7 @@ export default function ContactPage() {
             Get in Touch
           </h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            Have questions about our courses? Need help with your account? We're here to help.
+            Have questions about our courses? Need help with your account? We&apos;re here to help.
           </p>
         </div>
 

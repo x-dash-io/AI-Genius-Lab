@@ -4,7 +4,19 @@
  */
 
 import { checkAndGenerateCertificate } from "@/lib/certificate-service";
-import { getCachedProgress, setCachedProgress, updateCachedLessonProgress } from "@/lib/progress-cache";
+import {
+  cleanupCertificateCache,
+  getCertificateCacheStatus,
+} from "@/lib/certificate-service";
+import {
+  cleanupProgressCache,
+  getCachedProgress,
+  getProgressCacheStats,
+  invalidateProgressCache,
+  invalidateUserProgressCache,
+  setCachedProgress,
+  updateCachedLessonProgress,
+} from "@/lib/progress-cache";
 import { validateRequestBody, progressUpdateSchema, certificateCheckSchema } from "@/lib/validation";
 
 // Mock dependencies
@@ -19,7 +31,6 @@ describe("Certificate & Progress Integration", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Clear caches
-    const { cleanupCertificateCache } = require("@/lib/certificate-service");
     cleanupCertificateCache();
   });
 
@@ -141,7 +152,6 @@ describe("Certificate & Progress Integration", () => {
       expect(getCachedProgress(userId, courseId)).toBeTruthy();
 
       // Invalidate specific course cache
-      const { invalidateProgressCache } = require("@/lib/progress-cache");
       invalidateProgressCache(userId, courseId);
       expect(getCachedProgress(userId, courseId)).toBeNull();
 
@@ -149,7 +159,6 @@ describe("Certificate & Progress Integration", () => {
       setCachedProgress(userId, courseId, progress);
       setCachedProgress(userId, "another-course", progress);
       
-      const { invalidateUserProgressCache } = require("@/lib/progress-cache");
       invalidateUserProgressCache(userId);
       expect(getCachedProgress(userId, courseId)).toBeNull();
       expect(getCachedProgress(userId, "another-course")).toBeNull();
@@ -184,9 +193,6 @@ describe("Certificate & Progress Integration", () => {
 
   describe("Cache Performance", () => {
     it("should provide cache statistics", () => {
-      const { getCertificateCacheStatus } = require("@/lib/certificate-service");
-      const { getProgressCacheStats } = require("@/lib/progress-cache");
-
       // Initially empty
       const certStats = getCertificateCacheStatus();
       expect(certStats.totalEntries).toBe(0);
@@ -199,9 +205,6 @@ describe("Certificate & Progress Integration", () => {
     });
 
     it("should handle cache cleanup", () => {
-      const { cleanupCertificateCache } = require("@/lib/certificate-service");
-      const { cleanupProgressCache } = require("@/lib/progress-cache");
-
       // Should not throw errors
       expect(() => cleanupCertificateCache()).not.toThrow();
       expect(() => cleanupProgressCache()).not.toThrow();

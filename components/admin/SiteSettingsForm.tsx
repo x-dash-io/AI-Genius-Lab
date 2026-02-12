@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toastSuccess, toastError } from "@/lib/toast";
@@ -54,7 +54,7 @@ const settingsSchema = z.object({
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 interface SiteSettingsFormProps {
-    initialSocialLinks: any; // Using any to handle migration from object to array
+    initialSocialLinks: SettingsFormValues["socialLinks"] | Record<string, string>;
     initialHeroLogos: SettingsFormValues['heroLogos'];
 }
 
@@ -99,44 +99,44 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
         name: "heroLogos",
     });
 
+    const watchedSettings = useWatch({ control: form.control });
+
     // Auto-save functionality
     useEffect(() => {
-        const subscription = form.watch((value) => {
-            const timer = setTimeout(() => {
-                if (JSON.stringify(value) !== JSON.stringify(lastSaved)) {
-                    startTransition(async () => {
-                        try {
-                            await Promise.all([
-                                updateSiteSettings("social_links", value.socialLinks),
-                                updateSiteSettings("hero_logos", (value.heroLogos || []).filter(Boolean))
-                            ]);
-                            setLastSaved({
-                                socialLinks: (value.socialLinks || []).filter((link): link is NonNullable<typeof link> => Boolean(link)).map(link => ({
-                                    id: link.id || `social-${Date.now()}`,
-                                    platform: link.platform || "web",
-                                    url: link.url || "#",
-                                    visible: link.visible !== undefined ? link.visible : true
-                                })),
-                                heroLogos: (value.heroLogos || []).filter((logo): logo is NonNullable<typeof logo> => Boolean(logo)).map(logo => ({
-                                    id: logo.id || `logo-${Date.now()}`,
-                                    name: logo.name || "",
-                                    type: logo.type || "image",
-                                    value: logo.value || "",
-                                    visible: logo.visible !== undefined ? logo.visible : true
-                                }))
-                            });
-                        } catch (error: unknown) {
-                            console.error("Auto-save failed:", error);
-                        }
+        const timer = setTimeout(() => {
+            if (!watchedSettings || JSON.stringify(watchedSettings) === JSON.stringify(lastSaved)) {
+                return;
+            }
+
+            startTransition(async () => {
+                try {
+                    await Promise.all([
+                        updateSiteSettings("social_links", watchedSettings.socialLinks),
+                        updateSiteSettings("hero_logos", (watchedSettings.heroLogos || []).filter(Boolean))
+                    ]);
+                    setLastSaved({
+                        socialLinks: (watchedSettings.socialLinks || []).filter((link): link is NonNullable<typeof link> => Boolean(link)).map((link) => ({
+                            id: link.id || `social-${Date.now()}`,
+                            platform: link.platform || "web",
+                            url: link.url || "#",
+                            visible: link.visible !== undefined ? link.visible : true
+                        })),
+                        heroLogos: (watchedSettings.heroLogos || []).filter((logo): logo is NonNullable<typeof logo> => Boolean(logo)).map((logo) => ({
+                            id: logo.id || `logo-${Date.now()}`,
+                            name: logo.name || "",
+                            type: logo.type || "image",
+                            value: logo.value || "",
+                            visible: logo.visible !== undefined ? logo.visible : true
+                        }))
                     });
+                } catch (error: unknown) {
+                    console.error("Auto-save failed:", error);
                 }
-            }, 2000); // Auto-save after 2 seconds of inactivity
+            });
+        }, 2000); // Auto-save after 2 seconds of inactivity
 
-            return () => clearTimeout(timer);
-        });
-
-        return () => subscription.unsubscribe();
-    }, [lastSaved, form]);
+        return () => clearTimeout(timer);
+    }, [lastSaved, startTransition, watchedSettings]);
 
     function onSubmit(data: SettingsFormValues) {
         startTransition(async () => {

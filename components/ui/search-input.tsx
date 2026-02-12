@@ -42,8 +42,12 @@ export function SearchInput({
 
   // Sync with external value changes (e.g., when URL changes)
   useEffect(() => {
-    setInternalValue(externalValue);
-    lastSearchedValue.current = externalValue;
+    const frame = window.requestAnimationFrame(() => {
+      setInternalValue(externalValue);
+      lastSearchedValue.current = externalValue;
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, [externalValue]);
 
   // Debounced search - only when value actually changes from what was last searched

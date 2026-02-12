@@ -39,7 +39,7 @@ export default async function VerifyCertificatePage({ params }: CertificatePageP
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 p-4 md:p-8">
       {/* Same content as parent */}
       <div className="max-w-4xl mx-auto">
-        <h1>{certificate.User.name}'s Certificate</h1>
+        <h1>{certificate.User.name}&apos;s Certificate</h1>
       </div>
     </div>
   );

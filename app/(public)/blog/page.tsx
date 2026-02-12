@@ -29,6 +29,8 @@ async function BlogContent({ searchParams }: BlogPageProps) {
     search: params.search 
   });
   const tags = await getBlogTags();
+  type BlogPost = (typeof posts)[number];
+  type BlogTag = (typeof tags)[number];
 
   return (
     <div className="flex flex-col md:flex-row gap-8">
@@ -55,7 +57,7 @@ async function BlogContent({ searchParams }: BlogPageProps) {
                 All
               </Badge>
             </Link>
-            {tags.map((tag: any) => (
+            {tags.map((tag: BlogTag) => (
               <Link key={tag.id} href={`/blog?tag=${tag.slug}`}>
                 <Badge 
                   variant={params.tag === tag.slug ? "default" : "outline"}
@@ -82,7 +84,7 @@ async function BlogContent({ searchParams }: BlogPageProps) {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {posts.map((post: any) => (
+            {posts.map((post: BlogPost) => (
               <Link key={post.id} href={`/blog/${post.slug}`}>
                 <Card className="h-full overflow-hidden hover:shadow-lg transition-all group flex flex-col">
                   <div className="aspect-video relative bg-muted overflow-hidden">
@@ -101,7 +103,7 @@ async function BlogContent({ searchParams }: BlogPageProps) {
                   </div>
                   <CardHeader className="flex-none">
                     <div className="flex gap-2 mb-2 flex-wrap">
-                      {post.tags.slice(0, 3).map((tag: any) => (
+                      {post.tags.slice(0, 3).map((tag) => (
                         <Badge key={tag.id} variant="secondary" className="text-[10px]">
                           {tag.name}
                         </Badge>

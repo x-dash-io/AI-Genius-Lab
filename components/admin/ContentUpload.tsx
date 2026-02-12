@@ -18,6 +18,13 @@ interface ContentUploadProps {
   returnUrl?: boolean;
 }
 
+const UPLOAD_METHODS = ["file", "url", "manual"] as const;
+type UploadMethod = (typeof UPLOAD_METHODS)[number];
+
+function isUploadMethod(value: string): value is UploadMethod {
+  return UPLOAD_METHODS.includes(value as UploadMethod);
+}
+
 export function ContentUpload({
   sectionId,
   contentType,
@@ -26,7 +33,7 @@ export function ContentUpload({
   onError,
   returnUrl = false,
 }: ContentUploadProps) {
-  const [uploadMethod, setUploadMethod] = useState<"file" | "url" | "manual">("file");
+  const [uploadMethod, setUploadMethod] = useState<UploadMethod>("file");
   const [uploading, setUploading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState("");
@@ -191,7 +198,14 @@ export function ContentUpload({
 
   return (
     <div className="space-y-4">
-      <Tabs value={uploadMethod} onValueChange={(v) => setUploadMethod(v as any)}>
+      <Tabs
+        value={uploadMethod}
+        onValueChange={(value) => {
+          if (isUploadMethod(value)) {
+            setUploadMethod(value);
+          }
+        }}
+      >
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="file">
             <Upload className="h-4 w-4 mr-2" />
@@ -319,7 +333,7 @@ export function ContentUpload({
               disabled={uploading}
             />
             <p className="text-xs text-muted-foreground">
-              Note: For YouTube videos, use the "Link" content type instead. This uploads the file from the URL to Cloudinary.
+              Note: For YouTube videos, use the &quot;Link&quot; content type instead. This uploads the file from the URL to Cloudinary.
             </p>
             <Button
               type="button"
@@ -352,7 +366,7 @@ export function ContentUpload({
               onChange={handleManualChange}
             />
             <p className="text-xs text-muted-foreground">
-              Enter the {returnUrl ? "full URL" : "Cloudinary public ID"} if you've already uploaded the file manually.
+              Enter the {returnUrl ? "full URL" : "Cloudinary public ID"} if you&apos;ve already uploaded the file manually.
             </p>
           </div>
         </TabsContent>

@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
  * Safely parse JSON response from fetch
  * Handles cases where server returns HTML error pages instead of JSON
  */
-export async function safeJsonParse(response: Response): Promise<any> {
+export async function safeJsonParse(response: Response): Promise<unknown> {
   const contentType = response.headers.get("content-type");
 
   // Check if response is actually JSON

@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const purchasedCourseIds = new Set(existingPurchases.map((p: any) => p.courseId));
-    const coursesToPurchase = courses.filter((c: any) => !purchasedCourseIds.has(c.id));
+    const purchasedCourseIds = new Set(existingPurchases.map((purchase) => purchase.courseId));
+    const coursesToPurchase = courses.filter((course) => !purchasedCourseIds.has(course.id));
 
     if (coursesToPurchase.length === 0) {
       return NextResponse.json(
@@ -90,14 +90,14 @@ export async function POST(request: NextRequest) {
 
     // Check inventory availability
     const outOfStockCourses = coursesToPurchase.filter(
-      (course: any) => course.inventory !== null && course.inventory <= 0
+      (course) => course.inventory !== null && course.inventory <= 0
     );
 
     if (outOfStockCourses.length > 0) {
       return NextResponse.json(
         {
-          error: `Some courses are out of stock: ${outOfStockCourses.map((c: any) => c.title).join(", ")}`,
-          outOfStock: outOfStockCourses.map((c: any) => c.id),
+          error: `Some courses are out of stock: ${outOfStockCourses.map((course) => course.title).join(", ")}`,
+          outOfStock: outOfStockCourses.map((course) => course.id),
         },
         { status: 400 }
       );
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
 
     // Create purchases
     const purchases = await Promise.all(
-      coursesToPurchase.map((course: any) => {
+      coursesToPurchase.map((course) => {
         const purchaseId = `purchase_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
         let amountToPay = course.priceCents;
@@ -180,11 +180,11 @@ export async function POST(request: NextRequest) {
     // However, validation 'usedCount' check earlier might fail if many pending. 
     // For now, let's leave incrementing to the payment success handler (webhook).
 
-    const totalAmountCents = purchases.reduce((sum: number, p: any) => sum + p.amountCents, 0);
+    const totalAmountCents = purchases.reduce((sum, purchase) => sum + purchase.amountCents, 0);
     // Sanity check against finalTotal
     // Total might differ slightly due to rounding, but it's what we are charging.
 
-    const purchaseIds = purchases.map((p: any) => p.id).join(",");
+    const purchaseIds = purchases.map((purchase) => purchase.id).join(",");
     const appUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
 
     const { orderId, approvalUrl } = await createPayPalOrder({
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
     // Update all purchases with order ID
     await prisma.purchase.updateMany({
       where: {
-        id: { in: purchases.map((p: any) => p.id) },
+        id: { in: purchases.map((purchase) => purchase.id) },
       },
       data: {
         providerRef: orderId,

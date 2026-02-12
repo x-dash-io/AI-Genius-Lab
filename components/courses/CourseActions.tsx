@@ -18,6 +18,12 @@ interface CourseActionsProps {
   inventory?: number | null;
 }
 
+type ActiveSubscription = {
+  plan?: {
+    tier?: string | null;
+  } | null;
+} | null;
+
 export function CourseActions({
   courseId,
   courseSlug,
@@ -29,7 +35,7 @@ export function CourseActions({
   const { addToCart, cart } = useCart();
   const { data: session, status } = useSession();
   const [isOwned, setIsOwned] = useState(false);
-  const [subscription, setSubscription] = useState<any>(null);
+  const [subscription, setSubscription] = useState<ActiveSubscription>(null);
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
@@ -49,13 +55,13 @@ export function CourseActions({
         ]);
 
         if (ownershipRes.ok) {
-          const data = await ownershipRes.json();
-          setIsOwned(data.owned);
+          const data = (await ownershipRes.json()) as { owned?: boolean };
+          setIsOwned(data.owned === true);
         }
 
         if (subRes.ok) {
-          const data = await subRes.json();
-          setSubscription(data.subscription);
+          const data = (await subRes.json()) as { subscription?: ActiveSubscription };
+          setSubscription(data.subscription ?? null);
         }
       } catch (error) {
         console.error("Failed to check ownership:", error);

@@ -29,6 +29,7 @@ async function main() {
             plan: { select: { name: true } }
         }
     });
+    type PendingSubscription = (typeof pendingSubscriptions)[number];
 
     console.log(`Found ${pendingSubscriptions.length} pending subscriptions to check.\n`);
 
@@ -36,7 +37,8 @@ async function main() {
     let stayedPendingCount = 0;
 
     for (const sub of pendingSubscriptions) {
-        const userEmail = (sub as any).user?.email || "Unknown User";
+        const typedSubscription = sub as PendingSubscription;
+        const userEmail = typedSubscription.user?.email || "Unknown User";
         process.stdout.write(`Checking subscription ${sub.id} for ${userEmail} (${sub.plan.name})... `);
 
         try {
@@ -49,8 +51,9 @@ async function main() {
                 console.log("Still pending");
                 stayedPendingCount++;
             }
-        } catch (error: any) {
-            console.log(`❌ ERROR: ${error.message}`);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Unknown error";
+            console.log(`❌ ERROR: ${message}`);
         }
     }
 

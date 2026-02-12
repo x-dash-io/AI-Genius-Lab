@@ -29,7 +29,7 @@ export default function TermsPage() {
         </CardHeader>
         <CardContent className="space-y-4 text-muted-foreground">
           <p>
-            By accessing and using AI Genius Lab ("the Platform"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms and Conditions, please do not use our services.
+            By accessing and using AI Genius Lab (&quot;the Platform&quot;), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms and Conditions, please do not use our services.
           </p>
         </CardContent>
       </Card>
@@ -47,7 +47,7 @@ export default function TermsPage() {
             <li>Use the materials for any commercial purpose or for any public display</li>
             <li>Attempt to reverse engineer any software contained on the Platform</li>
             <li>Remove any copyright or other proprietary notations from the materials</li>
-            <li>Transfer the materials to another person or "mirror" the materials on any other server</li>
+            <li>Transfer the materials to another person or &quot;mirror&quot; the materials on any other server</li>
           </ul>
         </CardContent>
       </Card>
@@ -147,7 +147,7 @@ export default function TermsPage() {
         </CardHeader>
         <CardContent className="space-y-4 text-muted-foreground">
           <p>
-            The materials on AI Genius Lab are provided on an 'as is' basis. AI Genius Lab makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
+            The materials on AI Genius Lab are provided on an &apos;as is&apos; basis. AI Genius Lab makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
           </p>
         </CardContent>
       </Card>
@@ -180,7 +180,7 @@ export default function TermsPage() {
         </CardHeader>
         <CardContent className="space-y-4 text-muted-foreground">
           <p>
-            AI Genius Lab has not reviewed all of the sites linked to our Platform and is not responsible for the contents of any such linked site. The inclusion of any link does not imply endorsement by AI Genius Lab. Use of any such linked website is at the user's own risk.
+            AI Genius Lab has not reviewed all of the sites linked to our Platform and is not responsible for the contents of any such linked site. The inclusion of any link does not imply endorsement by AI Genius Lab. Use of any such linked website is at the user&apos;s own risk.
           </p>
         </CardContent>
       </Card>

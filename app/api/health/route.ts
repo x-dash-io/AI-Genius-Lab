@@ -12,12 +12,13 @@ export const GET = withErrorHandler(async () => {
     // Check database connection
     await prisma.$queryRaw`SELECT 1`;
     return NextResponse.json({ status: "healthy" });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const maybeError = error as { digest?: string; message?: string };
     // Re-throw Next.js internal errors so withErrorHandler can handle them (bail out)
     if (
-      error.digest?.startsWith("NEXT_PRERENDER_") ||
-      error.message?.includes("DYNAMIC_SERVER_USAGE") ||
-      error.message?.includes("NEXT_PRERENDER_INTERRUPTED")
+      maybeError.digest?.startsWith("NEXT_PRERENDER_") ||
+      maybeError.message?.includes("DYNAMIC_SERVER_USAGE") ||
+      maybeError.message?.includes("NEXT_PRERENDER_INTERRUPTED")
     ) {
       throw error;
     }

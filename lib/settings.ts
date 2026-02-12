@@ -43,10 +43,10 @@ export async function getSiteSettings<T>(key: string, defaultValue: T): Promise<
 
 export const getSocialLinks = unstable_cache(
     async () => {
-        const links = await getSiteSettings<any>("social_links", defaultSocialLinks);
+        const links = await getSiteSettings<unknown>("social_links", defaultSocialLinks);
 
         // Migration logic: if it's the old object format
-        if (links && !Array.isArray(links) && typeof links === 'object') {
+        if (links && !Array.isArray(links) && typeof links === "object") {
             return Object.entries(links).map(([platform, url]) => ({
                 id: platform,
                 platform,
@@ -57,12 +57,15 @@ export const getSocialLinks = unstable_cache(
 
         // If it's already an array, ensure it matches SocialLink structure
         if (Array.isArray(links)) {
-            return links.map(link => ({
-                id: link.id || link.platform || `social-${Math.random()}`,
-                platform: link.platform || "web",
-                url: link.url || "#",
-                visible: link.visible !== undefined ? link.visible : true,
-            })) as SocialLink[];
+            return links.map((link) => {
+                const socialLink = link as Partial<SocialLink>;
+                return {
+                    id: socialLink.id || socialLink.platform || `social-${Math.random()}`,
+                    platform: socialLink.platform || "web",
+                    url: socialLink.url || "#",
+                    visible: socialLink.visible !== undefined ? socialLink.visible : true,
+                };
+            }) as SocialLink[];
         }
 
         return defaultSocialLinks;
@@ -73,14 +76,17 @@ export const getSocialLinks = unstable_cache(
 
 export const getHeroLogos = unstable_cache(
     async () => {
-        const logos = await getSiteSettings<any[]>("hero_logos", defaultHeroLogos);
-        return logos.map(logo => ({
-            ...logo,
-            id: logo.id || `logo-${Math.random()}`,
-            type: logo.type || "image",
-            value: logo.value || logo.url || "",
-            visible: logo.visible === true || logo.visible === "true" || logo.visible === undefined,
-        })) as HeroLogo[];
+        const logos = await getSiteSettings<unknown[]>("hero_logos", defaultHeroLogos);
+        return logos.map((logo) => {
+            const heroLogo = logo as Partial<HeroLogo> & { url?: string; visible?: boolean | string };
+            return {
+                ...heroLogo,
+                id: heroLogo.id || `logo-${Math.random()}`,
+                type: heroLogo.type || "image",
+                value: heroLogo.value || heroLogo.url || "",
+                visible: heroLogo.visible === true || heroLogo.visible === "true" || heroLogo.visible === undefined,
+            };
+        }) as HeroLogo[];
     },
     ["site_settings", "hero_logos"],
     { tags: ["site_settings"] }

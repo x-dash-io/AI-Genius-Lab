@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 async function CategoriesContent() {
   const categories = await getAllCategories();
+  type CategoryItem = (typeof categories)[number];
 
   return (
     <div className="space-y-8">
@@ -25,19 +26,19 @@ async function CategoriesContent() {
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Active</p>
               <p className="text-2xl font-bold">
-                {categories.filter((c: any) => c.isActive).length}
+                {categories.filter((category: CategoryItem) => category.isActive).length}
               </p>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Inactive</p>
               <p className="text-2xl font-bold">
-                {categories.filter((c: any) => !c.isActive).length}
+                {categories.filter((category: CategoryItem) => !category.isActive).length}
               </p>
             </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Total Courses</p>
               <p className="text-2xl font-bold">
-                {categories.reduce((sum: number, c: any) => sum + c.courseCount, 0)}
+                {categories.reduce((sum, category: CategoryItem) => sum + category.courseCount, 0)}
               </p>
             </div>
           </div>

@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/access";
 import { getUserSubscription } from "@/lib/subscriptions";
+import type { Prisma } from "@prisma/client";
 
 export async function getAllPublishedLearningPaths() {
   return prisma.learningPath.findMany({
@@ -251,7 +252,7 @@ export async function createLearningPathPurchasesCore(userId: string, pathId: st
     existingPurchases.map((p) => [p.courseId, p])
   );
 
-  const toCreate: any[] = [];
+  const toCreate: Prisma.PurchaseCreateManyInput[] = [];
   const toUpdateIds: string[] = [];
 
   for (const pc of coursesToPurchase) {

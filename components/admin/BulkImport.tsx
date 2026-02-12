@@ -7,10 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Upload, FileText, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { toastSuccess, toastError, toastWarning } from "@/lib/toast";
 
+type ImportError = {
+  error: string;
+  row: {
+    title?: string;
+  };
+};
+
 export function BulkImport() {
   const [file, setFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [result, setResult] = useState<{ importedCount: number; errors: any[] } | null>(null);
+  const [result, setResult] = useState<{ importedCount: number; errors: ImportError[] } | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -111,7 +118,7 @@ export function BulkImport() {
                   {result.errors.length} errors occurred:
                 </div>
                 <ul className="text-xs text-muted-foreground list-disc pl-6 max-h-32 overflow-y-auto">
-                  {result.errors.map((err, i) => (
+                  {result.errors.map((err: ImportError, i) => (
                     <li key={i}>
                       Row {i + 1}: {err.error} (Title: {err.row.title})
                     </li>

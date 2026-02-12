@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star, Edit2, Trash2, Loader2 } from "lucide-react";
@@ -36,11 +36,7 @@ export function ReviewList({ courseId, currentUserId }: ReviewListProps) {
   const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null);
   const { confirm } = useConfirmDialog();
 
-  useEffect(() => {
-    fetchReviews();
-  }, [courseId]);
-
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       const response = await fetch(`/api/reviews?courseId=${courseId}`);
       const data = await response.json();
@@ -55,7 +51,11 @@ export function ReviewList({ courseId, currentUserId }: ReviewListProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [courseId]);
+
+  useEffect(() => {
+    void fetchReviews();
+  }, [fetchReviews]);
 
   const handleDelete = async (reviewId: string) => {
     const confirmed = await confirm({
@@ -77,7 +77,7 @@ export function ReviewList({ courseId, currentUserId }: ReviewListProps) {
       });
 
       if (response.ok) {
-        setReviews(reviews.filter((r) => r.id !== reviewId));
+        setReviews((previousReviews) => previousReviews.filter((review) => review.id !== reviewId));
         toast({
           title: "Review deleted",
           description: "Your review has been removed.",

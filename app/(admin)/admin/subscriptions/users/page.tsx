@@ -47,10 +47,11 @@ async function SubscriptionsList() {
     },
     orderBy: { createdAt: "desc" }
   });
+  type SubscriptionItem = (typeof subscriptions)[number];
 
   return (
     <div className="space-y-4">
-      {subscriptions.map((sub: any) => (
+      {subscriptions.map((sub: SubscriptionItem) => (
         <Card key={sub.id}>
           <CardHeader>
             <div className="flex items-start justify-between">
@@ -111,6 +112,7 @@ async function SubscriptionsList() {
 
 async function GrantSubscriptionForm() {
   const plans = await prisma.subscriptionPlan.findMany({ where: { isActive: true } });
+  type ActivePlan = (typeof plans)[number];
 
   return (
     <Card>
@@ -131,8 +133,8 @@ async function GrantSubscriptionForm() {
                 <SelectValue placeholder="Select Plan" />
               </SelectTrigger>
               <SelectContent>
-                {plans.map((p: any) => (
-                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                {plans.map((plan: ActivePlan) => (
+                  <SelectItem key={plan.id} value={plan.id}>{plan.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

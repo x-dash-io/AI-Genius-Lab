@@ -21,6 +21,7 @@ export const metadata: Metadata = generateSEOMetadata({
 export default async function AdminDashboardPage() {
   await requireRole("admin");
   const stats = await getAdminStats();
+  type RecentPurchase = (typeof stats.recentPurchases)[number];
 
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -141,7 +142,7 @@ export default async function AdminDashboardPage() {
               </p>
             ) : (
               <div className="space-y-4">
-                {stats.recentPurchases.map((purchase: any) => (
+                {stats.recentPurchases.map((purchase: RecentPurchase) => (
                   <div
                     key={purchase.id}
                     className="flex items-center justify-between rounded-lg border p-4"

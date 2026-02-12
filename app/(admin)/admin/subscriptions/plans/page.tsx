@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireRole } from "@/lib/access";
 import { prisma } from "@/lib/prisma";
 import { syncSubscriptionPlansToPayPal } from "@/lib/subscriptions";
+import type { SubscriptionTier } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +30,7 @@ async function savePlanAction(formData: FormData) {
   const data = {
     name: formData.get("name") as string,
     description: formData.get("description") as string,
-    tier: formData.get("tier") as any,
+    tier: formData.get("tier") as SubscriptionTier,
     priceMonthlyCents: Math.round(parseFloat(formData.get("priceMonthly") as string) * 100),
     priceAnnualCents: Math.round(parseFloat(formData.get("priceAnnual") as string) * 100),
     isActive: formData.get("isActive") === "on",
@@ -48,10 +49,11 @@ async function PlansList() {
   const plans = await prisma.subscriptionPlan.findMany({
     orderBy: { tier: "asc" }
   });
+  type Plan = (typeof plans)[number];
 
   return (
     <div className="space-y-4">
-      {plans.map((plan: any) => (
+      {plans.map((plan: Plan) => (
         <Card key={plan.id}>
           <CardHeader>
             <div className="flex items-start justify-between">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Upload, X, Loader2, Link as LinkIcon } from "lucide-react";
 import { toastError, toastSuccess } from "@/lib/toast";
@@ -49,8 +50,9 @@ export function LogoImageUpload({ value, onChange, className }: LogoImageUploadP
             const data = await response.json();
             onChange(data.secureUrl);
             toastSuccess("Logo uploaded", "The image has been processed.");
-        } catch (error: any) {
-            toastError("Upload failed", error.message);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Upload failed";
+            toastError("Upload failed", message);
         } finally {
             setUploading(false);
         }
@@ -82,9 +84,12 @@ export function LogoImageUpload({ value, onChange, className }: LogoImageUploadP
             >
                 {value ? (
                     <>
-                        <img
+                        <Image
                             src={value}
                             alt="Logo Preview"
+                            fill
+                            unoptimized
+                            sizes="(max-width: 768px) 100vw, 480px"
                             className="h-full w-full object-contain p-4"
                         />
                         <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-2">

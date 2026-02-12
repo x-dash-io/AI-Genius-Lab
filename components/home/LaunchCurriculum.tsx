@@ -3,10 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, Video, Megaphone, Code, Zap, ShieldCheck, Sparkles } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { HomepageStats } from "@/lib/homepage-stats";
 
 // Default icon mapping for common category names
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, LucideIcon> = {
   business: DollarSign,
   content: Video,
   marketing: Megaphone,

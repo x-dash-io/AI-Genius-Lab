@@ -5,10 +5,9 @@ import { subscribe, getToasts, type Toast } from "@/lib/toast";
 import { ToastContainer } from "@/components/ui/toast";
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [toasts, setToasts] = useState<Toast[]>(() => getToasts());
 
   useEffect(() => {
-    setToasts(getToasts());
     const unsubscribe = subscribe(setToasts);
     return unsubscribe;
   }, []);

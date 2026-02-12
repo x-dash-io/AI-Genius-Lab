@@ -1,13 +1,13 @@
-const { spawn } = require("child_process");
+import { spawn } from "node:child_process";
 
 /**
  * Cross-platform wrapper for commands that need Prisma engine env vars.
  *
  * Usage:
- *   node scripts/with-prisma-engine.js next dev
- *   node scripts/with-prisma-engine.js next build
- *   node scripts/with-prisma-engine.js next start
- *   node scripts/with-prisma-engine.js prisma generate
+ *   node scripts/with-prisma-engine.mjs next dev
+ *   node scripts/with-prisma-engine.mjs next build
+ *   node scripts/with-prisma-engine.mjs next start
+ *   node scripts/with-prisma-engine.mjs prisma generate
  */
 
 const command = process.argv[2];
@@ -33,8 +33,13 @@ const child = spawn(command, args, {
 });
 
 child.on("exit", (code, signal) => {
-  if (typeof code === "number") process.exit(code);
-  if (signal) process.exit(1);
+  if (typeof code === "number") {
+    process.exit(code);
+  }
+
+  if (signal) {
+    process.exit(1);
+  }
+
   process.exit(1);
 });
-

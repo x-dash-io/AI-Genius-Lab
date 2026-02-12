@@ -112,7 +112,7 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
       <form onSubmit={handleVerifyChange} className="space-y-4">
         <div className="rounded-lg bg-muted p-4">
           <p className="text-sm text-muted-foreground">
-            We've sent a 6-digit verification code to <strong>{newEmail}</strong>.
+            We&apos;ve sent a 6-digit verification code to <strong>{newEmail}</strong>.
             Please enter it below to confirm your email change.
           </p>
         </div>

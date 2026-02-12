@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import type { JWT } from "next-auth/jwt";
-import type { Session, User, Account } from "next-auth";
+import type { Session, User, Account, Profile } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
@@ -65,7 +65,7 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }: { user: User; account: Account | null; profile?: any }) {
+    async signIn({ user, account, profile }: { user: User; account: Account | null; profile?: Profile | null }) {
       // For OAuth providers, handle account linking and role assignment
       if (account && account.provider !== "credentials" && user.email) {
         try {
@@ -77,7 +77,9 @@ export const authOptions = {
           if (existingUser) {
             // Check if this OAuth account is already linked
             const existingAccount = existingUser.Account?.find(
-              (acc: any) => acc.provider === account.provider && acc.providerAccountId === account.providerAccountId
+              (existingUserAccount) =>
+                existingUserAccount.provider === account.provider &&
+                existingUserAccount.providerAccountId === account.providerAccountId
             );
 
             if (!existingAccount) {

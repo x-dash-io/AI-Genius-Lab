@@ -18,13 +18,13 @@ export async function getCartFromCookies(): Promise<Cart> {
 
       // Handle legacy array format
       if (Array.isArray(parsed)) {
-        const normalizedItems = parsed.map((item: any) => ({
+        const normalizedItems = parsed.map((item: Partial<CartItem>) => ({
           ...item,
           quantity: item.quantity || 1,
           availableInventory: item.availableInventory ?? null,
-        }));
-        const totalCents = normalizedItems.reduce((sum: number, item: any) => sum + (item.priceCents || 0) * (item.quantity || 1), 0);
-        const itemCount = normalizedItems.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0);
+        })) as CartItem[];
+        const totalCents = normalizedItems.reduce((sum, item) => sum + (item.priceCents || 0) * (item.quantity || 1), 0);
+        const itemCount = normalizedItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
         return {
           items: normalizedItems,
           totalCents,

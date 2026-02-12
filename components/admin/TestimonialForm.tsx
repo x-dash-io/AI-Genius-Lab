@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -42,13 +42,19 @@ interface TestimonialFormProps {
 export function TestimonialForm({ open, onOpenChange, testimonial }: TestimonialFormProps) {
     const { handleCreate, handleUpdate, isPending } = useTestimonialActions();
     const [activeTab, setActiveTab] = useState<"content" | "settings">("content");
+    const handleOpenStateChange = (nextOpen: boolean) => {
+        if (!nextOpen) {
+            setActiveTab("content");
+        }
+        onOpenChange(nextOpen);
+    };
 
     const {
         register,
         handleSubmit,
         reset,
-        watch,
         setValue,
+        control,
         formState: { errors }
     } = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -92,7 +98,6 @@ export function TestimonialForm({ open, onOpenChange, testimonial }: Testimonial
                     date: new Date().toISOString().split("T")[0],
                 });
             }
-            setActiveTab("content");
         }
     }, [testimonial, reset, open]);
 
@@ -107,19 +112,19 @@ export function TestimonialForm({ open, onOpenChange, testimonial }: Testimonial
         } else {
             await handleCreate(data);
         }
-        onOpenChange(false);
+        handleOpenStateChange(false);
     };
 
-    if (!open) return null;
+    const featured = useWatch({ control, name: "featured" }) ?? false;
 
-    const featured = watch("featured");
+    if (!open) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200"
-                onClick={() => !isPending && onOpenChange(false)}
+                onClick={() => !isPending && handleOpenStateChange(false)}
             />
 
             {/* Modal content */}
@@ -138,7 +143,7 @@ export function TestimonialForm({ open, onOpenChange, testimonial }: Testimonial
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => onOpenChange(false)}
+                        onClick={() => handleOpenStateChange(false)}
                         disabled={isPending}
                         className="rounded-full hover:bg-primary/10 transition-colors"
                     >
@@ -242,7 +247,7 @@ export function TestimonialForm({ open, onOpenChange, testimonial }: Testimonial
                                     <div className="space-y-2">
                                         <Label htmlFor="courseOrPath" className="text-xs uppercase font-bold tracking-widest text-muted-foreground">Reference Label</Label>
                                         <Input id="courseOrPath" {...register("courseOrPath")} placeholder="Mastering LLM" className="rounded-xl" />
-                                        <p className="text-[10px] text-muted-foreground font-bold tracking-tight uppercase">Shown as "Ref: Master LLM"</p>
+                                        <p className="text-[10px] text-muted-foreground font-bold tracking-tight uppercase">Shown as &quot;Ref: Master LLM&quot;</p>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="date" className="text-xs uppercase font-bold tracking-widest text-muted-foreground">Submission Date</Label>

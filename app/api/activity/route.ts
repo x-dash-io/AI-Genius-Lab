@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { withErrorHandler } from "../error-handler";
 import { AppError } from "@/lib/errors";
+import type { Prisma } from "@prisma/client";
 
 export const GET = withErrorHandler(async (request: NextRequest) => {
   const session = await getServerSession(authOptions);
@@ -15,7 +16,7 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
     const type = searchParams.get("type");
     const limit = parseInt(searchParams.get("limit") || "50");
 
-    const where: any = { userId: session.user.id };
+    const where: Prisma.ActivityLogWhereInput = { userId: session.user.id };
     if (type && type !== "all") {
       where.type = type;
     }
@@ -28,9 +29,9 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
 
     // Fetch course information for purchase activities
     const enrichedActivity = await Promise.all(
-      activity.map(async (entry: any) => {
+      activity.map(async (entry) => {
         if (entry.type === "purchase_completed" && entry.metadata) {
-          const metadata = entry.metadata as any;
+          const metadata = entry.metadata as { courseId?: string; courseTitle?: string; courseSlug?: string };
           if (metadata.courseId) {
             try {
               const course = await prisma.course.findUnique({

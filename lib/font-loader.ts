@@ -11,6 +11,22 @@ export class FontLoader {
 
   private constructor() {}
 
+  private getExtendedStyle(element: HTMLElement): CSSStyleDeclaration & {
+    webkitFontSmoothing?: string;
+    MozOsxFontSmoothing?: string;
+    webkitTextSizeAdjust?: string;
+    MozTextSizeAdjust?: string;
+    textSizeAdjust?: string;
+  } {
+    return element.style as CSSStyleDeclaration & {
+      webkitFontSmoothing?: string;
+      MozOsxFontSmoothing?: string;
+      webkitTextSizeAdjust?: string;
+      MozTextSizeAdjust?: string;
+      textSizeAdjust?: string;
+    };
+  }
+
   static getInstance(): FontLoader {
     if (!FontLoader.instance) {
       FontLoader.instance = new FontLoader();
@@ -162,16 +178,17 @@ export class FontLoader {
 
         // Apply font family
         element.style.fontFamily = 'var(--font-sf-pro)';
+        const extendedStyle = this.getExtendedStyle(element);
         
         // Apply font smoothing using correct property names
-        (element.style as any).webkitFontSmoothing = 'antialiased';
-        (element.style as any).MozOsxFontSmoothing = 'grayscale';
+        extendedStyle.webkitFontSmoothing = 'antialiased';
+        extendedStyle.MozOsxFontSmoothing = 'grayscale';
         element.style.textRendering = 'optimizeLegibility';
         
         // Prevent text size adjustment using correct property names
-        (element.style as any).webkitTextSizeAdjust = '100%';
-        (element.style as any).MozTextSizeAdjust = '100%';
-        (element.style as any).textSizeAdjust = '100%';
+        extendedStyle.webkitTextSizeAdjust = '100%';
+        extendedStyle.MozTextSizeAdjust = '100%';
+        extendedStyle.textSizeAdjust = '100%';
       }
     });
   }

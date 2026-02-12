@@ -7,6 +7,10 @@ import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { CourseEditForm } from "@/components/admin/CourseEditForm";
 
+type CourseForEdit = NonNullable<Awaited<ReturnType<typeof getCourseForEdit>>>;
+type CourseSection = CourseForEdit["sections"][number];
+type CourseLesson = CourseSection["lessons"][number];
+
 async function updateCourseAction(courseId: string, formData: FormData) {
   "use server";
   await requireRole("admin");
@@ -52,7 +56,7 @@ async function addSectionAction(courseId: string, formData: FormData) {
     const course = await getCourseForEdit(courseId);
     if (!course) throw new Error("Course not found");
 
-    const maxSortOrder = Math.max(...(course.sections || []).map((s: any) => s.sortOrder), -1);
+    const maxSortOrder = Math.max(...(course.sections || []).map((section: CourseSection) => section.sortOrder), -1);
     const section = await createSection(courseId, title, maxSortOrder + 1);
 
     return { ...section, lessons: [] };
@@ -88,10 +92,10 @@ async function addLessonAction(sectionId: string, formData: FormData) {
     const course = await getCourseForEdit(formData.get("courseId") as string);
     if (!course) throw new Error("Course not found");
 
-    const section = (course.sections || []).find((s: any) => s.id === sectionId);
+    const section = (course.sections || []).find((courseSection: CourseSection) => courseSection.id === sectionId);
     if (!section) throw new Error("Section not found");
 
-    const maxSortOrder = Math.max(...(section.lessons || []).map((l: any) => l.sortOrder), -1);
+    const maxSortOrder = Math.max(...(section.lessons || []).map((lesson: CourseLesson) => lesson.sortOrder), -1);
 
     const lesson = await createLesson({
       sectionId,
@@ -211,9 +215,9 @@ async function updateLessonAction(lessonId: string, formData: FormData) {
 
     const existingContent: Array<{ id: string }> = [];
     for (const section of (course.sections || [])) {
-      const foundLesson = (section.lessons || []).find((l: any) => l.id === lessonId);
+      const foundLesson = (section.lessons || []).find((lesson: CourseLesson) => lesson.id === lessonId);
       if (foundLesson) {
-        existingContent.push(...(foundLesson.contents || []).map((c: any) => ({ id: c.id })));
+        existingContent.push(...(foundLesson.contents || []).map((content) => ({ id: content.id })));
         break;
       }
     }
@@ -285,7 +289,7 @@ async function CourseEditContent({ courseId }: { courseId: string }) {
       </div>
 
       <CourseEditForm
-        course={course as any}
+        course={course}
         updateCourseAction={updateCourseAction.bind(null, courseId)}
         addSectionAction={addSectionAction.bind(null, courseId)}
         deleteSectionAction={deleteSectionAction}

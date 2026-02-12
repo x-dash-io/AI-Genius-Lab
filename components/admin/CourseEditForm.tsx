@@ -978,7 +978,7 @@ export function CourseEditForm({
 
                               {(lessonContents[section.id] || []).length === 0 && (
                                 <p className="text-sm text-muted-foreground text-center py-4 border-2 border-dashed rounded-lg">
-                                  No content added yet. Click "Add Content" to add video, PDF, or other materials.
+                                  No content added yet. Click &quot;Add Content&quot; to add video, PDF, or other materials.
                                 </p>
                               )}
                             </div>
@@ -1335,7 +1335,7 @@ export function CourseEditForm({
 
                                     {(lessonContents[lesson.id] || []).length === 0 && (
                                       <p className="text-sm text-muted-foreground text-center py-4 border-2 border-dashed rounded-lg">
-                                        No content added yet. Click "Add Content" to add video, PDF, or other materials.
+                                        No content added yet. Click &quot;Add Content&quot; to add video, PDF, or other materials.
                                       </p>
                                     )}
                                   </div>

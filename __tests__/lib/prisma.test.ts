@@ -1,6 +1,11 @@
 
 // We don't import Pool at top level to avoid stale reference
 // import { Pool } from 'pg';
+import { Pool } from "pg";
+
+type GlobalPrisma = {
+  prisma?: unknown;
+};
 
 // Mock pg
 jest.mock('pg', () => {
@@ -34,7 +39,7 @@ describe('Prisma Connection Pool Configuration', () => {
     process.env = { ...originalEnv };
 
     // Clear the global instance to force recreation
-    const globalForPrisma = globalThis as unknown as { prisma?: any };
+    const globalForPrisma = globalThis as GlobalPrisma;
     delete globalForPrisma.prisma;
   });
 
@@ -50,8 +55,6 @@ describe('Prisma Connection Pool Configuration', () => {
     await import('../../lib/prisma');
 
     // Get the Pool mock that was used in this isolation context
-    const { Pool } = require('pg');
-
     expect(Pool).toHaveBeenCalledWith(expect.objectContaining({
       max: 1,
       connectionTimeoutMillis: 15000,
@@ -65,8 +68,6 @@ describe('Prisma Connection Pool Configuration', () => {
     process.env.DATABASE_URL = 'postgres://test:test@localhost:5432/test';
 
     await import('../../lib/prisma');
-
-    const { Pool } = require('pg');
 
     expect(Pool).toHaveBeenCalledWith(expect.objectContaining({
       max: 10,

@@ -41,7 +41,7 @@ export function PreviewBanner() {
               Customer Preview Mode
             </p>
             <p className="text-xs text-amber-700 dark:text-amber-300">
-              You're viewing this page as a customer would see it. Some actions are restricted.
+              You&apos;re viewing this page as a customer would see it. Some actions are restricted.
             </p>
           </div>
         </div>

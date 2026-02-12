@@ -13,8 +13,9 @@ import {
 export function useTestimonialActions() {
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
+    type TestimonialPayload = Parameters<typeof createTestimonial>[0];
 
-    const handleCreate = async (data: any) => {
+    const handleCreate = async (data: TestimonialPayload) => {
         startTransition(async () => {
             const result = await createTestimonial(data);
             if (result.success) {
@@ -26,7 +27,7 @@ export function useTestimonialActions() {
         });
     };
 
-    const handleUpdate = async (id: string, data: any) => {
+    const handleUpdate = async (id: string, data: TestimonialPayload) => {
         startTransition(async () => {
             const result = await updateTestimonial(id, data);
             if (result.success) {

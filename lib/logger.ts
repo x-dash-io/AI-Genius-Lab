@@ -4,7 +4,7 @@ import { trackEvent } from "./analytics";
  * Unified logging utility
  */
 export const logger = {
-  warn: (message: string, context?: Record<string, any>) => {
+  warn: (message: string, context?: Record<string, unknown>) => {
     console.warn(`[WARN] ${message}`, context || "");
 
     trackEvent({
@@ -16,7 +16,7 @@ export const logger = {
     });
   },
 
-  error: (message: string, error?: unknown, context?: Record<string, any>) => {
+  error: (message: string, error?: unknown, context?: Record<string, unknown>) => {
     const errorDetails = error instanceof Error ? {
       errorMessage: error.message,
       stack: error.stack,
@@ -34,7 +34,7 @@ export const logger = {
     });
   },
 
-  info: (message: string, context?: Record<string, any>) => {
+  info: (message: string, context?: Record<string, unknown>) => {
     // Basic console info, not tracking to analytics by default to avoid noise
     if (process.env.NODE_ENV === "development") {
       console.log(`[INFO] ${message}`, context || "");

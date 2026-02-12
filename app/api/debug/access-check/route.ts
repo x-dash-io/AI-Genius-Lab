@@ -58,18 +58,20 @@ export async function POST(request: NextRequest) {
       include: { contents: true },
     });
 
-    console.log(`[DEBUG ACCESS] Found ${lessons.length} lessons with ${lessons.reduce((sum: number, l: any) => sum + l.contents.length, 0)} content items`);
+    console.log(
+      `[DEBUG ACCESS] Found ${lessons.length} lessons with ${lessons.reduce((sum, lesson) => sum + lesson.contents.length, 0)} content items`
+    );
 
-    const lessonsWithContent = lessons.map((l: any) => ({
-      id: l.id,
-      title: l.title,
-      contentCount: l.contents.length,
-      hasContentUrl: l.contents.some((c: any) => !!c.contentUrl),
-      contents: l.contents.map((c: any) => ({
-        id: c.id,
-        contentType: c.contentType,
-        hasUrl: !!c.contentUrl,
-        title: c.title,
+    const lessonsWithContent = lessons.map((lesson) => ({
+      id: lesson.id,
+      title: lesson.title,
+      contentCount: lesson.contents.length,
+      hasContentUrl: lesson.contents.some((content) => !!content.contentUrl),
+      contents: lesson.contents.map((content) => ({
+        id: content.id,
+        contentType: content.contentType,
+        hasUrl: !!content.contentUrl,
+        title: content.title,
       })),
     }));
 
@@ -94,7 +96,7 @@ export async function POST(request: NextRequest) {
       diagnosis: {
         hasPaidPurchase: purchase?.status === "paid",
         hasEnrollment: !!enrollment,
-        hasLessonContent: lessonsWithContent.some((l: any) => l.hasContentUrl),
+        hasLessonContent: lessonsWithContent.some((lesson) => lesson.hasContentUrl),
         shouldHaveAccess: purchase?.status === "paid",
         accessGranted: !!enrollment && purchase?.status === "paid",
       },

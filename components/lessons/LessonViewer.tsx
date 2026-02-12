@@ -49,7 +49,11 @@ export function LessonViewer({
         try {
           const response = await fetch(`/api/content/${lessonId}`, { method: 'HEAD' });
           if (!response.ok) {
-            let errorData: any = {};
+            let errorData: {
+              code?: string;
+              message?: string;
+              adminActionRequired?: boolean;
+            } = {};
             try {
               const text = await response.text();
               if (text) errorData = JSON.parse(text);

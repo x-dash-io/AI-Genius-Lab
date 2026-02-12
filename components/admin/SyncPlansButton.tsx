@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, Loader2 } from "lucide-react";
 import { toast } from "@/lib/toast";
 
-export function SyncPlansButton({ syncAction }: { syncAction: () => Promise<any> }) {
+type SyncPlansResult = {
+  success?: boolean;
+  count?: number;
+  errors?: string[];
+};
+
+export function SyncPlansButton({ syncAction }: { syncAction: () => Promise<SyncPlansResult> }) {
   const [isSyncing, setIsSyncing] = useState(false);
   const router = useRouter();
 
@@ -28,10 +34,11 @@ export function SyncPlansButton({ syncAction }: { syncAction: () => Promise<any>
         });
       }
       router.refresh();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "An unexpected error occurred during sync.";
       toast({
         title: "Error",
-        description: error.message || "An unexpected error occurred during sync.",
+        description: message,
         variant: "destructive",
       });
     } finally {

@@ -110,13 +110,17 @@ export default async function LearningPathDetailPage({
     notFound();
   }
 
+  type LearningPathCourse = (typeof pathData.courses)[number];
+
   const path = {
     ...pathData,
-    courses: (pathData.courses || []).map((pathCourse: any) => ({
+    courses: (pathData.courses || []).map((pathCourse: LearningPathCourse) => ({
       ...pathCourse,
       course: pathCourse.Course,
     })),
   };
+
+  type PathCourse = (typeof path.courses)[number];
 
   const session = await getServerSession(authOptions);
 
@@ -141,7 +145,7 @@ export default async function LearningPathDetailPage({
   }
 
   const totalPriceCents = path.courses.reduce(
-    (sum: number, pathCourse: any) => sum + pathCourse.course.priceCents,
+    (sum: number, pathCourse: PathCourse) => sum + pathCourse.course.priceCents,
     0
   );
 
@@ -161,7 +165,7 @@ export default async function LearningPathDetailPage({
           await prisma.purchase.findMany({
             where: {
               userId: session.user.id,
-              courseId: { in: path.courses.map((pathCourse: any) => pathCourse.course.id) },
+              courseId: { in: path.courses.map((pathCourse: PathCourse) => pathCourse.course.id) },
               status: "paid",
             },
             select: { courseId: true },
@@ -192,7 +196,7 @@ export default async function LearningPathDetailPage({
       throw new Error("No courses to purchase");
     }
 
-    const purchaseIds = purchases.map((purchase: any) => purchase.id).join(",");
+    const purchaseIds = purchases.map((purchase) => purchase.id).join(",");
     const appUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
     const returnUrl = `${appUrl}/api/payments/paypal/capture?purchases=${encodeURIComponent(
       purchaseIds
@@ -209,7 +213,7 @@ export default async function LearningPathDetailPage({
 
     await prisma.purchase.updateMany({
       where: {
-        id: { in: purchases.map((purchase: any) => purchase.id) },
+        id: { in: purchases.map((purchase) => purchase.id) },
       },
       data: {
         providerRef: orderId,
@@ -227,7 +231,7 @@ export default async function LearningPathDetailPage({
     description:
       path.description || `Follow this structured learning path to master ${path.title}.`,
     url: `/learning-paths/${pathId}`,
-    courses: path.courses.map((pathCourse: any) => ({
+    courses: path.courses.map((pathCourse: PathCourse) => ({
       name: pathCourse.course.title,
       url: `/courses/${pathCourse.course.slug}`,
     })),
@@ -239,11 +243,19 @@ export default async function LearningPathDetailPage({
     { label: path.title },
   ];
 
-  const estimatedHours = (pathData as any).estimatedHours as number | undefined;
-  const objectives = (pathData as any).objectives as string[] | undefined;
-  const skills = (pathData as any).skills as string[] | undefined;
-  const targetAudience = (pathData as any).targetAudience as string | undefined;
-  const prerequisites = (pathData as any).prerequisites as string | undefined;
+  type LearningPathDetails = {
+    estimatedHours?: number;
+    objectives?: string[];
+    skills?: string[];
+    targetAudience?: string;
+    prerequisites?: string;
+  };
+  const pathDetails = pathData as typeof pathData & LearningPathDetails;
+  const estimatedHours = pathDetails.estimatedHours;
+  const objectives = pathDetails.objectives;
+  const skills = pathDetails.skills;
+  const targetAudience = pathDetails.targetAudience;
+  const prerequisites = pathDetails.prerequisites;
   const hasObjectivesData = Boolean(
     objectives?.length || skills?.length || targetAudience || prerequisites || estimatedHours
   );
@@ -418,7 +430,7 @@ export default async function LearningPathDetailPage({
                   <CardDescription>Courses included in this path.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {path.courses.map((pathCourse: any, index: number) => (
+                  {path.courses.map((pathCourse: PathCourse, index: number) => (
                     <div
                       key={pathCourse.id}
                       className="rounded-[var(--radius-sm)] border bg-background px-3 py-3"
