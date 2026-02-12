@@ -31,15 +31,90 @@ const SOCIAL_PLATFORMS = [
     { value: "other", label: "Other" },
 ];
 
+const PLATFORM_URL_VALIDATORS: Record<string, (hostname: string) => boolean> = {
+    facebook: (hostname) => hostname === "facebook.com" || hostname.endsWith(".facebook.com"),
+    twitter: (hostname) =>
+        hostname === "twitter.com" ||
+        hostname.endsWith(".twitter.com") ||
+        hostname === "x.com" ||
+        hostname.endsWith(".x.com"),
+    instagram: (hostname) => hostname === "instagram.com" || hostname.endsWith(".instagram.com"),
+    linkedin: (hostname) => hostname === "linkedin.com" || hostname.endsWith(".linkedin.com"),
+    youtube: (hostname) =>
+        hostname === "youtube.com" ||
+        hostname.endsWith(".youtube.com") ||
+        hostname === "youtu.be" ||
+        hostname.endsWith(".youtu.be"),
+    tiktok: (hostname) => hostname === "tiktok.com" || hostname.endsWith(".tiktok.com"),
+    github: (hostname) => hostname === "github.com" || hostname.endsWith(".github.com"),
+    discord: (hostname) =>
+        hostname === "discord.com" ||
+        hostname.endsWith(".discord.com") ||
+        hostname === "discord.gg" ||
+        hostname.endsWith(".discord.gg"),
+};
+
+function normalizeSocialUrl(url: string | undefined): string {
+    const normalizedUrl = (url || "").trim();
+    return normalizedUrl === "#" ? "" : normalizedUrl;
+}
+
+function hasSocialUrl(url: string | undefined): boolean {
+    return Boolean(normalizeSocialUrl(url));
+}
+
+const socialLinkSchema = z
+    .object({
+        id: z.string(),
+        platform: z.string().min(1, "Platform is required"),
+        url: z.string(),
+        visible: z.boolean(),
+    })
+    .superRefine((link, ctx) => {
+        const normalizedUrl = normalizeSocialUrl(link.url);
+
+        if (!normalizedUrl) {
+            return;
+        }
+
+        let parsedUrl: URL;
+        try {
+            parsedUrl = new URL(normalizedUrl);
+        } catch {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["url"],
+                message: "Must be a valid URL",
+            });
+            return;
+        }
+
+        if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["url"],
+                message: "Must be a valid URL",
+            });
+            return;
+        }
+
+        const platform = link.platform.toLowerCase();
+        const validator = PLATFORM_URL_VALIDATORS[platform];
+        if (!validator) {
+            return;
+        }
+
+        if (!validator(parsedUrl.hostname.toLowerCase())) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ["url"],
+                message: "URL does not match the selected platform",
+            });
+        }
+    });
+
 const settingsSchema = z.object({
-    socialLinks: z.array(
-        z.object({
-            id: z.string(),
-            platform: z.string().min(1, "Platform is required"),
-            url: z.string().url("Must be a valid URL"),
-            visible: z.boolean(),
-        })
-    ),
+    socialLinks: z.array(socialLinkSchema),
     heroLogos: z.array(
         z.object({
             id: z.string(),
@@ -61,12 +136,16 @@ interface SiteSettingsFormProps {
 function normalizeSocialLinks(
     value: Array<Partial<SettingsFormValues["socialLinks"][number]>> | undefined
 ): SettingsFormValues["socialLinks"] {
-    return (value || []).map((link) => ({
-        id: link.id || `social-${Date.now()}`,
-        platform: link.platform || "web",
-        url: link.url || "#",
-        visible: link.visible !== undefined ? link.visible : true,
-    }));
+    return (value || []).map((link, index) => {
+        const normalizedUrl = normalizeSocialUrl(link.url);
+
+        return {
+            id: link.id || `social-${Date.now()}-${index}`,
+            platform: link.platform || "website",
+            url: normalizedUrl,
+            visible: link.visible !== undefined ? link.visible : hasSocialUrl(normalizedUrl),
+        };
+    });
 }
 
 function normalizeHeroLogos(
@@ -86,14 +165,16 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
     const [lastSaved, setLastSaved] = React.useState<{ socialLinks: SettingsFormValues['socialLinks']; heroLogos: SettingsFormValues['heroLogos'] } | null>(null);
 
     // Migration helper for social links
-    const migratedSocialLinks: SettingsFormValues['socialLinks'] = Array.isArray(initialSocialLinks)
-        ? initialSocialLinks
-        : Object.entries(initialSocialLinks || {}).map(([platform, url]) => ({
-            id: platform,
-            platform,
-            url: url as string,
-            visible: !!url && url !== "#",
-        }));
+    const migratedSocialLinks: SettingsFormValues['socialLinks'] = normalizeSocialLinks(
+        Array.isArray(initialSocialLinks)
+            ? initialSocialLinks
+            : Object.entries(initialSocialLinks || {}).map(([platform, url]) => ({
+                id: platform,
+                platform,
+                url: normalizeSocialUrl(url),
+                visible: hasSocialUrl(url),
+            }))
+    );
 
     // Migration helper: if initialHeroLogos come from old structure (without type), default them
     const migratedHeroLogos: SettingsFormValues['heroLogos'] = (initialHeroLogos || []).map((logo: { id: string; name?: string; type?: string; value?: string; url?: string; visible?: boolean }) => ({
@@ -196,7 +277,9 @@ export function SiteSettingsForm({ initialSocialLinks, initialHeroLogos }: SiteS
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => appendSocial({ id: `social-${Date.now()}`, platform: "instagram", url: "", visible: true })}
+                                onClick={() =>
+                                    appendSocial({ id: `social-${Date.now()}`, platform: "website", url: "", visible: false })
+                                }
                                 className="w-full sm:w-auto whitespace-nowrap"
                             >
                                 <Plus className="mr-2 h-4 w-4 flex-shrink-0" />

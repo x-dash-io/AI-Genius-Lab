@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import HeroLogosCarousel from "@/components/home/HeroLogosCarousel";
 import {
   ArrowRight,
   BadgeCheck,
@@ -16,9 +17,7 @@ import {
   TrendingUp,
   Trophy,
   Users,
-  type LucideIcon,
 } from "lucide-react";
-import * as LucideIcons from "lucide-react";
 import { HeroPattern } from "@/components/ui/hero-pattern";
 import type { HomepageStats } from "@/lib/homepage-stats";
 import type { HeroLogo } from "@/lib/settings";
@@ -34,36 +33,7 @@ const HERO_PROGRESS = 68;
 const progressOffset = RING_CIRCUMFERENCE - (HERO_PROGRESS / 100) * RING_CIRCUMFERENCE;
 
 export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
-  const renderLogo = (logo: HeroLogo) => {
-    if (logo.type === "icon") {
-      const iconCandidate = LucideIcons[logo.value as keyof typeof LucideIcons];
-      const IconComponent: LucideIcon =
-        typeof iconCandidate === "function" ? (iconCandidate as LucideIcon) : Route;
-      return (
-        <div key={logo.id} className="flex flex-col items-center gap-2 group cursor-pointer relative" title={logo.name}>
-          <IconComponent className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground/60 group-hover:text-primary transition-colors duration-300" />
-          <span className="text-[10px] font-bold text-muted-foreground group-hover:text-foreground transition-all opacity-0 group-hover:opacity-100 absolute -bottom-6 whitespace-nowrap">
-            {logo.name}
-          </span>
-        </div>
-      );
-    }
-
-    return (
-      <div key={logo.id} className="relative h-10 sm:h-14 flex items-center justify-center group">
-        <motion.img
-          src={logo.value}
-          alt={logo.name}
-          title={logo.name}
-          whileHover={{ scale: 1.1, opacity: 1 }}
-          className="h-full w-auto object-contain opacity-60 grayscale hover:grayscale-0 transition-all duration-300"
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = "none";
-          }}
-        />
-      </div>
-    );
-  };
+  const visibleHeroLogos = heroLogos.filter((logo) => logo.visible);
 
   return (
     <section className="relative py-12 sm:py-16 lg:py-20 min-h-0 overflow-hidden">
@@ -201,19 +171,17 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
           </motion.div>
         </div>
 
-        {heroLogos.filter((l) => l.visible).length > 0 && (
+        {visibleHeroLogos.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             className="pt-12 sm:pt-14"
           >
-            <p className="text-center text-xs font-bold text-muted-foreground/50 mb-6 uppercase tracking-[0.2em]">
+            <p className="text-center text-xs font-bold text-muted-foreground/50 mb-4 uppercase tracking-[0.2em]">
               Trusted by professionals at
             </p>
-            <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-              {heroLogos.filter((logo) => logo.visible).map((logo) => renderLogo(logo))}
-            </div>
+            <HeroLogosCarousel logos={visibleHeroLogos} direction="right" speed={20} />
           </motion.div>
         )}
 

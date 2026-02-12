@@ -9,11 +9,16 @@ export type SocialLink = {
 };
 
 export const defaultSocialLinks: SocialLink[] = [
-    { id: "facebook", platform: "facebook", url: "#", visible: true },
-    { id: "twitter", platform: "twitter", url: "#", visible: true },
-    { id: "instagram", platform: "instagram", url: "#", visible: true },
-    { id: "linkedin", platform: "linkedin", url: "#", visible: true },
-    { id: "youtube", platform: "youtube", url: "#", visible: true },
+    { id: "facebook", platform: "facebook", url: "", visible: false },
+    { id: "twitter", platform: "twitter", url: "", visible: false },
+    { id: "instagram", platform: "instagram", url: "", visible: false },
+    { id: "linkedin", platform: "linkedin", url: "", visible: false },
+    { id: "youtube", platform: "youtube", url: "", visible: false },
+    { id: "tiktok", platform: "tiktok", url: "", visible: false },
+    { id: "github", platform: "github", url: "", visible: false },
+    { id: "discord", platform: "discord", url: "", visible: false },
+    { id: "website", platform: "website", url: "", visible: false },
+    { id: "other", platform: "other", url: "", visible: false },
 ];
 
 export type HeroLogo = {
@@ -50,20 +55,25 @@ export const getSocialLinks = unstable_cache(
             return Object.entries(links).map(([platform, url]) => ({
                 id: platform,
                 platform,
-                url: url as string,
+                url: typeof url === "string" && url !== "#" ? url : "",
                 visible: !!url && url !== "#",
             })) as SocialLink[];
         }
 
         // If it's already an array, ensure it matches SocialLink structure
         if (Array.isArray(links)) {
-            return links.map((link) => {
+            return links.map((link, index) => {
                 const socialLink = link as Partial<SocialLink>;
+                const url = (socialLink.url || "").trim();
+                const hasUrl = Boolean(url && url !== "#");
                 return {
-                    id: socialLink.id || socialLink.platform || `social-${Math.random()}`,
-                    platform: socialLink.platform || "web",
-                    url: socialLink.url || "#",
-                    visible: socialLink.visible !== undefined ? socialLink.visible : true,
+                    id: socialLink.id || socialLink.platform || `social-${index}`,
+                    platform: socialLink.platform || "website",
+                    url: hasUrl ? url : "",
+                    visible:
+                        socialLink.visible !== undefined
+                            ? socialLink.visible && hasUrl
+                            : hasUrl,
                 };
             }) as SocialLink[];
         }
