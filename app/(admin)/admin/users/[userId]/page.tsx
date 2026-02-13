@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { ArrowLeft, Shield, User, ShoppingCart, GraduationCap, Activity } from "lucide-react";
 import { RoleSelectForm } from "@/components/admin/RoleSelectForm";
-import type { Role } from "@/lib/rbac";
 
 export const dynamic = "force-dynamic";
 
@@ -21,15 +20,8 @@ function formatCurrency(cents: number) {
 
 async function changeRoleAction(userId: string, formData: FormData) {
   "use server";
-  const admin = await requireRole("admin");
-
-  // Prevent admins from changing their own role
-  if (userId === admin.id) {
-    throw new Error("You cannot change your own role");
-  }
-
-  const role = formData.get("role") as Role;
-  if (role !== "admin" && role !== "customer") {
+  const role = formData.get("role");
+  if (typeof role !== "string") {
     throw new Error("Invalid role");
   }
 

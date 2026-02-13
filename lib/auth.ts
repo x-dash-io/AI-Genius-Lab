@@ -8,6 +8,19 @@ import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 import { type Role } from "@/lib/rbac";
 
+function isOAuthEmailVerified(account: Account | null, profile?: Profile | null) {
+  if (!account || account.provider === "credentials") {
+    return true;
+  }
+
+  // Fail closed for OAuth providers unless we can verify the email claim.
+  if (account.provider === "google") {
+    return (profile as { email_verified?: unknown } | null)?.email_verified === true;
+  }
+
+  return false;
+}
+
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
   session: { 
@@ -61,17 +74,23 @@ export const authOptions = {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-      allowDangerousEmailAccountLinking: true,
     }),
   ],
   callbacks: {
     async signIn({ user, account, profile }: { user: User; account: Account | null; profile?: Profile | null }) {
-      // For OAuth providers, handle account linking and role assignment
-      if (account && account.provider !== "credentials" && user.email) {
+      if (account && account.provider !== "credentials") {
+        if (!user.email || !isOAuthEmailVerified(account, profile)) {
+          return false;
+        }
+
         try {
           const existingUser = await prisma.user.findUnique({
-            where: { email: user.email },
-            include: { Account: true },
+            where: { email: user.email.toLowerCase().trim() },
+            select: {
+              id: true,
+              image: true,
+              emailVerified: true,
+            },
           });
 
           if (existingUser) {
@@ -81,50 +100,26 @@ export const authOptions = {
                 ? ((profile as { picture?: string }).picture ?? undefined)
                 : undefined;
 
-            // Check if this OAuth account is already linked
-            const existingAccount = existingUser.Account?.find(
-              (existingUserAccount) =>
-                existingUserAccount.provider === account.provider &&
-                existingUserAccount.providerAccountId === account.providerAccountId
-            );
+            const updates: { image?: string; emailVerified?: Date } = {};
 
-            if (!existingAccount) {
-              // Link the OAuth account to existing user
-              await prisma.account.create({
-                data: {
-                  id: crypto.randomUUID(),
-                  userId: existingUser.id,
-                  type: account.type,
-                  provider: account.provider,
-                  providerAccountId: account.providerAccountId,
-                  access_token: account.access_token,
-                  expires_at: account.expires_at,
-                  token_type: account.token_type,
-                  scope: account.scope,
-                  id_token: account.id_token,
-                },
-              });
-            }
-
-            // If user exists but has no role, set it to customer
-            if (!existingUser.role) {
-              await prisma.user.update({
-                where: { id: existingUser.id },
-                data: { role: "customer" },
-              });
-            }
-
-            // Update user info from OAuth profile if missing
             if (!existingUser.image && oauthPicture) {
+              updates.image = oauthPicture;
+            }
+
+            if (!existingUser.emailVerified) {
+              updates.emailVerified = new Date();
+            }
+
+            if (Object.keys(updates).length > 0) {
               await prisma.user.update({
                 where: { id: existingUser.id },
-                data: { image: oauthPicture },
+                data: updates,
               });
             }
           }
         } catch (error) {
           console.error("SignIn callback error:", error);
-          // Don't block sign-in if linking fails - adapter will handle it
+          return false;
         }
       }
       return true;
@@ -160,8 +155,26 @@ export const authOptions = {
           console.error("Error fetching OAuth user:", error);
         }
       }
-      
-      // Refresh user data from DB periodically (every 5 minutes) or on update trigger
+
+      // Authorization-critical: always sync role from DB to avoid stale elevated access.
+      if (token.id) {
+        try {
+          const authorizationUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { role: true },
+          });
+
+          if (!authorizationUser) {
+            return {};
+          }
+
+          token.role = authorizationUser.role;
+        } catch (error) {
+          console.error("Error refreshing user role in JWT callback:", error);
+        }
+      }
+
+      // Refresh profile fields periodically (every 5 minutes) or on update trigger.
       const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
       const shouldRefresh = trigger === "update" || 
         !token.lastRefresh || 
@@ -171,14 +184,13 @@ export const authOptions = {
         try {
           const freshUser = await prisma.user.findUnique({
             where: { id: token.id as string },
-            select: { name: true, email: true, image: true, role: true },
+            select: { name: true, email: true, image: true },
           });
           
           if (freshUser) {
             token.name = freshUser.name;
             token.email = freshUser.email;
             token.picture = freshUser.image;
-            token.role = freshUser.role;
             token.lastRefresh = Date.now();
           }
         } catch (error) {
