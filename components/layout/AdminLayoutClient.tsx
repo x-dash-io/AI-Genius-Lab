@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Eye, Menu, ShieldCheck, X } from "lucide-react";
 
 import { SignOutButton } from "@/components/auth/SignOutButton";
@@ -148,15 +149,15 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
         </aside>
 
-        <div className={cn("transition-all duration-300", isCollapsed ? "pl-16" : "pl-72")}>
+        <div className={cn("min-w-0 transition-all duration-300", isCollapsed ? "pl-16" : "pl-72")}>
           <header className="sticky top-0 z-20 border-b border-border/80 bg-background/90 backdrop-blur">
-            <div className="mx-auto flex h-14 w-full max-w-7xl items-center px-6">
+            <div className="mx-auto flex h-14 w-full max-w-[96rem] items-center px-5 lg:px-8">
               <p className="font-display text-base font-semibold tracking-tight">Admin Workspace</p>
             </div>
           </header>
 
           <main>
-            <div className="mx-auto w-full max-w-7xl px-6 py-6">{children}</div>
+            <div className="mx-auto w-full max-w-[96rem] px-5 py-6 lg:px-8">{children}</div>
           </main>
 
           <Footer />
@@ -165,7 +166,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
       <div className="md:hidden">
         <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur">
-          <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4">
+          <div className="mx-auto flex h-14 w-full max-w-[96rem] items-center justify-between px-3 sm:px-5">
             <Link href="/admin" className="inline-flex items-center gap-2">
               <Image src="/logo.png" alt="AI Genius Lab" width={128} height={28} className="h-7 w-auto object-contain" priority />
             </Link>
@@ -184,58 +185,96 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        {mobileOpen ? (
-          <div className="border-b border-border/80 bg-background px-4 pb-4 pt-2">
-            <nav className="grid gap-1">
-              {adminNavigation.map((item) => {
-                const Icon = item.icon;
-                const active = isActivePath(pathname, item.href);
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={cn(
-                      "inline-flex items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-sm font-medium",
-                      active
-                        ? "bg-accent text-foreground"
-                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {item.name}
+        <AnimatePresence>
+          {mobileOpen ? (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setMobileOpen(false)}
+                className="fixed inset-0 z-40 bg-black/50 md:hidden"
+              />
+              <motion.aside
+                initial={{ x: "-100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "-100%" }}
+                transition={{ type: "tween", duration: 0.28 }}
+                className="fixed inset-y-0 left-0 z-50 w-[min(88vw,20rem)] overflow-y-auto border-r bg-card/95 shadow-lg backdrop-blur-lg md:hidden"
+              >
+                <div className="flex items-center justify-between border-b p-4">
+                  <Link href="/admin" className="inline-flex items-center" onClick={() => setMobileOpen(false)}>
+                    <Image
+                      src="/logo.png"
+                      alt="AI Genius Lab"
+                      width={132}
+                      height={28}
+                      className="h-7 w-auto object-contain"
+                      priority
+                    />
                   </Link>
-                );
-              })}
-
-              <div className="mt-2 border-t pt-3">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Customer preview</p>
-                <div className="grid gap-1">
-                  {customerPreviewLinks.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={`${item.href}?preview=true`}
-                      target="_blank"
-                      onClick={() => setMobileOpen(false)}
-                      className="inline-flex items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {item.name}
-                    </Link>
-                  ))}
+                  <button
+                    onClick={() => setMobileOpen(false)}
+                    aria-label="Close menu"
+                    className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
                 </div>
-              </div>
 
-              <div className="mt-2 border-t pt-3">
-                <SignOutButton className="h-9 w-full justify-center" />
-              </div>
-            </nav>
-          </div>
-        ) : null}
+                <nav className="mt-2 space-y-1 px-4 pb-6">
+                  {adminNavigation.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActivePath(pathname, item.href);
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={cn(
+                          "inline-flex w-full items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-sm font-medium",
+                          active
+                            ? "bg-accent text-foreground"
+                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        )}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+
+                  <div className="mt-3 border-t pt-3">
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Customer preview</p>
+                    <div className="grid gap-1">
+                      {customerPreviewLinks.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={`${item.href}?preview=true`}
+                          target="_blank"
+                          onClick={() => setMobileOpen(false)}
+                          className="inline-flex items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-3 border-t pt-3">
+                    <SignOutButton className="h-9 w-full justify-center" />
+                  </div>
+                </nav>
+              </motion.aside>
+            </>
+          ) : null}
+        </AnimatePresence>
 
         <main>
-          <div className="mx-auto w-full max-w-7xl px-4 py-5">{children}</div>
+          <div className="mx-auto w-full max-w-[96rem] px-3 py-5 sm:px-5">{children}</div>
         </main>
 
         <Footer />

@@ -54,7 +54,7 @@ export function Footer({ socialLinks }: FooterProps) {
 
   return (
     <footer className="mt-12 border-t border-border/80 bg-card/60">
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.2fr_1fr_1fr]">
+      <div className="mx-auto grid w-full max-w-[96rem] gap-10 px-3 py-12 sm:px-5 lg:grid-cols-[1.2fr_1fr_1fr] lg:px-8">
         <div className="space-y-5">
           <Link href="/" className="inline-flex items-center" aria-label="AI Genius Lab home">
             <Image src="/logo.png" alt="AI Genius Lab" width={144} height={34} className="h-9 w-auto object-contain" priority />
@@ -105,7 +105,7 @@ export function Footer({ socialLinks }: FooterProps) {
       </div>
 
       <div className="border-t border-border/70">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="mx-auto flex w-full max-w-[96rem] flex-col gap-3 px-3 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-5 lg:px-8">
           <p>© {new Date().getFullYear()} AI Genius Lab. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <Link href="/privacy" className="hover:text-primary">Privacy</Link>

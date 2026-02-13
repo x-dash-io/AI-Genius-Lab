@@ -70,8 +70,8 @@ export function PurchaseFilters() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-4">
-        <div className="flex-1 min-w-[250px]">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <div className="w-full lg:flex-1 lg:min-w-[250px]">
           <SearchInput
             placeholder="Search by user email, name, or course..."
             value={currentSearch}
@@ -81,7 +81,7 @@ export function PurchaseFilters() {
           />
         </div>
         <Select value={currentStatus} onValueChange={handleStatusChange}>
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-full sm:w-[170px]">
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
@@ -92,7 +92,7 @@ export function PurchaseFilters() {
           </SelectContent>
         </Select>
         <Select value={currentProvider} onValueChange={handleProviderChange}>
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-full sm:w-[170px]">
             <SelectValue placeholder="All Providers" />
           </SelectTrigger>
           <SelectContent>
@@ -106,7 +106,7 @@ export function PurchaseFilters() {
             variant="outline"
             onClick={handleClearAll}
             disabled={showLoading}
-            className="gap-2"
+            className="w-full gap-2 sm:w-auto"
           >
             <X className="h-4 w-4" />
             Clear Filters

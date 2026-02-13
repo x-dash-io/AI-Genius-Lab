@@ -77,7 +77,7 @@ export function LearningPathFilters() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         <div className="flex-1">
           <SearchInput
             placeholder="Search learning paths..."
@@ -87,9 +87,9 @@ export function LearningPathFilters() {
             debounceMs={400}
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <Select value={sortBy} onValueChange={handleSortChange}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -104,7 +104,7 @@ export function LearningPathFilters() {
               variant="outline"
               onClick={handleClearAll}
               disabled={showLoading}
-              className="gap-2"
+              className="w-full gap-2 sm:w-auto"
             >
               <X className="h-4 w-4" />
               Clear

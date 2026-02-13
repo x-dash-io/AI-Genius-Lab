@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   BookOpen,
   Grid3X3,
@@ -59,7 +60,7 @@ export function PublicLayoutClient({
   return (
     <AppShell area="public">
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur">
-        <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto flex h-14 w-full max-w-[96rem] items-center justify-between px-3 sm:px-5 lg:px-8">
           <Link href="/" className="inline-flex items-center" aria-label="AI Genius Lab home">
             <Image
               src="/logo.png"
@@ -131,56 +132,95 @@ export function PublicLayoutClient({
         </div>
       </header>
 
-      {mobileOpen ? (
-        <div className="border-b border-border/80 bg-background px-4 pb-4 pt-2 md:hidden">
-          <nav className="grid gap-1">
-            {mobileNav.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    "inline-flex items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-sm font-medium",
-                    isActivePath(pathname, item.href)
-                      ? "bg-accent text-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  {item.name}
+      <AnimatePresence>
+        {mobileOpen ? (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMobileOpen(false)}
+              className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            />
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "tween", duration: 0.28 }}
+              className="fixed inset-y-0 left-0 z-50 w-[min(88vw,20rem)] overflow-y-auto border-r bg-card/95 shadow-lg backdrop-blur-lg md:hidden"
+            >
+              <div className="flex items-center justify-between border-b p-4">
+                <Link href="/" className="inline-flex items-center" onClick={() => setMobileOpen(false)}>
+                  <Image
+                    src="/logo.png"
+                    alt="AI Genius Lab"
+                    width={132}
+                    height={28}
+                    className="h-7 w-auto object-contain"
+                    priority
+                  />
                 </Link>
-              );
-            })}
-            <div className="mt-2 grid gap-2 border-t pt-3">
-              <Link href="/sign-in">
-                <Button
-                  variant="outline"
-                  className="w-full justify-center gap-2"
+                <button
                   onClick={() => setMobileOpen(false)}
+                  aria-label="Close menu"
+                  className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
-                  <LogIn className="h-4 w-4" />
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/sign-up">
-                <Button
-                  variant="premium"
-                  className="w-full justify-center gap-2"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  <UserPlus className="h-4 w-4" />
-                  Sign Up
-                </Button>
-              </Link>
-            </div>
-          </nav>
-        </div>
-      ) : null}
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <nav className="mt-2 space-y-1 px-4 pb-6">
+                {mobileNav.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={cn(
+                        "inline-flex w-full items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-sm font-medium",
+                        isActivePath(pathname, item.href)
+                          ? "bg-accent text-foreground"
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {item.name}
+                    </Link>
+                  );
+                })}
+
+                <div className="mt-3 grid gap-2 border-t pt-3">
+                  <Link href="/sign-in">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-center gap-2"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <LogIn className="h-4 w-4" />
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/sign-up">
+                    <Button
+                      variant="premium"
+                      className="w-full justify-center gap-2"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      Sign Up
+                    </Button>
+                  </Link>
+                </div>
+              </nav>
+            </motion.aside>
+          </>
+        ) : null}
+      </AnimatePresence>
 
       <main>
-        <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">{children}</div>
+        <div className="mx-auto w-full max-w-[96rem] px-3 py-5 sm:px-5 sm:py-6 lg:px-8">{children}</div>
       </main>
 
       <Footer socialLinks={socialLinks} />

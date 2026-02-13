@@ -164,7 +164,7 @@ export function CourseFilters() {
               <SelectTrigger className="w-full sm:w-[180px] h-10 border border-border/50 bg-background hover:bg-accent/50 hover:border-primary/50 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-sm">
                 <SelectValue placeholder={isLoadingCategories ? "Loading..." : "Category"} />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl glass border-white/10 p-1">
+              <SelectContent className="rounded-2xl border-border/70 bg-card p-1">
                 <SelectItem value="all" className="rounded-lg font-bold">All Categories</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat.slug} value={cat.slug} className="rounded-lg font-medium">
@@ -180,7 +180,7 @@ export function CourseFilters() {
               <SelectTrigger className="w-full sm:w-[140px] h-10 border border-border/50 bg-background hover:bg-accent/50 hover:border-primary/50 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-sm">
                 <SelectValue placeholder="Price" />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl glass border-white/10 p-1">
+              <SelectContent className="rounded-2xl border-border/70 bg-card p-1">
                 <SelectItem value="all" className="rounded-lg font-bold">Any Price</SelectItem>
                 <SelectItem value="free" className="rounded-lg font-medium">Complimentary</SelectItem>
                 <SelectItem value="paid" className="rounded-lg font-medium">Premium Access</SelectItem>
@@ -195,7 +195,7 @@ export function CourseFilters() {
               <SelectTrigger className="w-full sm:w-[150px] h-10 border border-border/50 bg-background hover:bg-accent/50 hover:border-primary/50 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-sm">
                 <SelectValue placeholder="Sort" />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl glass border-white/10 p-1">
+              <SelectContent className="rounded-2xl border-border/70 bg-card p-1">
                 <SelectItem value="newest" className="rounded-lg font-medium tracking-tight">Recently Added</SelectItem>
                 <SelectItem value="oldest" className="rounded-lg font-medium tracking-tight">Earliest First</SelectItem>
                 <SelectItem value="price-low" className="rounded-lg font-medium tracking-tight">Price: Low to High</SelectItem>

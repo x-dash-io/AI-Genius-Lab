@@ -17,9 +17,8 @@ const areaClassMap: Record<ShellArea, string> = {
 
 export function AppShell({ area, children, className }: AppShellProps) {
   return (
-    <div data-app-shell={area} className={cn("min-h-screen", areaClassMap[area], className)}>
+    <div data-app-shell={area} className={cn("min-h-screen min-h-[100dvh] w-full", areaClassMap[area], className)}>
       {children}
     </div>
   );
 }
-

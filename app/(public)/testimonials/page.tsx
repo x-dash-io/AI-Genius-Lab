@@ -13,14 +13,14 @@ export default async function TestimonialsPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background p-8 md:p-12 mb-12">
+      <section className="relative mb-12 overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background p-6 sm:p-8 md:p-12">
         <div className="relative z-10 text-center max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
             <Quote className="h-4 w-4" />
             Student Success Stories
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+          <h1 className="mb-6 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl md:text-5xl lg:text-6xl">
             Hear From Our Students
           </h1>
 
@@ -34,16 +34,16 @@ export default async function TestimonialsPage() {
       </section>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 md:gap-6 mb-12 max-w-3xl mx-auto">
-        <div className="text-center p-4 rounded-xl bg-card border">
+      <div className="mx-auto mb-12 grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
+        <div className="rounded-xl border bg-card p-4 text-center sm:p-5">
           <div className="text-3xl md:text-4xl font-bold text-primary mb-1">5,000+</div>
           <div className="text-sm text-muted-foreground">Students</div>
         </div>
-        <div className="text-center p-4 rounded-xl bg-card border">
+        <div className="rounded-xl border bg-card p-4 text-center sm:p-5">
           <div className="text-3xl md:text-4xl font-bold text-primary mb-1">4.9</div>
           <div className="text-sm text-muted-foreground">Avg Rating</div>
         </div>
-        <div className="text-center p-4 rounded-xl bg-card border">
+        <div className="rounded-xl border bg-card p-4 text-center sm:p-5">
           <div className="text-3xl md:text-4xl font-bold text-primary mb-1">98%</div>
           <div className="text-sm text-muted-foreground">Satisfaction</div>
         </div>
@@ -59,8 +59,8 @@ export default async function TestimonialsPage() {
       </Suspense>
 
       {/* CTA Section */}
-      <section className="text-center py-12 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent border px-6 mt-12">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">
+      <section className="mt-12 rounded-2xl border bg-gradient-to-br from-primary/5 to-transparent px-5 py-12 text-center sm:px-6">
+        <h2 className="mb-4 text-2xl font-bold sm:text-3xl md:text-4xl">
           Ready to Write Your Success Story?
         </h2>
         <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">

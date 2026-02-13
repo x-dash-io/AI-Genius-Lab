@@ -189,7 +189,7 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.75, delay: 0.4 }}
-          className="mt-14 sm:mt-16 grid grid-cols-2 md:grid-cols-4 gap-4"
+          className="mt-14 grid grid-cols-1 gap-4 sm:mt-16 sm:grid-cols-2 xl:grid-cols-4"
         >
           {[
             {
@@ -213,10 +213,18 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
               label: "Outcome-focused programs",
             },
           ].map((item) => (
-            <Card key={item.label} glass className="p-5 text-center border-white/10 hover:border-primary/25 transition-all duration-300">
+            <Card
+              key={item.label}
+              glass
+              className="min-w-0 border-white/10 p-5 text-center transition-all duration-300 hover:border-primary/25"
+            >
               <item.icon className="h-5 w-5 text-primary mx-auto mb-2" />
-              <p className="text-2xl sm:text-3xl font-black tracking-tight">{item.value}</p>
-              <p className="text-[11px] uppercase tracking-wide text-muted-foreground/80 mt-1">{item.label}</p>
+              <p className="break-words text-[clamp(1.5rem,6vw,1.875rem)] font-black tracking-tight leading-tight">
+                {item.value}
+              </p>
+              <p className="mt-1 break-words text-[11px] uppercase tracking-wide text-muted-foreground/80">
+                {item.label}
+              </p>
             </Card>
           ))}
         </motion.div>

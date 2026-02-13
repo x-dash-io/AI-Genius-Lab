@@ -10,12 +10,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Plus, Save } from "lucide-react";
 import { toast } from "@/lib/toast";
+import type { SubscriptionTier } from "@prisma/client";
+
+const OFFICIAL_TIER_OPTIONS = [
+  { value: "starter", label: "Starter" },
+  { value: "professional", label: "Professional" },
+  { value: "founder", label: "Founder" },
+] as const;
+
+type OfficialTier = (typeof OFFICIAL_TIER_OPTIONS)[number]["value"];
+
+function normalizeTierForForm(tier?: SubscriptionTier): OfficialTier {
+  if (tier === "starter" || tier === "professional" || tier === "founder") {
+    return tier;
+  }
+
+  // Migrate legacy values into current supported tier set.
+  if (tier === "pro" || tier === "elite") {
+    return "professional";
+  }
+
+  return "starter";
+}
 
 type PlanFormData = {
   id?: string;
   name: string;
   description: string;
-  tier: "starter" | "pro" | "elite" | "professional" | "founder";
+  tier: SubscriptionTier;
   priceMonthlyCents: number;
   priceAnnualCents: number;
   isActive: boolean;
@@ -67,16 +89,16 @@ export function SubscriptionPlanForm({
             </div>
             <div className="space-y-2">
               <Label htmlFor="tier">Tier</Label>
-              <Select name="tier" defaultValue={initialData?.tier || "starter"}>
+              <Select name="tier" defaultValue={normalizeTierForForm(initialData?.tier)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="starter">Starter</SelectItem>
-                  <SelectItem value="pro">Pro (Legacy)</SelectItem>
-                  <SelectItem value="elite">Elite (Legacy)</SelectItem>
-                  <SelectItem value="professional">Professional</SelectItem>
-                  <SelectItem value="founder">Founder</SelectItem>
+                  {OFFICIAL_TIER_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

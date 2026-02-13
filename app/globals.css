@@ -107,16 +107,16 @@
   --popover-foreground: var(--card-foreground);
 }
 
-/* Glass effect: dropdowns should be semi-transparent and readable */
+/* Glass effect: keep interactive menu surfaces opaque for readability */
 :root[data-ui-effects='glass'] {
-  /* A bright glass tone with ~85% opacity for light mode */
-  --popover: 0 0% 100% / 0.85;
+  /* Opaque card tone in light mode */
+  --popover: var(--card);
   --popover-foreground: 222 42% 12%; /* dark text */
 }
 
 .dark[data-ui-effects='glass'] {
-  /* A slightly translucent dark tone for glass in dark mode */
-  --popover: 17 23 41 / 0.85;
+  /* Opaque card tone in dark mode */
+  --popover: var(--card);
   --popover-foreground: 220 23% 96%; /* light text */
 }
 
@@ -137,6 +137,23 @@ body {
   position: relative;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent text and flex/grid children from forcing horizontal overflow. */
+[data-app-shell] :where(.flex, .inline-flex, .grid) > * {
+  min-width: 0;
+}
+
+[data-app-shell] :where(h1, h2, h3, h4, h5, h6, p, span, a, li, label, button, td, th, figcaption, blockquote) {
+  overflow-wrap: anywhere;
+}
+
+[data-app-shell] :where(h1, h2, h3, h4, h5, h6) {
+  text-wrap: balance;
+}
+
+[data-app-shell] :where(p, li, figcaption, blockquote) {
+  text-wrap: pretty;
 }
 
 body::before {

@@ -119,7 +119,6 @@ function HeroTypedPhrase({
       phrases[0] ?? ""
     );
   }, [phrases]);
-  const maxWidthCh = maxPhrase.length + 1;
 
   useEffect(() => {
     if (!phrases.length || reduceMotion) {
@@ -160,13 +159,10 @@ function HeroTypedPhrase({
   const visibleValue = !phrases.length ? "" : reduceMotion ? visiblePhrase : typedValue;
 
   return (
-    <span
-      className="relative inline-flex"
-      style={{ minWidth: `${maxWidthCh}ch` }}
-      aria-hidden="true"
-    >
-      <span className="invisible">{visiblePhrase}</span>
-      <span className="absolute inset-0 whitespace-nowrap text-primary">
+    <span className="relative inline-block max-w-full align-baseline text-primary" aria-hidden="true">
+      <span className="hidden invisible sm:inline-block">{visiblePhrase}</span>
+      <span className="sm:hidden">{visiblePhrase}</span>
+      <span className="absolute inset-0 hidden whitespace-nowrap sm:block">
         {visibleValue}
         {!reduceMotion && typedValue.length < phrase.length ? (
           <span className="ml-0.5 inline-block h-[1.05em] w-[1px] bg-primary align-middle" />
@@ -372,12 +368,12 @@ export function PremiumHomepageExperience({
                 </Link>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 md:grid-cols-2">
                 {metricItems.map((metric) => (
-                  <div key={metric.label} className="rounded-[var(--radius-md)] border bg-background/90 px-4 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{metric.label}</p>
-                    <p className="mt-1 text-2xl font-semibold">{metric.value}</p>
-                    <p className="text-xs text-muted-foreground">{metric.detail}</p>
+                  <div key={metric.label} className="min-w-0 rounded-[var(--radius-md)] border bg-background/90 px-4 py-3">
+                    <p className="break-words text-xs font-semibold uppercase tracking-wide text-muted-foreground">{metric.label}</p>
+                    <p className="mt-1 break-words text-[clamp(1.5rem,5vw,2rem)] font-semibold leading-tight">{metric.value}</p>
+                    <p className="break-words text-xs text-muted-foreground">{metric.detail}</p>
                   </div>
                 ))}
               </div>

@@ -240,12 +240,12 @@ export function CourseCreationForm({
                     <SelectValue placeholder="Select a tier" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="STANDARD">Standard (Starter+)</SelectItem>
-                    <SelectItem value="PREMIUM">Premium (Pro+)</SelectItem>
+                    <SelectItem value="STANDARD">Standard (Starter)</SelectItem>
+                    <SelectItem value="PREMIUM">Premium (Professional + Founder)</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  Standard courses are available to all subscribers. Premium courses require a Pro or Elite subscription.
+                  Standard courses are available to Starter subscribers. Premium courses are available to Professional and Founder subscribers.
                 </p>
               </div>
 

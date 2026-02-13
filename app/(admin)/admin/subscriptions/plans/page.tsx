@@ -27,10 +27,20 @@ async function savePlanAction(formData: FormData) {
   await requireRole("admin");
 
   const id = formData.get("id") as string;
+  const rawTier = formData.get("tier");
+
+  if (
+    rawTier !== "starter" &&
+    rawTier !== "professional" &&
+    rawTier !== "founder"
+  ) {
+    throw new Error("Invalid tier selected. Allowed tiers are Starter, Professional, and Founder.");
+  }
+
   const data = {
     name: formData.get("name") as string,
     description: formData.get("description") as string,
-    tier: formData.get("tier") as SubscriptionTier,
+    tier: rawTier as SubscriptionTier,
     priceMonthlyCents: Math.round(parseFloat(formData.get("priceMonthly") as string) * 100),
     priceAnnualCents: Math.round(parseFloat(formData.get("priceAnnual") as string) * 100),
     isActive: formData.get("isActive") === "on",

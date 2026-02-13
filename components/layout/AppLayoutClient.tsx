@@ -193,9 +193,9 @@ function AppLayoutContent({ children, planName = "Member" }: AppLayoutClientProp
             </div>
           </aside>
 
-          <div className={cn("transition-all duration-300", isCollapsed ? "pl-16" : "pl-72")}>
+          <div className={cn("min-w-0 transition-all duration-300", isCollapsed ? "pl-16" : "pl-72")}>
             <header className="sticky top-0 z-20 border-b border-border/80 bg-background/90 backdrop-blur">
-              <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-6">
+              <div className="mx-auto flex h-14 w-full max-w-[96rem] items-center justify-between px-5 lg:px-8">
                 <p className="font-display text-base font-semibold tracking-tight">{currentSection}</p>
                 <div className="flex items-center gap-2">
                   <Link href={getHref("/cart")} className="relative inline-flex">
@@ -216,7 +216,7 @@ function AppLayoutContent({ children, planName = "Member" }: AppLayoutClientProp
             {isPreviewMode ? <PreviewBanner /> : null}
 
             <main>
-              <div className="mx-auto w-full max-w-7xl px-6 py-6">{children}</div>
+              <div className="mx-auto w-full max-w-[96rem] px-5 py-6 lg:px-8">{children}</div>
             </main>
 
             <Footer />
@@ -225,7 +225,7 @@ function AppLayoutContent({ children, planName = "Member" }: AppLayoutClientProp
 
         <div className="md:hidden">
           <header className="sticky top-0 z-40 border-b border-border/80 bg-background/95 backdrop-blur">
-            <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between px-4">
+            <div className="mx-auto flex h-14 w-full max-w-[96rem] items-center justify-between px-3 sm:px-5">
               <Link href={getHref("/dashboard")} className="inline-flex items-center">
                 <Image
                   src="/logo.png"
@@ -267,7 +267,7 @@ function AppLayoutContent({ children, planName = "Member" }: AppLayoutClientProp
                   animate={{ x: 0 }}
                   exit={{ x: "-100%" }}
                   transition={{ type: "tween", duration: 0.3 }}
-                  className="fixed inset-y-0 left-0 z-50 w-72 bg-card/95 backdrop-blur-lg shadow-lg overflow-y-auto md:hidden"
+                  className="fixed inset-y-0 left-0 z-50 w-[min(88vw,20rem)] bg-card/95 backdrop-blur-lg shadow-lg overflow-y-auto md:hidden"
                 >
                   <div className="flex items-center justify-between p-4 border-b">
                     <Link
@@ -325,7 +325,7 @@ function AppLayoutContent({ children, planName = "Member" }: AppLayoutClientProp
           {isPreviewMode ? <PreviewBanner /> : null}
 
           <main>
-            <div className="mx-auto w-full max-w-7xl px-4 py-5 pb-24">{children}</div>
+            <div className="mx-auto w-full max-w-[96rem] px-3 py-5 pb-24 sm:px-5">{children}</div>
           </main>
 
           <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border/80 bg-background/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-1.5 backdrop-blur">

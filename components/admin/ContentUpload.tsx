@@ -230,18 +230,18 @@ export function ContentUpload({
           }
         }}
       >
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="file">
-            <Upload className="h-4 w-4 mr-2" />
-            Upload File
+        <TabsList className="grid h-auto w-full grid-cols-1 gap-1 sm:grid-cols-3">
+          <TabsTrigger value="file" className="justify-start gap-2 px-3 py-2 text-left sm:justify-center">
+            <Upload className="h-4 w-4" />
+            <span className="truncate">Upload File</span>
           </TabsTrigger>
-          <TabsTrigger value="url">
-            <LinkIcon className="h-4 w-4 mr-2" />
-            From URL
+          <TabsTrigger value="url" className="justify-start gap-2 px-3 py-2 text-left sm:justify-center">
+            <LinkIcon className="h-4 w-4" />
+            <span className="truncate">From URL</span>
           </TabsTrigger>
-          <TabsTrigger value="manual">
-            <FileText className="h-4 w-4 mr-2" />
-            Manual ID
+          <TabsTrigger value="manual" className="justify-start gap-2 px-3 py-2 text-left sm:justify-center">
+            <FileText className="h-4 w-4" />
+            <span className="truncate">Manual ID</span>
           </TabsTrigger>
         </TabsList>
 

@@ -54,17 +54,17 @@ async function SubscriptionsList() {
       {subscriptions.map((sub: SubscriptionItem) => (
         <Card key={sub.id}>
           <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex min-w-0 gap-3 sm:gap-4">
                 <div className="bg-muted p-2 rounded-full h-fit">
                   <User className="h-6 w-6" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <CardTitle className="text-lg">{sub.user.name || "Unnamed User"}</CardTitle>
-                  <CardDescription>{sub.user.email}</CardDescription>
+                  <CardDescription className="truncate">{sub.user.email}</CardDescription>
                 </div>
               </div>
-              <div className="text-right flex flex-col items-end gap-2">
+              <div className="flex flex-col gap-2 sm:items-end sm:text-right">
                 <Badge variant={sub.status === "active" ? "default" : "secondary"}>
                   {sub.status}
                 </Badge>
@@ -84,7 +84,7 @@ async function SubscriptionsList() {
                 {sub.paypalSubscriptionId && (
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-mono text-xs text-muted-foreground">PayPal: {sub.paypalSubscriptionId}</span>
+                    <span className="break-all font-mono text-xs text-muted-foreground">PayPal: {sub.paypalSubscriptionId}</span>
                   </div>
                 )}
               </div>
@@ -121,12 +121,15 @@ async function GrantSubscriptionForm() {
         <CardDescription>Manually grant a subscription tier to a user by email.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={grantAction} className="flex flex-wrap items-end gap-4">
-          <div className="flex-1 min-w-[200px] space-y-2">
+        <form
+          action={grantAction}
+          className="grid gap-4 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_11rem_11rem_auto] xl:items-end"
+        >
+          <div className="space-y-2 sm:col-span-2 xl:col-span-1">
             <Label htmlFor="email">User Email</Label>
             <Input id="email" name="email" type="email" placeholder="user@example.com" required />
           </div>
-          <div className="w-[150px] space-y-2">
+          <div className="space-y-2">
             <Label htmlFor="planId">Plan</Label>
             <Select name="planId" required>
               <SelectTrigger id="planId">
@@ -139,7 +142,7 @@ async function GrantSubscriptionForm() {
               </SelectContent>
             </Select>
           </div>
-          <div className="w-[150px] space-y-2">
+          <div className="space-y-2">
             <Label htmlFor="interval">Interval</Label>
             <Select name="interval" defaultValue="monthly" required>
               <SelectTrigger id="interval">
@@ -151,7 +154,7 @@ async function GrantSubscriptionForm() {
               </SelectContent>
             </Select>
           </div>
-          <Button type="submit">
+          <Button type="submit" className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             Grant
           </Button>
@@ -170,7 +173,7 @@ export default async function UsersSubscriptionsPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Subscription Management
         </p>
-        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
+        <h1 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">
           User Subscriptions
         </h1>
         <p className="mt-2 text-lg text-muted-foreground">
