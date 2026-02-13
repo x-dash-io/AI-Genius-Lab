@@ -2,7 +2,7 @@
 
 import { prisma, withRetry } from "@/lib/prisma";
 import { requireRole } from "@/lib/access";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 type TestimonialInput = {
     name: string;
@@ -18,6 +18,13 @@ type TestimonialInput = {
 
 function getErrorMessage(error: unknown) {
     return error instanceof Error ? error.message : "Unknown error";
+}
+
+function revalidateTestimonialViews() {
+    revalidateTag("testimonials");
+    revalidatePath("/admin/testimonials");
+    revalidatePath("/testimonials");
+    revalidatePath("/");
 }
 
 export async function createTestimonial(data: TestimonialInput) {
@@ -40,7 +47,7 @@ export async function createTestimonial(data: TestimonialInput) {
             });
         });
 
-        revalidateTag("testimonials");
+        revalidateTestimonialViews();
         return { success: true, data: testimonial };
     } catch (error: unknown) {
         console.error("Failed to create testimonial:", error);
@@ -69,7 +76,7 @@ export async function updateTestimonial(id: string, data: TestimonialInput) {
             });
         });
 
-        revalidateTag("testimonials");
+        revalidateTestimonialViews();
         return { success: true, data: testimonial };
     } catch (error: unknown) {
         console.error("Failed to update testimonial:", error);
@@ -87,7 +94,7 @@ export async function deleteTestimonial(id: string) {
             });
         });
 
-        revalidateTag("testimonials");
+        revalidateTestimonialViews();
         return { success: true };
     } catch (error: unknown) {
         console.error("Failed to delete testimonial:", error);
@@ -106,7 +113,7 @@ export async function toggleTestimonialFeatured(id: string, featured: boolean) {
             });
         });
 
-        revalidateTag("testimonials");
+        revalidateTestimonialViews();
         return { success: true };
     } catch (error: unknown) {
         console.error("Failed to toggle testimonial featured:", error);

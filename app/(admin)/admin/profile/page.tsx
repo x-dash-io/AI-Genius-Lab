@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { PasswordChangeForm } from "@/components/profile/PasswordChangeForm";
+import { GoogleAccountLinkForm } from "@/components/profile/GoogleAccountLinkForm";
 import { ProfilePreviewBanner } from "@/components/profile/ProfilePreviewBanner";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -49,7 +50,11 @@ async function changePasswordAction(userId: string, formData: FormData) {
   await changePassword(userId, currentPassword, newPassword);
 }
 
-export default async function AdminProfilePage() {
+export default async function AdminProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ googleLink?: string }>;
+}) {
   await requireRole("admin");
   
   const session = await getServerSession(authOptions);
@@ -62,6 +67,8 @@ export default async function AdminProfilePage() {
   if (!userId) {
     redirect("/sign-in");
   }
+
+  const resolvedSearchParams = await searchParams;
 
   const [profile, adminStats, userWithPassword] = await Promise.all([
     getUserProfile(userId),
@@ -78,7 +85,14 @@ export default async function AdminProfilePage() {
     // Check if user has a password
     prisma.user.findUnique({
       where: { id: userId },
-      select: { passwordHash: true },
+      select: {
+        passwordHash: true,
+        Account: {
+          where: { provider: "google" },
+          select: { id: true },
+          take: 1,
+        },
+      },
     }),
   ]);
 
@@ -88,6 +102,7 @@ export default async function AdminProfilePage() {
 
   const [totalUsers, totalCourses, totalPurchases, lastActivity] = adminStats;
   const hasPassword = !!userWithPassword?.passwordHash;
+  const hasLinkedGoogle = (userWithPassword?.Account.length ?? 0) > 0;
 
   return (
     <div className="space-y-8">
@@ -250,6 +265,26 @@ export default async function AdminProfilePage() {
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Connected Accounts</CardTitle>
+          <CardDescription>
+            Explicitly link Google sign-in to your admin account after password confirmation.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="max-w-md">
+            <GoogleAccountLinkForm
+              isLinked={hasLinkedGoogle}
+              hasPassword={hasPassword}
+              currentEmail={profile.email}
+              returnTo="/admin/profile"
+              linkStatus={resolvedSearchParams.googleLink}
+            />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

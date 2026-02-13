@@ -5,10 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, MessageSquare } from "lucide-react";
 import { TestimonialList } from "@/components/admin/TestimonialList";
 import type { Testimonial } from "@/lib/testimonials";
+import { unstable_noStore as noStore } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
 async function TestimonialsContent() {
+    noStore();
+
     const testimonials = await getAllTestimonials();
     type TestimonialItem = (typeof testimonials)[number];
 

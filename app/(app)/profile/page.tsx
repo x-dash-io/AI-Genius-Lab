@@ -10,6 +10,7 @@ import { ProfileForm } from "@/components/profile/ProfileForm";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { PasswordChangeForm } from "@/components/profile/PasswordChangeForm";
 import { EmailChangeForm } from "@/components/profile/EmailChangeForm";
+import { GoogleAccountLinkForm } from "@/components/profile/GoogleAccountLinkForm";
 import { ProfilePreviewBanner } from "@/components/profile/ProfilePreviewBanner";
 import { Separator } from "@/components/ui/separator";
 import { BookOpen, DollarSign, GraduationCap, Calendar, ShieldCheck, Zap, Rocket, Star } from "lucide-react";
@@ -56,19 +57,32 @@ function formatCurrency(cents: number) {
   }).format(cents / 100);
 }
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ googleLink?: string }>;
+}) {
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     redirect("/sign-in");
   }
 
-  const [profile, stats, userWithPassword, subscription] = await Promise.all([
+  const resolvedSearchParams = await searchParams;
+
+  const [profile, stats, userAuthState, subscription] = await Promise.all([
     getUserProfile(session.user.id),
     getUserStats(session.user.id),
-    // Check if user has a password
+    // Check password + connected Google provider.
     prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { passwordHash: true },
+      select: {
+        passwordHash: true,
+        Account: {
+          where: { provider: "google" },
+          select: { id: true },
+          take: 1,
+        },
+      },
     }),
     getUserSubscription(session.user.id),
   ]);
@@ -77,7 +91,8 @@ export default async function ProfilePage() {
     redirect("/sign-in");
   }
 
-  const hasPassword = !!userWithPassword?.passwordHash;
+  const hasPassword = !!userAuthState?.passwordHash;
+  const hasLinkedGoogle = (userAuthState?.Account.length ?? 0) > 0;
   const memberSinceLabel = new Date(stats.memberSince).toLocaleDateString();
 
   return (
@@ -222,6 +237,24 @@ export default async function ProfilePage() {
             </Card>
           </div>
         </div>
+
+        <Card className="ui-surface">
+          <CardHeader>
+            <CardTitle>Connected Accounts</CardTitle>
+            <CardDescription>
+              Explicitly link Google sign-in to this account after confirming your password.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <GoogleAccountLinkForm
+              isLinked={hasLinkedGoogle}
+              hasPassword={hasPassword}
+              currentEmail={profile.email}
+              returnTo="/profile"
+              linkStatus={resolvedSearchParams.googleLink}
+            />
+          </CardContent>
+        </Card>
 
         <Card className="ui-surface">
           <CardHeader>

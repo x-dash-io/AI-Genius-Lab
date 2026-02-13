@@ -1,12 +1,17 @@
 import NextAuth from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import type { Session, User, Account, Profile } from "next-auth";
+import { cookies } from "next/headers";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 import { type Role } from "@/lib/rbac";
+import {
+  GOOGLE_LINK_INTENT_COOKIE,
+  parseGoogleLinkIntent,
+} from "@/lib/google-link-intent";
 
 function isOAuthEmailVerified(account: Account | null, profile?: Profile | null) {
   if (!account || account.provider === "credentials") {
@@ -19,6 +24,34 @@ function isOAuthEmailVerified(account: Account | null, profile?: Profile | null)
   }
 
   return false;
+}
+
+function getGoogleLinkIntentFromCookie() {
+  try {
+    const token = cookies().get(GOOGLE_LINK_INTENT_COOKIE)?.value;
+    return parseGoogleLinkIntent(token);
+  } catch {
+    return null;
+  }
+}
+
+function clearGoogleLinkIntentCookie() {
+  try {
+    cookies().set(GOOGLE_LINK_INTENT_COOKIE, "", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 0,
+      path: "/",
+    });
+  } catch {
+    // No-op if cookie mutation is unavailable in this callback context.
+  }
+}
+
+function withGoogleLinkStatus(returnTo: string, status: string) {
+  const separator = returnTo.includes("?") ? "&" : "?";
+  return `${returnTo}${separator}googleLink=${encodeURIComponent(status)}`;
 }
 
 export const authOptions = {
@@ -79,19 +112,89 @@ export const authOptions = {
   callbacks: {
     async signIn({ user, account, profile }: { user: User; account: Account | null; profile?: Profile | null }) {
       if (account && account.provider !== "credentials") {
+        const googleLinkIntent = getGoogleLinkIntentFromCookie();
+
         if (!user.email || !isOAuthEmailVerified(account, profile)) {
+          if (googleLinkIntent) {
+            clearGoogleLinkIntentCookie();
+            return withGoogleLinkStatus(googleLinkIntent.returnTo, "verification_failed");
+          }
           return false;
         }
 
         try {
+          const normalizedEmail = user.email.toLowerCase().trim();
+          const linkedProviderAccount = await prisma.account.findUnique({
+            where: {
+              provider_providerAccountId: {
+                provider: account.provider,
+                providerAccountId: account.providerAccountId,
+              },
+            },
+            select: { userId: true },
+          });
+
           const existingUser = await prisma.user.findUnique({
-            where: { email: user.email.toLowerCase().trim() },
+            where: { email: normalizedEmail },
             select: {
               id: true,
               image: true,
               emailVerified: true,
             },
           });
+
+          if (googleLinkIntent) {
+            const isMatchingIntent =
+              existingUser &&
+              existingUser.id === googleLinkIntent.userId &&
+              googleLinkIntent.email === normalizedEmail;
+
+            if (!isMatchingIntent) {
+              clearGoogleLinkIntentCookie();
+              return withGoogleLinkStatus(googleLinkIntent.returnTo, "email_mismatch");
+            }
+
+            if (!linkedProviderAccount) {
+              await prisma.account.create({
+                data: {
+                  id: crypto.randomUUID(),
+                  userId: existingUser.id,
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  refresh_token: account.refresh_token,
+                  access_token: account.access_token,
+                  expires_at: account.expires_at,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: account.id_token,
+                  session_state:
+                    typeof account.session_state === "string"
+                      ? account.session_state
+                      : undefined,
+                },
+              });
+
+              await prisma.activityLog.create({
+                data: {
+                  id: `activity_${Date.now()}_${crypto.randomUUID()}`,
+                  userId: existingUser.id,
+                  type: "oauth_account_linked",
+                  metadata: {
+                    provider: account.provider,
+                  },
+                },
+              });
+            } else if (linkedProviderAccount.userId !== existingUser.id) {
+              clearGoogleLinkIntentCookie();
+              return withGoogleLinkStatus(googleLinkIntent.returnTo, "already_in_use");
+            }
+
+            clearGoogleLinkIntentCookie();
+          } else if (existingUser && !linkedProviderAccount) {
+            // Existing credential account requires explicit intent-based linking.
+            return false;
+          }
 
           if (existingUser) {
             const oauthPicture =
@@ -119,6 +222,11 @@ export const authOptions = {
           }
         } catch (error) {
           console.error("SignIn callback error:", error);
+          const googleLinkIntent = getGoogleLinkIntentFromCookie();
+          if (googleLinkIntent) {
+            clearGoogleLinkIntentCookie();
+            return withGoogleLinkStatus(googleLinkIntent.returnTo, "failed");
+          }
           return false;
         }
       }

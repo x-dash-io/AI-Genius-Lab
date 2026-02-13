@@ -107,12 +107,16 @@ export function TestimonialForm({ open, onOpenChange, testimonial }: Testimonial
             rating: parseInt(values.rating),
         };
 
+        let success = false;
         if (testimonial) {
-            await handleUpdate(testimonial.id, data);
+            success = await handleUpdate(testimonial.id, data);
         } else {
-            await handleCreate(data);
+            success = await handleCreate(data);
         }
-        handleOpenStateChange(false);
+
+        if (success) {
+            handleOpenStateChange(false);
+        }
     };
 
     const featured = useWatch({ control, name: "featured" }) ?? false;

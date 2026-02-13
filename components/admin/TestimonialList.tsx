@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useTestimonialActions } from "@/hooks/use-testimonial-actions";
 import { TestimonialForm } from "./TestimonialForm";
 import { Testimonial } from "@/lib/testimonials";
+import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface TestimonialListProps {
     initialTestimonials: Testimonial[];
@@ -31,6 +32,7 @@ interface TestimonialListProps {
 
 export function TestimonialList({ initialTestimonials }: TestimonialListProps) {
     const { handleDelete, handleToggleFeatured, isPending } = useTestimonialActions();
+    const { confirm } = useConfirmDialog();
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
 
@@ -42,6 +44,20 @@ export function TestimonialList({ initialTestimonials }: TestimonialListProps) {
     const onAdd = () => {
         setEditingTestimonial(null);
         setIsFormOpen(true);
+    };
+
+    const onDelete = async (testimonial: Testimonial) => {
+        const confirmed = await confirm({
+            title: "Delete testimonial?",
+            description:
+                "This will permanently remove this success story from admin records and public sections. This action cannot be undone.",
+            confirmText: "Delete Story",
+            cancelText: "Keep Story",
+            variant: "destructive",
+        });
+
+        if (!confirmed) return;
+        await handleDelete(testimonial.id);
     };
 
     return (
@@ -98,13 +114,18 @@ export function TestimonialList({ initialTestimonials }: TestimonialListProps) {
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="rounded-xl">
-                                                <DropdownMenuItem onClick={() => onEdit(testimonial)} className="rounded-lg">
+                                                <DropdownMenuItem
+                                                    onClick={() => onEdit(testimonial)}
+                                                    className="rounded-lg"
+                                                    disabled={isPending}
+                                                >
                                                     <Edit className="mr-2 h-4 w-4" />
                                                     Edit Details
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
                                                     onClick={() => handleToggleFeatured(testimonial.id, !testimonial.featured)}
                                                     className="rounded-lg"
+                                                    disabled={isPending}
                                                 >
                                                     {testimonial.featured ? (
                                                         <>
@@ -120,14 +141,11 @@ export function TestimonialList({ initialTestimonials }: TestimonialListProps) {
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
                                                     className="text-destructive focus:text-destructive rounded-lg"
-                                                    onClick={() => {
-                                                        if (confirm("Permanently delete this success story?")) {
-                                                            handleDelete(testimonial.id);
-                                                        }
-                                                    }}
+                                                    onClick={() => void onDelete(testimonial)}
+                                                    disabled={isPending}
                                                 >
                                                     <Trash2 className="mr-2 h-4 w-4" />
-                                                    Delete RECORD
+                                                    Delete Story
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
