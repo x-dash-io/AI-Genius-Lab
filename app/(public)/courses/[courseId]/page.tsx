@@ -9,6 +9,7 @@ import { CourseActions } from "@/components/courses/CourseActions";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateCourseSchema } from "@/lib/seo/schemas";
+import { canOptimizeImageUrl, normalizeImageUrl, passthroughImageLoader } from "@/lib/images";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,18 +52,6 @@ function formatPrice(priceCents: number) {
   return priceCents === 0 ? "Free" : `$${(priceCents / 100).toFixed(2)}`;
 }
 
-function resolveCourseImage(imageUrl: string | null) {
-  if (!imageUrl) {
-    return null;
-  }
-
-  if (imageUrl.startsWith("/") || imageUrl.includes("res.cloudinary.com")) {
-    return imageUrl;
-  }
-
-  return null;
-}
-
 export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
   const { courseId } = await params;
   const course = await getCoursePreviewBySlug(courseId);
@@ -72,7 +61,8 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
   }
 
   const reviewStats = await getCourseReviewStats(course.id);
-  const courseImage = resolveCourseImage(course.imageUrl);
+  const courseImage = normalizeImageUrl(course.imageUrl);
+  const usePassthroughLoader = courseImage ? !canOptimizeImageUrl(courseImage) : false;
   const lessons = course.sections.flatMap((section) =>
     section.lessons.map((lesson) => ({
       id: lesson.id,
@@ -127,6 +117,8 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
                     fill
                     sizes="(max-width: 1024px) 100vw, 66vw"
                     className="object-cover"
+                    loader={usePassthroughLoader ? passthroughImageLoader : undefined}
+                    unoptimized={usePassthroughLoader}
                   />
                 ) : (
                   <div className="absolute inset-0 bg-[linear-gradient(145deg,hsl(var(--primary)_/_0.16),hsl(var(--accent)_/_0.6))]" />

@@ -69,6 +69,8 @@ export function CourseEditForm({
   const [isDeletingLesson, setIsDeletingLesson] = useState<Record<string, boolean>>({});
   const [isUpdatingLesson, setIsUpdatingLesson] = useState<Record<string, boolean>>({});
   const [isEditingCourse, setIsEditingCourse] = useState(false);
+  const [courseImageUrl, setCourseImageUrl] = useState(initialCourse.imageUrl || "");
+  const [courseImageError, setCourseImageError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string }>>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
@@ -147,6 +149,30 @@ export function CourseEditForm({
         title: "Course updated",
         description: "Course details have been saved successfully.",
         variant: "success",
+      });
+      setCourse((prev) => {
+        const title = (formData.get("title") as string) || prev.title;
+        const slug = (formData.get("slug") as string) || prev.slug;
+        const description = ((formData.get("description") as string) || "").trim();
+        const category = (formData.get("category") as string) || "none";
+        const priceDollars = parseFloat((formData.get("priceCents") as string) || "0");
+        const inventoryRaw = (formData.get("inventory") as string) || "";
+        const parsedInventory = parseInt(inventoryRaw, 10);
+        const tier = ((formData.get("tier") as string) || prev.tier) as "STANDARD" | "PREMIUM";
+        const imageUrl = ((formData.get("imageUrl") as string) || "").trim();
+
+        return {
+          ...prev,
+          title,
+          slug,
+          description: description || null,
+          category: category === "none" ? null : category,
+          priceCents: Number.isFinite(priceDollars) ? Math.round(priceDollars * 100) : prev.priceCents,
+          inventory: inventoryRaw.trim() === "" ? null : (Number.isNaN(parsedInventory) ? prev.inventory : parsedInventory),
+          isPublished: formData.get("isPublished") === "on",
+          tier,
+          imageUrl: imageUrl || null,
+        };
       });
       setIsEditingCourse(false);
       router.refresh();
@@ -478,6 +504,18 @@ export function CourseEditForm({
     }
   };
 
+  const handleStartEditingCourse = () => {
+    setCourseImageUrl(course.imageUrl || "");
+    setCourseImageError(null);
+    setIsEditingCourse(true);
+  };
+
+  const handleCancelEditingCourse = () => {
+    setCourseImageUrl(course.imageUrl || "");
+    setCourseImageError(null);
+    setIsEditingCourse(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Course Details */}
@@ -493,7 +531,7 @@ export function CourseEditForm({
                 type="button"
                 variant="outline"
                 size="lg"
-                onClick={() => setIsEditingCourse(true)}
+                onClick={handleStartEditingCourse}
               >
                 Edit Course
               </Button>
@@ -535,16 +573,26 @@ export function CourseEditForm({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="imageUrl">Image URL</Label>
-                <Input
-                  id="imageUrl"
-                  name="imageUrl"
-                  placeholder="https://example.com/image.jpg"
-                  defaultValue={course.imageUrl || ""}
+                <Label>Course Image</Label>
+                <ContentUpload
+                  sectionId={`course-cover-${course.id}`}
+                  contentType="image"
+                  value={courseImageUrl}
+                  onChange={(value) => {
+                    setCourseImageUrl(value);
+                    setCourseImageError(null);
+                  }}
+                  onError={setCourseImageError}
+                  returnUrl={true}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Provide a URL for the course preview image.
-                </p>
+                <input type="hidden" name="imageUrl" value={courseImageUrl} />
+                {courseImageError ? (
+                  <p className="text-xs text-destructive">{courseImageError}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Upload an image file, import from URL, or paste an image URL/public ID.
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -635,7 +683,7 @@ export function CourseEditForm({
                   type="button"
                   variant="outline"
                   size="lg"
-                  onClick={() => setIsEditingCourse(false)}
+                  onClick={handleCancelEditingCourse}
                   disabled={isSavingCourse}
                 >
                   Cancel

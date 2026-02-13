@@ -4,6 +4,21 @@ import { uploadToCloudinary, getResourceTypeFromFile } from "@/lib/cloudinary";
 import { withErrorHandler } from "@/app/api/error-handler";
 import { AppError } from "@/lib/errors";
 
+const ALLOWED_CONTENT_TYPES = ["video", "audio", "pdf", "file", "image"] as const;
+type AllowedContentType = (typeof ALLOWED_CONTENT_TYPES)[number];
+
+const MAX_URL_UPLOAD_SIZES: Record<AllowedContentType, number> = {
+  video: 500 * 1024 * 1024,
+  audio: 100 * 1024 * 1024,
+  pdf: 100 * 1024 * 1024,
+  file: 100 * 1024 * 1024,
+  image: 10 * 1024 * 1024,
+};
+
+function isAllowedContentType(value: unknown): value is AllowedContentType {
+  return typeof value === "string" && ALLOWED_CONTENT_TYPES.includes(value as AllowedContentType);
+}
+
 export const POST = withErrorHandler(async (request: NextRequest) => {
   // Require admin role
   await requireRole("admin");
@@ -23,7 +38,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   }
 
   // Validate content type
-  if (!["video", "audio", "pdf", "file"].includes(contentType)) {
+  if (!isAllowedContentType(contentType)) {
     throw AppError.badRequest("Invalid content type");
   }
 
@@ -40,7 +55,7 @@ export const POST = withErrorHandler(async (request: NextRequest) => {
   // Validate file size (if available)
   if (contentLength) {
     const size = parseInt(contentLength, 10);
-    const maxSize = contentType === "video" ? 500 * 1024 * 1024 : 100 * 1024 * 1024;
+    const maxSize = MAX_URL_UPLOAD_SIZES[contentType];
     if (size > maxSize) {
       throw AppError.badRequest("File size exceeds maximum allowed size");
     }

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { canOptimizeImageUrl, normalizeImageUrl, passthroughImageLoader } from "@/lib/images";
 
 interface CourseAction {
   href: string;
@@ -39,10 +40,6 @@ interface CourseProductCardProps {
   primaryAction: CourseAction;
   secondaryActions?: CourseAction[];
   className?: string;
-}
-
-function isSupportedImageUrl(imageUrl: string) {
-  return imageUrl.startsWith("/") || imageUrl.includes("res.cloudinary.com");
 }
 
 function CourseImageFallback({ categoryLabel }: { categoryLabel: string }) {
@@ -71,24 +68,37 @@ export function CourseProductCard({
   secondaryActions = [],
   className,
 }: CourseProductCardProps) {
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [loadedImage, setLoadedImage] = useState<string | null>(null);
+  const [failedImage, setFailedImage] = useState<string | null>(null);
 
-  const resolvedImage = imageUrl && isSupportedImageUrl(imageUrl) ? imageUrl : null;
+  const resolvedImage = normalizeImageUrl(imageUrl);
+  const usePassthroughLoader = resolvedImage ? !canOptimizeImageUrl(resolvedImage) : false;
+  const hasImageError = Boolean(resolvedImage && failedImage === resolvedImage);
+  const isImageLoaded = Boolean(resolvedImage && loadedImage === resolvedImage);
 
   return (
     <Card className={cn("ui-surface supports-hover-card flex h-full flex-col overflow-hidden border", className)}>
       <div className="relative aspect-video overflow-hidden border-b bg-muted/25">
-        {resolvedImage ? (
+        {resolvedImage && !hasImageError ? (
           <>
             <Image
+              key={resolvedImage}
               src={resolvedImage}
               alt={title}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover"
-              onLoad={() => setImageLoaded(true)}
+              loader={usePassthroughLoader ? passthroughImageLoader : undefined}
+              unoptimized={usePassthroughLoader}
+              onLoad={() => {
+                setLoadedImage(resolvedImage);
+                setFailedImage((prev) => (prev === resolvedImage ? null : prev));
+              }}
+              onError={() => {
+                setFailedImage(resolvedImage);
+              }}
             />
-            {!imageLoaded ? <Skeleton className="absolute inset-0" /> : null}
+            {!isImageLoaded ? <Skeleton className="absolute inset-0" /> : null}
           </>
         ) : (
           <CourseImageFallback categoryLabel={categoryLabel} />

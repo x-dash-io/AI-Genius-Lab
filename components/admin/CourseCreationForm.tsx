@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ContentUpload } from "@/components/admin/ContentUpload";
 import { Plus, ChevronDown, ChevronUp, Loader2, CheckCircle } from "lucide-react";
 import { toast } from "@/lib/toast";
 import type { Course, Section, Lesson, Category } from "@prisma/client";
@@ -33,6 +34,8 @@ export function CourseCreationForm({
   const [createdCourse, setCreatedCourse] = useState<CourseWithSections | null>(null);
   const [isFormCollapsed, setIsFormCollapsed] = useState(false);
   const [isCreatingCourse, setIsCreatingCourse] = useState(false);
+  const [courseImageUrl, setCourseImageUrl] = useState("");
+  const [courseImageError, setCourseImageError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
 
@@ -172,16 +175,26 @@ export function CourseCreationForm({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="imageUrl">Image URL</Label>
-                <Input
-                  id="imageUrl"
-                  name="imageUrl"
-                  placeholder="https://example.com/image.jpg"
-                  disabled={isCreatingCourse}
+                <Label>Course Image</Label>
+                <ContentUpload
+                  sectionId="course-cover"
+                  contentType="image"
+                  value={courseImageUrl}
+                  onChange={(value) => {
+                    setCourseImageUrl(value);
+                    setCourseImageError(null);
+                  }}
+                  onError={setCourseImageError}
+                  returnUrl={true}
                 />
-                <p className="text-xs text-muted-foreground">
-                  Provide a URL for the course preview image.
-                </p>
+                <input type="hidden" name="imageUrl" value={courseImageUrl} />
+                {courseImageError ? (
+                  <p className="text-xs text-destructive">{courseImageError}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Upload an image file, import from URL, or paste an image URL/public ID.
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">

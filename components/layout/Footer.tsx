@@ -20,12 +20,29 @@ interface FooterProps {
   socialLinks?: SocialLink[] | Record<string, string>;
 }
 
+function TikTokIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      fill="currentColor"
+      viewBox="0 0 16 16"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M9.37 8.51c.27.18.57.28.89.28a1.65 1.65 0 0 0 1.66-1.66v-.27a3.2 3.2 0 0 0 1.5.36V5.6a1.7 1.7 0 0 1-.33-.02v1.29a3.2 3.2 0 0 1-1.5-.36v.27a1.65 1.65 0 0 1-1.66 1.66c-.32 0-.62-.1-.89-.28m3.95-5.49a2.1 2.1 0 0 1-.52-.34A2.1 2.1 0 0 1 12.28 1h-1.1v5.45q-.002.227-.15.42a.81.81 0 0 1-.66.33.81.81 0 0 1-.47-1.48.8.8 0 0 1 .44-.13V4.06a2.3 2.3 0 0 0-1.35.31 2.35 2.35 0 0 0-1.02 1.51 2.33 2.33 0 0 0 .36 1.79 2.35 2.35 0 0 0 1.51 1.02c.55.09 1.1-.02 1.58-.31a2.35 2.35 0 0 0 1.06-1.01c.2-.36.31-.78.31-1.2V3.39a3.2 3.2 0 0 0 1.87.6V2.47q-.54-.001-1.03-.2" />
+    </svg>
+  );
+}
+
 const iconMap: Record<string, ComponentType<{ className?: string }>> = {
   facebook: Facebook,
   twitter: Twitter,
   linkedin: Linkedin,
   instagram: Instagram,
   youtube: Youtube,
+  tiktok: TikTokIcon,
   github: Github,
   discord: MessageCircle,
   website: Globe,
