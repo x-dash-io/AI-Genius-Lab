@@ -81,9 +81,11 @@ export function CourseList({ courses }: CourseListProps) {
 
               <CardContent className="p-6 pt-0 space-y-6">
                 <div className="flex items-center justify-between pt-4 border-t border-border/50">
-                  <div className="space-y-0.5">
-                    <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground/40">Investment</p>
-                    <p className="text-2xl font-black text-foreground">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-background/90 px-3 py-2 shadow-sm backdrop-blur-sm">
+                    <p className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground">
+                      Price
+                    </p>
+                    <p className="text-lg font-black leading-none text-foreground tabular-nums sm:text-xl">
                       ${(course.priceCents / 100).toFixed(2)}
                     </p>
                   </div>

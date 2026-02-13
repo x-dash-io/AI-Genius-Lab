@@ -104,9 +104,15 @@ export function CourseProductCard({
           <CourseImageFallback categoryLabel={categoryLabel} />
         )}
 
-        <div className="absolute inset-x-3 top-3 flex items-center justify-between gap-2">
-          <Badge variant="secondary">{categoryLabel}</Badge>
-          <span className="rounded-full border bg-background/85 px-2.5 py-1 text-xs font-semibold">
+        <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
+          <Badge
+            variant="secondary"
+            title={categoryLabel}
+            className="max-w-[65%] truncate px-2.5 py-1 text-[11px] font-semibold"
+          >
+            {categoryLabel}
+          </Badge>
+          <span className="shrink-0 rounded-full border border-border/80 bg-background/95 px-3 py-1.5 text-sm font-bold leading-none text-foreground shadow-sm backdrop-blur-sm tabular-nums">
             {priceLabel}
           </span>
         </div>
