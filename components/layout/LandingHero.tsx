@@ -116,7 +116,7 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.65, delay: 0.2 }}
           >
-            <Card glass className="rounded-[28px] border-white/20 p-5 sm:p-6 shadow-2xl">
+            <Card className="rounded-[28px] border-white/20 p-5 sm:p-6 shadow-2xl">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-muted-foreground">Path Momentum</p>
                 <span className="text-xs font-bold uppercase tracking-wide text-primary">Live preview</span>
@@ -215,7 +215,6 @@ export function LandingHero({ stats, heroLogos }: LandingHeroProps) {
           ].map((item) => (
             <Card
               key={item.label}
-              glass
               className="min-w-0 border-white/10 p-5 text-center transition-all duration-300 hover:border-primary/25"
             >
               <item.icon className="h-5 w-5 text-primary mx-auto mb-2" />

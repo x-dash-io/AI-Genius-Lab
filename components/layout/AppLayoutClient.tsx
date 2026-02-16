@@ -167,7 +167,7 @@ function AppLayoutContent({ children, planName = "Member" }: AppLayoutClientProp
                 href={getHref("/profile")}
                 title={isCollapsed ? "Profile" : undefined}
                 className={cn(
-                  "ui-surface glass flex rounded-[var(--radius-md)] border",
+                  "ui-surface flex rounded-[var(--radius-md)] border",
                   isCollapsed ? "justify-center p-2" : "items-center gap-3 p-3"
                 )}
               >

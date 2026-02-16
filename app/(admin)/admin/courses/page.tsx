@@ -62,7 +62,7 @@ async function CourseList({ searchParams }: AdminCoursesPageProps) {
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <Card glass className="border-white/10 shadow-xl overflow-hidden">
+      <Card className="border-white/10 shadow-xl overflow-hidden">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
@@ -82,7 +82,7 @@ async function CourseList({ searchParams }: AdminCoursesPageProps) {
       </Card>
 
       {courses.length === 0 ? (
-        <Card glass className="py-20 border-white/5 shadow-2xl">
+        <Card className="py-20 border-white/5 shadow-2xl">
           <CardContent className="text-center">
             <div className="mx-auto h-20 w-20 rounded-full bg-accent/30 flex items-center justify-center mb-6">
               <BookOpen className="h-10 w-10 text-muted-foreground" />

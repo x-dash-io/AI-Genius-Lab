@@ -128,7 +128,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             <Link
               href="/admin/profile"
               className={cn(
-                "ui-surface glass flex rounded-[var(--radius-md)] border",
+                "ui-surface flex rounded-[var(--radius-md)] border",
                 isCollapsed ? "justify-center p-2" : "items-center gap-3 p-3"
               )}
             >

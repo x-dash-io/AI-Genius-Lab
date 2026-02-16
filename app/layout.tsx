@@ -64,7 +64,6 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      data-ui-effects="solid"
       data-reduced-motion="false"
     >
       <head>

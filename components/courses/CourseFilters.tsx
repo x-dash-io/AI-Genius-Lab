@@ -159,7 +159,7 @@ export function CourseFilters() {
 
         {/* Filters Group - Glassmorphic Controls */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-3 p-1 rounded-2xl glass border-white/5 bg-accent/5 flex-wrap">
+          <div className="flex items-center gap-3 rounded-2xl border border-border/50 bg-accent/5 p-1 flex-wrap">
             <Select value={category} onValueChange={handleCategoryChange} disabled={isLoadingCategories}>
               <SelectTrigger className="w-full sm:w-[180px] h-10 border border-border/50 bg-background hover:bg-accent/50 hover:border-primary/50 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-sm">
                 <SelectValue placeholder={isLoadingCategories ? "Loading..." : "Category"} />

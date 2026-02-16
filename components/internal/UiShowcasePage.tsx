@@ -437,18 +437,18 @@ export function UiShowcasePage() {
           </CardContent>
         </Card>
 
-        <Card glass>
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Layers className="h-4 w-4" />
-              Glass Surface Preview
+              Surface Preview
             </CardTitle>
             <CardDescription>
-              Toggle effects mode from the header control to verify `solid` vs `glass` behavior.
+              Shared surface styling with tokenized contrast across themes.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            This card is rendered with the shared `glass` surface style and inherits tokenized contrast in both themes.
+            This card uses the base card surface without optional effects mode switching.
           </CardContent>
         </Card>
 
