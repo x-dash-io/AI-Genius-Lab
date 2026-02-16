@@ -75,6 +75,9 @@ export function CourseProductCard({
   const usePassthroughLoader = resolvedImage ? !canOptimizeImageUrl(resolvedImage) : false;
   const hasImageError = Boolean(resolvedImage && failedImage === resolvedImage);
   const isImageLoaded = Boolean(resolvedImage && loadedImage === resolvedImage);
+  const normalizedTier = (tierLabel || "").trim().toLowerCase();
+  const isAdvancedTier = normalizedTier.includes("advanced");
+  const isCoreTier = normalizedTier.includes("core");
 
   return (
     <Card className={cn("ui-surface supports-hover-card flex h-full flex-col overflow-hidden border", className)}>
@@ -106,9 +109,9 @@ export function CourseProductCard({
 
         <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
           <Badge
-            variant="secondary"
+            variant="outline"
             title={categoryLabel}
-            className="max-w-[65%] truncate px-2.5 py-1 text-[11px] font-semibold"
+            className="max-w-[65%] truncate border-white/35 bg-black/55 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm backdrop-blur"
           >
             {categoryLabel}
           </Badge>
@@ -119,7 +122,17 @@ export function CourseProductCard({
 
         {tierLabel ? (
           <div className="absolute inset-x-3 bottom-3 flex justify-end">
-            <Badge variant="outline" className="gap-1 bg-background/85">
+            <Badge
+              variant="outline"
+              className={cn(
+                "gap-1 border shadow-sm backdrop-blur",
+                isAdvancedTier
+                  ? "border-primary/35 bg-primary/75 text-white dark:bg-primary/60"
+                  : isCoreTier
+                    ? "border-success/35 bg-success/75 text-white dark:bg-success/60"
+                    : "border-white/35 bg-black/55 text-white"
+              )}
+            >
               <GraduationCap className="h-3.5 w-3.5" />
               {tierLabel}
             </Badge>
