@@ -77,7 +77,7 @@ export default async function NewLearningPathPage() {
                 rows={4}
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <SubmitButton
                 loadingText="Creating..."
                 icon={<Plus className="h-4 w-4 mr-2" />}

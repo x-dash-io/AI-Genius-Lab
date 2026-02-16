@@ -108,7 +108,7 @@ async function LearningPathEditContent({ pathId }: { pathId: string }) {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Edit Learning Path
         </p>
-        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
+        <h1 className="mt-2 break-words font-display text-4xl font-bold tracking-tight">
           {path.title}
         </h1>
       </div>

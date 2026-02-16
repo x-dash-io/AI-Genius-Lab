@@ -322,8 +322,8 @@ export function CourseCreationForm({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center gap-2 p-4 border rounded-lg">
-                  <div className="flex-1">
+                <div className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:gap-2">
+                  <div className="flex-1 min-w-0">
                     <h3 className="font-medium">Edit Course Details</h3>
                     <p className="text-sm text-muted-foreground">
                       Go to the course edit page to add sections, lessons, and content.
@@ -337,8 +337,8 @@ export function CourseCreationForm({
                   </Button>
                 </div>
 
-                <div className="flex items-center gap-2 p-4 border rounded-lg">
-                  <div className="flex-1">
+                <div className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:gap-2">
+                  <div className="flex-1 min-w-0">
                     <h3 className="font-medium">Create Another Course</h3>
                     <p className="text-sm text-muted-foreground">
                       Expand the form above to create another course.

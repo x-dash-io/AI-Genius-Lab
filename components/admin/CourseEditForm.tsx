@@ -521,7 +521,7 @@ export function CourseEditForm({
       {/* Course Details */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <CardTitle>Course Details</CardTitle>
               <CardDescription>Basic information about your course</CardDescription>
@@ -668,7 +668,7 @@ export function CourseEditForm({
                 </Label>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button type="submit" disabled={isSavingCourse} variant="premium" size="lg">
                   {isSavingCourse ? (
                     <>
@@ -701,7 +701,7 @@ export function CourseEditForm({
 
                   <div>
                     <Label className="text-sm font-medium text-muted-foreground">Slug</Label>
-                    <p className="text-sm font-mono">{course.slug}</p>
+                    <p className="break-all text-sm font-mono">{course.slug}</p>
                   </div>
 
                   <div>
@@ -753,7 +753,7 @@ export function CourseEditForm({
       {/* Sections */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <CardTitle>Sections & Lessons</CardTitle>
               <CardDescription>
@@ -788,7 +788,7 @@ export function CourseEditForm({
                       required
                     />
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button type="submit" size="default" variant="premium" disabled={isAddingSection}>
                       {isAddingSection ? (
                         <>
@@ -818,8 +818,8 @@ export function CourseEditForm({
             {course.sections.map((section) => (
               <Card key={section.id}>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 flex-1">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="flex min-w-0 flex-1 items-center gap-2">
                       <button
                         type="button"
                         onClick={() => toggleSection(section.id)}
@@ -831,10 +831,10 @@ export function CourseEditForm({
                           <ChevronRight className="h-4 w-4" />
                         )}
                       </button>
-                      <CardTitle className="text-lg">{section.title}</CardTitle>
-                      <Badge variant="secondary">{(section.lessons || []).length} lessons</Badge>
+                      <CardTitle className="min-w-0 break-words text-lg">{section.title}</CardTitle>
+                      <Badge variant="secondary" className="shrink-0">{(section.lessons || []).length} lessons</Badge>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex w-full items-center gap-2 sm:w-auto">
                       <Button
                         type="button"
                         variant="ghost"
@@ -887,7 +887,7 @@ export function CourseEditForm({
 
                             {/* Lesson Content Management */}
                             <div className="space-y-4">
-                              <div className="flex items-center justify-between">
+                              <div className="flex flex-wrap items-center justify-between gap-2">
                                 <Label>Lesson Content</Label>
                                 <Button
                                   type="button"
@@ -917,7 +917,7 @@ export function CourseEditForm({
                                   <input type="hidden" name={`content-${index}-title`} value={content.title || ''} />
 
                                   <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex items-center justify-between gap-2">
                                       <Label className="text-sm font-medium">Content #{index + 1}</Label>
                                       <Button
                                         type="button"
@@ -935,7 +935,7 @@ export function CourseEditForm({
                                       </Button>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                       <div className="space-y-2">
                                         <Label>Content Type</Label>
                                         <Select
@@ -1106,7 +1106,7 @@ export function CourseEditForm({
                                 </Label>
                               </div>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex flex-wrap gap-2">
                               <Button type="submit" size="default" variant="premium" disabled={isAddingLesson[section.id]}>
                                 {isAddingLesson[section.id] ? (
                                   <>
@@ -1244,7 +1244,7 @@ export function CourseEditForm({
 
                                   {/* Lesson Content Management */}
                                   <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
                                       <Label>Lesson Content</Label>
                                       <Button
                                         type="button"
@@ -1274,7 +1274,7 @@ export function CourseEditForm({
                                         <input type="hidden" name={`content-${index}-title`} value={content.title || ''} />
 
                                         <div className="space-y-4">
-                                          <div className="flex items-center justify-between">
+                                          <div className="flex items-center justify-between gap-2">
                                             <Label className="text-sm font-medium">Content #{index + 1}</Label>
                                             <Button
                                               type="button"
@@ -1292,7 +1292,7 @@ export function CourseEditForm({
                                             </Button>
                                           </div>
 
-                                          <div className="grid grid-cols-2 gap-4">
+                                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                             <div className="space-y-2">
                                               <Label>Content Type</Label>
                                               <Select
@@ -1388,7 +1388,7 @@ export function CourseEditForm({
                                     )}
                                   </div>
 
-                                  <div className="flex gap-2">
+                                  <div className="flex flex-wrap gap-2">
                                     <Button type="submit" disabled={isUpdatingLesson[lesson.id]} variant="premium">
                                       {isUpdatingLesson[lesson.id] ? (
                                         <>

@@ -283,7 +283,7 @@ async function CourseEditContent({ courseId }: { courseId: string }) {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Edit Course
         </p>
-        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight">
+        <h1 className="mt-2 break-words font-display text-4xl font-bold tracking-tight">
           {course.title}
         </h1>
       </div>

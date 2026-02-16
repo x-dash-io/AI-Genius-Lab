@@ -232,7 +232,7 @@ export function LearningPathEditForm({
                 rows={4}
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button type="submit" disabled={isUpdating} variant="premium" size="lg">
                 {isUpdating ? (
                   <>

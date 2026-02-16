@@ -71,8 +71,8 @@ function SortableCourseItem({
     <div ref={setNodeRef} style={style}>
       <Card className="hover:shadow-md transition-shadow">
         <CardContent className="pt-6">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3 flex-1">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3 flex-1">
               <div
                 {...attributes}
                 {...listeners}
@@ -83,14 +83,14 @@ function SortableCourseItem({
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
                 {index + 1}
               </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold">{course.course.title}</h3>
+              <div className="min-w-0 flex-1">
+                <h3 className="break-words text-lg font-semibold">{course.course.title}</h3>
                 <p className="text-xs text-muted-foreground mt-1">
                   Order: {course.sortOrder}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
               <Link href={`/admin/courses/${course.course.id}/edit`}>
                 <Button variant="outline" size="sm">
                   View Course
