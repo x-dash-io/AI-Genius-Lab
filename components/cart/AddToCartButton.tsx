@@ -20,11 +20,9 @@ interface AddToCartButtonProps {
   tier?: "STANDARD" | "PREMIUM";
 }
 
-type ActiveSubscription = {
-  plan?: {
-    tier?: string | null;
-  } | null;
-} | null;
+type CourseOwnershipResponse = {
+  owned?: boolean;
+};
 
 export function AddToCartButton({
   courseId,
@@ -35,14 +33,12 @@ export function AddToCartButton({
   size = "default",
   className,
   checkOwnership = false,
-  tier = "STANDARD",
 }: AddToCartButtonProps) {
   const { data: session } = useSession();
   const { cart, addToCart, isLoading } = useCart();
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [isOwned, setIsOwned] = useState(false);
-  const [subscription, setSubscription] = useState<ActiveSubscription>(null);
   const [isCheckingOwnership, setIsCheckingOwnership] = useState(checkOwnership);
 
   // Check ownership if enabled
@@ -54,19 +50,11 @@ export function AddToCartButton({
 
     async function checkCourseOwnership() {
       try {
-        const [ownershipRes, subRes] = await Promise.all([
-          fetch(`/api/courses/${courseId}/ownership`),
-          fetch(`/api/subscriptions/current`)
-        ]);
+        const ownershipRes = await fetch(`/api/courses/${courseId}/ownership`);
 
         if (ownershipRes.ok) {
-          const data = (await ownershipRes.json()) as { owned?: boolean };
+          const data = (await ownershipRes.json()) as CourseOwnershipResponse;
           setIsOwned(data.owned === true);
-        }
-
-        if (subRes.ok) {
-          const data = (await subRes.json()) as { subscription?: ActiveSubscription };
-          setSubscription(data.subscription ?? null);
         }
       } catch (error) {
         console.error("Failed to check ownership:", error);
@@ -107,19 +95,6 @@ export function AddToCartButton({
       setIsAdding(false);
     }
   };
-
-  const isPremium = tier === "PREMIUM";
-  const hasProAccess = subscription?.plan?.tier === "professional" || subscription?.plan?.tier === "founder";
-
-  if (isPremium && !hasProAccess && !isOwned) {
-    return (
-      <Link href="/pricing" className={className}>
-        <Button variant="premium" size={size} className="w-full">
-          Unlock with Pro
-        </Button>
-      </Link>
-    );
-  }
 
   if (isCheckingOwnership) {
     return (

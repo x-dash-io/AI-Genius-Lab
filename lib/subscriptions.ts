@@ -8,6 +8,22 @@ import {
 import { Prisma, SubscriptionTier, SubscriptionStatus, SubscriptionInterval } from "@prisma/client";
 import { assertSubscriptionTransition } from "@/lib/subscription-state";
 
+export function isSubscriptionActiveNow(
+  subscription:
+    | {
+        status: SubscriptionStatus;
+        currentPeriodEnd: Date;
+      }
+    | null
+    | undefined
+) {
+  return Boolean(
+    subscription &&
+      subscription.status === "active" &&
+      subscription.currentPeriodEnd > new Date()
+  );
+}
+
 /**
  * Sync all active subscription plans from the database to PayPal.
  */
@@ -185,7 +201,7 @@ export const SUBSCRIPTION_TIERS: SubscriptionTier[] = [
 export async function getUserPlanDisplayName(userId: string): Promise<string> {
   const subscription = await getUserSubscription(userId);
 
-  if (!subscription || !["active", "cancelled", "past_due"].includes(subscription.status)) {
+  if (!isSubscriptionActiveNow(subscription)) {
     return "Starter";
   }
 
@@ -197,7 +213,7 @@ export async function getUserPlanDisplayName(userId: string): Promise<string> {
  */
 export async function hasSubscriptionTier(userId: string, requiredTier: SubscriptionTier) {
   const subscription = await getUserSubscription(userId);
-  if (!subscription || !["active", "cancelled", "past_due"].includes(subscription.status)) {
+  if (!isSubscriptionActiveNow(subscription)) {
     return false;
   }
 

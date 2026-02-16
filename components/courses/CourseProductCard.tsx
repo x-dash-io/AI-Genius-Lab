@@ -112,7 +112,7 @@ export function CourseProductCard({
           >
             {categoryLabel}
           </Badge>
-          <span className="shrink-0 rounded-full border border-border/80 bg-background/95 px-3 py-1.5 text-sm font-bold leading-none text-foreground shadow-sm backdrop-blur-sm tabular-nums">
+          <span className="shrink-0 rounded-full border border-primary/35 bg-[linear-gradient(135deg,hsl(var(--primary))_0%,hsl(260_88%_63%)_100%)] px-3 py-1.5 text-sm font-bold leading-none text-white shadow-[0_12px_24px_hsl(var(--primary)/0.28)] tabular-nums">
             {priceLabel}
           </span>
         </div>

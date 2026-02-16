@@ -2,7 +2,11 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma, withRetry } from "@/lib/prisma";
 import { hasRole, type Role } from "@/lib/rbac";
-import { getUserSubscription } from "@/lib/subscriptions";
+import {
+  getUserSubscription,
+  isSubscriptionActiveNow,
+  SUBSCRIPTION_TIERS,
+} from "@/lib/subscriptions";
 
 export async function requireUser() {
   const session = await getServerSession(authOptions);
@@ -52,43 +56,101 @@ export async function hasPurchasedCourse(userId: string, courseId: string) {
   return Boolean(purchase);
 }
 
-export async function hasCourseAccess(
+export type CourseAccessSource = "admin" | "purchase" | "subscription" | "none";
+
+function getMinimumTierForCourse(courseTier: "STANDARD" | "PREMIUM"): "starter" | "professional" {
+  return courseTier === "PREMIUM" ? "professional" : "starter";
+}
+
+function subscriptionTierMeetsRequirement(
+  userTier: "starter" | "professional" | "founder",
+  requiredTier: "starter" | "professional"
+) {
+  const userTierIndex = SUBSCRIPTION_TIERS.indexOf(userTier);
+  const requiredTierIndex = SUBSCRIPTION_TIERS.indexOf(requiredTier);
+  return userTierIndex >= requiredTierIndex;
+}
+
+export async function getCourseAccessState(
   userId: string,
   role: Role,
   courseId: string
 ) {
   if (isAdmin(role)) {
-    return true;
+    return {
+      granted: true,
+      source: "admin" as CourseAccessSource,
+      owned: false,
+      subscriptionActive: false,
+    };
   }
 
-  // Check individual purchase
-  const purchased = await hasPurchasedCourse(userId, courseId);
-  if (purchased) return true;
+  const [owned, course] = await Promise.all([
+    hasPurchasedCourse(userId, courseId),
+    prisma.course.findUnique({
+      where: { id: courseId },
+      select: { tier: true },
+    }),
+  ]);
 
-  // Check subscription
-  const course = await prisma.course.findUnique({
-    where: { id: courseId },
-    select: { tier: true },
-  });
+  if (owned) {
+    return {
+      granted: true,
+      source: "purchase" as CourseAccessSource,
+      owned: true,
+      subscriptionActive: false,
+    };
+  }
 
-  if (!course) return false;
+  if (!course) {
+    return {
+      granted: false,
+      source: "none" as CourseAccessSource,
+      owned: false,
+      subscriptionActive: false,
+    };
+  }
 
   const subscription = await getUserSubscription(userId);
-  if (!subscription) return false;
+  const subscriptionActive = isSubscriptionActiveNow(subscription);
 
-  // Access rules:
-  // - Starter: STANDARD courses
-  // - Professional: STANDARD + PREMIUM courses
-  // - Founder: STANDARD + PREMIUM courses
-  if (course.tier === "STANDARD") {
-    return true; // Any active subscription gives access to Standard
+  if (!subscriptionActive || !subscription) {
+    return {
+      granted: false,
+      source: "none" as CourseAccessSource,
+      owned: false,
+      subscriptionActive: false,
+    };
   }
 
-  if (course.tier === "PREMIUM") {
-    return (
-      subscription.plan.tier === "professional" || subscription.plan.tier === "founder"
-    );
+  const requiredTier = getMinimumTierForCourse(course.tier);
+  const hasSubscriptionAccess = subscriptionTierMeetsRequirement(
+    subscription.plan.tier,
+    requiredTier
+  );
+
+  if (hasSubscriptionAccess) {
+    return {
+      granted: true,
+      source: "subscription" as CourseAccessSource,
+      owned: false,
+      subscriptionActive: true,
+    };
   }
 
-  return false;
+  return {
+    granted: false,
+    source: "none" as CourseAccessSource,
+    owned: false,
+    subscriptionActive: true,
+  };
+}
+
+export async function hasCourseAccess(
+  userId: string,
+  role: Role,
+  courseId: string
+) {
+  const access = await getCourseAccessState(userId, role, courseId);
+  return access.granted;
 }

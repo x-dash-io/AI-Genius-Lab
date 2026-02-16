@@ -46,8 +46,6 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
   );
 
   if (!hasAccess) {
-    const isPremium = course.tier === "PREMIUM";
-
     return (
       <PageContainer className="space-y-6">
         <PageHeader
@@ -68,22 +66,17 @@ export default async function CourseAppPage({ params }: CourseAppPageProps) {
         <StatusRegion>
           <EmptyState
             icon={<Lock className="h-6 w-6" />}
-            title={isPremium ? "Premium plan required" : "Purchase required"}
-            description={
-              isPremium
-                ? "This premium course is available to active Professional or Founder subscriptions."
-                : "Purchase this course to unlock lessons, progress tracking, and certificates."
-            }
+            title="Access required"
+            description="Buy this course for lifetime access, or use an active subscription that includes this course tier."
             action={
-              isPremium ? (
-                <Link href="/pricing">
-                  <Button variant="premium">Upgrade subscription</Button>
-                </Link>
-              ) : (
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 <Link href={`/courses/${course.slug}`}>
-                  <Button>View course details</Button>
+                  <Button>View purchase options</Button>
                 </Link>
-              )
+                <Link href="/pricing">
+                  <Button variant="outline">View subscription plans</Button>
+                </Link>
+              </div>
             }
           />
 

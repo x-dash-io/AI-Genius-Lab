@@ -31,7 +31,7 @@ import type { HeroLogo } from "@/lib/settings";
 const HERO_TYPED_PHRASES = [
   "Hands-on AI skills",
   "Real AI execution",
-  "Empower your future with AI",
+  "Empowering your future with AI",
 ];
 
 type FeaturedCourse = {

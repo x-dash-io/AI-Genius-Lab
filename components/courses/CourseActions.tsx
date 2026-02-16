@@ -18,11 +18,11 @@ interface CourseActionsProps {
   inventory?: number | null;
 }
 
-type ActiveSubscription = {
-  plan?: {
-    tier?: string | null;
-  } | null;
-} | null;
+type CourseOwnershipResponse = {
+  owned?: boolean;
+  hasAccess?: boolean;
+  accessSource?: "admin" | "purchase" | "subscription" | "none";
+};
 
 export function CourseActions({
   courseId,
@@ -35,7 +35,8 @@ export function CourseActions({
   const { addToCart, cart } = useCart();
   const { data: session, status } = useSession();
   const [isOwned, setIsOwned] = useState(false);
-  const [subscription, setSubscription] = useState<ActiveSubscription>(null);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [accessSource, setAccessSource] = useState<CourseOwnershipResponse["accessSource"]>("none");
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
@@ -49,19 +50,13 @@ export function CourseActions({
       }
 
       try {
-        const [ownershipRes, subRes] = await Promise.all([
-          fetch(`/api/courses/${courseId}/ownership`),
-          fetch(`/api/subscriptions/current`)
-        ]);
+        const ownershipRes = await fetch(`/api/courses/${courseId}/ownership`);
 
         if (ownershipRes.ok) {
-          const data = (await ownershipRes.json()) as { owned?: boolean };
+          const data = (await ownershipRes.json()) as CourseOwnershipResponse;
           setIsOwned(data.owned === true);
-        }
-
-        if (subRes.ok) {
-          const data = (await subRes.json()) as { subscription?: ActiveSubscription };
-          setSubscription(data.subscription ?? null);
+          setHasAccess(data.hasAccess === true || data.owned === true);
+          setAccessSource(data.accessSource ?? "none");
         }
       } catch (error) {
         console.error("Failed to check ownership:", error);
@@ -85,18 +80,8 @@ export function CourseActions({
     );
   }
 
-  // User doesn't own - check subscription access
-  const isPremium = tier === "PREMIUM";
-  const planTier = subscription?.plan?.tier;
-  const hasProAccess = planTier === "pro" || planTier === "elite";
-  const hasStandardAccess = planTier === "starter" || hasProAccess;
-
-  const hasAccessViaSubscription =
-    (tier === "STANDARD" && hasStandardAccess) ||
-    (tier === "PREMIUM" && hasProAccess);
-
-  // User already owns the course or has access via subscription
-  if (isOwned || hasAccessViaSubscription) {
+  // User already owns the course or currently has access via subscription
+  if (isOwned || hasAccess) {
     return (
       <div className="ui-surface flex flex-col gap-4 rounded-[var(--radius-md)] border p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
@@ -106,7 +91,7 @@ export function CourseActions({
           <div className="space-y-0.5">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Access</p>
             <p className="text-sm font-semibold text-foreground">
-              {isOwned ? "Personal License" : "Active Subscription"}
+              {isOwned ? "Owned Lifetime" : accessSource === "subscription" ? "Active Subscription" : "Available"}
             </p>
           </div>
         </div>
@@ -128,61 +113,46 @@ export function CourseActions({
     );
   }
 
-  // If it's a premium course and user doesn't have Pro/Elite subscription
-  if (isPremium && !hasProAccess) {
-    return (
-      <div className="grid gap-4">
+  return (
+    <div className="grid gap-4">
+      {tier === "PREMIUM" ? (
         <div className="ui-surface rounded-[var(--radius-md)] border p-4">
           <div className="mb-2 flex items-center gap-2">
             <Badge variant="secondary">Premium</Badge>
-            <p className="text-sm font-semibold">Subscription required</p>
+            <p className="text-sm font-semibold">Purchase or subscribe</p>
           </div>
           <p className="text-sm text-muted-foreground">
-            Upgrade to a supported subscription tier to unlock this premium course.
+            Buy this course for lifetime access, or keep an active Professional/Founder subscription for plan-based access.
           </p>
         </div>
-        <div className="grid gap-2 sm:grid-cols-2">
-          <Link href="/pricing" className="flex-1">
-            <Button size="lg" variant="premium" className="w-full">
-              Upgrade to Unlock
-            </Button>
-          </Link>
-          <Link href="/courses" className="flex-1">
-            <Button variant="outline" size="lg" className="w-full">
-              Browse Catalog
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
+      ) : null}
 
-  return (
-    <div className="grid gap-2 sm:grid-cols-2">
-      <AddToCartButton
-        courseId={courseId}
-        priceCents={priceCents}
-        inventory={inventory}
-        variant="premium"
-        className="w-full"
-      />
-      <Button
-        size="lg"
-        variant="outline"
-        className="w-full"
-        onClick={async () => {
-          try {
-            const isInCart = cart.items.some((item) => item.courseId === courseId);
-            if (!isInCart) {
-              await addToCart(courseId);
-            }
-            router.push("/cart");
-          } catch {}
-        }}
-        disabled={isChecking}
-      >
-        Instant Checkout
-      </Button>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <AddToCartButton
+          courseId={courseId}
+          priceCents={priceCents}
+          inventory={inventory}
+          variant="premium"
+          className="w-full"
+        />
+        <Button
+          size="lg"
+          variant="outline"
+          className="w-full"
+          onClick={async () => {
+            try {
+              const isInCart = cart.items.some((item) => item.courseId === courseId);
+              if (!isInCart) {
+                await addToCart(courseId);
+              }
+              router.push("/cart");
+            } catch {}
+          }}
+          disabled={isChecking}
+        >
+          Instant Checkout
+        </Button>
+      </div>
     </div>
   );
 }
