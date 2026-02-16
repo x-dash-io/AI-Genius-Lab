@@ -25,8 +25,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { HeroLogo } from "@/lib/settings";
 
 const HERO_TYPED_PHRASES = [
@@ -173,104 +171,25 @@ function HeroTypedPhrase({
   );
 }
 
-function ProductPreviewCard({ metrics }: { metrics: HomepageMetrics }) {
-  const activeLearners = metrics.totalStudents || 0;
-  const coursesInPlay = metrics.totalCourses || 0;
-  const [weeklyActivity] = useState(() =>
-    Array.from({ length: 7 }, () => Math.min(100, Math.round(Math.random() * 100)))
-  );
-
+function HeroShowcaseImage() {
   return (
-    <Card className="ui-surface supports-hover-card overflow-hidden border">
-      <CardHeader className="space-y-3 border-b bg-muted/35 pb-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
-            <span className="h-2.5 w-2.5 rounded-full bg-warning/70" />
-            <span className="h-2.5 w-2.5 rounded-full bg-success/70" />
-          </div>
-          <Badge variant="secondary">Product preview</Badge>
+    <div className="ui-surface supports-hover-card relative overflow-hidden rounded-[var(--radius-xl)] border">
+      <div className="relative aspect-[16/10] min-h-[320px] w-full">
+        <Image
+          src="/hero/platform-preview.jpg"
+          alt="Platform workspace preview"
+          fill
+          priority
+          sizes="(max-width: 1024px) 100vw, 50vw"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-tr from-black/35 via-black/10 to-transparent" />
+        <div className="absolute inset-x-4 bottom-4 rounded-[var(--radius-md)] border border-white/25 bg-black/35 px-4 py-3 backdrop-blur-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/80">Product experience</p>
+          <p className="mt-1 text-sm font-medium text-white">Unified learner, checkout, and certificate flow</p>
         </div>
-        <CardTitle className="text-xl">Platform control panel</CardTitle>
-        <CardDescription>
-          Preview the learner and billing experience from one unified workspace.
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="p-5">
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="h-11 w-full justify-start">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="progress">Progress</TabsTrigger>
-            <TabsTrigger value="billing">Billing</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="grid gap-3">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-[var(--radius-sm)] border bg-background p-3">
-                <p className="text-xs text-muted-foreground">Active learners</p>
-                <p className="mt-1 text-lg font-semibold">{activeLearners}</p>
-              </div>
-              <div className="rounded-[var(--radius-sm)] border bg-background p-3">
-                <p className="text-xs text-muted-foreground">Courses in play</p>
-                <p className="mt-1 text-lg font-semibold">{coursesInPlay}</p>
-              </div>
-            </div>
-            <div className="rounded-[var(--radius-sm)] border bg-background p-3">
-              <p className="text-xs text-muted-foreground">Weekly activity</p>
-              <div className="mt-3 grid grid-cols-7 items-end gap-1.5">
-                {weeklyActivity.map((value, index) => (
-                  <span
-                    key={`preview-overview-${index}`}
-                    className="rounded-full bg-primary/65"
-                    style={{ height: `${value}%` }}
-                  />
-                ))}
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="progress" className="grid gap-3">
-            <div className="rounded-[var(--radius-sm)] border bg-background p-3">
-              <div className="mb-2 flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Team completion</span>
-                <span className="font-semibold">78%</span>
-              </div>
-              <Progress value={78} className="h-2.5" />
-            </div>
-            <div className="grid gap-2">
-              {["AI Operations", "Prompt Engineering", "Automation Systems"].map((track, index) => (
-                <div
-                  key={track}
-                  className="flex items-center justify-between rounded-[var(--radius-sm)] border bg-background px-3 py-2 text-sm"
-                >
-                  <span>{track}</span>
-                  <Badge variant="outline">{[84, 67, 53][index]}%</Badge>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="billing" className="grid gap-3">
-            <div className="rounded-[var(--radius-sm)] border bg-background p-3">
-              <p className="text-xs text-muted-foreground">Current cycle</p>
-              <p className="mt-1 text-lg font-semibold">Founder Annual</p>
-              <p className="mt-2 text-xs text-muted-foreground">Next renewal: Sep 14, 2026</p>
-            </div>
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between rounded-[var(--radius-sm)] border bg-background px-3 py-2 text-sm">
-                <span className="text-muted-foreground">Invoice sync</span>
-                <Badge variant="secondary">Healthy</Badge>
-              </div>
-              <div className="flex items-center justify-between rounded-[var(--radius-sm)] border bg-background px-3 py-2 text-sm">
-                <span className="text-muted-foreground">Payment rail</span>
-                <span className="font-medium">PayPal</span>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -381,7 +300,7 @@ export function PremiumHomepageExperience({
 
             </div>
 
-            <ProductPreviewCard metrics={metrics} />
+            <HeroShowcaseImage />
           </div>
 
           {visibleHeroLogos.length > 0 && (
