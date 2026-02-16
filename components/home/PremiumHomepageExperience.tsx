@@ -559,17 +559,13 @@ export function PremiumHomepageExperience({
                   { label: "Outcome", value: "Certificate" },
                 ]}
                 primaryAction={{
-                  href: `/courses/${course.slug}`,
-                  label: "View course",
+                  href: `/checkout?course=${course.slug}`,
+                  label: "Buy course once",
                 }}
                 secondaryActions={[
                   {
-                    href: `/checkout?course=${course.slug}`,
-                    label: "Checkout",
-                  },
-                  {
-                    href: `/courses/${course.slug}#curriculum`,
-                    label: "Preview",
+                    href: "/pricing",
+                    label: "Buy subscription",
                   },
                 ]}
               />

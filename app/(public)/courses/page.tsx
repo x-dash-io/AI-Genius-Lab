@@ -237,8 +237,8 @@ async function CoursesContent({ searchParams }: CoursesPageProps) {
                     value: "Certificate",
                   },
                 ]}
-                primaryAction={{ href: `/courses/${course.slug}`, label: "View course" }}
-                secondaryActions={[{ href: `/checkout?course=${course.slug}`, label: "Checkout" }]}
+                primaryAction={{ href: `/checkout?course=${course.slug}`, label: "Buy course once" }}
+                secondaryActions={[{ href: "/pricing", label: "Buy subscription" }]}
               />
             ))}
           </section>
