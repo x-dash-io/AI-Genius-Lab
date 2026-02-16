@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { LazyMotion, domAnimation, m, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
@@ -429,31 +430,49 @@ export function PremiumHomepageExperience({
               title: "Discover",
               detail: "Search by role, compare outcomes, and choose fast.",
               icon: Sparkles,
+              image:
+                "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
             },
             {
               title: "Purchase",
               detail: "Transparent billing cadence and secure checkout.",
               icon: ReceiptText,
+              image:
+                "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80",
             },
             {
               title: "Learn",
               detail: "Structured lessons with progress visibility.",
               icon: BookOpen,
+              image:
+                "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1200&q=80",
             },
             {
               title: "Certify",
               detail: "Issue and verify completion credentials.",
               icon: BadgeCheck,
+              image:
+                "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=80",
             },
           ].map((step, index) => (
-            <Card key={step.title} className="ui-surface supports-hover-card border">
-              <CardHeader className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border bg-background text-xs font-semibold">
+            <Card key={step.title} className="ui-surface supports-hover-card overflow-hidden border">
+              <div className="relative h-40 border-b bg-muted/25 sm:h-44">
+                <Image
+                  src={step.image}
+                  alt={step.title}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 25vw"
+                  className="object-contain p-1.5"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-black/5 to-transparent" />
+                <div className="absolute inset-x-3 bottom-2 flex items-center justify-between">
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/40 bg-black/35 text-xs font-semibold text-white">
                     {index + 1}
                   </span>
-                  <step.icon className="h-4 w-4 text-primary" />
+                  <step.icon className="h-4 w-4 text-white" />
                 </div>
+              </div>
+              <CardHeader className="space-y-3">
                 <CardTitle className="text-lg">{step.title}</CardTitle>
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">{step.detail}</CardContent>

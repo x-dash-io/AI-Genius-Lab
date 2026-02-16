@@ -201,7 +201,7 @@ export const SUBSCRIPTION_TIERS: SubscriptionTier[] = [
 export async function getUserPlanDisplayName(userId: string): Promise<string> {
   const subscription = await getUserSubscription(userId);
 
-  if (!isSubscriptionActiveNow(subscription)) {
+  if (!subscription || !isSubscriptionActiveNow(subscription)) {
     return "Starter";
   }
 
@@ -213,7 +213,7 @@ export async function getUserPlanDisplayName(userId: string): Promise<string> {
  */
 export async function hasSubscriptionTier(userId: string, requiredTier: SubscriptionTier) {
   const subscription = await getUserSubscription(userId);
-  if (!isSubscriptionActiveNow(subscription)) {
+  if (!subscription || !isSubscriptionActiveNow(subscription)) {
     return false;
   }
 
