@@ -39,6 +39,17 @@ function formatPrice(priceCents: number) {
   return priceCents === 0 ? "Free" : `$${(priceCents / 100).toFixed(2)}`;
 }
 
+function getTierPresentation(tier: "STARTER" | "PROFESSIONAL" | "FOUNDER") {
+  switch (tier) {
+    case "STARTER":
+      return { label: "Starter", difficulty: "Foundational" };
+    case "PROFESSIONAL":
+      return { label: "Professional", difficulty: "Applied" };
+    case "FOUNDER":
+      return { label: "Founder", difficulty: "Expert" };
+  }
+}
+
 function applyFilters(
   allCourses: Awaited<ReturnType<typeof getPublishedCourses>>,
   search: string | undefined,
@@ -240,6 +251,7 @@ async function CoursesContent({ searchParams }: CoursesPageProps) {
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {courses.map((course) => {
               const isFreeCourse = course.priceCents === 0;
+              const tierPresentation = getTierPresentation(course.tier);
               const hasSubscriptionAccess =
                 !isFreeCourse &&
                 activeSubscriptionTier !== null &&
@@ -262,11 +274,11 @@ async function CoursesContent({ searchParams }: CoursesPageProps) {
                   categoryLabel={course.Category?.name || "General"}
                   priceLabel={formatPrice(course.priceCents)}
                   imageUrl={course.imageUrl}
-                  tierLabel={course.tier === "PREMIUM" ? "Advanced" : "Core"}
+                  tierLabel={tierPresentation.label}
                   metaItems={[
                     {
                       label: "Difficulty",
-                      value: course.tier === "PREMIUM" ? "Advanced" : "Foundational",
+                      value: tierPresentation.difficulty,
                     },
                     {
                       label: "Duration",

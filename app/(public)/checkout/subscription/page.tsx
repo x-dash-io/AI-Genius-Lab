@@ -166,8 +166,13 @@ export default async function SubscriptionCheckoutPage({ searchParams }: Props) 
 
   const featureRows = [
     {
-      title: "Unlimited course access",
-      detail: `Includes ${plan.tier === "starter" ? "standard" : "standard + premium"} courses`,
+      title: "Tier-based course access",
+      detail:
+        plan.tier === "starter"
+          ? "Includes free starter courses"
+          : plan.tier === "professional"
+            ? "Includes professional-tier courses"
+            : "Includes founder-tier courses",
       enabled: true,
     },
     {

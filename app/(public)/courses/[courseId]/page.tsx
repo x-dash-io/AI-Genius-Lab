@@ -52,6 +52,17 @@ function formatPrice(priceCents: number) {
   return priceCents === 0 ? "Free" : `$${(priceCents / 100).toFixed(2)}`;
 }
 
+function formatTierLabel(tier: "STARTER" | "PROFESSIONAL" | "FOUNDER") {
+  switch (tier) {
+    case "STARTER":
+      return "Starter";
+    case "PROFESSIONAL":
+      return "Professional";
+    case "FOUNDER":
+      return "Founder";
+  }
+}
+
 export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
   const { courseId } = await params;
   const course = await getCoursePreviewBySlug(courseId);
@@ -126,8 +137,8 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
               </div>
               <CardHeader>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant={course.tier === "PREMIUM" ? "default" : "secondary"}>
-                    {course.tier}
+                  <Badge variant={course.tier === "STARTER" ? "secondary" : "default"}>
+                    {formatTierLabel(course.tier)}
                   </Badge>
                   <Badge variant="outline">{formatPrice(course.priceCents)}</Badge>
                 </div>

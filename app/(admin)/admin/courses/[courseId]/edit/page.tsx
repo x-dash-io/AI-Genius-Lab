@@ -24,8 +24,17 @@ async function updateCourseAction(courseId: string, formData: FormData) {
     const inventoryStr = formData.get("inventory") as string;
     const inventory = inventoryStr && inventoryStr.trim() !== "" ? parseInt(inventoryStr) : null;
     const isPublished = formData.get("isPublished") === "on";
-    const tier = formData.get("tier") as "STANDARD" | "PREMIUM";
+    const tier = formData.get("tier") as "STARTER" | "PROFESSIONAL" | "FOUNDER";
     const imageUrl = formData.get("imageUrl") as string;
+
+    if (priceCents > 0 && tier === "STARTER") {
+      throw new Error("Starter tier courses must be free. Select Professional or Founder for paid courses.");
+    }
+
+    const normalizedTier =
+      priceCents === 0
+        ? "STARTER"
+        : tier;
 
 
     await updateCourse(courseId, {
@@ -36,7 +45,7 @@ async function updateCourseAction(courseId: string, formData: FormData) {
       priceCents,
       inventory,
       isPublished,
-      tier,
+      tier: normalizedTier,
       imageUrl: imageUrl || undefined,
     });
 

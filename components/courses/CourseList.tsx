@@ -15,7 +15,7 @@ type Course = {
   description: string | null;
   slug: string;
   priceCents: number;
-  tier: "STANDARD" | "PREMIUM";
+  tier: "STARTER" | "PROFESSIONAL" | "FOUNDER";
   imageUrl: string | null;
 };
 
@@ -58,10 +58,10 @@ export function CourseList({ courses }: CourseListProps) {
                 {/* Overlay Gradient for dynamic feel */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                {course.tier === "PREMIUM" && (
+                {course.tier !== "STARTER" && (
                   <div className="absolute top-4 right-4 group-hover:scale-110 transition-transform duration-300">
                     <Badge className="bg-amber-500 hover:bg-amber-600 text-[10px] font-black tracking-widest px-2.5 py-1 border-none shadow-lg shadow-amber-500/20">
-                      PREMIUM
+                      {course.tier}
                     </Badge>
                   </div>
                 )}

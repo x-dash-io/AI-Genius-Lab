@@ -29,9 +29,11 @@ export function CourseFilters() {
   const currentSearch = searchParams?.get("search") || "";
   const currentStatus = searchParams?.get("status") || "all";
   const currentCategory = searchParams?.get("category") || "all";
+  const currentTier = searchParams?.get("tier") || "all";
   
   const [status, setStatus] = useState(currentStatus);
   const [category, setCategory] = useState(currentCategory);
+  const [tier, setTier] = useState(currentTier);
   const [isFiltering, setIsFiltering] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
@@ -58,7 +60,8 @@ export function CourseFilters() {
   useEffect(() => {
     setStatus(currentStatus);
     setCategory(currentCategory);
-  }, [currentStatus, currentCategory]);
+    setTier(currentTier);
+  }, [currentStatus, currentCategory, currentTier]);
 
   // Reset filtering state when transition completes
   useEffect(() => {
@@ -108,16 +111,31 @@ export function CourseFilters() {
     });
   }, [router, pathname, searchParams]);
 
+  const handleTierChange = useCallback((value: string) => {
+    setTier(value);
+    setIsFiltering(true);
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams?.toString() ?? "");
+      if (value && value !== "all") {
+        params.set("tier", value);
+      } else {
+        params.delete("tier");
+      }
+      router.push(`${pathname}?${params.toString()}`);
+    });
+  }, [router, pathname, searchParams]);
+
   const handleClearAll = useCallback(() => {
     setStatus("all");
     setCategory("all");
+    setTier("all");
     setIsFiltering(true);
     startTransition(() => {
       router.push(pathname);
     });
   }, [router, pathname]);
 
-  const hasFilters = currentSearch || currentStatus !== "all" || currentCategory !== "all";
+  const hasFilters = currentSearch || currentStatus !== "all" || currentCategory !== "all" || currentTier !== "all";
   const showLoading = isPending && isFiltering;
 
   return (
@@ -153,6 +171,17 @@ export function CourseFilters() {
                 {cat.name}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+        <Select value={tier} onValueChange={handleTierChange}>
+          <SelectTrigger className="w-full sm:w-[170px]">
+            <SelectValue placeholder="All Tiers" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Tiers</SelectItem>
+            <SelectItem value="STARTER">Starter</SelectItem>
+            <SelectItem value="PROFESSIONAL">Professional</SelectItem>
+            <SelectItem value="FOUNDER">Founder</SelectItem>
           </SelectContent>
         </Select>
         {hasFilters && (

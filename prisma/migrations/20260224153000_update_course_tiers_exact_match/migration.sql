@@ -1,0 +1,7 @@
+-- Expand course tier model from 2 levels to 3 explicit levels.
+ALTER TYPE "CourseTier" RENAME VALUE 'STANDARD' TO 'STARTER';
+ALTER TYPE "CourseTier" RENAME VALUE 'PREMIUM' TO 'PROFESSIONAL';
+ALTER TYPE "CourseTier" ADD VALUE IF NOT EXISTS 'FOUNDER';
+
+ALTER TABLE "Course"
+  ALTER COLUMN "tier" SET DEFAULT 'STARTER';

@@ -20,6 +20,7 @@ export interface HomepageStats {
       title: string;
       slug: string;
       priceCents: number;
+      tier: "STARTER" | "PROFESSIONAL" | "FOUNDER";
       imageUrl: string | null;
     }>;
   }>;
@@ -94,6 +95,7 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
             title: true,
             slug: true,
             priceCents: true,
+            tier: true,
             imageUrl: true,
           },
           take: 6,
@@ -125,6 +127,7 @@ export const getHomepageStats = cache(async (): Promise<HomepageStats> => {
           title: true,
           slug: true,
           priceCents: true,
+          tier: true,
           imageUrl: true,
         },
         take: 6,

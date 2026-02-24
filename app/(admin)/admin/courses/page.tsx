@@ -14,7 +14,7 @@ import { deleteCourseAction } from "@/app/actions/delete-actions";
 export const dynamic = "force-dynamic";
 
 interface AdminCoursesPageProps {
-  searchParams: Promise<{ search?: string; status?: string; category?: string }>;
+  searchParams: Promise<{ search?: string; status?: string; category?: string; tier?: string }>;
 }
 
 function formatCurrency(cents: number) {
@@ -55,9 +55,13 @@ async function CourseList({ searchParams }: AdminCoursesPageProps) {
     courses = courses.filter((course) => course.category === params.category);
   }
 
+  if (params.tier) {
+    courses = courses.filter((course) => course.tier === params.tier);
+  }
+
   const totalCourses = allCourses.length;
   const filteredCount = courses.length;
-  const hasFilters = params.search || params.status || params.category;
+  const hasFilters = params.search || params.status || params.category || params.tier;
 
   return (
     <div className="space-y-6">
@@ -114,6 +118,9 @@ async function CourseList({ searchParams }: AdminCoursesPageProps) {
                         ) : (
                           <Badge variant="secondary" className="px-3 py-1 font-bold">Draft</Badge>
                         )}
+                        <Badge variant={course.tier === "STARTER" ? "secondary" : "outline"} className="px-3 py-1 font-bold">
+                          {course.tier}
+                        </Badge>
                         {course.category && (
                           <Badge variant="outline" className="capitalize px-3 py-1 border-primary/20 text-primary font-bold">
                             {course.category}

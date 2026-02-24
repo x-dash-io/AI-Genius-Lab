@@ -48,7 +48,7 @@ export async function createCourse(data: {
   priceCents: number;
   inventory?: number | null;
   isPublished?: boolean;
-  tier?: "STANDARD" | "PREMIUM";
+  tier?: "STARTER" | "PROFESSIONAL" | "FOUNDER";
   imageUrl?: string;
 }) {
   // Generate a unique ID for the course
@@ -65,7 +65,7 @@ export async function createCourse(data: {
       priceCents: data.priceCents,
       inventory: data.inventory ?? null,
       isPublished: data.isPublished ?? false,
-      tier: data.tier ?? "STANDARD",
+      tier: data.tier ?? "STARTER",
       imageUrl: data.imageUrl,
       updatedAt: now,
     },
@@ -82,7 +82,7 @@ export async function updateCourse(
     priceCents?: number;
     inventory?: number | null;
     isPublished?: boolean;
-    tier?: "STANDARD" | "PREMIUM";
+    tier?: "STARTER" | "PROFESSIONAL" | "FOUNDER";
     imageUrl?: string;
   }
 ) {

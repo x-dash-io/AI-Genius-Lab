@@ -4,7 +4,6 @@ import { getServerSession } from "next-auth";
 import { BookOpen } from "lucide-react";
 
 import { authOptions } from "@/lib/auth";
-import { subscriptionTierHasCourseAccess } from "@/lib/access";
 import { prisma } from "@/lib/prisma";
 import { getUserSubscription, isSubscriptionActiveNow } from "@/lib/subscriptions";
 import { CourseProductCard } from "@/components/courses/CourseProductCard";
@@ -23,6 +22,17 @@ export const dynamic = "force-dynamic";
 
 function formatPrice(priceCents: number) {
   return priceCents === 0 ? "Included" : `$${(priceCents / 100).toFixed(2)}`;
+}
+
+function getTierLabel(tier: "STARTER" | "PROFESSIONAL" | "FOUNDER") {
+  switch (tier) {
+    case "STARTER":
+      return "Starter";
+    case "PROFESSIONAL":
+      return "Professional";
+    case "FOUNDER":
+      return "Founder";
+  }
 }
 
 export default async function LibraryPage() {
@@ -47,6 +57,12 @@ export default async function LibraryPage() {
 
   const hasActiveSubscription = isSubscriptionActiveNow(subscription);
   const purchasedCourseIds = new Set(purchases.map((purchase) => purchase.courseId));
+  const subscriptionCourseTier =
+    subscription?.plan.tier === "starter"
+      ? "STARTER"
+      : subscription?.plan.tier === "professional"
+        ? "PROFESSIONAL"
+        : "FOUNDER";
 
   const subscriptionCourses =
     hasActiveSubscription && subscription
@@ -54,9 +70,10 @@ export default async function LibraryPage() {
           where: {
             isPublished: true,
             id: { notIn: Array.from(purchasedCourseIds) },
-            ...(subscriptionTierHasCourseAccess(subscription.plan.tier, "PREMIUM")
-              ? {}
-              : { tier: "STANDARD" }),
+            OR: [
+              { priceCents: 0 },
+              { tier: subscriptionCourseTier },
+            ],
           },
           select: {
             id: true,
@@ -121,7 +138,7 @@ export default async function LibraryPage() {
                 categoryLabel={purchase.Course.category || "Course"}
                 priceLabel={formatPrice(purchase.amountCents)}
                 imageUrl={purchase.Course.imageUrl}
-                tierLabel={purchase.Course.tier === "PREMIUM" ? "Advanced" : "Core"}
+                tierLabel={getTierLabel(purchase.Course.tier)}
                 metaItems={[
                   { label: "Status", value: "Purchased" },
                   { label: "Access", value: "Lifetime" },
@@ -141,7 +158,7 @@ export default async function LibraryPage() {
                 categoryLabel={course.category || "Course"}
                 priceLabel="Included"
                 imageUrl={course.imageUrl}
-                tierLabel={course.tier === "PREMIUM" ? "Advanced" : "Core"}
+                tierLabel={getTierLabel(course.tier)}
                 metaItems={[
                   { label: "Status", value: "Included" },
                   { label: "Access", value: "Subscription" },

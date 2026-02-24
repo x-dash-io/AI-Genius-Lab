@@ -72,8 +72,9 @@ export function CourseProductCard({
   const hasImageError = Boolean(resolvedImage && failedImage === resolvedImage);
   const isImageLoaded = Boolean(resolvedImage && loadedImage === resolvedImage);
   const normalizedTier = (tierLabel || "").trim().toLowerCase();
-  const isAdvancedTier = normalizedTier.includes("advanced");
-  const isCoreTier = normalizedTier.includes("core");
+  const isFounderTier = normalizedTier.includes("founder");
+  const isProfessionalTier = normalizedTier.includes("professional");
+  const isStarterTier = normalizedTier.includes("starter");
 
   return (
     <Card
@@ -124,10 +125,12 @@ export function CourseProductCard({
               variant="outline"
               className={cn(
                 "gap-1 border shadow-sm backdrop-blur",
-                isAdvancedTier
+                isFounderTier
                   ? "border-primary/35 bg-primary/75 text-white dark:bg-primary/60"
-                  : isCoreTier
-                    ? "border-success/35 bg-success/75 text-white dark:bg-success/60"
+                  : isProfessionalTier
+                    ? "border-warning/35 bg-warning/80 text-white dark:bg-warning/65"
+                    : isStarterTier
+                      ? "border-success/35 bg-success/75 text-white dark:bg-success/60"
                     : "border-white/35 bg-black/55 text-white"
               )}
             >

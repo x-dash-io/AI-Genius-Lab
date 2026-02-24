@@ -89,7 +89,6 @@ export default async function LandingPage() {
           {
             ...course,
             categoryName: category.name || "General",
-            tier: course.priceCents > 0 ? "PREMIUM" : "STANDARD",
           },
         ] as const)
       )
@@ -124,8 +123,7 @@ export default async function LandingPage() {
 
       if (subscription && isSubscriptionActiveNow(subscription)) {
         featuredCourses.forEach((course) => {
-          const tier = course.tier === "PREMIUM" ? "PREMIUM" : "STANDARD";
-          if (subscriptionTierHasCourseAccess(subscription.plan.tier, tier)) {
+          if (subscriptionTierHasCourseAccess(subscription.plan.tier, course.tier)) {
             accessibleCourseIds.add(course.id);
           }
         });

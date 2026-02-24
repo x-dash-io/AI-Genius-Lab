@@ -40,7 +40,7 @@ type FeaturedCourse = {
   priceCents: number;
   categoryName: string;
   imageUrl?: string | null;
-  tier?: string;
+  tier?: "STARTER" | "PROFESSIONAL" | "FOUNDER";
   hasAccess?: boolean;
 };
 
@@ -82,6 +82,18 @@ function formatRating(averageRating: number, reviewCount: number) {
 
 function formatPrice(priceCents: number) {
   return priceCents === 0 ? "Free" : `$${(priceCents / 100).toFixed(2)}`;
+}
+
+function getTierPresentation(tier?: "STARTER" | "PROFESSIONAL" | "FOUNDER") {
+  switch (tier) {
+    case "PROFESSIONAL":
+      return { label: "Professional", difficulty: "Applied" };
+    case "FOUNDER":
+      return { label: "Founder", difficulty: "Expert" };
+    case "STARTER":
+    default:
+      return { label: "Starter", difficulty: "Foundational" };
+  }
 }
 
 function getInitials(name: string) {
@@ -482,32 +494,36 @@ export function PremiumHomepageExperience({
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {featuredCourses.map((course) => (
-              <CourseProductCard
-                key={course.id}
-                title={course.title}
-                description="Structured, project-ready lessons with measurable outcomes and practical deliverables."
-                slug={course.slug}
-                categoryLabel={course.categoryName}
-                priceLabel={formatPrice(course.priceCents)}
-                imageUrl={course.imageUrl}
-                tierLabel={course.tier === "PREMIUM" ? "Advanced" : "Core"}
-                metaItems={[
-                  { label: "Difficulty", value: course.tier === "PREMIUM" ? "Advanced" : "Foundational" },
-                  { label: "Duration", value: "Self-paced" },
-                  { label: "Outcome", value: "Certificate" },
-                ]}
-                primaryAction={{
-                  href: course.hasAccess ? `/library/${course.slug}` : `/checkout?course=${course.slug}`,
-                  label: course.hasAccess ? "Open course" : "Buy course once",
-                }}
-                secondaryActions={
-                  course.hasAccess
-                    ? [{ href: `/courses/${course.slug}`, label: "Course detail" }]
-                    : [{ href: "/pricing", label: "Buy subscription" }]
-                }
-              />
-            ))}
+            {featuredCourses.map((course) => {
+              const tierPresentation = getTierPresentation(course.tier);
+
+              return (
+                <CourseProductCard
+                  key={course.id}
+                  title={course.title}
+                  description="Structured, project-ready lessons with measurable outcomes and practical deliverables."
+                  slug={course.slug}
+                  categoryLabel={course.categoryName}
+                  priceLabel={formatPrice(course.priceCents)}
+                  imageUrl={course.imageUrl}
+                  tierLabel={tierPresentation.label}
+                  metaItems={[
+                    { label: "Difficulty", value: tierPresentation.difficulty },
+                    { label: "Duration", value: "Self-paced" },
+                    { label: "Outcome", value: "Certificate" },
+                  ]}
+                  primaryAction={{
+                    href: course.hasAccess ? `/library/${course.slug}` : `/checkout?course=${course.slug}`,
+                    label: course.hasAccess ? "Open course" : "Buy course once",
+                  }}
+                  secondaryActions={
+                    course.hasAccess
+                      ? [{ href: `/courses/${course.slug}`, label: "Course detail" }]
+                      : [{ href: "/pricing", label: "Buy subscription" }]
+                  }
+                />
+              );
+            })}
           </div>
         </m.section>
       </ContentRegion>

@@ -82,7 +82,7 @@ model Course {
   priceCents         Int
   inventory          Int?
   isPublished        Boolean              @default(false)
-  tier               CourseTier           @default(STANDARD)
+  tier               CourseTier           @default(STARTER)
   createdAt          DateTime             @default(now())
   updatedAt          DateTime
   Category           Category?            @relation(fields: [categoryId], references: [id], onDelete: SetNull)
@@ -369,8 +369,9 @@ enum PostStatus {
 }
 
 enum CourseTier {
-  STANDARD
-  PREMIUM
+  STARTER
+  PROFESSIONAL
+  FOUNDER
 }
 
 enum SubscriptionTier {

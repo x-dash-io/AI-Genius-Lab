@@ -30,6 +30,12 @@ import {
 
 export const dynamic = "force-dynamic";
 
+function getPlanCourseAccessText(tier: "starter" | "professional" | "founder") {
+  if (tier === "starter") return "free starter courses";
+  if (tier === "professional") return "professional-tier courses";
+  return "founder-tier courses";
+}
+
 type SuccessPageProps = {
   searchParams: Promise<{
     subscriptionId?: string;
@@ -172,7 +178,7 @@ export default async function SubscriptionSuccessPage({ searchParams }: SuccessP
               <ul className="grid gap-2 text-sm">
                 <li className="rounded-[var(--radius-sm)] border bg-background px-3 py-2 inline-flex items-center gap-2">
                   <Zap className="h-4 w-4 text-primary" />
-                  Unlimited access to {subscription.plan.tier === "starter" ? "standard" : "all"} courses
+                  Access to {getPlanCourseAccessText(subscription.plan.tier)}
                 </li>
                 {subscription.plan.tier !== "starter" ? (
                   <li className="rounded-[var(--radius-sm)] border bg-background px-3 py-2 inline-flex items-center gap-2">

@@ -248,17 +248,18 @@ export function CourseCreationForm({
 
               <div className="space-y-2">
                 <Label htmlFor="tier">Course Tier</Label>
-                <Select name="tier" defaultValue="STANDARD" disabled={isCreatingCourse}>
+                <Select name="tier" defaultValue="STARTER" disabled={isCreatingCourse}>
                   <SelectTrigger id="tier">
                     <SelectValue placeholder="Select a tier" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="STANDARD">Standard (Starter)</SelectItem>
-                    <SelectItem value="PREMIUM">Premium (Professional + Founder)</SelectItem>
+                    <SelectItem value="STARTER">Starter (Free)</SelectItem>
+                    <SelectItem value="PROFESSIONAL">Professional</SelectItem>
+                    <SelectItem value="FOUNDER">Founder</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  Standard courses are available to Starter subscribers. Premium courses are available to Professional and Founder subscribers.
+                  Starter is for free courses only. Professional and Founder are exact-match subscription tiers.
                 </p>
               </div>
 

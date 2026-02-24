@@ -15,38 +15,54 @@ interface PricingGridProps {
   currentPlanId?: string | null;
 }
 
-const tierPriority = ["starter", "pro", "professional", "founder", "enterprise"];
+type NormalizedTier = "starter" | "professional" | "founder" | "unknown";
+
+const tierPriority: NormalizedTier[] = ["starter", "professional", "founder", "unknown"];
+
+function normalizeTier(tier: string): NormalizedTier {
+  const normalized = tier.toLowerCase();
+  if (normalized === "starter") return "starter";
+  if (normalized === "professional" || normalized === "pro") return "professional";
+  if (normalized === "founder" || normalized === "elite") return "founder";
+  return "unknown";
+}
+
+function formatTierLabel(tier: NormalizedTier) {
+  if (tier === "unknown") return "Custom";
+  return tier[0].toUpperCase() + tier.slice(1);
+}
 
 const featureRows = [
   {
-    key: "standard",
-    label: "Standard course access",
+    key: "starter-courses",
+    label: "Starter free courses",
     check: () => true,
   },
   {
-    key: "premium",
-    label: "Premium course access",
-    check: (tier: string) => ["pro", "professional", "founder", "enterprise"].includes(tier),
+    key: "professional-courses",
+    label: "Professional-tier courses",
+    check: (tier: NormalizedTier) => tier === "professional",
+  },
+  {
+    key: "founder-courses",
+    label: "Founder-tier courses",
+    check: (tier: NormalizedTier) => tier === "founder",
   },
   {
     key: "certificates",
     label: "Course certificates",
-    check: (tier: string) => tier !== "starter",
+    check: (tier: NormalizedTier) => tier !== "starter",
   },
   {
     key: "learning-paths",
     label: "Learning path access",
-    check: (tier: string) => ["founder", "enterprise"].includes(tier),
+    check: (tier: NormalizedTier) => tier === "founder",
   },
 ];
 
 function sortPlans(plans: SubscriptionPlan[]) {
   return [...plans].sort((a, b) => {
-    const aIndex = tierPriority.indexOf(a.tier.toLowerCase());
-    const bIndex = tierPriority.indexOf(b.tier.toLowerCase());
-    const safeA = aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex;
-    const safeB = bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex;
-    return safeA - safeB;
+    return tierPriority.indexOf(normalizeTier(a.tier)) - tierPriority.indexOf(normalizeTier(b.tier));
   });
 }
 
@@ -57,9 +73,8 @@ export function PricingGrid({ plans, currentPlanId }: PricingGridProps) {
 
   const recommendedPlanId = useMemo(() => {
     return (
-      orderedPlans.find((plan) =>
-        ["pro", "professional"].includes(plan.tier.toLowerCase())
-      )?.id ?? orderedPlans[Math.min(1, Math.max(0, orderedPlans.length - 1))]?.id
+      orderedPlans.find((plan) => normalizeTier(plan.tier) === "professional")?.id ??
+      orderedPlans[Math.min(1, Math.max(0, orderedPlans.length - 1))]?.id
     );
   }, [orderedPlans]);
 
@@ -83,7 +98,7 @@ export function PricingGrid({ plans, currentPlanId }: PricingGridProps) {
 
       <div className="grid gap-5 xl:grid-cols-3">
         {orderedPlans.map((plan) => {
-          const tier = plan.tier.toLowerCase();
+          const tier = normalizeTier(plan.tier);
           const isRecommended = plan.id === recommendedPlanId;
           const isCurrentPlan = currentPlanId === plan.id;
           const priceCents = interval === "monthly" ? plan.priceMonthlyCents : plan.priceAnnualCents;
@@ -111,7 +126,7 @@ export function PricingGrid({ plans, currentPlanId }: PricingGridProps) {
                 <div className="flex items-center justify-between gap-2">
                   <CardTitle className="text-2xl">{plan.name}</CardTitle>
                   <Badge variant="outline" className="capitalize">
-                    {plan.tier.toLowerCase()}
+                    {formatTierLabel(tier)}
                   </Badge>
                 </div>
                 <CardDescription className="min-h-[2.75rem] text-sm">
@@ -208,7 +223,7 @@ export function PricingGrid({ plans, currentPlanId }: PricingGridProps) {
                 <tr key={`feature-row-${feature.key}`} className="border-t">
                   <td className="px-4 py-3 text-muted-foreground">{feature.label}</td>
                   {orderedPlans.map((plan) => {
-                    const enabled = feature.check(plan.tier.toLowerCase());
+                    const enabled = feature.check(normalizeTier(plan.tier));
                     return (
                       <td key={`${feature.key}-${plan.id}`} className="px-4 py-3 text-center">
                         {enabled ? (
@@ -233,7 +248,7 @@ export function PricingGrid({ plans, currentPlanId }: PricingGridProps) {
               </summary>
               <ul className="mt-3 space-y-2 text-sm">
                 {featureRows.map((feature) => {
-                  const enabled = feature.check(plan.tier.toLowerCase());
+                  const enabled = feature.check(normalizeTier(plan.tier));
                   return (
                     <li key={`${plan.id}-mobile-${feature.key}`} className="flex items-center gap-2">
                       {enabled ? (

@@ -158,8 +158,12 @@ export function CourseEditForm({
         const priceDollars = parseFloat((formData.get("priceCents") as string) || "0");
         const inventoryRaw = (formData.get("inventory") as string) || "";
         const parsedInventory = parseInt(inventoryRaw, 10);
-        const tier = ((formData.get("tier") as string) || prev.tier) as "STANDARD" | "PREMIUM";
+        const tier = ((formData.get("tier") as string) || prev.tier) as "STARTER" | "PROFESSIONAL" | "FOUNDER";
         const imageUrl = ((formData.get("imageUrl") as string) || "").trim();
+        const normalizedPriceCents = Number.isFinite(priceDollars)
+          ? Math.round(priceDollars * 100)
+          : prev.priceCents;
+        const normalizedTier = normalizedPriceCents === 0 ? "STARTER" : tier;
 
         return {
           ...prev,
@@ -167,10 +171,10 @@ export function CourseEditForm({
           slug,
           description: description || null,
           category: category === "none" ? null : category,
-          priceCents: Number.isFinite(priceDollars) ? Math.round(priceDollars * 100) : prev.priceCents,
+          priceCents: normalizedPriceCents,
           inventory: inventoryRaw.trim() === "" ? null : (Number.isNaN(parsedInventory) ? prev.inventory : parsedInventory),
           isPublished: formData.get("isPublished") === "on",
-          tier,
+          tier: normalizedTier,
           imageUrl: imageUrl || null,
         };
       });
@@ -646,12 +650,13 @@ export function CourseEditForm({
                     <SelectValue placeholder="Select a tier" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="STANDARD">Standard (Starter)</SelectItem>
-                    <SelectItem value="PREMIUM">Premium (Professional + Founder)</SelectItem>
+                    <SelectItem value="STARTER">Starter (Free)</SelectItem>
+                    <SelectItem value="PROFESSIONAL">Professional</SelectItem>
+                    <SelectItem value="FOUNDER">Founder</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  Standard courses are available to Starter subscribers. Premium courses are available to Professional and Founder subscribers.
+                  Starter is for free courses only. Professional and Founder are exact-match subscription tiers.
                 </p>
               </div>
 

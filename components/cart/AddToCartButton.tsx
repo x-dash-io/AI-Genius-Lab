@@ -17,7 +17,7 @@ interface AddToCartButtonProps {
   size?: "default" | "sm" | "lg" | "icon";
   className?: string;
   checkOwnership?: boolean; // If true, checks if user already owns the course
-  tier?: "STANDARD" | "PREMIUM";
+  tier?: "STARTER" | "PROFESSIONAL" | "FOUNDER";
 }
 
 type CourseOwnershipResponse = {

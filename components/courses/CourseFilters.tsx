@@ -183,7 +183,7 @@ export function CourseFilters() {
               <SelectContent className="rounded-2xl border-border/70 bg-card p-1">
                 <SelectItem value="all" className="rounded-lg font-bold">Any Price</SelectItem>
                 <SelectItem value="free" className="rounded-lg font-medium">Complimentary</SelectItem>
-                <SelectItem value="paid" className="rounded-lg font-medium">Premium Access</SelectItem>
+                <SelectItem value="paid" className="rounded-lg font-medium">Paid Courses</SelectItem>
                 <SelectItem value="under-50" className="rounded-lg font-medium">Under $50</SelectItem>
                 <SelectItem value="over-50" className="rounded-lg font-medium">$50 & Above</SelectItem>
               </SelectContent>

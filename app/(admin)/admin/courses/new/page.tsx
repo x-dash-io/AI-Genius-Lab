@@ -20,12 +20,21 @@ async function createCourseAction(formData: FormData) {
     const inventoryStr = formData.get("inventory") as string;
     const inventory = inventoryStr && inventoryStr.trim() !== "" ? parseInt(inventoryStr) : null;
     const isPublished = formData.get("isPublished") === "on";
-    const tier = formData.get("tier") as "STANDARD" | "PREMIUM";
+    const tier = formData.get("tier") as "STARTER" | "PROFESSIONAL" | "FOUNDER";
     const imageUrl = formData.get("imageUrl") as string;
 
     if (!title || !slug || !priceCentsStr) {
       throw new Error("Missing required fields");
     }
+
+    if (priceCents > 0 && tier === "STARTER") {
+      throw new Error("Starter tier courses must be free. Select Professional or Founder for paid courses.");
+    }
+
+    const normalizedTier =
+      priceCents === 0
+        ? "STARTER"
+        : tier;
 
     const course = await createCourse({
       title,
@@ -35,7 +44,7 @@ async function createCourseAction(formData: FormData) {
       priceCents,
       inventory,
       isPublished,
-      tier,
+      tier: normalizedTier,
       imageUrl: imageUrl || undefined,
     });
 

@@ -104,19 +104,19 @@ async function main() {
 
     const sampleCourses = [
         // Free
-        { title: "AI Basics for Beginners", slug: "ai-basics", categorySlug: "free-courses", price: 0, tier: CourseTier.STANDARD },
+        { title: "AI Basics for Beginners", slug: "ai-basics", categorySlug: "free-courses", price: 0, tier: CourseTier.STARTER },
 
         // Professional
-        { title: "Mastering ChatGPT", slug: "mastering-chatgpt", categorySlug: "master-ai-tools", price: 4900, tier: CourseTier.PREMIUM },
-        { title: "Excel AI Automation", slug: "excel-ai", categorySlug: "master-ai-tools", price: 4900, tier: CourseTier.PREMIUM },
-        { title: "Build Your First AI Agent", slug: "first-ai-agent", categorySlug: "build-ai-apps", price: 9900, tier: CourseTier.PREMIUM },
-        { title: "Chatbot Development 101", slug: "chatbot-101", categorySlug: "build-ai-apps", price: 9900, tier: CourseTier.PREMIUM },
+        { title: "Mastering ChatGPT", slug: "mastering-chatgpt", categorySlug: "master-ai-tools", price: 4900, tier: CourseTier.PROFESSIONAL },
+        { title: "Excel AI Automation", slug: "excel-ai", categorySlug: "master-ai-tools", price: 4900, tier: CourseTier.PROFESSIONAL },
+        { title: "Build Your First AI Agent", slug: "first-ai-agent", categorySlug: "build-ai-apps", price: 9900, tier: CourseTier.PROFESSIONAL },
+        { title: "Chatbot Development 101", slug: "chatbot-101", categorySlug: "build-ai-apps", price: 9900, tier: CourseTier.PROFESSIONAL },
 
         // Founder
-        { title: "YouTube Growth with AI", slug: "youtube-growth-ai", categorySlug: "get-traffic-with-ai", price: 14900, tier: CourseTier.PREMIUM },
-        { title: "TikTok Faceless Channels", slug: "tiktok-faceless", categorySlug: "get-traffic-with-ai", price: 14900, tier: CourseTier.PREMIUM },
-        { title: "SEO Domination with AI", slug: "seo-domination", categorySlug: "create-viral-ai-content", price: 19900, tier: CourseTier.PREMIUM },
-        { title: "Launch Your AI Agency", slug: "launch-ai-agency", categorySlug: "start-an-ai-business", price: 29900, tier: CourseTier.PREMIUM },
+        { title: "YouTube Growth with AI", slug: "youtube-growth-ai", categorySlug: "get-traffic-with-ai", price: 14900, tier: CourseTier.FOUNDER },
+        { title: "TikTok Faceless Channels", slug: "tiktok-faceless", categorySlug: "get-traffic-with-ai", price: 14900, tier: CourseTier.FOUNDER },
+        { title: "SEO Domination with AI", slug: "seo-domination", categorySlug: "create-viral-ai-content", price: 19900, tier: CourseTier.FOUNDER },
+        { title: "Launch Your AI Agency", slug: "launch-ai-agency", categorySlug: "start-an-ai-business", price: 29900, tier: CourseTier.FOUNDER },
     ];
 
     for (const course of sampleCourses) {

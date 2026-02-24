@@ -14,7 +14,7 @@ interface CourseActionsProps {
   courseId: string;
   courseSlug: string;
   priceCents: number;
-  tier: "STANDARD" | "PREMIUM";
+  tier: "STARTER" | "PROFESSIONAL" | "FOUNDER";
   inventory?: number | null;
 }
 
@@ -126,14 +126,15 @@ export function CourseActions({
 
   return (
     <div className="grid gap-4">
-      {tier === "PREMIUM" ? (
+      {tier !== "STARTER" ? (
         <div className="ui-surface rounded-[var(--radius-md)] border p-4">
           <div className="mb-2 flex items-center gap-2">
-            <Badge variant="secondary">Premium</Badge>
+            <Badge variant="secondary">{tier === "FOUNDER" ? "Founder" : "Professional"}</Badge>
             <p className="text-sm font-semibold">Purchase or subscribe</p>
           </div>
           <p className="text-sm text-muted-foreground">
-            Buy this course for lifetime access, or keep an active Professional/Founder subscription for plan-based access.
+            Buy this course for lifetime access, or keep an active{" "}
+            {tier === "FOUNDER" ? "Founder" : "Professional"} subscription for plan-based access.
           </p>
         </div>
       ) : null}

@@ -68,10 +68,23 @@ export async function POST() {
 
     let allAccessibleCourses: CourseWithSections[] = purchases.map(p => p.Course);
 
-    // If user has Professional or Founder subscription, add all published courses
-    if (subscription && (subscription.plan.tier === "professional" || subscription.plan.tier === "founder")) {
+    // Add subscription-accessible courses using exact tier matching (plus free starter courses).
+    if (subscription) {
+      const subscriptionCourseTier =
+        subscription.plan.tier === "starter"
+          ? "STARTER"
+          : subscription.plan.tier === "professional"
+            ? "PROFESSIONAL"
+            : "FOUNDER";
+
       const publishedCourses = await prisma.course.findMany({
-        where: { isPublished: true },
+        where: {
+          isPublished: true,
+          OR: [
+            { priceCents: 0 },
+            { tier: subscriptionCourseTier },
+          ],
+        },
         include: {
           sections: {
             include: {

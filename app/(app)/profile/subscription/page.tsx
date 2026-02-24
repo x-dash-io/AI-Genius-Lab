@@ -24,6 +24,12 @@ import { Check, CreditCard, Sparkles, XCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
+function getPlanCourseAccessText(tier: "starter" | "professional" | "founder") {
+  if (tier === "starter") return "free starter courses";
+  if (tier === "professional") return "professional-tier courses";
+  return "founder-tier courses";
+}
+
 async function cancelAction(formData: FormData) {
   "use server";
   const session = await getServerSession(authOptions);
@@ -124,7 +130,7 @@ export default async function UserSubscriptionPage() {
           <EmptyState
             icon={<CreditCard className="h-6 w-6" />}
             title="No active subscription"
-            description="Choose a plan to unlock premium courses, certificates, and learning paths."
+            description="Choose a plan to unlock tier-based course access, certificates, and learning paths."
             action={
               <Link href="/pricing">
                 <Button variant="premium">View pricing plans</Button>
@@ -153,7 +159,7 @@ export default async function UserSubscriptionPage() {
                 <ul className="space-y-2 text-sm">
                   <li className="inline-flex items-center gap-2">
                     <Check className="h-4 w-4 text-success" />
-                    Access to {subscription.plan.tier === "starter" ? "standard" : "all"} courses
+                    Access to {getPlanCourseAccessText(subscription.plan.tier)}
                   </li>
                   <li className="inline-flex items-center gap-2">
                     {subscription.plan.tier !== "starter" ? (

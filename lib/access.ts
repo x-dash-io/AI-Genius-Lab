@@ -5,7 +5,6 @@ import { hasRole, type Role } from "@/lib/rbac";
 import {
   getUserSubscription,
   isSubscriptionActiveNow,
-  SUBSCRIPTION_TIERS,
 } from "@/lib/subscriptions";
 
 export async function requireUser() {
@@ -58,26 +57,31 @@ export async function hasPurchasedCourse(userId: string, courseId: string) {
 
 export type CourseAccessSource = "admin" | "purchase" | "subscription" | "free" | "none";
 
-export function getMinimumTierForCourse(
-  courseTier: "STANDARD" | "PREMIUM"
-): "starter" | "professional" {
-  return courseTier === "PREMIUM" ? "professional" : "starter";
+export function getRequiredTierForCourse(
+  courseTier: "STARTER" | "PROFESSIONAL" | "FOUNDER"
+): "starter" | "professional" | "founder" {
+  switch (courseTier) {
+    case "STARTER":
+      return "starter";
+    case "PROFESSIONAL":
+      return "professional";
+    case "FOUNDER":
+      return "founder";
+  }
 }
 
 export function subscriptionTierMeetsRequirement(
   userTier: "starter" | "professional" | "founder",
-  requiredTier: "starter" | "professional"
+  requiredTier: "starter" | "professional" | "founder"
 ) {
-  const userTierIndex = SUBSCRIPTION_TIERS.indexOf(userTier);
-  const requiredTierIndex = SUBSCRIPTION_TIERS.indexOf(requiredTier);
-  return userTierIndex >= requiredTierIndex;
+  return userTier === requiredTier;
 }
 
 export function subscriptionTierHasCourseAccess(
   userTier: "starter" | "professional" | "founder",
-  courseTier: "STANDARD" | "PREMIUM"
+  courseTier: "STARTER" | "PROFESSIONAL" | "FOUNDER"
 ) {
-  return subscriptionTierMeetsRequirement(userTier, getMinimumTierForCourse(courseTier));
+  return subscriptionTierMeetsRequirement(userTier, getRequiredTierForCourse(courseTier));
 }
 
 export async function getCourseAccessState(
