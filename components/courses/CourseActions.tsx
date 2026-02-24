@@ -21,7 +21,7 @@ interface CourseActionsProps {
 type CourseOwnershipResponse = {
   owned?: boolean;
   hasAccess?: boolean;
-  accessSource?: "admin" | "purchase" | "subscription" | "none";
+  accessSource?: "admin" | "purchase" | "subscription" | "free" | "none";
 };
 
 export function CourseActions({
@@ -34,9 +34,12 @@ export function CourseActions({
   const router = useRouter();
   const { addToCart, cart } = useCart();
   const { data: session, status } = useSession();
+  const isFreeCourse = priceCents === 0;
   const [isOwned, setIsOwned] = useState(false);
-  const [hasAccess, setHasAccess] = useState(false);
-  const [accessSource, setAccessSource] = useState<CourseOwnershipResponse["accessSource"]>("none");
+  const [hasAccess, setHasAccess] = useState(isFreeCourse);
+  const [accessSource, setAccessSource] = useState<CourseOwnershipResponse["accessSource"]>(
+    isFreeCourse ? "free" : "none"
+  );
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
@@ -46,6 +49,8 @@ export function CourseActions({
       if (!session?.user) {
         setIsChecking(false);
         setIsOwned(false);
+        setHasAccess(isFreeCourse);
+        setAccessSource(isFreeCourse ? "free" : "none");
         return;
       }
 
@@ -66,7 +71,7 @@ export function CourseActions({
     }
 
     checkOwnership();
-  }, [courseId, session, status]);
+  }, [courseId, isFreeCourse, session, status]);
 
   // Show loading state while checking
   if (isChecking && status !== "unauthenticated") {
@@ -91,7 +96,13 @@ export function CourseActions({
           <div className="space-y-0.5">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Access</p>
             <p className="text-sm font-semibold text-foreground">
-              {isOwned ? "Owned Lifetime" : accessSource === "subscription" ? "Active Subscription" : "Available"}
+              {isOwned
+                ? "Owned Lifetime"
+                : accessSource === "subscription"
+                  ? "Active Subscription"
+                  : accessSource === "free"
+                    ? "Free Access"
+                    : "Available"}
             </p>
           </div>
         </div>
@@ -130,6 +141,7 @@ export function CourseActions({
       <div className="grid gap-2 sm:grid-cols-2">
         <AddToCartButton
           courseId={courseId}
+          courseSlug={courseSlug}
           priceCents={priceCents}
           inventory={inventory}
           variant="premium"

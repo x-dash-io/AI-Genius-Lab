@@ -72,15 +72,15 @@ export function Footer({ socialLinks }: FooterProps) {
   return (
     <footer className="mt-12 border-t border-border/80 bg-card/60">
       <div className="mx-auto grid w-full max-w-[96rem] gap-10 px-3 py-12 sm:px-5 lg:grid-cols-[1.2fr_1fr_1fr] lg:px-8">
-        <div className="space-y-5">
-          <Link href="/" className="inline-flex items-center" aria-label="AI Genius Lab home">
+        <div className="mx-auto w-full max-w-sm space-y-5 text-center lg:mx-0 lg:max-w-none lg:text-left">
+          <Link href="/" className="inline-flex items-center lg:justify-start" aria-label="AI Genius Lab home">
             <Image src="/logo.png" alt="AI Genius Lab" width={144} height={34} className="h-9 w-auto object-contain" priority />
           </Link>
-          <p className="max-w-sm text-sm text-muted-foreground">
+          <p className="mx-auto max-w-sm text-sm text-muted-foreground lg:mx-0">
             Outcome-driven AI education with structured learning paths, practical coursework, and clear progress tracking.
           </p>
           {links.length ? (
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-2 lg:justify-start">
               {links.map((social) => {
                 const Icon = iconMap[social.platform.toLowerCase()] || LinkIcon;
                 return (
@@ -100,9 +100,9 @@ export function Footer({ socialLinks }: FooterProps) {
           ) : null}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 text-center lg:text-left">
           <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Learn</h4>
-          <div className="grid gap-2 text-sm">
+          <div className="grid gap-2 text-sm justify-items-center lg:justify-items-start">
             <Link href="/courses" className="hover:text-primary">Courses</Link>
             <Link href="/learning-paths" className="hover:text-primary">Learning Paths</Link>
             <Link href="/pricing" className="hover:text-primary">Pricing</Link>
@@ -110,9 +110,9 @@ export function Footer({ socialLinks }: FooterProps) {
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 text-center lg:text-left">
           <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Company</h4>
-          <div className="grid gap-2 text-sm">
+          <div className="grid gap-2 text-sm justify-items-center lg:justify-items-start">
             <Link href="/about" className="hover:text-primary">About</Link>
             <Link href="/contact" className="hover:text-primary">Contact</Link>
             <Link href="/faq" className="hover:text-primary">FAQ</Link>
@@ -122,9 +122,9 @@ export function Footer({ socialLinks }: FooterProps) {
       </div>
 
       <div className="border-t border-border/70">
-        <div className="mx-auto flex w-full max-w-[96rem] flex-col gap-3 px-3 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-5 lg:px-8">
+        <div className="mx-auto flex w-full max-w-[96rem] flex-col items-center gap-3 px-3 py-4 text-center text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:text-left lg:px-8">
           <p>© {new Date().getFullYear()} AI Genius Lab. All rights reserved.</p>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:justify-end">
             <Link href="/privacy" className="hover:text-primary">Privacy</Link>
             <Link href="/terms" className="hover:text-primary">Terms</Link>
           </div>

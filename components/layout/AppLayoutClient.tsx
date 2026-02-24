@@ -324,11 +324,15 @@ function AppLayoutContent({ children, planName = "Member" }: AppLayoutClientProp
 
           {isPreviewMode ? <PreviewBanner /> : null}
 
-          <main>
-            <div className="mx-auto w-full max-w-[96rem] px-3 py-5 pb-24 sm:px-5">{children}</div>
-          </main>
+	          <main>
+	            <div className="mx-auto w-full max-w-[96rem] px-3 py-5 pb-24 sm:px-5">{children}</div>
+	          </main>
 
-          <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border/80 bg-background/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-1.5 backdrop-blur">
+	          <div className="pb-24">
+	            <Footer />
+	          </div>
+
+	          <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border/80 bg-background/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.35rem)] pt-1.5 backdrop-blur">
             <div className="mx-auto grid w-full max-w-md grid-cols-5 gap-1">
               {mobileBottomNavigation.map((item) => {
                 const Icon = item.icon;

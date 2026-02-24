@@ -86,7 +86,7 @@ export function CourseList({ courses }: CourseListProps) {
                       Price
                     </p>
                     <p className="text-lg font-black leading-none text-foreground tabular-nums sm:text-xl">
-                      ${(course.priceCents / 100).toFixed(2)}
+                      {course.priceCents === 0 ? "Free" : `$${(course.priceCents / 100).toFixed(2)}`}
                     </p>
                   </div>
                 </div>

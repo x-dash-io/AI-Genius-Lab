@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createPayPalOrder } from "@/lib/paypal";
-import { isAdmin } from "@/lib/access";
+import { getCourseAccessState, isAdmin } from "@/lib/access";
 import { getCartFromCookies } from "@/lib/cart/utils";
 
 function generateId(prefix: string) {
@@ -41,21 +41,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Some courses not found" }, { status: 404 });
     }
 
-    // Check for existing purchases
-    const existingPurchases = await prisma.purchase.findMany({
-      where: {
-        userId: session.user.id,
-        courseId: { in: courseIds },
-        status: "paid",
-      },
-    });
+    const accessStates = await Promise.all(
+      courses.map(async (course) => ({
+        course,
+        access: await getCourseAccessState(
+          session.user.id,
+          session.user.role,
+          course.id
+        ),
+      }))
+    );
 
-    const purchasedCourseIds = new Set(existingPurchases.map((purchase) => purchase.courseId));
-    const coursesToPurchase = courses.filter((course) => !purchasedCourseIds.has(course.id));
+    const coursesToPurchase = accessStates
+      .filter(({ access }) => !access.granted)
+      .map(({ course }) => course);
 
     if (coursesToPurchase.length === 0) {
       return NextResponse.json(
-        { error: "You already own all selected courses" },
+        { error: "All selected courses are already available in your library." },
         { status: 400 }
       );
     }

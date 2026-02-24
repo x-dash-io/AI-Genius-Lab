@@ -1,9 +1,14 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Metadata } from "next";
+import { getServerSession } from "next-auth";
 import { Search, SlidersHorizontal } from "lucide-react";
+import { authOptions } from "@/lib/auth";
+import { subscriptionTierHasCourseAccess } from "@/lib/access";
 import { getPublishedCourses } from "@/lib/courses";
+import { prisma } from "@/lib/prisma";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
+import { getUserSubscription, isSubscriptionActiveNow } from "@/lib/subscriptions";
 import { CourseProductCard } from "@/components/courses/CourseProductCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -102,6 +107,29 @@ async function CoursesContent({ searchParams }: CoursesPageProps) {
   const params = await searchParams;
   const allCourses = await getPublishedCourses();
   const courses = applyFilters(allCourses, params.search, params.category, params.price, params.sort);
+  const session = await getServerSession(authOptions);
+
+  let purchasedCourseIds = new Set<string>();
+  let activeSubscriptionTier: "starter" | "professional" | "founder" | null = null;
+
+  if (session?.user && session.user.role !== "admin") {
+    const [purchases, subscription] = await Promise.all([
+      prisma.purchase.findMany({
+        where: {
+          userId: session.user.id,
+          status: "paid",
+          courseId: { in: allCourses.map((course) => course.id) },
+        },
+        select: { courseId: true },
+      }),
+      getUserSubscription(session.user.id),
+    ]);
+
+    purchasedCourseIds = new Set(purchases.map((purchase) => purchase.courseId));
+    if (subscription && isSubscriptionActiveNow(subscription)) {
+      activeSubscriptionTier = subscription.plan.tier;
+    }
+  }
 
   const totalCourses = allCourses.length;
   const hasFilters = Boolean(params.search || params.category || params.price || params.sort);
@@ -210,37 +238,62 @@ async function CoursesContent({ searchParams }: CoursesPageProps) {
       <ContentRegion>
         {courses.length ? (
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {courses.map((course) => (
-              <CourseProductCard
-                key={course.id}
-                title={course.title}
-                description={
-                  course.description ||
-                  "Structured AI training with practical outcomes and guided progression."
-                }
-                slug={course.slug}
-                categoryLabel={course.Category?.name || "General"}
-                priceLabel={formatPrice(course.priceCents)}
-                imageUrl={course.imageUrl}
-                tierLabel={course.tier === "PREMIUM" ? "Advanced" : "Core"}
-                metaItems={[
-                  {
-                    label: "Difficulty",
-                    value: course.tier === "PREMIUM" ? "Advanced" : "Foundational",
-                  },
-                  {
-                    label: "Duration",
-                    value: "Self-paced",
-                  },
-                  {
-                    label: "Outcome",
-                    value: "Certificate",
-                  },
-                ]}
-                primaryAction={{ href: `/checkout?course=${course.slug}`, label: "Buy course once" }}
-                secondaryActions={[{ href: "/pricing", label: "Buy subscription" }]}
-              />
-            ))}
+            {courses.map((course) => {
+              const isFreeCourse = course.priceCents === 0;
+              const hasSubscriptionAccess =
+                !isFreeCourse &&
+                activeSubscriptionTier !== null &&
+                subscriptionTierHasCourseAccess(activeSubscriptionTier, course.tier);
+              const hasCourseAccess =
+                isFreeCourse ||
+                session?.user?.role === "admin" ||
+                purchasedCourseIds.has(course.id) ||
+                hasSubscriptionAccess;
+
+              return (
+                <CourseProductCard
+                  key={course.id}
+                  title={course.title}
+                  description={
+                    course.description ||
+                    "Structured AI training with practical outcomes and guided progression."
+                  }
+                  slug={course.slug}
+                  categoryLabel={course.Category?.name || "General"}
+                  priceLabel={formatPrice(course.priceCents)}
+                  imageUrl={course.imageUrl}
+                  tierLabel={course.tier === "PREMIUM" ? "Advanced" : "Core"}
+                  metaItems={[
+                    {
+                      label: "Difficulty",
+                      value: course.tier === "PREMIUM" ? "Advanced" : "Foundational",
+                    },
+                    {
+                      label: "Duration",
+                      value: "Self-paced",
+                    },
+                    {
+                      label: "Outcome",
+                      value: "Certificate",
+                    },
+                  ]}
+                  planIncluded={!isFreeCourse && hasSubscriptionAccess}
+                  primaryAction={{
+                    href: hasCourseAccess ? `/library/${course.slug}` : `/checkout?course=${course.slug}`,
+                    label: hasCourseAccess
+                      ? isFreeCourse
+                        ? "Open free course"
+                        : "Open course"
+                      : "Buy course once",
+                  }}
+                  secondaryActions={
+                    hasCourseAccess
+                      ? [{ href: `/courses/${course.slug}`, label: "Course detail" }]
+                      : [{ href: "/pricing", label: "Buy subscription" }]
+                  }
+                />
+              );
+            })}
           </section>
         ) : null}
       </ContentRegion>

@@ -146,7 +146,7 @@ async function CourseList({ searchParams }: AdminCoursesPageProps) {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 self-end lg:self-center">
+                  <div className="flex flex-wrap items-center justify-end gap-3 self-end lg:self-center">
                     <Link href={`/admin/courses/${course.id}/edit`}>
                       <Button variant="outline" className="rounded-xl px-5 h-11 border-2 font-bold hover:bg-accent/50 group/edit">
                         <Edit className="mr-2 h-4 w-4 transition-transform group-hover/edit:-rotate-12" />
@@ -174,7 +174,7 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
 
   return (
     <div className="space-y-10 pb-20">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="flex flex-col items-start gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-2">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
             Master Control
@@ -186,8 +186,12 @@ export default async function AdminCoursesPage({ searchParams }: AdminCoursesPag
             Architect, monitor, and refine your professional learning experiences from a central mission control.
           </p>
         </div>
-        <Link href="/admin/courses/new">
-          <Button variant="premium" size="lg" className="rounded-xl shadow-lg shadow-primary/20">
+        <Link href="/admin/courses/new" className="w-full sm:w-auto">
+          <Button
+            variant="premium"
+            size="lg"
+            className="w-full whitespace-normal rounded-xl text-center shadow-lg shadow-primary/20 sm:w-auto"
+          >
             <Plus className="mr-2 h-5 w-5 font-bold" />
             New Course
           </Button>

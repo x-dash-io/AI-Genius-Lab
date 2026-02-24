@@ -4,75 +4,87 @@ import { authOptions } from "@/lib/auth";
 import { getCartFromCookies, setCartInCookies, addItemToCart, removeItemFromCart, updateItemQuantity, clearCart } from "@/lib/cart/utils";
 import { CartItem } from "@/lib/cart/types";
 import { prisma } from "@/lib/prisma";
+import { getCourseAccessState } from "@/lib/access";
 
 export async function GET() {
   try {
     const cart = await getCartFromCookies();
+    let normalizedCart = cart;
+    let removedFreeCourses = false;
+    let removedAlreadyAccessible = false;
 
-    // If user is logged in, filter out already purchased courses
+    // Free courses should never live in cart; they are directly accessible.
+    const nonFreeItems = normalizedCart.items.filter((item) => item.priceCents > 0);
+    if (nonFreeItems.length !== normalizedCart.items.length) {
+      removedFreeCourses = true;
+      normalizedCart = {
+        ...normalizedCart,
+        items: nonFreeItems,
+        totalCents: nonFreeItems.reduce(
+          (sum, item) => sum + item.priceCents * item.quantity,
+          0
+        ),
+        itemCount: nonFreeItems.reduce(
+          (sum, item) => sum + item.quantity,
+          0
+        ),
+      };
+    }
+
+    // If user is logged in, filter out courses they already can access
     const session = await getServerSession(authOptions);
-    if (session?.user && cart.items.length > 0) {
-      const courseIds = cart.items.map((item) => item.courseId);
+    if (session?.user && normalizedCart.items.length > 0) {
+      const accessResults = await Promise.all(
+        normalizedCart.items.map(async (item) => ({
+          courseId: item.courseId,
+          access: await getCourseAccessState(
+            session.user.id,
+            session.user.role,
+            item.courseId
+          ),
+        }))
+      );
 
-      // Get purchased courses
-      const purchases = await prisma.purchase.findMany({
-        where: {
-          userId: session.user.id,
-          courseId: { in: courseIds },
-          status: "paid",
-        },
-        select: { courseId: true },
-      });
+      const accessibleCourseIds = new Set(
+        accessResults
+          .filter(({ access }) => access.granted)
+          .map(({ courseId }) => courseId)
+      );
 
-      const purchasedIds = new Set(purchases.map((purchase) => purchase.courseId));
-
-      // Filter out purchased items
-      if (purchasedIds.size > 0) {
-        const filteredItems = cart.items.filter(
-          (item) => !purchasedIds.has(item.courseId)
+      if (accessibleCourseIds.size > 0) {
+        const filteredItems = normalizedCart.items.filter(
+          (item) => !accessibleCourseIds.has(item.courseId)
         );
 
         // Update cart if items were removed
-        if (filteredItems.length !== cart.items.length) {
-          const totalCents = filteredItems.reduce(
-            (sum, item) => sum + item.priceCents * item.quantity,
-            0
-          );
-          const itemCount = filteredItems.reduce(
-            (sum, item) => sum + item.quantity,
-            0
-          );
-
-          const updatedCart = {
-            ...cart,
+        if (filteredItems.length !== normalizedCart.items.length) {
+          removedAlreadyAccessible = true;
+          normalizedCart = {
+            ...normalizedCart,
             items: filteredItems,
-            totalCents,
-            itemCount,
-            // Reset coupon if items change significantly? Maybe keep it.
-            // But re-calculate discount would be safer.
-            // For now, let's keep coupon but we might need to re-validate it.
-            // Simpler: Just update items and save. Logic elsewhere handles totals.
+            totalCents: filteredItems.reduce(
+              (sum, item) => sum + item.priceCents * item.quantity,
+              0
+            ),
+            itemCount: filteredItems.reduce(
+              (sum, item) => sum + item.quantity,
+              0
+            ),
           };
-
-          // Re-calculate totals including coupon if exists
-          if (updatedCart.couponCode) {
-            // We technically should re-validate coupon here but for now just saving filtered items
-            // The client usually refreshes or we can handle it.
-            // Let's safe-guard: if items change, maybe remove coupon to force re-apply?
-            // Or better, let's just save.
-          }
-
-          await setCartInCookies(updatedCart);
-
-          return NextResponse.json({
-            ...updatedCart,
-            removedPurchased: true,
-          });
         }
       }
     }
 
-    return NextResponse.json(cart);
+    if (removedFreeCourses || removedAlreadyAccessible) {
+      await setCartInCookies(normalizedCart);
+      return NextResponse.json({
+        ...normalizedCart,
+        removedFreeCourses,
+        removedAlreadyAccessible,
+      });
+    }
+
+    return NextResponse.json(normalizedCart);
   } catch (error) {
     console.error("Error getting cart:", error);
     return NextResponse.json({ items: [], totalCents: 0, itemCount: 0 }, { status: 200 });
@@ -114,25 +126,40 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Course ID is required" }, { status: 400 });
       }
 
-      // Check ownership
-      const session = await getServerSession(authOptions);
-      if (session?.user) {
-        const existingPurchase = await prisma.purchase.findFirst({
-          where: { userId: session.user.id, courseId, status: "paid" },
-        });
-        if (existingPurchase) {
-          return NextResponse.json({ error: "You already own this course" }, { status: 400 });
-        }
-      }
-
       // Fetch course
       const course = await prisma.course.findUnique({
         where: { id: courseId },
-        select: { id: true, slug: true, title: true, priceCents: true, inventory: true },
+        select: { id: true, slug: true, title: true, priceCents: true, inventory: true, tier: true },
       });
 
       if (!course) {
         return NextResponse.json({ error: "Course not found" }, { status: 404 });
+      }
+
+      if (course.priceCents === 0) {
+        return NextResponse.json(
+          { error: "This course is free and already available without checkout." },
+          { status: 400 }
+        );
+      }
+
+      // Check access/ownership
+      const session = await getServerSession(authOptions);
+      if (session?.user) {
+        const access = await getCourseAccessState(
+          session.user.id,
+          session.user.role,
+          course.id
+        );
+
+        if (access.granted) {
+          const message =
+            access.source === "subscription"
+              ? "This course is already included in your active subscription."
+              : "You already have access to this course.";
+
+          return NextResponse.json({ error: message }, { status: 400 });
+        }
       }
 
       // Inventory check

@@ -22,6 +22,8 @@ interface AddToCartButtonProps {
 
 type CourseOwnershipResponse = {
   owned?: boolean;
+  hasAccess?: boolean;
+  accessSource?: "admin" | "purchase" | "subscription" | "free" | "none";
 };
 
 export function AddToCartButton({
@@ -39,6 +41,8 @@ export function AddToCartButton({
   const [isAdding, setIsAdding] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const [isOwned, setIsOwned] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [accessSource, setAccessSource] = useState<CourseOwnershipResponse["accessSource"]>("none");
   const [isCheckingOwnership, setIsCheckingOwnership] = useState(checkOwnership);
 
   // Check ownership if enabled
@@ -55,6 +59,8 @@ export function AddToCartButton({
         if (ownershipRes.ok) {
           const data = (await ownershipRes.json()) as CourseOwnershipResponse;
           setIsOwned(data.owned === true);
+          setHasAccess(data.hasAccess === true || data.owned === true);
+          setAccessSource(data.accessSource ?? "none");
         }
       } catch (error) {
         console.error("Failed to check ownership:", error);
@@ -105,13 +111,19 @@ export function AddToCartButton({
     );
   }
 
-  // User already owns this course
-  if (isOwned) {
+  // User already owns or can access this course (subscription/admin)
+  if (isOwned || hasAccess) {
     return (
       <Link href={courseSlug ? `/library/${courseSlug}` : "/library"} className={className}>
         <Button variant="secondary" size={size} className="w-full rounded-xl font-bold">
           <BookOpen className="h-4 w-4 mr-2" />
-          Continue Learning
+          {isOwned
+            ? "Continue Learning"
+            : accessSource === "subscription"
+              ? "Included in Plan"
+              : accessSource === "free"
+                ? "Free Access"
+              : "Open Course"}
         </Button>
       </Link>
     );
@@ -123,6 +135,22 @@ export function AddToCartButton({
         <X className="h-4 w-4 mr-2 font-bold" />
         Sold Out
       </Button>
+    );
+  }
+
+  if (priceCents === 0) {
+    const libraryHref = courseSlug ? `/library/${courseSlug}` : "/library";
+    const freeCourseHref = session?.user
+      ? libraryHref
+      : `/sign-in?next=${encodeURIComponent(libraryHref)}`;
+
+    return (
+      <Link href={freeCourseHref} className={className}>
+        <Button variant="secondary" size={size} className="w-full rounded-xl font-bold">
+          <BookOpen className="h-4 w-4 mr-2" />
+          {session?.user ? "Free Access" : "Sign in for free access"}
+        </Button>
+      </Link>
     );
   }
 

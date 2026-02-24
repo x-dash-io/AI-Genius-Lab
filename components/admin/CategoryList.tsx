@@ -234,9 +234,14 @@ export function CategoryList({ initialCategories }: CategoryListProps) {
     <>
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>All Categories</CardTitle>
-            <Button onClick={() => setShowCreateDialog(true)} variant="premium" size="lg" className="rounded-xl shadow-lg shadow-primary/20">
+            <Button
+              onClick={() => setShowCreateDialog(true)}
+              variant="premium"
+              size="lg"
+              className="w-full whitespace-normal rounded-xl text-center shadow-lg shadow-primary/20 sm:w-auto"
+            >
               <Plus className="mr-2 h-4 w-4" />
               Create Category
             </Button>

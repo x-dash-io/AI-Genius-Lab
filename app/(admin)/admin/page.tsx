@@ -121,15 +121,15 @@ export default async function AdminDashboardPage() {
         {/* Recent Purchases */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <CardTitle>Recent Purchases</CardTitle>
                 <CardDescription>
                   Latest course purchases and enrollments
                 </CardDescription>
               </div>
-              <Link href="/admin/purchases">
-                <Button variant="outline" size="sm">
+              <Link href="/admin/purchases" className="w-full sm:w-auto">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto">
                   View All
                 </Button>
               </Link>
@@ -191,19 +191,31 @@ export default async function AdminDashboardPage() {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
               <Link href="/admin/courses/new">
-                <Button variant="premium" className="w-full h-14 rounded-2xl shadow-xl shadow-primary/20 text-lg group border border-white/10" size="lg">
+                <Button
+                  variant="premium"
+                  className="h-auto min-h-14 w-full whitespace-normal rounded-2xl border border-white/10 py-3 text-center text-base shadow-xl shadow-primary/20 group sm:text-lg"
+                  size="lg"
+                >
                   <BookOpen className="mr-3 h-5 w-5 group-hover:scale-110 transition-transform" />
                   Create New Course
                 </Button>
               </Link>
               <Link href="/admin/learning-paths/new">
-                <Button variant="outline" className="w-full h-14 rounded-2xl border-2 font-bold hover:bg-accent/50 text-lg group" size="lg">
+                <Button
+                  variant="outline"
+                  className="h-auto min-h-14 w-full whitespace-normal rounded-2xl border-2 py-3 text-center text-base font-bold hover:bg-accent/50 group sm:text-lg"
+                  size="lg"
+                >
                   <GraduationCap className="mr-3 h-5 w-5 group-hover:scale-110 transition-transform" />
                   Create Learning Path
                 </Button>
               </Link>
               <Link href="/admin/coupons" className="md:col-span-2">
-                <Button variant="secondary" className="w-full h-14 rounded-2xl font-bold bg-accent/30 hover:bg-accent/50 text-lg group border border-border/50" size="lg">
+                <Button
+                  variant="secondary"
+                  className="h-auto min-h-14 w-full whitespace-normal rounded-2xl border border-border/50 bg-accent/30 py-3 text-center text-base font-bold hover:bg-accent/50 group sm:text-lg"
+                  size="lg"
+                >
                   <DollarSign className="mr-3 h-5 w-5 group-hover:scale-110 transition-transform" />
                   Manage Coupons
                 </Button>

@@ -11,15 +11,19 @@ export default async function CouponsPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div className="space-y-1">
                     <h2 className="text-2xl font-bold tracking-tight">Coupons</h2>
                     <p className="text-muted-foreground">
                         Manage discount codes and promotions
                     </p>
                 </div>
-                <Link href="/admin/coupons/new">
-                    <Button variant="premium" size="lg" className="rounded-xl shadow-lg shadow-primary/20">
+                <Link href="/admin/coupons/new" className="w-full sm:w-auto">
+                    <Button
+                        variant="premium"
+                        size="lg"
+                        className="w-full whitespace-normal rounded-xl text-center shadow-lg shadow-primary/20 sm:w-auto"
+                    >
                         <Plus className="mr-2 h-5 w-5" />
                         Create Coupon
                     </Button>

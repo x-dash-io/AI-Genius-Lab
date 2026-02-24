@@ -56,19 +56,28 @@ export async function hasPurchasedCourse(userId: string, courseId: string) {
   return Boolean(purchase);
 }
 
-export type CourseAccessSource = "admin" | "purchase" | "subscription" | "none";
+export type CourseAccessSource = "admin" | "purchase" | "subscription" | "free" | "none";
 
-function getMinimumTierForCourse(courseTier: "STANDARD" | "PREMIUM"): "starter" | "professional" {
+export function getMinimumTierForCourse(
+  courseTier: "STANDARD" | "PREMIUM"
+): "starter" | "professional" {
   return courseTier === "PREMIUM" ? "professional" : "starter";
 }
 
-function subscriptionTierMeetsRequirement(
+export function subscriptionTierMeetsRequirement(
   userTier: "starter" | "professional" | "founder",
   requiredTier: "starter" | "professional"
 ) {
   const userTierIndex = SUBSCRIPTION_TIERS.indexOf(userTier);
   const requiredTierIndex = SUBSCRIPTION_TIERS.indexOf(requiredTier);
   return userTierIndex >= requiredTierIndex;
+}
+
+export function subscriptionTierHasCourseAccess(
+  userTier: "starter" | "professional" | "founder",
+  courseTier: "STANDARD" | "PREMIUM"
+) {
+  return subscriptionTierMeetsRequirement(userTier, getMinimumTierForCourse(courseTier));
 }
 
 export async function getCourseAccessState(
@@ -89,7 +98,7 @@ export async function getCourseAccessState(
     hasPurchasedCourse(userId, courseId),
     prisma.course.findUnique({
       where: { id: courseId },
-      select: { tier: true },
+      select: { tier: true, priceCents: true },
     }),
   ]);
 
@@ -111,6 +120,15 @@ export async function getCourseAccessState(
     };
   }
 
+  if (course.priceCents === 0) {
+    return {
+      granted: true,
+      source: "free" as CourseAccessSource,
+      owned: false,
+      subscriptionActive: false,
+    };
+  }
+
   const subscription = await getUserSubscription(userId);
   const subscriptionActive = isSubscriptionActiveNow(subscription);
 
@@ -123,10 +141,9 @@ export async function getCourseAccessState(
     };
   }
 
-  const requiredTier = getMinimumTierForCourse(course.tier);
-  const hasSubscriptionAccess = subscriptionTierMeetsRequirement(
+  const hasSubscriptionAccess = subscriptionTierHasCourseAccess(
     subscription.plan.tier,
-    requiredTier
+    course.tier
   );
 
   if (hasSubscriptionAccess) {

@@ -41,6 +41,7 @@ type FeaturedCourse = {
   categoryName: string;
   imageUrl?: string | null;
   tier?: string;
+  hasAccess?: boolean;
 };
 
 type Testimonial = {
@@ -374,27 +375,27 @@ export function PremiumHomepageExperience({
                 "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=80",
             },
           ].map((step, index) => (
-            <Card key={step.title} className="ui-surface supports-hover-card overflow-hidden border">
-              <div className="relative h-40 border-b bg-muted/25 sm:h-44">
-                <Image
-                  src={step.image}
-                  alt={step.title}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 25vw"
-                  className="object-contain p-1.5"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-black/5 to-transparent" />
-                <div className="absolute inset-x-3 bottom-2 flex items-center justify-between">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/40 bg-black/35 text-xs font-semibold text-white">
+            <Card key={step.title} className="group ui-surface supports-hover-card relative min-h-72 overflow-hidden border">
+              <Image
+                src={step.image}
+                alt={step.title}
+                fill
+                sizes="(max-width: 1024px) 100vw, 25vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20" />
+              <CardContent className="relative z-[1] flex h-full flex-col justify-between p-4 sm:p-5">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/50 bg-black/40 text-xs font-semibold text-white">
                     {index + 1}
                   </span>
-                  <step.icon className="h-4 w-4 text-white" />
+                  <step.icon className="h-5 w-5 text-white/95" />
                 </div>
-              </div>
-              <CardHeader className="space-y-3">
-                <CardTitle className="text-lg">{step.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">{step.detail}</CardContent>
+                <div className="space-y-2">
+                  <CardTitle className="text-xl text-white">{step.title}</CardTitle>
+                  <p className="text-sm text-white/85">{step.detail}</p>
+                </div>
+              </CardContent>
             </Card>
           ))}
         </m.section>
@@ -497,15 +498,14 @@ export function PremiumHomepageExperience({
                   { label: "Outcome", value: "Certificate" },
                 ]}
                 primaryAction={{
-                  href: `/checkout?course=${course.slug}`,
-                  label: "Buy course once",
+                  href: course.hasAccess ? `/library/${course.slug}` : `/checkout?course=${course.slug}`,
+                  label: course.hasAccess ? "Open course" : "Buy course once",
                 }}
-                secondaryActions={[
-                  {
-                    href: "/pricing",
-                    label: "Buy subscription",
-                  },
-                ]}
+                secondaryActions={
+                  course.hasAccess
+                    ? [{ href: `/courses/${course.slug}`, label: "Course detail" }]
+                    : [{ href: "/pricing", label: "Buy subscription" }]
+                }
               />
             ))}
           </div>

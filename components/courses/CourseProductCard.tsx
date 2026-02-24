@@ -3,17 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { BookOpen, Ellipsis, GraduationCap } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle2, CreditCard, GraduationCap } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { canOptimizeImageUrl, normalizeImageUrl, passthroughImageLoader } from "@/lib/images";
@@ -39,6 +33,7 @@ interface CourseProductCardProps {
   metaItems: CourseMetaItem[];
   primaryAction: CourseAction;
   secondaryActions?: CourseAction[];
+  planIncluded?: boolean;
   className?: string;
 }
 
@@ -66,6 +61,7 @@ export function CourseProductCard({
   metaItems,
   primaryAction,
   secondaryActions = [],
+  planIncluded = false,
   className,
 }: CourseProductCardProps) {
   const [loadedImage, setLoadedImage] = useState<string | null>(null);
@@ -80,8 +76,14 @@ export function CourseProductCard({
   const isCoreTier = normalizedTier.includes("core");
 
   return (
-    <Card className={cn("ui-surface supports-hover-card flex h-full flex-col overflow-hidden border", className)}>
-      <div className="relative aspect-video overflow-hidden border-b bg-muted/25">
+    <Card
+      className={cn(
+        "group ui-surface supports-hover-card flex h-full flex-col overflow-hidden border border-border/70 bg-card/90",
+        "transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/10",
+        className
+      )}
+    >
+      <div className="relative aspect-[16/10] overflow-hidden border-b bg-muted/25">
         {resolvedImage && !hasImageError ? (
           <>
             <Image
@@ -90,7 +92,7 @@ export function CourseProductCard({
               alt={title}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
               loader={usePassthroughLoader ? passthroughImageLoader : undefined}
               unoptimized={usePassthroughLoader}
               onLoad={() => {
@@ -107,21 +109,17 @@ export function CourseProductCard({
           <CourseImageFallback categoryLabel={categoryLabel} />
         )}
 
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-transparent" />
+
         <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
           <Badge
             variant="outline"
             title={categoryLabel}
-            className="max-w-[65%] truncate border-white/35 bg-black/55 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm backdrop-blur"
+            className="max-w-[62%] truncate border-white/35 bg-black/55 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm backdrop-blur"
           >
             {categoryLabel}
           </Badge>
-          <span className="shrink-0 rounded-full border border-primary/35 bg-[linear-gradient(135deg,hsl(var(--primary))_0%,hsl(260_88%_63%)_100%)] px-3 py-1.5 text-sm font-bold leading-none text-white shadow-[0_12px_24px_hsl(var(--primary)/0.28)] tabular-nums">
-            {priceLabel}
-          </span>
-        </div>
-
-        {tierLabel ? (
-          <div className="absolute inset-x-3 bottom-3 flex justify-end">
+          {tierLabel ? (
             <Badge
               variant="outline"
               className={cn(
@@ -136,73 +134,87 @@ export function CourseProductCard({
               <GraduationCap className="h-3.5 w-3.5" />
               {tierLabel}
             </Badge>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
+
+        <div className="absolute inset-x-3 bottom-3">
+          <span className="inline-flex rounded-full border border-primary/35 bg-[linear-gradient(135deg,hsl(var(--primary))_0%,hsl(260_88%_63%)_100%)] px-3 py-1.5 text-sm font-bold leading-none text-white shadow-[0_12px_24px_hsl(var(--primary)/0.28)] tabular-nums">
+            {priceLabel}
+          </span>
+        </div>
       </div>
 
-      <CardHeader className="space-y-2">
-        <CardTitle className="line-clamp-2 text-xl">{title}</CardTitle>
-        <CardDescription className="line-clamp-3 text-sm">
-          {description || "Structured practical curriculum designed for measurable project outcomes."}
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="mt-auto grid gap-4">
-        <div className="flex flex-wrap gap-2">
-          {metaItems.map((item) => (
-            <span
-              key={`${slug}-${item.label}`}
-              className="rounded-full border bg-background px-2.5 py-1 text-xs text-muted-foreground"
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        <div className="space-y-2">
+          <CardTitle className="line-clamp-2 text-lg sm:text-xl">{title}</CardTitle>
+          <CardDescription className="line-clamp-3 text-sm leading-relaxed">
+            {description || "Structured practical curriculum designed for measurable project outcomes."}
+          </CardDescription>
+          {planIncluded ? (
+            <Badge
+              variant="outline"
+              className="mt-2 inline-flex w-fit items-center gap-1 border-success/30 bg-success/10 text-xs font-semibold text-success"
             >
-              <span className="font-semibold text-foreground">{item.label}:</span> {item.value}
-            </span>
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Included with your plan
+            </Badge>
+          ) : null}
+        </div>
+
+        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+          {metaItems.map((item) => (
+            <div
+              key={`${slug}-${item.label}`}
+              className="rounded-xl border border-border/70 bg-background/80 px-3 py-2"
+            >
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                {item.label}
+              </p>
+              <p className="mt-1 text-xs font-semibold text-foreground">{item.value}</p>
+            </div>
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
-          <Link href={primaryAction.href} className="flex-1">
-            <Button className="h-11 w-full" variant="premium">
-              {primaryAction.label}
+        <div className="mt-auto pt-4">
+          <Link href={primaryAction.href} className="block min-w-0">
+            <Button
+              className="h-11 w-full justify-between rounded-xl px-4 text-sm font-semibold whitespace-normal"
+              variant="premium"
+            >
+              <span className="min-w-0 truncate text-left">{primaryAction.label}</span>
+              <ArrowRight className="h-4 w-4 shrink-0" />
             </Button>
           </Link>
 
           {secondaryActions.length ? (
-            <>
-              <div className="hidden items-center gap-2 sm:flex">
-                {secondaryActions.map((action) => (
-                  <Link key={`${slug}-${action.label}`} href={action.href}>
-                    <Button className="h-11" variant="outline">
-                      {action.label}
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              {secondaryActions.map((action) => {
+                const isSubscriptionAction = action.label.toLowerCase().includes("subscription");
+
+                return (
+                  <Link
+                    key={`${slug}-${action.label}`}
+                    href={action.href}
+                    className={cn("block min-w-0", secondaryActions.length === 1 && "sm:col-span-2")}
+                  >
+                    <Button
+                      className={cn(
+                        "h-11 w-full rounded-xl px-4 text-sm font-semibold whitespace-normal",
+                        isSubscriptionAction &&
+                          "justify-between border-primary/35 bg-primary/10 text-foreground shadow-sm hover:bg-primary/15 hover:text-foreground"
+                      )}
+                      variant={isSubscriptionAction ? "secondary" : "outline"}
+                    >
+                      <span className="min-w-0 truncate">{action.label}</span>
+                      {isSubscriptionAction ? <CreditCard className="h-4 w-4 shrink-0 text-primary" /> : null}
                     </Button>
                   </Link>
-                ))}
-              </div>
-
-              <div className="sm:hidden">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      aria-label="More course actions"
-                      className="h-11 w-11"
-                      variant="outline"
-                      size="icon"
-                    >
-                      <Ellipsis className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-44">
-                    {secondaryActions.map((action) => (
-                      <DropdownMenuItem key={`${slug}-mobile-${action.label}`} asChild>
-                        <Link href={action.href}>{action.label}</Link>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </>
+                );
+              })}
+            </div>
           ) : null}
         </div>
-      </CardContent>
+      </div>
     </Card>
   );
 }

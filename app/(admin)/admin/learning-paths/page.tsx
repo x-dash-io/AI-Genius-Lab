@@ -42,7 +42,7 @@ async function LearningPathsList() {
       {paths.map((path) => (
         <Card key={path.id}>
           <CardHeader>
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-1 flex-1">
                 <CardTitle className="text-xl">{path.title}</CardTitle>
                 {path.description && (
@@ -56,7 +56,7 @@ async function LearningPathsList() {
                   </span>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 self-start sm:self-auto">
                 <Link href={`/admin/learning-paths/${path.id}/edit`}>
                   <Button variant="outline" size="sm">
                     <Edit className="h-4 w-4 mr-1" />
@@ -94,7 +94,7 @@ export default async function AdminLearningPathsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             Learning Path Management
@@ -106,8 +106,8 @@ export default async function AdminLearningPathsPage() {
             Create and manage structured learning paths for your courses.
           </p>
         </div>
-        <Link href="/admin/learning-paths/new">
-          <Button variant="premium" className="h-12 px-8 rounded-xl shadow-2xl shadow-primary/20">
+        <Link href="/admin/learning-paths/new" className="w-full sm:w-auto">
+          <Button className="h-12 w-full whitespace-normal rounded-xl px-8 text-center shadow-2xl shadow-primary/20 sm:w-auto" variant="premium">
             <Plus className="h-5 w-5 mr-2" />
             New Learning Path
           </Button>

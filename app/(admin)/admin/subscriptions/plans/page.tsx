@@ -138,7 +138,7 @@ export default async function PlansPage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             Subscription Management
@@ -150,7 +150,10 @@ export default async function PlansPage({ searchParams }: { searchParams: Promis
             Manage your subscription tiers and sync them with PayPal.
           </p>
         </div>
-        <SyncPlansButton syncAction={syncPlansAction} />
+        <SyncPlansButton
+          syncAction={syncPlansAction}
+          className="w-full whitespace-normal text-center sm:w-auto"
+        />
       </div>
 
       <SubscriptionPlanForm

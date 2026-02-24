@@ -1,11 +1,16 @@
 import { Metadata } from "next";
+import { getServerSession } from "next-auth";
 import { Sparkles } from "lucide-react";
 import { PremiumHomepageExperience } from "@/components/home/PremiumHomepageExperience";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { authOptions } from "@/lib/auth";
+import { subscriptionTierHasCourseAccess } from "@/lib/access";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { getHomepageStats } from "@/lib/homepage-stats";
 import { getFeaturedTestimonials } from "@/lib/testimonials";
+import { prisma } from "@/lib/prisma";
+import { getUserSubscription, isSubscriptionActiveNow } from "@/lib/subscriptions";
 import { getHeroLogos, defaultHeroLogos } from "@/lib/settings";
 import { PageContainer, StatusRegion } from "@/components/layout/shell";
 import Link from "next/link";
@@ -27,7 +32,17 @@ export const metadata: Metadata = generateSEOMetadata({
   ],
 });
 
+const HARD_CODED_LANDING_METRICS = {
+  totalCourses: 64,
+  totalStudents: 14850,
+  totalLessons: 540,
+  averageRating: 4.8,
+  totalReviews: 3200,
+};
+
 export default async function LandingPage() {
+  const session = await getServerSession(authOptions);
+
   const emptyStats: HomepageStats = {
     totalCourses: 0,
     totalStudents: 0,
@@ -81,17 +96,53 @@ export default async function LandingPage() {
     ).values()
   ).slice(0, 6);
 
+  const featuredCourseIds = featuredCourses.map((course) => course.id);
+  const accessibleCourseIds = new Set<string>();
+  featuredCourses.forEach((course) => {
+    if (course.priceCents === 0) {
+      accessibleCourseIds.add(course.id);
+    }
+  });
+
+  if (session?.user && featuredCourseIds.length) {
+    if (session.user.role === "admin") {
+      featuredCourseIds.forEach((courseId) => accessibleCourseIds.add(courseId));
+    } else {
+      const [purchases, subscription] = await Promise.all([
+        prisma.purchase.findMany({
+          where: {
+            userId: session.user.id,
+            status: "paid",
+            courseId: { in: featuredCourseIds },
+          },
+          select: { courseId: true },
+        }),
+        getUserSubscription(session.user.id),
+      ]);
+
+      purchases.forEach((purchase) => accessibleCourseIds.add(purchase.courseId));
+
+      if (subscription && isSubscriptionActiveNow(subscription)) {
+        featuredCourses.forEach((course) => {
+          const tier = course.tier === "PREMIUM" ? "PREMIUM" : "STANDARD";
+          if (subscriptionTierHasCourseAccess(subscription.plan.tier, tier)) {
+            accessibleCourseIds.add(course.id);
+          }
+        });
+      }
+    }
+  }
+
+  const featuredCoursesWithAccess = featuredCourses.map((course) => ({
+    ...course,
+    hasAccess: accessibleCourseIds.has(course.id),
+  }));
+
   return (
     <PageContainer className="space-y-6 lg:space-y-8" width="wide">
       <PremiumHomepageExperience
-        metrics={{
-          totalCourses: stats.totalCourses,
-          totalStudents: stats.totalStudents,
-          totalLessons: stats.totalLessons,
-          averageRating: stats.averageRating,
-          totalReviews: stats.totalReviews,
-        }}
-        featuredCourses={featuredCourses}
+        metrics={HARD_CODED_LANDING_METRICS}
+        featuredCourses={featuredCoursesWithAccess}
         testimonials={testimonials}
         heroLogos={heroLogos}
       />

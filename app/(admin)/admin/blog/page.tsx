@@ -38,7 +38,7 @@ async function BlogPostsList() {
       {posts.map((post: BlogPost) => (
         <Card key={post.id}>
           <CardHeader className="p-4 sm:p-6">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-1 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <CardTitle className="text-xl">{post.title}</CardTitle>
@@ -68,7 +68,7 @@ async function BlogPostsList() {
                   ))}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
                 <Link href={`/blog/${post.slug}`} target="_blank">
                   <Button variant="ghost" size="sm">
                     <Eye className="h-4 w-4" />
@@ -102,7 +102,7 @@ export default async function AdminBlogPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             Content Management
@@ -114,8 +114,12 @@ export default async function AdminBlogPage() {
             Create and manage blog articles for your students.
           </p>
         </div>
-        <Link href="/admin/blog/new">
-          <Button variant="premium" size="lg" className="rounded-xl shadow-lg shadow-primary/20">
+        <Link href="/admin/blog/new" className="w-full sm:w-auto">
+          <Button
+            variant="premium"
+            size="lg"
+            className="w-full whitespace-normal rounded-xl text-center shadow-lg shadow-primary/20 sm:w-auto"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Create Post
           </Button>

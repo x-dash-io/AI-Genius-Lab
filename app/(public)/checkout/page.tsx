@@ -6,6 +6,7 @@ import { getCoursePreviewBySlug } from "@/lib/courses";
 import { prisma } from "@/lib/prisma";
 import { createPayPalOrder } from "@/lib/paypal";
 import { getCartFromCookies } from "@/lib/cart/utils";
+import { getCourseAccessState } from "@/lib/access";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,6 +48,16 @@ async function createCheckoutSession(formData: FormData) {
 
   if (!course) {
     redirect("/courses");
+  }
+
+  const accessState = await getCourseAccessState(
+    session.user.id,
+    session.user.role,
+    course.id
+  );
+
+  if (accessState.granted) {
+    redirect(`/library/${course.slug}`);
   }
 
   const existingPurchase = await prisma.purchase.findFirst({
