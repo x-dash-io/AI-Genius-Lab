@@ -80,8 +80,9 @@ class AINeuralBackground {
     }
 
     private resize() {
-        this.width = window.innerWidth;
-        this.height = window.innerHeight;
+        if (!this.canvas.parentElement) return;
+        this.width = this.canvas.parentElement.clientWidth;
+        this.height = this.canvas.parentElement.clientHeight;
         this.canvas.width = this.width * this.dpr;
         this.canvas.height = this.height * this.dpr;
         this.ctx.scale(this.dpr, this.dpr);
@@ -105,8 +106,9 @@ class AINeuralBackground {
     }
 
     private onMouseMove(e: MouseEvent) {
-        this.mouseX = e.clientX;
-        this.mouseY = e.clientY;
+        const rect = this.canvas.getBoundingClientRect();
+        this.mouseX = e.clientX - rect.left;
+        this.mouseY = e.clientY - rect.top;
         this.isMouseIn = true;
     }
 
@@ -284,14 +286,14 @@ export default function AINeuralBackgroundComponent() {
         <canvas
             ref={canvasRef}
             style={{
-                position: 'fixed',
+                position: 'absolute',
                 top: 0,
                 left: 0,
-                width: '100vw',
-                height: '100vh',
-                zIndex: -1, // Ensure it is behind everything
-                pointerEvents: 'none', // Allow clicks to pass through
-                background: 'transparent', // Let globals body bg show
+                width: '100%',
+                height: '100%',
+                zIndex: 0,
+                pointerEvents: 'none',
+                background: 'transparent',
             }}
             aria-hidden="true"
         />

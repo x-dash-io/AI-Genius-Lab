@@ -17,7 +17,7 @@ import {
   Star,
   Trophy,
 } from "lucide-react";
-
+import AINeuralBackgroundComponent from "@/components/ui/AINeuralBackground";
 import { CourseProductCard } from "@/components/courses/CourseProductCard";
 import HeroLogosCarousel from "@/components/home/HeroLogosCarousel";
 import { ContentRegion, StatusRegion, Toolbar } from "@/components/layout/shell";
@@ -114,7 +114,7 @@ function getSectionMotion(reduceMotion: boolean) {
     initial: { opacity: 0, y: 14 },
     whileInView: { opacity: 1, y: 0 },
     transition: { duration: 0.24, ease: "easeOut" as const },
-    viewport: { once: true, amount: 0.2 },
+    viewport: { once: true, margin: "-10px" },
   };
 }
 
@@ -257,6 +257,7 @@ export function PremiumHomepageExperience({
           className="ui-surface relative overflow-hidden rounded-[var(--radius-xl)] border p-5 sm:p-8"
           {...heroMotion}
         >
+          <AINeuralBackgroundComponent />
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0"
@@ -362,29 +363,25 @@ export function PremiumHomepageExperience({
               title: "Discover",
               detail: "Search by role, compare outcomes, and choose fast.",
               icon: Sparkles,
-              image:
-                "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+              image: "/hero/discover.jpg",
             },
             {
               title: "Purchase",
               detail: "Transparent billing cadence and secure checkout.",
               icon: ReceiptText,
-              image:
-                "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=1200&q=80",
+              image: "/hero/purchase.jpg",
             },
             {
               title: "Learn",
               detail: "Structured lessons with progress visibility.",
               icon: BookOpen,
-              image:
-                "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1200&q=80",
+              image: "/hero/learn.jpg",
             },
             {
               title: "Certify",
               detail: "Issue and verify completion credentials.",
               icon: BadgeCheck,
-              image:
-                "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1200&q=80",
+              image: "/hero/certify.jpg",
             },
           ].map((step, index) => (
             <Card key={step.title} className="group ui-surface supports-hover-card relative min-h-72 overflow-hidden border">
