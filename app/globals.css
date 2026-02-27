@@ -3,6 +3,8 @@
 :root {
   --background: 220 28% 97%;
   --foreground: 222 42% 12%;
+  --font-body: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
 
   --card: 0 0% 100%;
   --card-foreground: 222 42% 12%;
@@ -108,7 +110,7 @@ body {
 }
 
 /* Prevent text and flex/grid children from forcing horizontal overflow. */
-[data-app-shell] :where(.flex, .inline-flex, .grid) > * {
+[data-app-shell] :where(.flex, .inline-flex, .grid)>* {
   min-width: 0;
 }
 
@@ -266,7 +268,7 @@ body::before {
     max-width: 100% !important;
   }
 
-  #invoice > div:first-child,
+  #invoice>div:first-child,
   [class*="bg-gradient-to-br"][class*="from-primary"] {
     background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--brand-gradient-end)) 100%) !important;
     color: hsl(var(--primary-foreground)) !important;

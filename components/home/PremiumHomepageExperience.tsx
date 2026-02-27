@@ -363,19 +363,19 @@ export function PremiumHomepageExperience({
               title: "Discover",
               detail: "Search by role, compare outcomes, and choose fast.",
               icon: Sparkles,
-              image: "/hero/discover.jpg",
+              image: "/hero/discover.jpeg",
             },
             {
               title: "Purchase",
               detail: "Transparent billing cadence and secure checkout.",
               icon: ReceiptText,
-              image: "/hero/purchase.jpg",
+              image: "/hero/purchase.jpeg",
             },
             {
               title: "Learn",
               detail: "Structured lessons with progress visibility.",
               icon: BookOpen,
-              image: "/hero/learn.jpg",
+              image: "/hero/learn.jpeg",
             },
             {
               title: "Certify",
