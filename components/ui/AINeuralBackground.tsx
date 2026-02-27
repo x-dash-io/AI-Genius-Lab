@@ -94,10 +94,10 @@ class AINeuralBackground {
     private initNodes() {
         this.nodes = [];
         const area = this.width * this.height;
-        // Optimize node count based on screen area. Target ~100 nodes on desktop.
+        // Optimize node count based on screen area. Target ~150 nodes on desktop.
         // Spatial logic keeps the visual density consistent and guarantees 60fps.
-        const targetNodes = Math.floor(area / 20000);
-        const numNodes = Math.min(Math.max(targetNodes, 30), 120);
+        const targetNodes = Math.floor(area / 12000);
+        const numNodes = Math.min(Math.max(targetNodes, 40), 180);
 
         for (let i = 0; i < numNodes; i++) {
             this.nodes.push(new Node(this.width, this.height));
@@ -132,7 +132,7 @@ class AINeuralBackground {
         }
 
         // Draw connections (elegant connecting lines)
-        const maxDist = 140;
+        const maxDist = 160;
         for (let i = 0; i < this.nodes.length; i++) {
             for (let j = i + 1; j < this.nodes.length; j++) {
                 const node1 = this.nodes[i];
