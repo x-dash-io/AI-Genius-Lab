@@ -174,8 +174,8 @@ function HeroTypedPhrase({
     <span className="relative inline-block max-w-full align-baseline text-primary" aria-hidden="true">
       <span className="hidden invisible sm:inline-block">{visiblePhrase}</span>
       <span className="sm:hidden">{visiblePhrase}</span>
-      <span className="absolute inset-0 hidden whitespace-nowrap sm:block">
-        {visibleValue}
+      <span className="absolute inset-0 hidden sm:block">
+        <span className="whitespace-normal break-words sm:whitespace-nowrap">{visibleValue}</span>
         {!reduceMotion && typedValue.length < phrase.length ? (
           <span className="ml-0.5 inline-block h-[1.05em] w-[1px] bg-primary align-middle" />
         ) : null}
