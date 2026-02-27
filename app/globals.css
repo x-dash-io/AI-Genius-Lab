@@ -98,7 +98,7 @@ html {
 }
 
 body {
-  background-color: hsl(var(--background));
+  background-color: transparent;
   color: hsl(var(--foreground));
   font-feature-settings: "rlig" 1, "calt" 1;
   overflow-x: hidden;
@@ -125,23 +125,11 @@ body {
 }
 
 body::before {
-  content: "";
-  pointer-events: none;
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  background:
-    radial-gradient(70% 55% at 12% 0%, hsl(var(--primary) / 0.14), transparent 72%),
-    radial-gradient(60% 50% at 95% 4%, hsl(193 90% 52% / 0.12), transparent 78%),
-    linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--background)) 68%, hsl(var(--muted) / 0.4) 100%);
+  display: none;
 }
 
 .dark body::before {
-  background:
-    radial-gradient(70% 55% at 8% 0%, hsl(var(--primary) / 0.25), transparent 72%),
-    radial-gradient(60% 50% at 100% 5%, hsl(193 90% 56% / 0.14), transparent 78%),
-    linear-gradient(180deg, hsl(226 63% 9%) 0%, hsl(224 61% 9%) 72%, hsl(224 59% 8%) 100%);
+  display: none;
 }
 
 .ui-shell {

@@ -11,6 +11,7 @@ import { ConfirmDialogProvider } from "@/components/ui/confirm-dialog";
 import { DevIndicatorRemover } from "@/components/DevIndicatorRemover";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { generateOrganizationSchema, generateWebSiteSchema } from "@/lib/seo/schemas";
+import AINeuralBackgroundComponent from "@/components/ui/AINeuralBackground";
 import "./globals.css";
 import type { Viewport } from "next";
 
@@ -81,6 +82,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${manrope.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
+        <AINeuralBackgroundComponent />
         <ThemeProvider>
           <UiPreferencesProvider>
             <SessionProvider>
