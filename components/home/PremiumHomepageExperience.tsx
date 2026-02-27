@@ -219,10 +219,10 @@ export function PremiumHomepageExperience({
   const heroMotion = reduceMotion
     ? {}
     : {
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.26, ease: "easeOut" as const },
-      };
+      initial: { opacity: 0, y: 20 },
+      animate: { opacity: 1, y: 0 },
+      transition: { duration: 0.26, ease: "easeOut" as const },
+    };
 
   const metricItems = useMemo(
     () => [
@@ -356,7 +356,7 @@ export function PremiumHomepageExperience({
           </Toolbar>
         </m.section>
 
-        <m.section className="grid gap-4 lg:grid-cols-4" {...sectionMotion}>
+        <m.section className="grid grid-cols-1 gap-4 lg:grid-cols-4" {...sectionMotion}>
           {[
             {
               title: "Discover",
@@ -412,7 +412,7 @@ export function PremiumHomepageExperience({
           ))}
         </m.section>
 
-        <m.section className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]" {...sectionMotion}>
+        <m.section className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]" {...sectionMotion}>
           <Card className="ui-surface supports-hover-card border">
             <CardHeader>
               <Badge variant="secondary" className="w-fit">
@@ -493,7 +493,7 @@ export function PremiumHomepageExperience({
             </Link>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {featuredCourses.map((course) => {
               const tierPresentation = getTierPresentation(course.tier);
 
